@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:goal_timer/features/goal_timer/presentation/screens/goal_list_screen.dart';
 import 'package:goal_timer/features/statistics/presentation/screens/statistics_screen.dart';
 import 'package:goal_timer/features/settings/presentation/screens/settings_screen.dart';
+import 'package:goal_timer/features/home/presentation/screens/home_screen.dart';
 
 void main() {
   runApp(
@@ -69,70 +70,73 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _screens[_selectedIndex],
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            DrawerHeader(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'ゴールタイマー',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    '目標達成を時間で管理',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.list),
-              title: const Text('ゴール一覧'),
-              selected: _selectedIndex == 0,
-              onTap: () {
-                _selectDrawerItem(0);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.bar_chart),
-              title: const Text('統計'),
-              selected: _selectedIndex == 1,
-              onTap: () {
-                _selectDrawerItem(1);
-              },
-            ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text('設定'),
-              selected: _selectedIndex == 2,
-              onTap: () {
-                _selectDrawerItem(2);
-              },
-            ),
-          ],
-        ),
-      ),
-      appBar: AppBar(
-        title: Text(_titles[_selectedIndex]),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      ),
+    return MaterialApp(
+      home: const HomeScreen(),
     );
+    // Scaffold(
+    //   body: _screens[_selectedIndex],
+    //   drawer: Drawer(
+    //     child: ListView(
+    //       padding: EdgeInsets.zero,
+    //       children: [
+    //         DrawerHeader(
+    //           decoration: BoxDecoration(
+    //             color: Theme.of(context).colorScheme.primary,
+    //           ),
+    //           child: const Column(
+    //             crossAxisAlignment: CrossAxisAlignment.start,
+    //             children: [
+    //               Text(
+    //                 'ゴールタイマー',
+    //                 style: TextStyle(
+    //                   color: Colors.white,
+    //                   fontSize: 24,
+    //                 ),
+    //               ),
+    //               SizedBox(height: 8),
+    //               Text(
+    //                 '目標達成を時間で管理',
+    //                 style: TextStyle(
+    //                   color: Colors.white,
+    //                   fontSize: 16,
+    //                 ),
+    //               ),
+    //             ],
+    //           ),
+    //         ),
+    //         ListTile(
+    //           leading: const Icon(Icons.list),
+    //           title: const Text('ゴール一覧'),
+    //           selected: _selectedIndex == 0,
+    //           onTap: () {
+    //             _selectDrawerItem(0);
+    //           },
+    //         ),
+    //         ListTile(
+    //           leading: const Icon(Icons.bar_chart),
+    //           title: const Text('統計'),
+    //           selected: _selectedIndex == 1,
+    //           onTap: () {
+    //             _selectDrawerItem(1);
+    //           },
+    //         ),
+    //         const Divider(),
+    //         ListTile(
+    //           leading: const Icon(Icons.settings),
+    //           title: const Text('設定'),
+    //           selected: _selectedIndex == 2,
+    //           onTap: () {
+    //             _selectDrawerItem(2);
+    //           },
+    //         ),
+    //       ],
+    //     ),
+    //   ),
+    //   appBar: AppBar(
+    //     title: Text(_titles[_selectedIndex]),
+    //     backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+    //   ),
+    // );
   }
 
   void _selectDrawerItem(int index) {
