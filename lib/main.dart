@@ -4,6 +4,8 @@ import 'package:goal_timer/features/goal_timer/presentation/screens/goal_list_sc
 import 'package:goal_timer/features/statistics/presentation/screens/statistics_screen.dart';
 import 'package:goal_timer/features/settings/presentation/screens/settings_screen.dart';
 import 'package:goal_timer/features/home/presentation/screens/home_screen.dart';
+import 'package:goal_timer/routes.dart';
+import 'package:goal_timer/core/utils/route_names.dart';
 
 void main() {
   runApp(
@@ -71,6 +73,8 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      initialRoute: RouteNames.home,
+      onGenerateRoute: generateRoute,
       home: const HomeScreen(),
     );
     // Scaffold(

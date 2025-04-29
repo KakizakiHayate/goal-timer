@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'package:goal_timer/routes.dart';
+import 'package:goal_timer/core/utils/route_names.dart';
+
 class GoalListCellWidget extends StatelessWidget {
   const GoalListCellWidget({Key? key}) : super(key: key);
 
@@ -11,14 +14,9 @@ class GoalListCellWidget extends StatelessWidget {
       elevation: 2,
       child: InkWell(
         onTap: () {
-          Navigator.push(
+          Navigator.pushNamed(
             context,
-            MaterialPageRoute(
-              builder: (context) => Scaffold(
-                appBar: AppBar(title: const Text('目標詳細')),
-                body: const Center(child: Text('目標詳細ページ')),
-              ),
-            ),
+            RouteNames.goalDetailSetting,
           );
         },
         borderRadius: BorderRadius.circular(12),
