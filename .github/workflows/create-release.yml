@@ -1,0 +1,69 @@
+name: Create GitHub Release with all PRs since last tag
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    if: startsWith(github.event.head_commit.message, 'Merge pull request')
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get latest tag
+        id: latest_tag
+        run: |
+          git fetch --tags
+          TAG=$(git describe --tags --abbrev=0 || echo "")
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Extract version from release branch
+        id: get_version
+        run: |
+          BRANCH=$(git log -1 --merges --pretty=format:"%s" | grep -oE 'release/[0-9]+\.[0-9]+\.[0-9]+')
+          VERSION=${BRANCH#release/}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create new tag
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git tag v${{ steps.get_version.outputs.version }}
+          git push origin v${{ steps.get_version.outputs.version }}
+
+      - name: Generate changelog from PRs since last tag
+        run: |
+          echo "## リリース内容（v${{ steps.get_version.outputs.version }}）" > changelog.md
+
+          # 前回のタグからHEADまでのMerge PRを取得
+          COMMITS=$(git log ${{ steps.latest_tag.outputs.tag }}..HEAD --merges --pretty=format:"%s")
+          
+          for commit in $COMMITS; do
+            if [[ "$commit" =~ Merge\ pull\ request\ \#([0-9]+) ]]; then
+              PR_NUM=${BASH_REMATCH[1]}
+              echo "🔍 Processing PR #$PR_NUM"
+              PR_JSON=$(gh pr view $PR_NUM --json title,body)
+              TITLE=$(echo "$PR_JSON" | jq -r '.title')
+              BODY=$(echo "$PR_JSON" | jq -r '.body')
+
+              if [[ "$BODY" =~ (TANZAM_MHT-[0-9]+) ]]; then
+                TICKET="${BASH_REMATCH[1]}"
+                URL="https://mhtcode.backlog.jp/view/$TICKET"
+                SUMMARY=$(echo "$BODY" | grep "$TICKET" | head -n 1 | sed "s/$TICKET //")
+                echo "- [$TICKET]($URL): $SUMMARY" >> changelog.md
+              else
+                echo "- (PR #$PR_NUM): $TITLE" >> changelog.md
+              fi
+            fi
+          done
+
+      - name: Create GitHub Release
+        run: |
+          gh release create v${{ steps.get_version.outputs.version }} \
+            --title "v${{ steps.get_version.outputs.version }}" \
+            --notes-file changelog.md
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
