@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:goal_timer/features/goal_detail_setting/presentation/viewmodels/goal_detail_view_model.dart';
 
 // タイマーの状態を管理するプロバイダー
 final timerViewModelProvider =
     StateNotifierProvider<TimerViewModel, TimerState>((ref) {
-      return TimerViewModel();
+      return TimerViewModel(ref);
     });
 
 // タイマーの状態
@@ -27,12 +28,14 @@ class TimerState {
   final int currentSeconds; // 現在の秒数（カウントダウン/カウントアップ両用）
   final TimerStatus status; // 状態
   final TimerMode mode; // モード
+  final String? goalId; // 関連する目標ID
 
   TimerState({
     this.totalSeconds = 25 * 60, // デフォルト25分
     this.currentSeconds = 25 * 60,
     this.status = TimerStatus.initial,
     this.mode = TimerMode.countdown,
+    this.goalId,
   });
 
   // 新しい状態を作成するヘルパーメソッド
@@ -41,12 +44,14 @@ class TimerState {
     int? currentSeconds,
     TimerStatus? status,
     TimerMode? mode,
+    String? goalId,
   }) {
     return TimerState(
       totalSeconds: totalSeconds ?? this.totalSeconds,
       currentSeconds: currentSeconds ?? this.currentSeconds,
       status: status ?? this.status,
       mode: mode ?? this.mode,
+      goalId: goalId ?? this.goalId,
     );
   }
 
@@ -71,16 +76,26 @@ class TimerState {
 // タイマービューモデル
 class TimerViewModel extends StateNotifier<TimerState> {
   Timer? _timer;
+  final Ref _ref;
+  int _elapsedSeconds = 0; // タイマー実行中の経過秒数
 
-  TimerViewModel() : super(TimerState());
+  TimerViewModel(this._ref) : super(TimerState());
+
+  // 目標IDを設定
+  void setGoalId(String goalId) {
+    state = state.copyWith(goalId: goalId);
+  }
 
   // タイマーの開始
   void startTimer() {
     if (state.status == TimerStatus.running) return;
 
     state = state.copyWith(status: TimerStatus.running);
+    _elapsedSeconds = 0; // 経過秒数リセット
 
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      _elapsedSeconds++; // 経過秒数を増加
+
       if (state.mode == TimerMode.countdown) {
         // カウントダウンモード
         if (state.currentSeconds <= 1) {
@@ -115,12 +130,35 @@ class TimerViewModel extends StateNotifier<TimerState> {
       currentSeconds: initialSeconds,
       status: TimerStatus.initial,
     );
+    _elapsedSeconds = 0; // 経過秒数リセット
   }
 
   // タイマーの完了処理
   void completeTimer() {
     _timer?.cancel();
     state = state.copyWith(status: TimerStatus.completed);
+
+    // 目標IDがある場合は学習時間を更新
+    if (state.goalId != null) {
+      _updateGoalStudyTime();
+    }
+  }
+
+  // 目標の学習時間を更新
+  void _updateGoalStudyTime() {
+    // カウントダウンモードの場合は設定時間、カウントアップモードの場合は経過時間を使用
+    final studyMinutes =
+        state.mode == TimerMode.countdown
+            ? state.totalSeconds ~/
+                60 // 設定した時間（分）
+            : _elapsedSeconds ~/ 60; // 経過した時間（分）
+
+    if (studyMinutes > 0 && state.goalId != null) {
+      // 目標の学習時間を更新
+      _ref
+          .read(goalDetailViewModelProvider.notifier)
+          .addStudyTime(state.goalId!, studyMinutes);
+    }
   }
 
   // タイマーモードの変更
@@ -138,6 +176,7 @@ class TimerViewModel extends StateNotifier<TimerState> {
       currentSeconds: initialSeconds,
       status: TimerStatus.initial,
     );
+    _elapsedSeconds = 0; // 経過秒数リセット
   }
 
   // カウントダウンの時間を設定（分単位）
@@ -152,6 +191,7 @@ class TimerViewModel extends StateNotifier<TimerState> {
       currentSeconds: state.mode == TimerMode.countdown ? newTotalSeconds : 0,
       status: TimerStatus.initial,
     );
+    _elapsedSeconds = 0; // 経過秒数リセット
   }
 
   @override

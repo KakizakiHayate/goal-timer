@@ -70,3 +70,32 @@ final updateGoalSpentTimeProvider =
       return (String id, int additionalMinutes) =>
           useCase.execute(id, additionalMinutes);
     });
+
+// 目標詳細ビューモデルプロバイダー
+final goalDetailViewModelProvider =
+    StateNotifierProvider<GoalDetailViewModel, void>((ref) {
+      return GoalDetailViewModel(ref);
+    });
+
+// 目標詳細を操作するビューモデル
+class GoalDetailViewModel extends StateNotifier<void> {
+  final Ref _ref;
+
+  GoalDetailViewModel(this._ref) : super(null);
+
+  // 目標の学習時間を追加する
+  Future<void> addStudyTime(String goalId, int minutes) async {
+    try {
+      // 学習時間の更新
+      final updateSpentTime = _ref.read(updateGoalSpentTimeProvider);
+      await updateSpentTime(goalId, minutes);
+
+      // 更新後に目標詳細を再取得するためにキャッシュを無効化
+      _ref.invalidate(goalDetailProvider(goalId));
+      _ref.invalidate(goalDetailListProvider);
+    } catch (e) {
+      // エラー処理
+      print('目標の学習時間更新に失敗しました: $e');
+    }
+  }
+}

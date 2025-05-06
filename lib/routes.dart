@@ -21,7 +21,14 @@ Route<dynamic> generateRoute(RouteSettings settings) {
         builder: (context) => const GoalDetailSettingScreen(),
       );
     case RouteNames.timer:
+      // 引数なしの場合は通常のタイマー画面
       return platformPageRoute(builder: (context) => const TimerScreen());
+    // 特定の目標IDを指定したタイマー画面
+    case RouteNames.timerWithGoal:
+      final goalId = settings.arguments as String;
+      return platformPageRoute(
+        builder: (context) => TimerScreen(goalId: goalId),
+      );
     // 目標詳細画面
     case RouteNames.goalDetail:
       final goalId = settings.arguments as String;

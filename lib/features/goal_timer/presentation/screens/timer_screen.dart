@@ -2,16 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:goal_timer/core/utils/color_consts.dart';
+import 'package:goal_timer/features/goal_timer/domain/entities/goal.dart';
+import 'package:goal_timer/features/goal_timer/presentation/viewmodels/goal_view_model.dart';
 import 'package:goal_timer/features/goal_timer/presentation/viewmodels/timer_view_model.dart';
 import 'package:goal_timer/features/goal_timer/presentation/widgets/timer_progress_ring.dart';
 
 class TimerScreen extends ConsumerWidget {
-  const TimerScreen({super.key});
+  final String? goalId;
+
+  const TimerScreen({super.key, this.goalId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final timerState = ref.watch(timerViewModelProvider);
     final timerViewModel = ref.read(timerViewModelProvider.notifier);
+
+    // 目標情報を取得（存在する場合）
+    final goalAsyncValue = ref.watch(goalListProvider);
+
+    // 目標IDをタイマービューモデルに設定
+    if (goalId != null && timerState.goalId != goalId) {
+      // 画面表示後に一度だけ実行するために遅延実行
+      Future.microtask(() {
+        timerViewModel.setGoalId(goalId!);
+      });
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -25,6 +40,28 @@ class TimerScreen extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // 目標情報を表示（存在する場合）
+            if (goalId != null) ...[
+              goalAsyncValue.when(
+                data: (goals) {
+                  final goal = goals.firstWhere(
+                    (g) => g.id == goalId,
+                    orElse:
+                        () => Goal(
+                          id: '',
+                          title: '不明な目標',
+                          description: '',
+                          deadline: DateTime.now(),
+                        ),
+                  );
+
+                  return _buildGoalInfo(context, goal);
+                },
+                loading: () => const CircularProgressIndicator(),
+                error: (_, __) => const Text('目標情報の取得に失敗しました'),
+              ),
+              const SizedBox(height: 20),
+            ],
             _buildModeSwitcher(context, timerState, timerViewModel),
             const SizedBox(height: 40),
             _buildTimerDisplay(context, timerState),
@@ -34,6 +71,50 @@ class TimerScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  // 目標情報を表示するウィジェット
+  Widget _buildGoalInfo(BuildContext context, Goal goal) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '目標: ${goal.title}',
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          if (goal.description.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              goal.description,
+              style: const TextStyle(fontSize: 14, color: Colors.black54),
+            ),
+          ],
+          const SizedBox(height: 4),
+          Text(
+            '期限: ${_formatDate(goal.deadline)}',
+            style: const TextStyle(fontSize: 14, color: Colors.black54),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 日付のフォーマット
+  String _formatDate(DateTime date) {
+    return '${date.year}年${date.month}月${date.day}日';
   }
 
   Widget _buildModeSwitcher(
