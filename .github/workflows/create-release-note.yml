@@ -60,10 +60,13 @@ jobs:
 
               CHANGELOG_ENTRY_ADDED=false
               # BODY を1行ずつ処理して、Markdown リンク形式の Backlog チケットを探す
+              echo "--- Start processing BODY ---"
               echo "$BODY" | while IFS= read -r line; do
+                echo "Processing line: [$line]"
                 # 正規表現: [TANZAM_MHT-XXX](URL) 概要
                 regex='\[(TANZAM_MHT-[0-9]+)\]\(([^)]+)\)\s+(.*)'
                 if [[ "$line" =~ $regex ]]; then
+                  echo "  -> Regex MATCHED"
                   TICKET="${BASH_REMATCH[1]}"
                   URL="${BASH_REMATCH[2]}"
                   SUMMARY="${BASH_REMATCH[3]}"
@@ -73,8 +76,11 @@ jobs:
                   echo "  -> Found Ticket: [$TICKET]($URL): $SUMMARY" # ログ出力
                   echo "- [$TICKET]($URL): $SUMMARY" >> changelog.md
                   CHANGELOG_ENTRY_ADDED=true
+                else
+                  echo "  -> Regex NOT MATCHED"
                 fi
               done
+              echo "--- End processing BODY ---"
               
               # チケットが見つからなかった場合、フォールバックとしてPRタイトルを追加
               if [ "$CHANGELOG_ENTRY_ADDED" = false ]; then
