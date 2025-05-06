@@ -50,17 +50,31 @@ jobs:
           # 前回のタグからHEADまでのMerge PRを取得
           COMMITS=$(git log ${{ steps.latest_tag.outputs.tag }}..HEAD --merges --pretty=format:"%s")
           
+          # デバッグ: コミット一覧を表示
+          echo "📋 Found commits between ${{ steps.latest_tag.outputs.tag }} and HEAD:"
+          git log ${{ steps.latest_tag.outputs.tag }}..HEAD --merges --pretty=format:"%h %s"
+          
+          # カウンター初期化
+          PR_COUNT=0
+          TICKET_COUNT=0
+          
           for commit in $COMMITS; do
+            echo "🔄 Checking commit: $commit"
             if [[ "$commit" =~ Merge\ pull\ request\ \#([0-9]+) ]]; then
               PR_NUM=${BASH_REMATCH[1]}
               echo "🔍 Processing PR #$PR_NUM"
+              PR_COUNT=$((PR_COUNT + 1))
+              
+              # PRの情報を詳細に取得
+              gh pr view $PR_NUM --json title,body,number
               PR_JSON=$(gh pr view $PR_NUM --json title,body)
               TITLE=$(echo "$PR_JSON" | jq -r '.title')
               BODY=$(echo "$PR_JSON" | jq -r '.body')
-
+  
               # 詳細なデバッグ出力
               echo "::debug::PR #$PR_NUM Title: $TITLE"
-              echo "::debug::PR #$PR_NUM Body: $BODY"
+              echo "::debug::PR Body length: $(echo "$BODY" | wc -c) chars"
+              echo "::notice::PR #$PR_NUM Body first 100 chars: $(echo "$BODY" | head -c 100)..."
               
               CHANGELOG_ENTRY_ADDED=false
               # BODY を1行ずつ処理して、Markdown リンク形式の Backlog チケットを探す
@@ -68,31 +82,30 @@ jobs:
               
               # 改行を含む場合の処理を改善
               echo "$BODY" > pr_body.txt
-              CHANGELOG_ENTRY_ADDED=false
+              cat pr_body.txt | grep -n "TANZAM_MHT" || echo "No ticket references found in PR body"
               
               while IFS= read -r line; do
                 echo "Processing line: [$line]"
-                # 正規表現: [TANZAM_MHT-XXX](URL) 概要
-                # Bash での正規表現を単純化
-                if [[ "$line" =~ \[TANZAM_MHT-[0-9]+\] ]]; then
-                  # まず、チケット番号を抽出
-                  TICKET=$(echo "$line" | grep -o '\[TANZAM_MHT-[0-9]\+\]' | sed 's/\[\(.*\)\]/\1/')
-                  # URL を抽出
-                  URL=$(echo "$line" | grep -o '(https://[^)]*)')
-                  URL=$(echo "$URL" | sed 's/(\(.*\))/\1/')
-                  # 概要を抽出 - URLの後の部分
-                  SUMMARY=$(echo "$line" | sed 's/.*)[[:space:]]*//')
+                # Backlogチケット形式を検出
+                if [[ "$line" =~ TANZAM_MHT-[0-9]+ ]]; then
+                  echo "  -> Ticket pattern found in line"
+                  # チケット番号全体を抽出
+                  TICKET=$(echo "$line" | grep -o 'TANZAM_MHT-[0-9]\+')
+                  # URL を抽出（ある場合）
+                  URL=$(echo "$line" | grep -o 'https://[^)]*' || echo "https://mhtcode.backlog.com/view/$TICKET")
+                  # 概要を抽出
+                  SUMMARY=$(echo "$line" | sed -E 's/.*TANZAM_MHT-[0-9]+[^)]*\)[[:space:]]*(.*)/\1/' || echo "$TITLE")
                   
-                  echo "  -> Regex MATCHED"
-                  echo "  -> Found Ticket: [$TICKET]($URL): $SUMMARY" # ログ出力
+                  echo "  -> Found Ticket: $TICKET ($URL): $SUMMARY" # ログ出力
                   echo "- [$TICKET]($URL): $SUMMARY" >> changelog.md
                   CHANGELOG_ENTRY_ADDED=true
+                  TICKET_COUNT=$((TICKET_COUNT + 1))
                 else
-                  echo "  -> Regex NOT MATCHED"
+                  echo "  -> No ticket pattern found"
                 fi
               done < pr_body.txt
               echo "--- End processing BODY ---"
-              echo "::debug::CHANGELOG_ENTRY_ADDED=$CHANGELOG_ENTRY_ADDED"
+              echo "::notice::CHANGELOG_ENTRY_ADDED=$CHANGELOG_ENTRY_ADDED"
               
               # チケットが見つからなかった場合、フォールバックとしてPRタイトルを追加
               if [ "$CHANGELOG_ENTRY_ADDED" = false ]; then
@@ -101,6 +114,11 @@ jobs:
               fi
             fi
           done
+          
+          # 統計情報
+          echo "📊 Found $PR_COUNT PRs and $TICKET_COUNT tickets"
+          echo "📄 Changelog content:"
+          cat changelog.md
 
       - name: Create GitHub Release
         run: |
