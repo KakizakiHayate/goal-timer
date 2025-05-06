@@ -73,14 +73,17 @@ jobs:
               while IFS= read -r line; do
                 echo "Processing line: [$line]"
                 # 正規表現: [TANZAM_MHT-XXX](URL) 概要
-                if [[ "$line" =~ \[(TANZAM_MHT-[0-9]+)\]\(([^)]+)\)(.*)$ ]]; then
-                  echo "  -> Regex MATCHED"
-                  TICKET="${BASH_REMATCH[1]}"
-                  URL="${BASH_REMATCH[2]}"
-                  SUMMARY="${BASH_REMATCH[3]}"
-                  # 概要の前後の空白を削除
-                  SUMMARY=$(echo "$SUMMARY" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+                # Bash での正規表現を単純化
+                if [[ "$line" =~ \[TANZAM_MHT-[0-9]+\] ]]; then
+                  # まず、チケット番号を抽出
+                  TICKET=$(echo "$line" | grep -o '\[TANZAM_MHT-[0-9]\+\]' | sed 's/\[\(.*\)\]/\1/')
+                  # URL を抽出
+                  URL=$(echo "$line" | grep -o '(https://[^)]*)')
+                  URL=$(echo "$URL" | sed 's/(\(.*\))/\1/')
+                  # 概要を抽出 - URLの後の部分
+                  SUMMARY=$(echo "$line" | sed 's/.*)[[:space:]]*//')
                   
+                  echo "  -> Regex MATCHED"
                   echo "  -> Found Ticket: [$TICKET]($URL): $SUMMARY" # ログ出力
                   echo "- [$TICKET]($URL): $SUMMARY" >> changelog.md
                   CHANGELOG_ENTRY_ADDED=true
