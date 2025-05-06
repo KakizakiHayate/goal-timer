@@ -85,28 +85,50 @@ jobs:
             echo "📏 PR Body length: $(echo "$BODY" | wc -c) characters"
             
             if [[ -n "$BODY" ]]; then
-              # PR本文に含まれるBacklogチケットの抽出を試みる
-              echo "🔎 Searching for Backlog tickets in PR #$PR_NUM body"
+              # PR本文を保存してデバッグに使用
               echo "$BODY" > pr_body.txt
-              grep -n "TANZAM_MHT" pr_body.txt || echo "No direct ticket references found"
+              echo "🔍 PR本文を pr_body.txt に保存しました"
+              
+              # 直接本文を検索して各行を処理
+              echo "🔎 PR本文からBacklogチケット情報を抽出します"
+              
+              # 特殊文字をエスケープして本文を表示
+              cat pr_body.txt | sed 's/\\/\\\\/g' > escaped_body.txt
               
               CHANGELOG_ENTRY_ADDED=false
               
-              # マークダウンリンクを探す
+              # 行ごとに処理
               while IFS= read -r line; do
+                # 空行や不要な行はスキップ
+                if [[ -z "$line" || "$line" == "---"* ]]; then
+                  continue
+                fi
+                
+                # Backlogチケットの行を探す
                 if [[ "$line" == *"TANZAM_MHT"* && "$line" == *"["* && "$line" == *"]("* ]]; then
-                  # チケット番号の抽出
-                  TICKET=$(echo "$line" | grep -o 'TANZAM_MHT-[0-9]*')
+                  echo "✓ チケット情報を含む行を検出: $line"
                   
+                  # 完全なマークダウンリンクパターンを検出
+                  TICKET=$(echo "$line" | sed -n 's/.*\[\(TANZAM_MHT-[0-9]\+\)\].*/\1/p')
+                  URL=$(echo "$line" | sed -n 's/.*\[TANZAM_MHT-[0-9]\+\](\([^)]*\)).*/\1/p')
+                  
+                  # チケット番号が取得できた場合
                   if [[ -n "$TICKET" ]]; then
-                    # URL の抽出
-                    URL=$(echo "$line" | sed -n 's/.*\]\(\(http[^)]*\)\).*/\1/p' || echo "https://mhtcode.backlog.com/view/$TICKET")
+                    echo "✅ チケット番号: $TICKET"
                     
-                    # 概要の抽出
-                    SUMMARY=$(echo "$line" | sed 's/.*\](.*) \(.*\)/\1/' || echo "$TITLE")
+                    # URLがない場合はデフォルトを設定
+                    if [[ -z "$URL" ]]; then
+                      URL="https://mhtcode.backlog.com/view/$TICKET"
+                    fi
+                    echo "✅ URL: $URL"
                     
-                    echo "✓ Found ticket: $TICKET with summary: $SUMMARY"
-                    echo "- [$TICKET]($URL) $SUMMARY" >> changelog.md
+                    # リンク部分を除いて概要を抽出
+                    LINK_PART="\[$TICKET\]($URL)"
+                    SUMMARY=$(echo "$line" | sed "s/$LINK_PART//" | sed 's/^[[:space:]]*//')
+                    echo "✅ 概要: $SUMMARY"
+                    
+                    # チケット情報をマークダウン形式でchangelogに追加
+                    echo "[$TICKET]($URL) $SUMMARY" >> changelog.md
                     CHANGELOG_ENTRY_ADDED=true
                     TICKET_COUNT=$((TICKET_COUNT + 1))
                   fi
@@ -115,12 +137,12 @@ jobs:
               
               # チケットが見つからなかった場合
               if [ "$CHANGELOG_ENTRY_ADDED" = false ]; then
-                echo "⚠️ No Backlog tickets found in PR body, using PR title instead"
-                echo "- (PR #$PR_NUM): $TITLE" >> changelog.md
+                echo "⚠️ PR本文からチケット情報を抽出できませんでした。PR #$PR_NUM のタイトルを使用します。"
+                echo "(PR #$PR_NUM): $TITLE" >> changelog.md
               fi
             else
-              echo "⚠️ Empty PR body, using PR title"
-              echo "- (PR #$PR_NUM): $TITLE" >> changelog.md
+              echo "⚠️ PR本文が空です。PR #$PR_NUM のタイトルを使用します。"
+              echo "(PR #$PR_NUM): $TITLE" >> changelog.md
             fi
           else
             echo "❌ Could not extract PR number from merge commit: $MERGE_COMMIT"
