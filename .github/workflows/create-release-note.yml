@@ -61,134 +61,70 @@ jobs:
           PR_COUNT=0
           TICKET_COUNT=0
           
-          # コミットメッセージを保存して行ごとに処理（厳密なフォーマットで）
-          git log ${{ steps.latest_tag.outputs.tag }}..HEAD --merges --pretty=format:"%s" > commits.txt
-          echo "📝 Raw commit messages from git:"
-          cat commits.txt
+          # マージコミットから直接リリース対象のPRを特定する
+          MERGE_COMMIT=$(git log -1 --merges --pretty=format:"%s")
+          echo "🔍 最新のマージコミット: $MERGE_COMMIT"
           
-          while IFS= read -r commit_msg; do
-            echo "🔄 Processing commit message: '$commit_msg'"
-            
-            # PR番号を複数のパターンで試行
-            if [[ "$commit_msg" =~ [Mm]erge\ pull\ request\ \#([0-9]+) ]]; then
-              PR_NUM=${BASH_REMATCH[1]}
-              echo "✅ Pattern 1 matched! Found PR #$PR_NUM"
-            elif [[ "$commit_msg" =~ \#([0-9]+) ]]; then
-              PR_NUM=${BASH_REMATCH[1]}
-              echo "✅ Pattern 2 matched! Found PR #$PR_NUM"
-            else
-              echo "❌ No PR pattern matched in commit message"
-              continue
-            fi
-            
-            echo "🔍 Processing PR #$PR_NUM"
+          # プルリクエスト番号を抽出（より単純な方法）
+          PR_NUM=$(echo "$MERGE_COMMIT" | sed -n 's/.*#\([0-9]\+\).*/\1/p')
+          
+          if [[ -n "$PR_NUM" ]]; then
+            echo "✅ Found PR #$PR_NUM"
             PR_COUNT=$((PR_COUNT + 1))
             
-            # PRの情報を詳細に取得（エラーハンドリング追加）
-            if ! gh pr view $PR_NUM --json title,body,number &> pr_info.json; then
-              echo "⚠️ Failed to get PR #$PR_NUM info, skipping"
-              continue
-            fi
+            # PRの情報を詳細に取得
+            echo "📥 Fetching PR info for #$PR_NUM"
+            gh pr view $PR_NUM --json title,body,number || echo "PR info fetch failed"
             
-            cat pr_info.json
-            PR_JSON=$(cat pr_info.json)
+            PR_JSON=$(gh pr view $PR_NUM --json title,body)
             TITLE=$(echo "$PR_JSON" | jq -r '.title')
             BODY=$(echo "$PR_JSON" | jq -r '.body')
             
-            # PR情報がnullの場合は対応
-            if [[ "$TITLE" == "null" || -z "$TITLE" ]]; then
-              echo "⚠️ PR #$PR_NUM title is null or empty, skipping"
-              continue
-            fi
+            # デバッグ出力
+            echo "📃 PR Title: $TITLE"
+            echo "📏 PR Body length: $(echo "$BODY" | wc -c) characters"
             
-            # 詳細なデバッグ出力
-            echo "::debug::PR #$PR_NUM Title: $TITLE"
-            echo "::debug::PR Body length: $(echo "$BODY" | wc -c) chars"
-            echo "::notice::PR #$PR_NUM Body first 100 chars: $(echo "$BODY" | head -c 100)..."
-            
-            CHANGELOG_ENTRY_ADDED=false
-            
-            # 一度PRのBODY全体で直接Backlogチケットリンクを検索
-            if echo "$BODY" | grep -q '\[TANZAM_MHT-[0-9]'; then
-              echo "✓ Backlog ticket references found in PR body!"
-              
-              # マークダウンリンク形式を抽出（エスケープを簡略化）
-              MARKDOWN_LINKS=$(echo "$BODY" | grep -o '\[TANZAM_MHT-[0-9].*\]([^)]*)' || echo "")
-              
-              if [[ -n "$MARKDOWN_LINKS" ]]; then
-                echo "🎯 Found markdown links: $MARKDOWN_LINKS"
-                echo "$MARKDOWN_LINKS" > markdown_links.txt
-                
-                # 各リンクを処理
-                while IFS= read -r link; do
-                  # チケット番号を抽出
-                  TICKET=$(echo "$link" | grep -o 'TANZAM_MHT-[0-9]*')
-                  
-                  # URL を抽出
-                  URL=$(echo "$link" | grep -o '(.*' | sed 's/^(//')
-                  
-                  # 該当行を検索して概要を抽出
-                  LINE=$(echo "$BODY" | grep -F "$link" || echo "")
-                  SUMMARY=$(echo "$LINE" | sed "s/.*$link //" || echo "$TITLE")
-                  
-                  echo "💡 Extracted: Ticket=$TICKET, URL=$URL, Summary=$SUMMARY"
-                  echo "- [$TICKET]($URL) $SUMMARY" >> changelog.md
-                  CHANGELOG_ENTRY_ADDED=true
-                  TICKET_COUNT=$((TICKET_COUNT + 1))
-                done < markdown_links.txt
-              fi
-            else
-              echo "❌ No Backlog ticket references found in PR body using direct search"
-            fi
-            
-            # マークダウンリンク形式が見つからなかった場合、行ごとに処理
-            if [ "$CHANGELOG_ENTRY_ADDED" = false ]; then
-              echo "--- Start processing BODY line by line ---"
+            if [[ -n "$BODY" ]]; then
+              # PR本文に含まれるBacklogチケットの抽出を試みる
+              echo "🔎 Searching for Backlog tickets in PR #$PR_NUM body"
               echo "$BODY" > pr_body.txt
+              grep -n "TANZAM_MHT" pr_body.txt || echo "No direct ticket references found"
               
+              CHANGELOG_ENTRY_ADDED=false
+              
+              # マークダウンリンクを探す
               while IFS= read -r line; do
-                echo "Processing line: [$line]"
-                # より正確なマークダウンリンク検出（シンプル化）
-                if [[ "$line" =~ \[TANZAM_MHT ]]; then
-                  echo "  -> Potential ticket found in line"
-                  
-                  # チケット番号を抽出
-                  TICKET=$(echo "$line" | grep -o 'TANZAM_MHT-[0-9]*' || echo "")
+                if [[ "$line" == *"TANZAM_MHT"* && "$line" == *"["* && "$line" == *"]("* ]]; then
+                  # チケット番号の抽出
+                  TICKET=$(echo "$line" | grep -o 'TANZAM_MHT-[0-9]*')
                   
                   if [[ -n "$TICKET" ]]; then
-                    # URL を抽出（存在する場合）
-                    URL=$(echo "$line" | grep -o '(http[^)]*)' | sed 's/^(//' || echo "https://mhtcode.backlog.com/view/$TICKET")
+                    # URL の抽出
+                    URL=$(echo "$line" | sed -n 's/.*\]\(\(http[^)]*\)\).*/\1/p' || echo "https://mhtcode.backlog.com/view/$TICKET")
                     
-                    # 行からリンク部分を除去して概要を取得
-                    SUMMARY=$(echo "$line" | sed "s/.*\]([^)]*)//" | sed 's/^[[:space:]]*//')
+                    # 概要の抽出
+                    SUMMARY=$(echo "$line" | sed 's/.*\](.*) \(.*\)/\1/' || echo "$TITLE")
                     
-                    # 概要が空の場合はPRタイトルを使用
-                    if [[ -z "$SUMMARY" ]]; then
-                      SUMMARY="$TITLE"
-                    fi
-                    
-                    echo "  -> Found Ticket: [$TICKET]($URL): $SUMMARY" # ログ出力
+                    echo "✓ Found ticket: $TICKET with summary: $SUMMARY"
                     echo "- [$TICKET]($URL) $SUMMARY" >> changelog.md
                     CHANGELOG_ENTRY_ADDED=true
                     TICKET_COUNT=$((TICKET_COUNT + 1))
-                  else
-                    echo "  -> Could not extract ticket number"
                   fi
-                else
-                  echo "  -> No markdown link in this line"
                 fi
               done < pr_body.txt
-              echo "--- End processing BODY line by line ---"
-            fi
-            
-            echo "::notice::CHANGELOG_ENTRY_ADDED=$CHANGELOG_ENTRY_ADDED"
-            
-            # チケットが見つからなかった場合、フォールバックとしてPRタイトルを追加
-            if [ "$CHANGELOG_ENTRY_ADDED" = false ]; then
-              echo "  -> No Ticket found in body, using PR title." # ログ出力
+              
+              # チケットが見つからなかった場合
+              if [ "$CHANGELOG_ENTRY_ADDED" = false ]; then
+                echo "⚠️ No Backlog tickets found in PR body, using PR title instead"
+                echo "- (PR #$PR_NUM): $TITLE" >> changelog.md
+              fi
+            else
+              echo "⚠️ Empty PR body, using PR title"
               echo "- (PR #$PR_NUM): $TITLE" >> changelog.md
             fi
-          done < commits.txt
+          else
+            echo "❌ Could not extract PR number from merge commit: $MERGE_COMMIT"
+          fi
           
           # 統計情報
           echo "📊 Found $PR_COUNT PRs and $TICKET_COUNT tickets"
