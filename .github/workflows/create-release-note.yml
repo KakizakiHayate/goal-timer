@@ -109,11 +109,11 @@ jobs:
             CHANGELOG_ENTRY_ADDED=false
             
             # 一度PRのBODY全体で直接Backlogチケットリンクを検索
-            if echo "$BODY" | grep -q "\[TANZAM_MHT-[0-9]\+\]"; then
+            if echo "$BODY" | grep -q '\[TANZAM_MHT-[0-9]'; then
               echo "✓ Backlog ticket references found in PR body!"
               
-              # マークダウンリンク形式を抽出
-              MARKDOWN_LINKS=$(echo "$BODY" | grep -o "\[TANZAM_MHT-[0-9]\+\](https://[^)]*)" || echo "")
+              # マークダウンリンク形式を抽出（エスケープを簡略化）
+              MARKDOWN_LINKS=$(echo "$BODY" | grep -o '\[TANZAM_MHT-[0-9].*\]([^)]*)' || echo "")
               
               if [[ -n "$MARKDOWN_LINKS" ]]; then
                 echo "🎯 Found markdown links: $MARKDOWN_LINKS"
@@ -122,14 +122,14 @@ jobs:
                 # 各リンクを処理
                 while IFS= read -r link; do
                   # チケット番号を抽出
-                  TICKET=$(echo "$link" | grep -o "TANZAM_MHT-[0-9]\+")
+                  TICKET=$(echo "$link" | grep -o 'TANZAM_MHT-[0-9]*')
                   
                   # URL を抽出
-                  URL=$(echo "$link" | grep -o "(.*)" | sed 's/(\(.*\))/\1/')
+                  URL=$(echo "$link" | grep -o '(.*' | sed 's/^(//')
                   
-                  # その行の概要を探す
-                  LINE=$(echo "$BODY" | grep "$link")
-                  SUMMARY=$(echo "$LINE" | sed -E "s/.*\]\\($URL\\)[[:space:]]*(.*)/\\1/" || echo "$TITLE")
+                  # 該当行を検索して概要を抽出
+                  LINE=$(echo "$BODY" | grep -F "$link" || echo "")
+                  SUMMARY=$(echo "$LINE" | sed "s/.*$link //" || echo "$TITLE")
                   
                   echo "💡 Extracted: Ticket=$TICKET, URL=$URL, Summary=$SUMMARY"
                   echo "- [$TICKET]($URL) $SUMMARY" >> changelog.md
@@ -148,23 +148,32 @@ jobs:
               
               while IFS= read -r line; do
                 echo "Processing line: [$line]"
-                # より正確なマークダウンリンク検出
-                if [[ "$line" =~ \[TANZAM_MHT-[0-9]+\]\(https://[^)]+\) ]]; then
-                  echo "  -> Markdown link found in line"
+                # より正確なマークダウンリンク検出（シンプル化）
+                if [[ "$line" =~ \[TANZAM_MHT ]]; then
+                  echo "  -> Potential ticket found in line"
                   
                   # チケット番号を抽出
-                  TICKET=$(echo "$line" | grep -o 'TANZAM_MHT-[0-9]\+')
+                  TICKET=$(echo "$line" | grep -o 'TANZAM_MHT-[0-9]*' || echo "")
                   
-                  # URL を抽出
-                  URL=$(echo "$line" | grep -o '(https://[^)]*)' | sed 's/(\(.*\))/\1/')
-                  
-                  # 概要を抽出 - リンクの後の部分
-                  SUMMARY=$(echo "$line" | sed -E 's/\[.*\]\([^)]+\)[[:space:]]*(.*)/\1/')
-                  
-                  echo "  -> Found Ticket: [$TICKET]($URL): $SUMMARY" # ログ出力
-                  echo "- [$TICKET]($URL) $SUMMARY" >> changelog.md
-                  CHANGELOG_ENTRY_ADDED=true
-                  TICKET_COUNT=$((TICKET_COUNT + 1))
+                  if [[ -n "$TICKET" ]]; then
+                    # URL を抽出（存在する場合）
+                    URL=$(echo "$line" | grep -o '(http[^)]*)' | sed 's/^(//' || echo "https://mhtcode.backlog.com/view/$TICKET")
+                    
+                    # 行からリンク部分を除去して概要を取得
+                    SUMMARY=$(echo "$line" | sed "s/.*\]([^)]*)//" | sed 's/^[[:space:]]*//')
+                    
+                    # 概要が空の場合はPRタイトルを使用
+                    if [[ -z "$SUMMARY" ]]; then
+                      SUMMARY="$TITLE"
+                    fi
+                    
+                    echo "  -> Found Ticket: [$TICKET]($URL): $SUMMARY" # ログ出力
+                    echo "- [$TICKET]($URL) $SUMMARY" >> changelog.md
+                    CHANGELOG_ENTRY_ADDED=true
+                    TICKET_COUNT=$((TICKET_COUNT + 1))
+                  else
+                    echo "  -> Could not extract ticket number"
+                  fi
                 else
                   echo "  -> No markdown link in this line"
                 fi
