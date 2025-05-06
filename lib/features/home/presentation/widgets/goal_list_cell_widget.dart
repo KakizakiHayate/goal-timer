@@ -2,14 +2,18 @@ import 'package:flutter/material.dart';
 
 import 'package:goal_timer/routes.dart';
 import 'package:goal_timer/core/utils/route_names.dart';
+import 'package:goal_timer/core/utils/color_consts.dart';
+import 'package:goal_timer/features/home/presentation/viewmodels/home_view_model.dart';
 
 class GoalListCellWidget extends StatelessWidget {
-  const GoalListCellWidget({Key? key}) : super(key: key);
+  final GoalItem goal;
+
+  const GoalListCellWidget({Key? key, required this.goal}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: ColorConsts.cardBackground,
       borderRadius: BorderRadius.circular(12),
       elevation: 2,
       child: InkWell(
@@ -17,6 +21,7 @@ class GoalListCellWidget extends StatelessWidget {
           Navigator.pushNamed(
             context,
             RouteNames.goalDetailSetting,
+            arguments: goal.id,
           );
         },
         borderRadius: BorderRadius.circular(12),
@@ -30,7 +35,7 @@ class GoalListCellWidget extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      '今すぐやらないと後悔するぞ！',
+                      goal.avoidMessage,
                       style: TextStyle(
                         color: Colors.red[700],
                         fontSize: 18,
@@ -40,25 +45,31 @@ class GoalListCellWidget extends StatelessWidget {
                   ),
                   const Icon(
                     Icons.arrow_forward_ios,
-                    color: Colors.grey,
+                    color: ColorConsts.textLight,
                     size: 16,
                   ),
                 ],
               ),
               const SizedBox(height: 8),
-              const Text(
-                'Flutterの基礎を完全に理解する',
-                style: TextStyle(fontSize: 16),
+              Text(
+                goal.title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: ColorConsts.textDark,
+                ),
               ),
               const SizedBox(height: 12),
               Row(
                 children: [
-                  const Text('残り30日', style: TextStyle(color: Colors.grey)),
+                  Text(
+                    '残り${goal.remainingDays}日',
+                    style: const TextStyle(color: ColorConsts.textLight),
+                  ),
                   const Spacer(),
                   Text(
-                    '45%',
-                    style: TextStyle(
-                      color: Colors.blue[700],
+                    '${(goal.progressPercent * 100).toInt()}%',
+                    style: const TextStyle(
+                      color: ColorConsts.primary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -66,9 +77,11 @@ class GoalListCellWidget extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               LinearProgressIndicator(
-                value: 0.45,
-                backgroundColor: Colors.grey[200],
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.blue[700]!),
+                value: goal.progressPercent,
+                backgroundColor: ColorConsts.border,
+                valueColor: const AlwaysStoppedAnimation<Color>(
+                  ColorConsts.success,
+                ),
               ),
             ],
           ),
