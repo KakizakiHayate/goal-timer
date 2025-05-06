@@ -7,6 +7,7 @@ import 'package:goal_timer/features/goal_timer/presentation/screens/timer_screen
 import 'package:goal_timer/features/home/presentation/screens/home_screen.dart';
 import 'package:goal_timer/features/memo_record/presentation/screens/memo_record_screen.dart';
 import 'package:goal_timer/features/statistics/presentation/screens/statistics_screen.dart';
+import 'package:goal_timer/features/settings/presentation/screens/settings_screen.dart';
 
 // TODO: 中規模・大規模になってきたら疎結合にすることを考える
 
@@ -38,6 +39,9 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       );
     case RouteNames.statistics:
       return platformPageRoute(builder: (context) => const StatisticsScreen());
+    // 設定画面
+    case RouteNames.settings:
+      return platformPageRoute(builder: (context) => const SettingsScreen());
     // 不明なルート
     default:
       return platformPageRoute(

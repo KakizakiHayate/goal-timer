@@ -9,25 +9,28 @@ final settingsRepositoryProvider = Provider((ref) => SettingsRepositoryImpl());
 
 // ユースケースプロバイダー
 final getSettingsUseCaseProvider = Provider(
-    (ref) => GetSettingsUseCase(ref.watch(settingsRepositoryProvider)));
+  (ref) => GetSettingsUseCase(ref.watch(settingsRepositoryProvider)),
+);
 
 final saveSettingsUseCaseProvider = Provider(
-    (ref) => SaveSettingsUseCase(ref.watch(settingsRepositoryProvider)));
+  (ref) => SaveSettingsUseCase(ref.watch(settingsRepositoryProvider)),
+);
 
 // 設定の状態管理プロバイダー
 final settingsProvider =
     StateNotifierProvider<SettingsNotifier, AsyncValue<Settings>>(
-        (ref) => SettingsNotifier(
-              ref.watch(getSettingsUseCaseProvider),
-              ref.watch(saveSettingsUseCaseProvider),
-            ));
+      (ref) => SettingsNotifier(
+        ref.watch(getSettingsUseCaseProvider),
+        ref.watch(saveSettingsUseCaseProvider),
+      ),
+    );
 
 class SettingsNotifier extends StateNotifier<AsyncValue<Settings>> {
   final GetSettingsUseCase _getSettingsUseCase;
   final SaveSettingsUseCase _saveSettingsUseCase;
 
   SettingsNotifier(this._getSettingsUseCase, this._saveSettingsUseCase)
-      : super(const AsyncValue.loading()) {
+    : super(const AsyncValue.loading()) {
     loadSettings();
   }
 
@@ -54,9 +57,7 @@ class SettingsNotifier extends StateNotifier<AsyncValue<Settings>> {
   Future<void> updateTheme(String theme) async {
     if (state.hasValue) {
       final currentSettings = state.value!;
-      await updateSettings(
-        currentSettings.copyWith(theme: theme),
-      );
+      await updateSettings(currentSettings.copyWith(theme: theme));
     }
   }
 
@@ -81,8 +82,15 @@ class SettingsNotifier extends StateNotifier<AsyncValue<Settings>> {
   Future<void> updateSoundEnabled(bool enabled) async {
     if (state.hasValue) {
       final currentSettings = state.value!;
+      await updateSettings(currentSettings.copyWith(soundEnabled: enabled));
+    }
+  }
+
+  Future<void> updateDefaultTimerDuration(int minutes) async {
+    if (state.hasValue) {
+      final currentSettings = state.value!;
       await updateSettings(
-        currentSettings.copyWith(soundEnabled: enabled),
+        currentSettings.copyWith(defaultTimerDuration: minutes),
       );
     }
   }

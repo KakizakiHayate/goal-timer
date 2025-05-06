@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:goal_timer/core/utils/color_consts.dart';
+import 'package:goal_timer/core/utils/route_names.dart';
 import 'package:goal_timer/features/home/presentation/widgets/goal_list_cell_widget.dart';
 import 'package:goal_timer/features/home/presentation/viewmodels/home_view_model.dart';
 import 'package:goal_timer/features/goal_detail_setting/presentation/screens/goal_detail_setting_screen.dart';
@@ -68,7 +69,7 @@ class _HomePage extends ConsumerWidget {
             icon: const Icon(Icons.settings, color: Colors.white),
             onPressed: () {
               // 設定画面へ移動
-              Navigator.pushNamed(context, '/settings');
+              Navigator.pushNamed(context, RouteNames.settings);
             },
           ),
         ],
@@ -242,7 +243,7 @@ class _HomePage extends ConsumerWidget {
               const SizedBox(height: 12),
               OutlinedButton.icon(
                 onPressed: () {
-                  Navigator.pushNamed(context, '/memo-record');
+                  Navigator.pushNamed(context, RouteNames.memoRecord);
                 },
                 icon: const Icon(Icons.note_add),
                 label: const Text('学習メモを記録する'),

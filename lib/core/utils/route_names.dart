@@ -6,4 +6,5 @@ final class RouteNames {
   static const String memoRecord = '/memo-record';
   static const String statistics = '/statistics';
   static const String memoRecordWithGoal = '/memo-record/goal';
+  static const String settings = '/settings';
 }
