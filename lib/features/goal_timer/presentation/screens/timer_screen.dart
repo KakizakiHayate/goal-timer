@@ -6,7 +6,7 @@ import 'package:goal_timer/features/goal_timer/presentation/viewmodels/timer_vie
 import 'package:goal_timer/features/goal_timer/presentation/widgets/timer_progress_ring.dart';
 
 class TimerScreen extends ConsumerWidget {
-  const TimerScreen({Key? key}) : super(key: key);
+  const TimerScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -14,276 +14,264 @@ class TimerScreen extends ConsumerWidget {
     final timerViewModel = ref.read(timerViewModelProvider.notifier);
 
     return Scaffold(
-      backgroundColor: _getBackgroundColor(timerState.mode),
       appBar: AppBar(
-        title: const Text(
-          'タイマー',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: _getAppBarColor(timerState.mode),
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        title: const Text('タイマー'),
+        backgroundColor: ColorConsts.primary,
+        foregroundColor: Colors.white,
       ),
-      body: SafeArea(
+      backgroundColor: Colors.white,
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildModeSelector(context, timerState, timerViewModel),
-            Expanded(
-              child: _buildTimerContent(context, timerState, timerViewModel),
-            ),
-            _buildTimerControls(context, timerState, timerViewModel),
-            const SizedBox(height: 16),
+            _buildModeSwitcher(context, timerState, timerViewModel),
+            const SizedBox(height: 40),
+            _buildTimerDisplay(context, timerState),
+            const SizedBox(height: 40),
+            _buildControlButtons(context, timerState, timerViewModel),
           ],
         ),
       ),
     );
   }
 
-  // モード選択ウィジェット
-  Widget _buildModeSelector(
+  Widget _buildModeSwitcher(
     BuildContext context,
-    TimerState state,
-    TimerViewModel viewModel,
+    TimerState timerState,
+    TimerViewModel timerViewModel,
   ) {
     return Container(
-      margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(40),
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(25),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           _buildModeButton(
             context,
             'カウントダウン',
-            state.mode == TimerMode.countdown,
-            () => viewModel.changeMode(TimerMode.countdown),
+            timerState.mode == TimerMode.countdown,
+            () => timerViewModel.changeMode(TimerMode.countdown),
+            ColorConsts.primary,
           ),
           _buildModeButton(
             context,
             'カウントアップ',
-            state.mode == TimerMode.countup,
-            () => viewModel.changeMode(TimerMode.countup),
+            timerState.mode == TimerMode.countup,
+            () => timerViewModel.changeMode(TimerMode.countup),
+            ColorConsts.success,
           ),
         ],
       ),
     );
   }
 
-  // モード選択ボタン
   Widget _buildModeButton(
     BuildContext context,
-    String label,
-    bool isSelected,
+    String text,
+    bool isActive,
     VoidCallback onTap,
+    Color activeColor,
   ) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color:
-                isSelected ? Colors.white.withOpacity(0.2) : Colors.transparent,
-            borderRadius: BorderRadius.circular(40),
-          ),
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              fontSize: 16,
-            ),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        decoration: BoxDecoration(
+          color: isActive ? activeColor : Colors.transparent,
+          borderRadius: BorderRadius.circular(25),
+        ),
+        child: Text(
+          text,
+          style: TextStyle(
+            color: isActive ? Colors.white : Colors.black54,
+            fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
           ),
         ),
       ),
     );
   }
 
-  // タイマーコンテンツ
-  Widget _buildTimerContent(
-    BuildContext context,
-    TimerState state,
-    TimerViewModel viewModel,
-  ) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // 残り時間の表示（大きな文字）
-          Text(
-            state.displayTime,
-            style: const TextStyle(
-              fontSize: 80,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 48),
-          // カスタムプログレスリング
-          TimerProgressRing(
-            progress: state.progress,
-            size: 280,
-            strokeWidth: 12,
-            backgroundColor: Colors.white,
-            foregroundColor: Colors.white,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  _getModeLabel(state.mode),
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                if (state.mode == TimerMode.countdown)
+  Widget _buildTimerDisplay(BuildContext context, TimerState timerState) {
+    final minutes = timerState.currentSeconds ~/ 60;
+    final seconds = timerState.currentSeconds % 60;
+    final timeText =
+        '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+
+    final progressValue =
+        timerState.mode == TimerMode.countdown
+            ? timerState.currentSeconds /
+                (25 * 60) // 25分を基準
+            : timerState.currentSeconds / (60 * 60); // 1時間を基準
+
+    final color =
+        timerState.mode == TimerMode.countdown
+            ? ColorConsts.primary
+            : ColorConsts.success;
+
+    return Column(
+      children: [
+        SizedBox(
+          width: 250,
+          height: 250,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              TimerProgressRing(
+                progress:
+                    timerState.mode == TimerMode.countdown
+                        ? progressValue
+                        : 1 - progressValue,
+                color: color,
+                backgroundColor: Colors.grey[200]!,
+              ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
                   Text(
-                    '${(state.totalSeconds / 60).round()}分タイマー',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.white.withOpacity(0.8),
+                    timeText,
+                    style: const TextStyle(
+                      fontSize: 48,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // タイマー操作のボタン
-  Widget _buildTimerControls(
-    BuildContext context,
-    TimerState state,
-    TimerViewModel viewModel,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          // リセットボタン
-          IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.white, size: 32),
-            onPressed: () => viewModel.resetTimer(),
-          ),
-          // 開始/一時停止ボタン
-          FloatingActionButton.large(
-            backgroundColor: Colors.white,
-            onPressed: () {
-              if (state.status == TimerStatus.running) {
-                viewModel.pauseTimer();
-              } else {
-                viewModel.startTimer();
-              }
-            },
-            child: Icon(
-              state.status == TimerStatus.running
-                  ? Icons.pause
-                  : Icons.play_arrow,
-              color: _getAppBarColor(state.mode),
-              size: 40,
-            ),
-          ),
-          // 設定ボタン（カウントダウンモードの場合のみ表示）
-          state.mode == TimerMode.countdown
-              ? IconButton(
-                icon: const Icon(Icons.settings, color: Colors.white, size: 32),
-                onPressed: () {
-                  _showTimeSettingDialog(context, state, viewModel);
-                },
-              )
-              : const SizedBox(width: 48), // スペースを確保
-        ],
-      ),
-    );
-  }
-
-  // 時間設定ダイアログ
-  void _showTimeSettingDialog(
-    BuildContext context,
-    TimerState state,
-    TimerViewModel viewModel,
-  ) {
-    final currentMinutes = (state.totalSeconds / 60).round();
-    int selectedMinutes = currentMinutes;
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('タイマー時間設定'),
-          content: StatefulBuilder(
-            builder: (context, setState) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('$selectedMinutes 分'),
-                  Slider(
-                    value: selectedMinutes.toDouble(),
-                    min: 1,
-                    max: 60,
-                    divisions: 59,
-                    onChanged: (value) {
-                      setState(() {
-                        selectedMinutes = value.round();
-                      });
-                    },
+                  Text(
+                    timerState.mode == TimerMode.countdown
+                        ? 'カウントダウン'
+                        : 'カウントアップ',
+                    style: TextStyle(fontSize: 16, color: color),
                   ),
                 ],
-              );
-            },
+              ),
+            ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('キャンセル'),
-            ),
-            TextButton(
-              onPressed: () {
-                viewModel.setTime(selectedMinutes);
-                Navigator.pop(context);
-              },
-              child: const Text('設定'),
-            ),
-          ],
-        );
-      },
+        ),
+      ],
     );
   }
 
-  // モードによって背景色を変更
-  Color _getBackgroundColor(TimerMode mode) {
-    switch (mode) {
-      case TimerMode.countdown:
-        return const Color(0xFF2563EB); // カウントダウン: 青
-      case TimerMode.countup:
-        return const Color(0xFF10B981); // カウントアップ: 緑
-    }
+  Widget _buildControlButtons(
+    BuildContext context,
+    TimerState timerState,
+    TimerViewModel timerViewModel,
+  ) {
+    final isRunning = timerState.status == TimerStatus.running;
+    final color =
+        timerState.mode == TimerMode.countdown
+            ? ColorConsts.primary
+            : ColorConsts.success;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _buildCircleButton(
+          icon: isRunning ? Icons.pause : Icons.play_arrow,
+          onPressed: () {
+            if (isRunning) {
+              timerViewModel.pauseTimer();
+            } else {
+              timerViewModel.startTimer();
+            }
+          },
+          color: color,
+          size: 72,
+          iconSize: 36,
+        ),
+        const SizedBox(width: 20),
+        _buildCircleButton(
+          icon: Icons.refresh,
+          onPressed: () => timerViewModel.resetTimer(),
+          color: Colors.grey[400]!,
+        ),
+        const SizedBox(width: 20),
+        _buildCircleButton(
+          icon: Icons.settings,
+          onPressed: () {
+            _showTimerSettingDialog(context, timerState, timerViewModel);
+          },
+          color: Colors.grey[400]!,
+        ),
+      ],
+    );
   }
 
-  // モードによってアプリバーの色を変更
-  Color _getAppBarColor(TimerMode mode) {
-    switch (mode) {
-      case TimerMode.countdown:
-        return const Color(0xFF1D4ED8); // カウントダウン: 濃い青
-      case TimerMode.countup:
-        return const Color(0xFF059669); // カウントアップ: 濃い緑
-    }
+  Widget _buildCircleButton({
+    required IconData icon,
+    required VoidCallback onPressed,
+    required Color color,
+    double size = 56,
+    double iconSize = 24,
+  }) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          shape: const CircleBorder(),
+          padding: EdgeInsets.zero,
+          backgroundColor: color,
+          foregroundColor: Colors.white,
+        ),
+        child: Icon(icon, size: iconSize),
+      ),
+    );
   }
 
-  // モードのラベル文字列を取得
-  String _getModeLabel(TimerMode mode) {
-    switch (mode) {
-      case TimerMode.countdown:
-        return 'カウントダウン';
-      case TimerMode.countup:
-        return 'カウントアップ';
+  void _showTimerSettingDialog(
+    BuildContext context,
+    TimerState timerState,
+    TimerViewModel timerViewModel,
+  ) {
+    if (timerState.mode == TimerMode.countdown) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          int minutes = 25; // デフォルト25分
+
+          return AlertDialog(
+            title: const Text('タイマー設定'),
+            content: StatefulBuilder(
+              builder: (context, setState) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('カウントダウン時間（分）'),
+                    Slider(
+                      value: minutes.toDouble(),
+                      min: 1,
+                      max: 60,
+                      divisions: 59,
+                      label: minutes.toString(),
+                      onChanged: (value) {
+                        setState(() {
+                          minutes = value.toInt();
+                        });
+                      },
+                    ),
+                    Text('$minutes分', style: const TextStyle(fontSize: 18)),
+                  ],
+                );
+              },
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('キャンセル'),
+              ),
+              TextButton(
+                onPressed: () {
+                  timerViewModel.setTime(minutes);
+                  Navigator.pop(context);
+                },
+                child: const Text('設定'),
+              ),
+            ],
+          );
+        },
+      );
     }
   }
 }

@@ -4,9 +4,50 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:goal_timer/core/utils/color_consts.dart';
 import 'package:goal_timer/features/home/presentation/widgets/goal_list_cell_widget.dart';
 import 'package:goal_timer/features/home/presentation/viewmodels/home_view_model.dart';
+import 'package:goal_timer/features/goal_detail_setting/presentation/screens/goal_detail_setting_screen.dart';
+import 'package:goal_timer/features/goal_timer/presentation/screens/timer_screen.dart';
+import 'package:goal_timer/features/goal_detail_setting/domain/entities/goal_detail.dart';
+import 'package:goal_timer/features/goal_detail_setting/presentation/viewmodels/goal_detail_view_model.dart';
+import 'package:goal_timer/features/goal_detail_setting/data/repositories/goal_detail_repository_impl.dart';
+import 'package:goal_timer/features/goal_detail_setting/presentation/screens/goal_edit_modal.dart';
+
+// ホーム画面のタブインデックスを管理するプロバイダー
+final homeTabIndexProvider = StateProvider<int>((ref) => 0);
 
 class HomeScreen extends ConsumerWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentIndex = ref.watch(homeTabIndexProvider);
+
+    return Scaffold(
+      body: _buildPage(currentIndex),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: currentIndex,
+        onTap: (index) => ref.read(homeTabIndexProvider.notifier).state = index,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'ホーム'),
+          BottomNavigationBarItem(icon: Icon(Icons.timer), label: 'タイマー'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPage(int index) {
+    switch (index) {
+      case 0:
+        return const _HomePage();
+      case 1:
+        return const TimerScreen();
+      default:
+        return const _HomePage();
+    }
+  }
+}
+
+class _HomePage extends ConsumerWidget {
+  const _HomePage();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -42,12 +83,39 @@ class HomeScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // 目標追加画面へ移動
-          Navigator.pushNamed(context, '/goal-detail-setting');
+          // 目標追加モーダルを表示
+          _showAddGoalModal(context);
         },
         backgroundColor: ColorConsts.primary,
         child: const Icon(Icons.add, color: Colors.white),
       ),
+    );
+  }
+
+  // 目標追加モーダルを表示
+  void _showAddGoalModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // フルスクリーンに近い高さで表示
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return FractionallySizedBox(
+          heightFactor: 0.95, // 画面の95%の高さ
+          child: Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+            ),
+            child: const GoalEditModal(
+              title: '目標を追加',
+              goalDetail: null, // 新規追加なのでnull
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -152,8 +220,11 @@ class HomeScreen extends ConsumerWidget {
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {
-                  // タイマー開始画面へ移動
-                  Navigator.pushNamed(context, '/timer');
+                  // タブをタイマー画面に切り替え
+                  final notifier = ProviderScope.containerOf(
+                    context,
+                  ).read(homeTabIndexProvider.notifier);
+                  notifier.state = 1; // タイマータブのインデックス
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: ColorConsts.primary,

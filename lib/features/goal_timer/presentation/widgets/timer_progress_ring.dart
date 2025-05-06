@@ -7,6 +7,7 @@ class TimerProgressRing extends StatelessWidget {
   final double strokeWidth;
   final Color backgroundColor;
   final Color foregroundColor;
+  final Color? color;
   final Widget? child;
 
   const TimerProgressRing({
@@ -16,11 +17,14 @@ class TimerProgressRing extends StatelessWidget {
     this.strokeWidth = 12,
     this.backgroundColor = Colors.black12,
     this.foregroundColor = Colors.white,
+    this.color,
     this.child,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final effectiveColor = color ?? foregroundColor;
+
     return SizedBox(
       width: size,
       height: size,
@@ -43,7 +47,7 @@ class TimerProgressRing extends StatelessWidget {
               progress: progress,
               strokeWidth: strokeWidth,
               backgroundColor: backgroundColor.withOpacity(0.2),
-              foregroundColor: foregroundColor.withOpacity(0.9),
+              foregroundColor: effectiveColor.withOpacity(0.9),
             ),
           ),
           // 中央のコンテンツ

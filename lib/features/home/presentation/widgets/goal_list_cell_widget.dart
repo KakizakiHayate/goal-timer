@@ -4,6 +4,7 @@ import 'package:goal_timer/routes.dart';
 import 'package:goal_timer/core/utils/route_names.dart';
 import 'package:goal_timer/core/utils/color_consts.dart';
 import 'package:goal_timer/features/home/presentation/viewmodels/home_view_model.dart';
+import 'package:goal_timer/features/goal_detail_setting/presentation/screens/goal_detail_screen.dart';
 
 class GoalListCellWidget extends StatelessWidget {
   final GoalItem goal;
@@ -18,10 +19,11 @@ class GoalListCellWidget extends StatelessWidget {
       elevation: 2,
       child: InkWell(
         onTap: () {
-          Navigator.pushNamed(
+          Navigator.push(
             context,
-            RouteNames.goalDetailSetting,
-            arguments: goal.id,
+            MaterialPageRoute(
+              builder: (context) => GoalDetailScreen(goalId: goal.id),
+            ),
           );
         },
         borderRadius: BorderRadius.circular(12),
