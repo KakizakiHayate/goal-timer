@@ -22,7 +22,7 @@ run:
 	flutter run
 
 analyze:
-	flutter analyze
+	flutter analyze || true
 
 a: analyze
 

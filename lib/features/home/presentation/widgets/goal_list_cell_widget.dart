@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:goal_timer/routes.dart';
-import 'package:goal_timer/core/utils/route_names.dart';
 import 'package:goal_timer/core/utils/color_consts.dart';
 import 'package:goal_timer/features/home/presentation/viewmodels/home_view_model.dart';
 import 'package:goal_timer/features/goal_detail_setting/presentation/screens/goal_detail_screen.dart';
@@ -9,7 +7,7 @@ import 'package:goal_timer/features/goal_detail_setting/presentation/screens/goa
 class GoalListCellWidget extends StatelessWidget {
   final GoalItem goal;
 
-  const GoalListCellWidget({Key? key, required this.goal}) : super(key: key);
+  const GoalListCellWidget({super.key, required this.goal});
 
   @override
   Widget build(BuildContext context) {

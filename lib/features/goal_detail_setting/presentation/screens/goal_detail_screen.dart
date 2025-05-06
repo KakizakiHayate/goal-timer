@@ -41,10 +41,6 @@ class GoalDetailScreen extends ConsumerWidget {
     GoalDetail goalDetail,
     WidgetRef ref,
   ) {
-    final formatter = DateFormat('yyyy年MM月dd日');
-    final deadlineString = formatter.format(goalDetail.deadline);
-    final totalHoursSpent = goalDetail.spentMinutes / 60;
-
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -284,14 +280,22 @@ class GoalDetailScreen extends ConsumerWidget {
 
     return LineChart(
       LineChartData(
-        gridData: const FlGridData(show: true),
+        gridData: const FlGridData(
+          show: true,
+          drawVerticalLine: false, // 垂直線を非表示にして描画負荷を軽減
+        ),
+        lineTouchData: const LineTouchData(enabled: false), // タッチ機能を無効化して負荷を軽減
         titlesData: FlTitlesData(
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
               getTitlesWidget: (value, meta) {
-                return Text('${value.toInt()}h');
+                return Text(
+                  '${value.toInt()}h',
+                  style: const TextStyle(fontSize: 10), // フォントサイズを小さくして最適化
+                );
               },
+              reservedSize: 24, // サイズを固定
             ),
           ),
           bottomTitles: AxisTitles(
@@ -300,10 +304,14 @@ class GoalDetailScreen extends ConsumerWidget {
               getTitlesWidget: (value, meta) {
                 final weekdays = ['月', '火', '水', '木', '金', '土', '日'];
                 if (value >= 0 && value < 7) {
-                  return Text(weekdays[value.toInt()]);
+                  return Text(
+                    weekdays[value.toInt()],
+                    style: const TextStyle(fontSize: 10), // フォントサイズを小さくして最適化
+                  );
                 }
                 return const Text('');
               },
+              reservedSize: 18, // サイズを固定
             ),
           ),
           rightTitles: const AxisTitles(
@@ -313,18 +321,20 @@ class GoalDetailScreen extends ConsumerWidget {
             sideTitles: SideTitles(showTitles: false),
           ),
         ),
-        borderData: FlBorderData(show: true),
+        borderData: FlBorderData(show: false), // 境界線を表示しない
         lineBarsData: [
           LineChartBarData(
             spots: spots,
-            isCurved: true,
+            isCurved: false, // 曲線をオフにして描画を高速化
             color: ColorConsts.primary,
-            barWidth: 3,
+            barWidth: 2, // 線を細くして描画負荷を軽減
             belowBarData: BarAreaData(
               show: true,
-              color: ColorConsts.primary.withOpacity(0.2),
+              color: ColorConsts.primary.withAlpha(
+                50,
+              ), // withOpacityの代わりにwithAlphaを使用
             ),
-            dotData: const FlDotData(show: true),
+            dotData: const FlDotData(show: false), // ドットを非表示にして描画負荷を軽減
           ),
         ],
         minY: 0,
@@ -401,7 +411,7 @@ class GoalDetailScreen extends ConsumerWidget {
                   Navigator.pop(context); // 詳細画面を閉じる
 
                   // リストを更新するためにプロバイダーを更新
-                  ref.refresh(goalDetailListProvider);
+                  final _ = ref.refresh(goalDetailListProvider);
 
                   // 成功メッセージを表示
                   ScaffoldMessenger.of(context).showSnackBar(

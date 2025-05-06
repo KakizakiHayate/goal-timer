@@ -263,16 +263,27 @@ class _GoalEditModalState extends ConsumerState<GoalEditModal> {
   }
 
   void _saveGoal(BuildContext context) {
-    if (_formKey.currentState!.validate()) {
-      // フォームのバリデーションが成功した場合
-      final goalRepository = ref.read(goalDetailRepositoryProvider);
+    _saveGoalData(context, ref);
+  }
 
-      // 新しい目標の期間（日数）
-      final durationDays = _targetDate.difference(DateTime.now()).inDays;
+  // 目標データを保存するメソッド
+  Future<void> _saveGoalData(BuildContext context, WidgetRef ref) async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
-      // 目標の総時間を計算（1日の目標時間 × 期間日数）
-      final int targetHours = (_targetMinutesPerDay * durationDays) ~/ 60;
+    // 非同期処理のために最初にcontextを保存
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    final goalRepository = ref.read(goalDetailRepositoryProvider);
 
+    // 新しい目標の期間（日数）
+    final durationDays = _targetDate.difference(DateTime.now()).inDays;
+
+    // 目標の総時間を計算（1日の目標時間 × 期間日数）
+    final int targetHours = (_targetMinutesPerDay * durationDays) ~/ 60;
+
+    try {
       // 編集モードか新規追加モードかに応じて処理を分ける
       if (widget.goalDetail != null) {
         // 編集モード: 既存データを更新
@@ -286,33 +297,21 @@ class _GoalEditModalState extends ConsumerState<GoalEditModal> {
         );
 
         // リポジトリを使って目標を更新
-        goalRepository
-            .updateGoalDetail(updatedGoal)
-            .then((_) {
-              // 成功メッセージを表示
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('目標が更新されました'),
-                  backgroundColor: Colors.green,
-                ),
-              );
+        await goalRepository.updateGoalDetail(updatedGoal);
 
-              // リストを更新するためにプロバイダーを更新
-              ref.refresh(goalDetailListProvider);
-              ref.refresh(goalDetailProvider(updatedGoal.id));
+        // リストを更新するためにプロバイダーを更新
+        // ignore: unused_result
+        ref.refresh(goalDetailListProvider);
+        // ignore: unused_result
+        ref.refresh(goalDetailProvider(updatedGoal.id));
 
-              // モーダルを閉じる
-              Navigator.pop(context);
-            })
-            .catchError((error) {
-              // エラーメッセージを表示
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('エラーが発生しました: $error'),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            });
+        // 成功メッセージを表示
+        scaffoldMessenger.showSnackBar(
+          const SnackBar(
+            content: Text('目標が更新されました'),
+            backgroundColor: Colors.green,
+          ),
+        );
       } else {
         // 新規追加モード: 新しいデータを作成
         final newGoal = GoalDetail(
@@ -328,33 +327,31 @@ class _GoalEditModalState extends ConsumerState<GoalEditModal> {
         );
 
         // リポジトリを使って目標を追加
-        goalRepository
-            .addGoalDetail(newGoal)
-            .then((_) {
-              // 成功メッセージを表示
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('目標が追加されました'),
-                  backgroundColor: ColorConsts.success,
-                ),
-              );
+        await goalRepository.addGoalDetail(newGoal);
 
-              // リストを更新するためにプロバイダーを更新
-              ref.refresh(goalDetailListProvider);
+        // リストを更新するためにプロバイダーを更新
+        // ignore: unused_result
+        ref.refresh(goalDetailListProvider);
 
-              // モーダルを閉じる
-              Navigator.pop(context);
-            })
-            .catchError((error) {
-              // エラーメッセージを表示
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('エラーが発生しました: $error'),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            });
+        // 成功メッセージを表示
+        scaffoldMessenger.showSnackBar(
+          const SnackBar(
+            content: Text('目標が追加されました'),
+            backgroundColor: ColorConsts.success,
+          ),
+        );
       }
+
+      // モーダルを閉じる
+      navigator.pop();
+    } catch (error) {
+      // エラーメッセージを表示
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: Text('エラーが発生しました: $error'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 }

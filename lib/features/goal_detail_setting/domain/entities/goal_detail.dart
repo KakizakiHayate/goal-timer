@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+// 'package:flutter/material.dart'のインポートを削除
 
 // ゴール詳細を表すエンティティ
 class GoalDetail {

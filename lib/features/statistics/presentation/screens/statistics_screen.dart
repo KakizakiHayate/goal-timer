@@ -5,7 +5,7 @@ import '../../domain/entities/statistics.dart';
 import 'package:intl/intl.dart';
 
 class StatisticsScreen extends ConsumerWidget {
-  const StatisticsScreen({Key? key}) : super(key: key);
+  const StatisticsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -41,9 +41,7 @@ class StatisticsScreen extends ConsumerWidget {
             child: statisticsAsync.when(
               data: (statistics) {
                 if (statistics.isEmpty) {
-                  return const Center(
-                    child: Text('この期間のデータはありません'),
-                  );
+                  return const Center(child: Text('この期間のデータはありません'));
                 }
 
                 int totalMinutes = 0;
@@ -73,9 +71,8 @@ class StatisticsScreen extends ConsumerWidget {
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stack) => Center(
-                child: Text('エラーが発生しました: $error'),
-              ),
+              error:
+                  (error, stack) => Center(child: Text('エラーが発生しました: $error')),
             ),
           ),
         ],
@@ -96,18 +93,21 @@ class StatisticsScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              '統計サマリー',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+            Text('統計サマリー', style: Theme.of(context).textTheme.titleLarge),
             const Divider(),
             const SizedBox(height: 8),
             _buildSummaryItem(context, '合計時間', '$totalMinutes 分'),
             _buildSummaryItem(context, '合計目標達成数', '$totalGoals 個'),
             _buildSummaryItem(
-                context, '1日平均時間', '${(totalMinutes / days).round()} 分/日'),
-            _buildSummaryItem(context, '1日平均目標達成数',
-                '${(totalGoals / days).toStringAsFixed(1)} 個/日'),
+              context,
+              '1日平均時間',
+              '${(totalMinutes / days).round()} 分/日',
+            ),
+            _buildSummaryItem(
+              context,
+              '1日平均目標達成数',
+              '${(totalGoals / days).toStringAsFixed(1)} 個/日',
+            ),
           ],
         ),
       ),
@@ -128,14 +128,13 @@ class StatisticsScreen extends ConsumerWidget {
   }
 
   Widget _buildDailyStatsList(
-      BuildContext context, List<Statistics> statistics) {
+    BuildContext context,
+    List<Statistics> statistics,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          '日別の記録',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
+        Text('日別の記録', style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 8),
         ListView.builder(
           shrinkWrap: true,
@@ -146,8 +145,9 @@ class StatisticsScreen extends ConsumerWidget {
             return Card(
               child: ListTile(
                 title: Text(DateFormat('yyyy/MM/dd').format(stat.date)),
-                subtitle:
-                    Text('${stat.totalMinutes}分 / ${stat.goalCount}個の目標達成'),
+                subtitle: Text(
+                  '${stat.totalMinutes}分 / ${stat.goalCount}個の目標達成',
+                ),
                 trailing: const Icon(Icons.timeline),
                 onTap: () {
                   // 詳細ビューに移動する処理（必要に応じて実装）

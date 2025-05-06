@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
@@ -37,16 +36,10 @@ class MemoState {
   final List<MemoItem> memos;
   final String? currentGoalId; // 現在選択されている目標ID
 
-  const MemoState({
-    this.memos = const [],
-    this.currentGoalId,
-  });
+  const MemoState({this.memos = const [], this.currentGoalId});
 
   // 状態のコピーを作成
-  MemoState copyWith({
-    List<MemoItem>? memos,
-    String? currentGoalId,
-  }) {
+  MemoState copyWith({List<MemoItem>? memos, String? currentGoalId}) {
     return MemoState(
       memos: memos ?? this.memos,
       currentGoalId: currentGoalId ?? this.currentGoalId,
@@ -61,8 +54,9 @@ class MemoState {
 }
 
 // プロバイダー
-final memoViewModelProvider =
-    StateNotifierProvider<MemoViewModel, MemoState>((ref) {
+final memoViewModelProvider = StateNotifierProvider<MemoViewModel, MemoState>((
+  ref,
+) {
   return MemoViewModel();
 });
 
@@ -84,30 +78,28 @@ class MemoViewModel extends StateNotifier<MemoState> {
       goalId: goalId,
     );
 
-    state = state.copyWith(
-      memos: [newMemo, ...state.memos],
-    );
+    state = state.copyWith(memos: [newMemo, ...state.memos]);
   }
 
   // メモを更新
   void updateMemo(String id, String newContent) {
-    final updatedMemos = state.memos.map((memo) {
-      if (memo.id == id) {
-        return memo.copyWith(
-          content: newContent,
-          timestamp: DateTime.now(),
-        );
-      }
-      return memo;
-    }).toList();
+    final updatedMemos =
+        state.memos.map((memo) {
+          if (memo.id == id) {
+            return memo.copyWith(
+              content: newContent,
+              timestamp: DateTime.now(),
+            );
+          }
+          return memo;
+        }).toList();
 
     state = state.copyWith(memos: updatedMemos);
   }
 
   // メモを削除
   void deleteMemo(String id) {
-    final updatedMemos =
-        state.memos.where((memo) => memo.id != id).toList();
+    final updatedMemos = state.memos.where((memo) => memo.id != id).toList();
     state = state.copyWith(memos: updatedMemos);
   }
 }

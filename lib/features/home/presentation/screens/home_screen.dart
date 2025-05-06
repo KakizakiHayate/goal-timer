@@ -5,11 +5,7 @@ import 'package:goal_timer/core/utils/color_consts.dart';
 import 'package:goal_timer/core/utils/route_names.dart';
 import 'package:goal_timer/features/home/presentation/widgets/goal_list_cell_widget.dart';
 import 'package:goal_timer/features/home/presentation/viewmodels/home_view_model.dart';
-import 'package:goal_timer/features/goal_detail_setting/presentation/screens/goal_detail_setting_screen.dart';
 import 'package:goal_timer/features/goal_timer/presentation/screens/timer_screen.dart';
-import 'package:goal_timer/features/goal_detail_setting/domain/entities/goal_detail.dart';
-import 'package:goal_timer/features/goal_detail_setting/presentation/viewmodels/goal_detail_view_model.dart';
-import 'package:goal_timer/features/goal_detail_setting/data/repositories/goal_detail_repository_impl.dart';
 import 'package:goal_timer/features/goal_detail_setting/presentation/screens/goal_edit_modal.dart';
 
 // ホーム画面のタブインデックスを管理するプロバイダー
@@ -175,7 +171,7 @@ class _HomePage extends ConsumerWidget {
         color: ColorConsts.cardBackground,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: ColorConsts.border, width: 1),
+          side: const BorderSide(color: ColorConsts.border, width: 1),
         ),
         child: Padding(
           padding: const EdgeInsets.all(16),
