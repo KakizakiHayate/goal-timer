@@ -85,46 +85,55 @@ jobs:
             echo "📏 PR Body length: $(echo "$BODY" | wc -c) characters"
             
             if [[ -n "$BODY" ]]; then
-              # PR本文を保存してデバッグに使用
+              # PR本文を保存して処理
               echo "$BODY" > pr_body.txt
-              echo "🔍 PR本文を pr_body.txt に保存しました"
+              echo "🔍 PR本文を保存しました"
               
-              # 直接本文を検索して各行を処理
-              echo "🔎 PR本文からBacklogチケット情報を抽出します"
-              
-              # 特殊文字をエスケープして本文を表示
-              cat pr_body.txt | sed 's/\\/\\\\/g' > escaped_body.txt
-              
+              # 文字列処理を改善 - grep と sed の高度な組み合わせを使用
+              echo "🔍 チケット情報を抽出します"
               CHANGELOG_ENTRY_ADDED=false
               
-              # 行ごとに処理
-              while IFS= read -r line; do
-                # 空行や不要な行はスキップ
-                if [[ -z "$line" || "$line" == "---"* ]]; then
-                  continue
-                fi
+              # より信頼性の高いアプローチ - 単純な行処理
+              grep -n "\[TANZAM_MHT-[0-9]\+\]" pr_body.txt > ticket_lines.txt
+              
+              if [ -s ticket_lines.txt ]; then
+                echo "✅ Backlogチケット参照を検出しました"
                 
-                # Backlogチケットの行を探す
-                if [[ "$line" == *"TANZAM_MHT"* && "$line" == *"["* && "$line" == *"]("* ]]; then
-                  echo "✓ チケット情報を含む行を検出: $line"
+                while IFS= read -r line_with_num; do
+                  LINE_NUM=$(echo "$line_with_num" | cut -d':' -f1)
+                  LINE=$(echo "$line_with_num" | cut -d':' -f2-)
                   
-                  # 完全なマークダウンリンクパターンを検出
-                  TICKET=$(echo "$line" | sed -n 's/.*\[\(TANZAM_MHT-[0-9]\+\)\].*/\1/p')
-                  URL=$(echo "$line" | sed -n 's/.*\[TANZAM_MHT-[0-9]\+\](\([^)]*\)).*/\1/p')
+                  echo "処理する行 #$LINE_NUM: $LINE"
                   
-                  # チケット番号が取得できた場合
+                  # チケット番号を抽出
+                  TICKET=$(echo "$LINE" | grep -o "TANZAM_MHT-[0-9]\+" | head -1)
                   if [[ -n "$TICKET" ]]; then
-                    echo "✅ チケット番号: $TICKET"
+                    # URL を抽出
+                    URL=$(echo "$LINE" | grep -o "https://[^)]*" || echo "https://mhtcode.backlog.com/view/$TICKET")
                     
-                    # URLがない場合はデフォルトを設定
-                    if [[ -z "$URL" ]]; then
-                      URL="https://mhtcode.backlog.com/view/$TICKET"
+                    # 概要を抽出 - より確実な方法
+                    # まず、行内でリンク後の部分を抽出
+                    LINK_PATTERN="\[$TICKET\](.*)"
+                    if echo "$LINE" | grep -q "$LINK_PATTERN"; then
+                      # リンクの後の部分を取得
+                      AFTER_LINK=$(echo "$LINE" | sed -E "s/.*\[$TICKET\][^)]*\)//" | sed 's/^[[:space:]]*//')
+                      if [[ -n "$AFTER_LINK" ]]; then
+                        # リンク後に何かあれば、それを概要とする
+                        SUMMARY="$AFTER_LINK"
+                      else
+                        # リンク後に何もなければ、次の行を取得
+                        NEXT_LINE_NUM=$((LINE_NUM + 1))
+                        SUMMARY=$(sed -n "${NEXT_LINE_NUM}p" pr_body.txt)
+                      fi
+                    else
+                      # パターンマッチしない場合のフォールバック
+                      SUMMARY=$(sed -n "$((LINE_NUM + 1))p" pr_body.txt)
                     fi
-                    echo "✅ URL: $URL"
                     
-                    # リンク部分を除いて概要を抽出
-                    LINK_PART="\[$TICKET\]($URL)"
-                    SUMMARY=$(echo "$line" | sed "s/$LINK_PART//" | sed 's/^[[:space:]]*//')
+                    # 概要の先頭の不要な文字を削除
+                    SUMMARY=$(echo "$SUMMARY" | sed 's/^[[:space:]]*//;s/^[[:punct:]]*//')
+                    
+                    echo "✅ 抽出結果: チケット=$TICKET, URL=$URL"
                     echo "✅ 概要: $SUMMARY"
                     
                     # チケット情報をマークダウン形式でchangelogに追加
@@ -132,16 +141,18 @@ jobs:
                     CHANGELOG_ENTRY_ADDED=true
                     TICKET_COUNT=$((TICKET_COUNT + 1))
                   fi
-                fi
-              done < pr_body.txt
+                done < ticket_lines.txt
+              else
+                echo "❌ PR本文にBacklogチケット参照が見つかりません"
+              fi
               
               # チケットが見つからなかった場合
               if [ "$CHANGELOG_ENTRY_ADDED" = false ]; then
-                echo "⚠️ PR本文からチケット情報を抽出できませんでした。PR #$PR_NUM のタイトルを使用します。"
+                echo "⚠️ PR本文からチケット情報を抽出できませんでした。PRタイトルを使用します。"
                 echo "(PR #$PR_NUM): $TITLE" >> changelog.md
               fi
             else
-              echo "⚠️ PR本文が空です。PR #$PR_NUM のタイトルを使用します。"
+              echo "⚠️ PR本文が空です。PRタイトルを使用します。"
               echo "(PR #$PR_NUM): $TITLE" >> changelog.md
             fi
           else
