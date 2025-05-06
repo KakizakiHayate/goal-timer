@@ -61,7 +61,7 @@ jobs:
               CHANGELOG_ENTRY_ADDED=false
               # BODY を1行ずつ処理して、Markdown リンク形式の Backlog チケットを探す
               echo "--- Start processing BODY ---"
-              echo "$BODY" | while IFS= read -r line; do
+              while IFS= read -r line; do
                 echo "Processing line: [$line]"
                 # 正規表現: [TANZAM_MHT-XXX](URL) 概要
                 regex='\[(TANZAM_MHT-[0-9]+)\]\(([^)]+)\)\s+(.*)'
@@ -79,7 +79,7 @@ jobs:
                 else
                   echo "  -> Regex NOT MATCHED"
                 fi
-              done
+              done <<< "$BODY"
               echo "--- End processing BODY ---"
               
               # チケットが見つからなかった場合、フォールバックとしてPRタイトルを追加
