@@ -58,9 +58,12 @@ jobs:
           PR_COUNT=0
           TICKET_COUNT=0
           
-          for commit in $COMMITS; do
-            echo "🔄 Checking commit: $commit"
-            if [[ "$commit" =~ Merge\ pull\ request\ \#([0-9]+) ]]; then
+          # コミットメッセージを保存して行ごとに処理
+          git log ${{ steps.latest_tag.outputs.tag }}..HEAD --merges --pretty=format:"%s" > commits.txt
+          
+          while IFS= read -r commit_msg; do
+            echo "🔄 Processing commit: $commit_msg"
+            if [[ "$commit_msg" =~ Merge\ pull\ request\ \#([0-9]+) ]]; then
               PR_NUM=${BASH_REMATCH[1]}
               echo "🔍 Processing PR #$PR_NUM"
               PR_COUNT=$((PR_COUNT + 1))
@@ -113,7 +116,7 @@ jobs:
                 echo "- (PR #$PR_NUM): $TITLE" >> changelog.md
               fi
             fi
-          done
+          done < commits.txt
           
           # 統計情報
           echo "📊 Found $PR_COUNT PRs and $TICKET_COUNT tickets"
