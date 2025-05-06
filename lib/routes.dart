@@ -5,6 +5,8 @@ import 'package:goal_timer/features/goal_detail_setting/presentation/screens/goa
 import 'package:goal_timer/features/goal_detail_setting/presentation/screens/goal_detail_screen.dart';
 import 'package:goal_timer/features/goal_timer/presentation/screens/timer_screen.dart';
 import 'package:goal_timer/features/home/presentation/screens/home_screen.dart';
+import 'package:goal_timer/features/memo_record/presentation/screens/memo_record_screen.dart';
+import 'package:goal_timer/features/statistics/presentation/screens/statistics_screen.dart';
 
 // TODO: 中規模・大規模になってきたら疎結合にすることを考える
 
@@ -25,6 +27,17 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return platformPageRoute(
         builder: (context) => GoalDetailScreen(goalId: goalId),
       );
+    // メモ記録画面
+    case RouteNames.memoRecord:
+      return platformPageRoute(builder: (context) => const MemoRecordScreen());
+    // 特定の目標IDを指定したメモ記録画面
+    case RouteNames.memoRecordWithGoal:
+      final goalId = settings.arguments as String;
+      return platformPageRoute(
+        builder: (context) => MemoRecordScreen(goalId: goalId),
+      );
+    case RouteNames.statistics:
+      return platformPageRoute(builder: (context) => const StatisticsScreen());
     // 不明なルート
     default:
       return platformPageRoute(

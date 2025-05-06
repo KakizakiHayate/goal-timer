@@ -6,6 +6,7 @@ import 'package:goal_timer/features/goal_detail_setting/domain/entities/goal_det
 import 'package:goal_timer/features/goal_detail_setting/presentation/viewmodels/goal_detail_view_model.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:goal_timer/features/goal_detail_setting/presentation/screens/goal_edit_modal.dart';
+import 'package:goal_timer/core/utils/route_names.dart';
 
 class GoalDetailScreen extends ConsumerWidget {
   final String goalId;
@@ -338,37 +339,38 @@ class GoalDetailScreen extends ConsumerWidget {
     WidgetRef ref,
   ) {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        // 編集ボタン
-        Expanded(
-          child: ElevatedButton.icon(
-            onPressed: () {
-              _showEditGoalModal(context, goalDetail, ref);
-            },
-            icon: const Icon(Icons.edit),
-            label: const Text('編集する'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: ColorConsts.primary,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 12),
-            ),
-          ),
+        _buildActionButton(
+          context: context,
+          icon: Icons.edit,
+          label: '編集',
+          color: Colors.blue,
+          onTap: () {
+            _showEditGoalModal(context, goalDetail, ref);
+          },
         ),
-        const SizedBox(width: 16),
-        // 削除ボタン
-        Expanded(
-          child: ElevatedButton.icon(
-            onPressed: () {
-              _showDeleteConfirmation(context, goalDetail, ref);
-            },
-            icon: const Icon(Icons.delete),
-            label: const Text('削除する'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 12),
-            ),
-          ),
+        _buildActionButton(
+          context: context,
+          icon: Icons.note_alt,
+          label: 'メモを見る',
+          color: Colors.green,
+          onTap: () {
+            Navigator.pushNamed(
+              context,
+              RouteNames.memoRecordWithGoal,
+              arguments: goalDetail.id,
+            );
+          },
+        ),
+        _buildActionButton(
+          context: context,
+          icon: Icons.delete,
+          label: '削除',
+          color: Colors.red,
+          onTap: () {
+            _showDeleteConfirmation(context, goalDetail, ref);
+          },
         ),
       ],
     );
@@ -454,5 +456,27 @@ class GoalDetailScreen extends ConsumerWidget {
     } else {
       return Colors.green;
     }
+  }
+
+  // _buildActionButton メソッドをクラスに追加
+  Widget _buildActionButton({
+    required BuildContext context,
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      child: ElevatedButton.icon(
+        onPressed: onTap,
+        icon: Icon(icon),
+        label: Text(label),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 12),
+        ),
+      ),
+    );
   }
 }

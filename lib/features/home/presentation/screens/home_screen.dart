@@ -237,6 +237,24 @@ class _HomePage extends ConsumerWidget {
                 ),
                 child: const Text('タイマーを開始する'),
               ),
+
+              // メモ記録ボタン
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/memo-record');
+                },
+                icon: const Icon(Icons.note_add),
+                label: const Text('学習メモを記録する'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: ColorConsts.primary,
+                  side: const BorderSide(color: ColorConsts.primary),
+                  minimumSize: const Size(double.infinity, 48),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
