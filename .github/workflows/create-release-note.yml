@@ -58,14 +58,22 @@ jobs:
               TITLE=$(echo "$PR_JSON" | jq -r '.title')
               BODY=$(echo "$PR_JSON" | jq -r '.body')
 
+              # 詳細なデバッグ出力
+              echo "::debug::PR #$PR_NUM Title: $TITLE"
+              echo "::debug::PR #$PR_NUM Body: $BODY"
+              
               CHANGELOG_ENTRY_ADDED=false
               # BODY を1行ずつ処理して、Markdown リンク形式の Backlog チケットを探す
               echo "--- Start processing BODY ---"
+              
+              # 改行を含む場合の処理を改善
+              echo "$BODY" > pr_body.txt
+              CHANGELOG_ENTRY_ADDED=false
+              
               while IFS= read -r line; do
                 echo "Processing line: [$line]"
                 # 正規表現: [TANZAM_MHT-XXX](URL) 概要
-                regex='\[(TANZAM_MHT-[0-9]+)\]\(([^)]+)\)\s+(.*)'
-                if [[ "$line" =~ $regex ]]; then
+                if [[ "$line" =~ \[(TANZAM_MHT-[0-9]+)\]\(([^)]+)\)(.*)$ ]]; then
                   echo "  -> Regex MATCHED"
                   TICKET="${BASH_REMATCH[1]}"
                   URL="${BASH_REMATCH[2]}"
@@ -79,8 +87,9 @@ jobs:
                 else
                   echo "  -> Regex NOT MATCHED"
                 fi
-              done <<< "$BODY"
+              done < pr_body.txt
               echo "--- End processing BODY ---"
+              echo "::debug::CHANGELOG_ENTRY_ADDED=$CHANGELOG_ENTRY_ADDED"
               
               # チケットが見つからなかった場合、フォールバックとしてPRタイトルを追加
               if [ "$CHANGELOG_ENTRY_ADDED" = false ]; then
