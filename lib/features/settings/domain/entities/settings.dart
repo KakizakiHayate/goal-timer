@@ -4,6 +4,7 @@ class Settings {
   final bool notificationsEnabled;
   final int reminderInterval;
   final bool soundEnabled;
+  final int defaultTimerDuration;
 
   Settings({
     required this.id,
@@ -11,6 +12,7 @@ class Settings {
     required this.notificationsEnabled,
     required this.reminderInterval,
     required this.soundEnabled,
+    required this.defaultTimerDuration,
   });
 
   factory Settings.defaultSettings() {
@@ -20,6 +22,7 @@ class Settings {
       notificationsEnabled: true,
       reminderInterval: 30,
       soundEnabled: true,
+      defaultTimerDuration: 25,
     );
   }
 
@@ -29,6 +32,7 @@ class Settings {
     bool? notificationsEnabled,
     int? reminderInterval,
     bool? soundEnabled,
+    int? defaultTimerDuration,
   }) {
     return Settings(
       id: id ?? this.id,
@@ -36,6 +40,7 @@ class Settings {
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
       reminderInterval: reminderInterval ?? this.reminderInterval,
       soundEnabled: soundEnabled ?? this.soundEnabled,
+      defaultTimerDuration: defaultTimerDuration ?? this.defaultTimerDuration,
     );
   }
-} 
+}

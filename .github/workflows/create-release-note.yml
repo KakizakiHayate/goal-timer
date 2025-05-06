@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: read
 
 jobs:
   release:
@@ -44,51 +45,124 @@ jobs:
           git push origin v${{ steps.get_version.outputs.version }}
 
       - name: Generate changelog from PRs since last tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "## リリース内容（v${{ steps.get_version.outputs.version }}）" > changelog.md
 
           # 前回のタグからHEADまでのMerge PRを取得
           COMMITS=$(git log ${{ steps.latest_tag.outputs.tag }}..HEAD --merges --pretty=format:"%s")
           
-          for commit in $COMMITS; do
-            if [[ "$commit" =~ Merge\ pull\ request\ \#([0-9]+) ]]; then
-              PR_NUM=${BASH_REMATCH[1]}
-              echo "🔍 Processing PR #$PR_NUM"
-              PR_JSON=$(gh pr view $PR_NUM --json title,body)
-              TITLE=$(echo "$PR_JSON" | jq -r '.title')
-              BODY=$(echo "$PR_JSON" | jq -r '.body')
-
-              CHANGELOG_ENTRY_ADDED=false
-              # BODY を1行ずつ処理して、Markdown リンク形式の Backlog チケットを探す
-              echo "--- Start processing BODY ---"
-              echo "$BODY" | while IFS= read -r line; do
-                echo "Processing line: [$line]"
-                # 正規表現: [TANZAM_MHT-XXX](URL) 概要
-                regex='\[(TANZAM_MHT-[0-9]+)\]\(([^)]+)\)\s+(.*)'
-                if [[ "$line" =~ $regex ]]; then
-                  echo "  -> Regex MATCHED"
-                  TICKET="${BASH_REMATCH[1]}"
-                  URL="${BASH_REMATCH[2]}"
-                  SUMMARY="${BASH_REMATCH[3]}"
-                  # 概要の前後の空白を削除
-                  SUMMARY=$(echo "$SUMMARY" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-                  
-                  echo "  -> Found Ticket: [$TICKET]($URL): $SUMMARY" # ログ出力
-                  echo "- [$TICKET]($URL): $SUMMARY" >> changelog.md
-                  CHANGELOG_ENTRY_ADDED=true
-                else
-                  echo "  -> Regex NOT MATCHED"
-                fi
-              done
-              echo "--- End processing BODY ---"
+          # デバッグ: コミット一覧を表示
+          echo "📋 Found commits between ${{ steps.latest_tag.outputs.tag }} and HEAD:"
+          git log ${{ steps.latest_tag.outputs.tag }}..HEAD --merges --pretty=format:"%h %s"
+          
+          # カウンター初期化
+          PR_COUNT=0
+          TICKET_COUNT=0
+          
+          # マージコミットから直接リリース対象のPRを特定する
+          MERGE_COMMIT=$(git log -1 --merges --pretty=format:"%s")
+          echo "🔍 最新のマージコミット: $MERGE_COMMIT"
+          
+          # プルリクエスト番号を抽出（より単純な方法）
+          PR_NUM=$(echo "$MERGE_COMMIT" | sed -n 's/.*#\([0-9]\+\).*/\1/p')
+          
+          if [[ -n "$PR_NUM" ]]; then
+            echo "✅ Found PR #$PR_NUM"
+            PR_COUNT=$((PR_COUNT + 1))
+            
+            # PRの情報を詳細に取得
+            echo "📥 Fetching PR info for #$PR_NUM"
+            gh pr view $PR_NUM --json title,body,number || echo "PR info fetch failed"
+            
+            PR_JSON=$(gh pr view $PR_NUM --json title,body)
+            TITLE=$(echo "$PR_JSON" | jq -r '.title')
+            BODY=$(echo "$PR_JSON" | jq -r '.body')
+            
+            # デバッグ出力
+            echo "📃 PR Title: $TITLE"
+            echo "📏 PR Body length: $(echo "$BODY" | wc -c) characters"
+            
+            if [[ -n "$BODY" ]]; then
+              # PR本文を保存して処理
+              echo "$BODY" > pr_body.txt
+              echo "🔍 PR本文を保存しました"
               
-              # チケットが見つからなかった場合、フォールバックとしてPRタイトルを追加
-              if [ "$CHANGELOG_ENTRY_ADDED" = false ]; then
-                echo "  -> No Ticket found in body, using PR title." # ログ出力
-                echo "- (PR #$PR_NUM): $TITLE" >> changelog.md
+              # 文字列処理を改善 - grep と sed の高度な組み合わせを使用
+              echo "🔍 チケット情報を抽出します"
+              CHANGELOG_ENTRY_ADDED=false
+              
+              # より信頼性の高いアプローチ - 単純な行処理
+              grep -n "\[TANZAM_MHT-[0-9]\+\]" pr_body.txt > ticket_lines.txt
+              
+              if [ -s ticket_lines.txt ]; then
+                echo "✅ Backlogチケット参照を検出しました"
+                
+                while IFS= read -r line_with_num; do
+                  LINE_NUM=$(echo "$line_with_num" | cut -d':' -f1)
+                  LINE=$(echo "$line_with_num" | cut -d':' -f2-)
+                  
+                  echo "処理する行 #$LINE_NUM: $LINE"
+                  
+                  # チケット番号を抽出
+                  TICKET=$(echo "$LINE" | grep -o "TANZAM_MHT-[0-9]\+" | head -1)
+                  if [[ -n "$TICKET" ]]; then
+                    # URL を抽出
+                    URL=$(echo "$LINE" | grep -o "https://[^)]*" || echo "https://mhtcode.backlog.com/view/$TICKET")
+                    
+                    # 概要を抽出 - より確実な方法
+                    # まず、行内でリンク後の部分を抽出
+                    LINK_PATTERN="\[$TICKET\](.*)"
+                    if echo "$LINE" | grep -q "$LINK_PATTERN"; then
+                      # リンクの後の部分を取得
+                      AFTER_LINK=$(echo "$LINE" | sed -E "s/.*\[$TICKET\][^)]*\)//" | sed 's/^[[:space:]]*//')
+                      if [[ -n "$AFTER_LINK" ]]; then
+                        # リンク後に何かあれば、それを概要とする
+                        SUMMARY="$AFTER_LINK"
+                      else
+                        # リンク後に何もなければ、次の行を取得
+                        NEXT_LINE_NUM=$((LINE_NUM + 1))
+                        SUMMARY=$(sed -n "${NEXT_LINE_NUM}p" pr_body.txt)
+                      fi
+                    else
+                      # パターンマッチしない場合のフォールバック
+                      SUMMARY=$(sed -n "$((LINE_NUM + 1))p" pr_body.txt)
+                    fi
+                    
+                    # 概要の先頭の不要な文字を削除
+                    SUMMARY=$(echo "$SUMMARY" | sed 's/^[[:space:]]*//;s/^[[:punct:]]*//')
+                    
+                    echo "✅ 抽出結果: チケット=$TICKET, URL=$URL"
+                    echo "✅ 概要: $SUMMARY"
+                    
+                    # チケット情報をマークダウン形式でchangelogに追加
+                    echo "[$TICKET]($URL) $SUMMARY" >> changelog.md
+                    CHANGELOG_ENTRY_ADDED=true
+                    TICKET_COUNT=$((TICKET_COUNT + 1))
+                  fi
+                done < ticket_lines.txt
+              else
+                echo "❌ PR本文にBacklogチケット参照が見つかりません"
               fi
+              
+              # チケットが見つからなかった場合
+              if [ "$CHANGELOG_ENTRY_ADDED" = false ]; then
+                echo "⚠️ PR本文からチケット情報を抽出できませんでした。PRタイトルを使用します。"
+                echo "(PR #$PR_NUM): $TITLE" >> changelog.md
+              fi
+            else
+              echo "⚠️ PR本文が空です。PRタイトルを使用します。"
+              echo "(PR #$PR_NUM): $TITLE" >> changelog.md
             fi
-          done
+          else
+            echo "❌ Could not extract PR number from merge commit: $MERGE_COMMIT"
+          fi
+          
+          # 統計情報
+          echo "📊 Found $PR_COUNT PRs and $TICKET_COUNT tickets"
+          echo "📄 Changelog content:"
+          cat changelog.md
 
       - name: Create GitHub Release
         run: |
