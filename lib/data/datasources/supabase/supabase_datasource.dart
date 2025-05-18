@@ -1,5 +1,5 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:goal_timer/core/config/env_config.dart';
 import 'package:goal_timer/data/repositories/supabase/supabase_repository.dart';
 
 class SupabaseDatasource implements SupabaseRepository {
@@ -12,10 +12,10 @@ class SupabaseDatasource implements SupabaseRepository {
 
     try {
       // 環境変数からSupabase認証情報を取得
-      final supabaseUrl = dotenv.env['SUPABASE_URL'] ?? '';
-      final supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'] ?? '';
+      final supabaseUrl = EnvConfig.supabaseUrl;
+      final supabaseAnonKey = EnvConfig.supabaseAnonKey;
 
-      if (supabaseUrl.isEmpty || supabaseAnonKey.isEmpty) {
+      if (!EnvConfig.validateSupabaseConfig()) {
         throw Exception('Supabase環境変数が設定されていません');
       }
 

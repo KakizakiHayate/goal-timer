@@ -26,6 +26,9 @@ dependencies:
   intl: '0.18.1'
   fl_chart: '0.71.0'
   uuid: '4.4.0'
+  
+  # 環境変数
+  flutter_dotenv: '5.1.0'
 
 dev_dependencies:
   flutter_test:
@@ -39,3 +42,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  
+  # 環境変数ファイルのアセット登録
+  assets:
+    - .env
