@@ -50,6 +50,9 @@ dev_dependencies:
   json_serializable: '6.7.1'
   
   flutter_lints: '3.0.1'
+  
+  # アプリアイコン生成
+  flutter_launcher_icons: ^0.13.1
 
 flutter:
   uses-material-design: true
@@ -57,3 +60,11 @@ flutter:
   # 環境変数ファイルのアセット登録
   assets:
     - .env
+
+# アプリアイコン設定
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/goal_timer_app_icon.png"
+  adaptive_icon_background: "#1976D2"
+  adaptive_icon_foreground: "assets/icons/goal_timer_app_icon.png"
