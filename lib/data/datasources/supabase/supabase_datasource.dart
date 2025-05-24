@@ -31,10 +31,20 @@ class SupabaseDatasource implements SupabaseRepository {
       // テーブルの初期化はスキップ - テーブルは別途管理コンソールから作成する
       // 開発者に通知するためのログ
       print('注意: Supabaseのテーブルが存在しない場合は、管理コンソールから手動作成してください');
-      // アプリがローカルデータベースで動作できるようにするため、初期化は成功とみなす
     } catch (e) {
       print('Error initializing Supabase: $e');
       rethrow; // エラーを再スローして呼び出し元で処理可能に
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>?> fetchAllUsers() async {
+    try {
+      final allUsers = await client.from('users').select().single();
+
+      return allUsers;
+    } catch (e) {
+      return null;
     }
   }
 }
