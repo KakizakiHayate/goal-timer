@@ -1,63 +1,85 @@
-class GoalsModel {
-  /// 各目標のid管理
-  final String id;
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  /// users tableのidとリレーション
-  final String userId;
+part 'goals_model.freezed.dart';
+part 'goals_model.g.dart';
 
-  /// 目標名
-  final String title;
+@freezed
+class GoalsModel with _$GoalsModel {
+  const factory GoalsModel({
+    /// 各目標のid管理
+    required String id,
 
-  /// 目標の詳細説明
-  final String description;
+    /// users tableのidとリレーション
+    required String userId,
 
-  /// いつまで(日付)に達成するのか？
-  final DateTime deadline;
+    /// 目標名
+    required String title,
 
-  /// 目標を完了したかの判定フラグ
-  final bool isCompleted;
+    /// 目標の詳細説明
+    required String description,
 
-  /// 目標達成しなかったら自分に課すこと
-  final String avoidMessage;
+    /// いつまで(日付)に達成するのか？
+    required DateTime deadline,
 
-  /// 目標の進捗率（0.0-100.0）
-  final double progressPercent;
+    /// 目標を完了したかの判定フラグ
+    required bool isCompleted,
 
-  /// 目標達成に必要な総時間（時間単位）
-  final int totalTargetHours;
+    /// 目標達成しなかったら自分に課すこと
+    required String avoidMessage,
 
-  /// 実際に使った時間（分単位）
-  final int spentMinutes;
+    /// 目標の進捗率（0.0-100.0）
+    required double progressPercent,
 
-  const GoalsModel({
-    required this.id,
-    required this.userId,
-    required this.title,
-    required this.description,
-    required this.deadline,
-    required this.isCompleted,
-    required this.avoidMessage,
-    required this.progressPercent,
-    required this.totalTargetHours,
-    required this.spentMinutes,
-  });
+    /// 目標達成に必要な総時間（時間単位）
+    required int totalTargetHours,
+
+    /// 実際に使った時間（分単位）
+    required int spentMinutes,
+  }) = _GoalsModel;
 
   /// Supabaseからのデータを元にGoalsModelを生成
+  factory GoalsModel.fromJson(Map<String, dynamic> json) =>
+      _$GoalsModelFromJson(json);
+
+  /// 後方互換性のためのfromMapメソッド
   factory GoalsModel.fromMap(Map<String, dynamic> map) {
+    // deadlineの型変換処理を追加
+    DateTime parsedDeadline;
+    if (map['deadline'] is String) {
+      parsedDeadline = DateTime.parse(map['deadline']);
+    } else if (map['deadline'] is DateTime) {
+      parsedDeadline = map['deadline'];
+    } else {
+      throw ArgumentError('Invalid deadline format');
+    }
+
+    // booleanの型変換処理を追加
+    bool parsedIsCompleted;
+    final isCompletedValue = map['is_completed'];
+    if (isCompletedValue is bool) {
+      parsedIsCompleted = isCompletedValue;
+    } else if (isCompletedValue is String) {
+      parsedIsCompleted = isCompletedValue == 'true';
+    } else {
+      parsedIsCompleted = false;
+    }
+
     return GoalsModel(
       id: map['id'] ?? '',
       userId: map['user_id'] ?? '',
       title: map['title'] ?? '',
       description: map['description'] ?? '',
-      deadline: DateTime.parse(map['deadline']),
-      isCompleted: map['is_completed'] == true || map['is_completed'] == 'true',
+      deadline: parsedDeadline,
+      isCompleted: parsedIsCompleted,
       avoidMessage: map['avoid_message'] ?? '',
       progressPercent: (map['progress_percent'] ?? 0.0).toDouble(),
       totalTargetHours: map['total_target_hours'] ?? 0,
       spentMinutes: map['spent_minutes'] ?? 0,
     );
   }
+}
 
+extension GoalsModelExtension on GoalsModel {
   /// SupabaseへのInsert/Update用のMapに変換
   Map<String, dynamic> toMap() {
     return {
@@ -72,69 +94,5 @@ class GoalsModel {
       'total_target_hours': totalTargetHours,
       'spent_minutes': spentMinutes,
     };
-  }
-
-  /// GoalsModelのコピーを作成（部分的な更新用）
-  GoalsModel copyWith({
-    String? id,
-    String? userId,
-    String? title,
-    String? description,
-    DateTime? deadline,
-    bool? isCompleted,
-    String? avoidMessage,
-    double? progressPercent,
-    int? totalTargetHours,
-    int? spentMinutes,
-  }) {
-    return GoalsModel(
-      id: id ?? this.id,
-      userId: userId ?? this.userId,
-      title: title ?? this.title,
-      description: description ?? this.description,
-      deadline: deadline ?? this.deadline,
-      isCompleted: isCompleted ?? this.isCompleted,
-      avoidMessage: avoidMessage ?? this.avoidMessage,
-      progressPercent: progressPercent ?? this.progressPercent,
-      totalTargetHours: totalTargetHours ?? this.totalTargetHours,
-      spentMinutes: spentMinutes ?? this.spentMinutes,
-    );
-  }
-
-  @override
-  String toString() {
-    return 'GoalsModel(id: $id, userId: $userId, title: $title, description: $description, deadline: $deadline, isCompleted: $isCompleted, avoidMessage: $avoidMessage, progressPercent: $progressPercent, totalTargetHours: $totalTargetHours, spentMinutes: $spentMinutes)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is GoalsModel &&
-        other.id == id &&
-        other.userId == userId &&
-        other.title == title &&
-        other.description == description &&
-        other.deadline == deadline &&
-        other.isCompleted == isCompleted &&
-        other.avoidMessage == avoidMessage &&
-        other.progressPercent == progressPercent &&
-        other.totalTargetHours == totalTargetHours &&
-        other.spentMinutes == spentMinutes;
-  }
-
-  @override
-  int get hashCode {
-    return Object.hash(
-      id,
-      userId,
-      title,
-      description,
-      deadline,
-      isCompleted,
-      avoidMessage,
-      progressPercent,
-      totalTargetHours,
-      spentMinutes,
-    );
   }
 }
