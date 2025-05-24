@@ -9,6 +9,8 @@ import 'package:goal_timer/core/utils/supabase_utils.dart';
 import 'package:goal_timer/routes.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+import 'package:goal_timer/features/splash/presentation/screens/splash_screen.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -52,7 +54,7 @@ class MyApp extends ConsumerWidget {
               future: _checkSupabaseConnection(ref),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const SplashScreen(message: '接続状態を確認中...');
+                  return const SplashScreen();
                 }
 
                 if (snapshot.hasError) {
@@ -78,7 +80,7 @@ class MyApp extends ConsumerWidget {
                 return const AppRouter();
               },
             ),
-        loading: () => const SplashScreen(message: 'Supabaseを初期化中...'),
+        loading: () => const SplashScreen(),
         error:
             (error, stack) => ErrorScreen(
               message: 'Supabase初期化エラー',
@@ -112,28 +114,6 @@ class AppRouter extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: RouteNames.home,
       onGenerateRoute: generateRoute,
-    );
-  }
-}
-
-class SplashScreen extends StatelessWidget {
-  final String message;
-
-  const SplashScreen({super.key, this.message = '初期化中...'});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const CircularProgressIndicator(),
-            const SizedBox(height: 16),
-            Text(message, style: const TextStyle(fontSize: 16)),
-          ],
-        ),
-      ),
     );
   }
 }

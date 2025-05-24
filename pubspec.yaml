@@ -60,6 +60,7 @@ flutter:
   # 環境変数ファイルのアセット登録
   assets:
     - .env
+    - assets/icons/
 
 # アプリアイコン設定
 flutter_launcher_icons:
