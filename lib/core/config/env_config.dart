@@ -1,4 +1,5 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:uuid/uuid.dart';
 
 /// 環境変数へのアクセスを提供するクラス
 class EnvConfig {
@@ -20,6 +21,16 @@ class EnvConfig {
 
   /// 本番環境かどうかを確認
   static bool get isProduction => appEnv == 'production';
+
+  /// デバイス固有のIDを取得（未設定の場合は新規生成）
+  static String get deviceId {
+    final storedId = dotenv.env['LOCAL_DEVICE_ID'];
+    if (storedId != null && storedId.isNotEmpty) {
+      return storedId;
+    }
+    // 未設定の場合はUUIDを生成
+    return const Uuid().v4();
+  }
 
   /// 環境変数が正しく設定されているかを確認
   static bool validateSupabaseConfig() {
