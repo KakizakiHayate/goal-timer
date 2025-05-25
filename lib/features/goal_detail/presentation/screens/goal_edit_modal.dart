@@ -356,7 +356,7 @@ class _GoalEditModalState extends ConsumerState<GoalEditModal> {
         // 新規追加モード: 新しいデータを作成
         final newGoal = GoalsModel(
           id: DateTime.now().millisecondsSinceEpoch.toString(), // 仮のID生成
-          userId: 'user1', // ユーザーIDは仮の値
+          userId: 'a9d7e8b2-5678-4f3c-bdef-abcdef123456',
           title: _titleController.text.trim(),
           description:
               '毎日${_targetMinutesPerDay ~/ 60}時間${_targetMinutesPerDay % 60}分の学習',
