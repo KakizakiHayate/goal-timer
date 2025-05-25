@@ -103,11 +103,9 @@ class SplashViewModel extends StateNotifier<SplashState> {
             // 全ての接続テストに失敗
             state = state.copyWith(
               isLoading: false,
-              errorMessage: 'Supabaseサーバーに接続できません',
+              errorMessage: 'サーバーに接続できません',
               errorDetails:
-                  '1. .envファイル内のSUPABASE_URLとSUPABASE_ANON_KEYが正しいか確認してください\n'
-                  '2. ネットワーク接続状態を確認してください\n'
-                  '3. Supabaseプロジェクトが起動しているか確認してください',
+                  'あなたのデバイスがネットワークに接続されていない可能性があります。',
             );
           }
         }
