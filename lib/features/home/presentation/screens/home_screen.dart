@@ -13,6 +13,8 @@ import 'package:goal_timer/features/goal_detail/presentation/viewmodels/goal_det
 // ホーム画面のタブインデックスを管理するプロバイダー
 final homeTabIndexProvider = StateProvider<int>((ref) => 0);
 
+final _pages = [const _HomePage(), const _TimerPage()];
+
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
@@ -33,16 +35,7 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildPage(int index) {
-    switch (index) {
-      case 0:
-        return const _HomePage();
-      case 1:
-        return const _TimerPage();
-      default:
-        return const _HomePage();
-    }
-  }
+  Widget _buildPage(int index) => _pages[index];
 }
 
 class _HomePage extends ConsumerWidget {
