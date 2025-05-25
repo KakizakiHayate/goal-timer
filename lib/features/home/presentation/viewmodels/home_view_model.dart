@@ -49,12 +49,6 @@ class HomeViewModel extends StateNotifier<HomeState> {
   void _loadGoals() {
     state = state.copyWith(isLoading: true);
 
-    // モックデータが必要な場合はgoalDetailListProviderを使用
-    if (_shouldUseMockData()) {
-      _loadGoalsFromMockData();
-      return;
-    }
-
     // 実際のデータ（Supabase）から取得
     _loadGoalsFromSupabase();
   }
@@ -66,21 +60,6 @@ class HomeViewModel extends StateNotifier<HomeState> {
     return false; // 常に実際のデータを使用する場合
   }
 
-  // モックデータから目標を読み込む
-  void _loadGoalsFromMockData() {
-    // goalDetailListProviderを監視して、データが変更されたら目標リストを更新
-    _ref.listen(goalDetailListProvider, (previous, next) {
-      next.whenData((goals) {
-        state = state.copyWith(goals: goals, isLoading: false);
-      });
-    });
-
-    // 初回のデータ読み込み
-    _ref.read(goalDetailListProvider).whenData((goals) {
-      state = state.copyWith(goals: goals, isLoading: false);
-    });
-  }
-
   // Supabaseから目標を読み込む
   void _loadGoalsFromSupabase() {
     state = state.copyWith(isLoading: true);
@@ -90,9 +69,11 @@ class HomeViewModel extends StateNotifier<HomeState> {
 
     // 2. goalsListProviderの監視を設定
     _ref.listen(goalsListProvider, (previous, next) {
-      // ユースケースを呼び出してGoalsModelのリストを取得
       fetchGoalsUsecase(next).then((goalsModels) {
         state = state.copyWith(goals: goalsModels, isLoading: false);
+        // 残り%を計算する
+
+        // 日付 or 時間どちらを選択したのかを送る
       });
     });
 
@@ -113,9 +94,11 @@ class HomeViewModel extends StateNotifier<HomeState> {
     if (state.filterType == '全て') {
       return state.goals;
     } else if (state.filterType == '進行中') {
-      return state.goals.where((goal) => goal.progressPercent < 1.0).toList();
+      return state.goals.where((goal) => goal.getProgressRate() < 1.0).toList();
     } else {
-      return state.goals.where((goal) => goal.progressPercent >= 1.0).toList();
+      return state.goals
+          .where((goal) => goal.getProgressRate() >= 1.0)
+          .toList();
     }
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:goal_timer/core/utils/color_consts.dart';
 import 'package:goal_timer/core/models/goals/goals_model.dart';
+import 'package:goal_timer/core/utils/time_utils.dart';
 import 'package:goal_timer/features/goal_detail_setting/presentation/viewmodels/goal_detail_view_model.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:goal_timer/features/goal_detail_setting/presentation/screens/goal_edit_modal.dart';
@@ -124,6 +125,11 @@ class GoalDetailScreen extends ConsumerWidget {
     final dailyMinutesTarget =
         (goalDetail.totalTargetHours * 60) ~/ remainingDays;
 
+    // 残り時間を計算
+    final remainingTimeText = goalDetail.getRemainingTimeText();
+    final isAlmostOutOfTime =
+        goalDetail.getRemainingMinutes() < 60; // 残り1時間未満は警告色
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -172,9 +178,9 @@ class GoalDetailScreen extends ConsumerWidget {
                 const SizedBox(width: 24),
                 _buildTimeInfoItem(
                   icon: Icons.timelapse,
-                  title: '残り日数',
-                  value: '$remainingDays日',
-                  color: remainingDays < 7 ? Colors.red : Colors.blue,
+                  title: '残り時間',
+                  value: remainingTimeText,
+                  color: isAlmostOutOfTime ? Colors.red : Colors.blue,
                 ),
               ],
             ),
@@ -218,7 +224,9 @@ class GoalDetailScreen extends ConsumerWidget {
 
   // 進捗セクション
   Widget _buildProgressSection(GoalsModel goalDetail) {
-    final progressColor = _getProgressColor(goalDetail.progressPercent);
+    // 進捗率を計算
+    final progressRate = goalDetail.getProgressRate();
+    final progressColor = _getProgressColor(progressRate);
 
     return Card(
       elevation: 2,
@@ -241,7 +249,7 @@ class GoalDetailScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '進捗率: ${(goalDetail.progressPercent * 100).toStringAsFixed(1)}%',
+                  '進捗率: ${(progressRate * 100).toStringAsFixed(1)}%',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: progressColor,
@@ -256,7 +264,7 @@ class GoalDetailScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             LinearProgressIndicator(
-              value: goalDetail.progressPercent,
+              value: progressRate,
               backgroundColor: Colors.grey.shade200,
               valueColor: AlwaysStoppedAnimation<Color>(progressColor),
               minHeight: 12,
@@ -625,6 +633,11 @@ class GoalDetailScreenWithData extends ConsumerWidget {
     final dailyMinutesTarget =
         (goalDetail.totalTargetHours * 60) ~/ remainingDays;
 
+    // 残り時間を計算
+    final remainingTimeText = goalDetail.getRemainingTimeText();
+    final isAlmostOutOfTime =
+        goalDetail.getRemainingMinutes() < 60; // 残り1時間未満は警告色
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -673,9 +686,9 @@ class GoalDetailScreenWithData extends ConsumerWidget {
                 const SizedBox(width: 24),
                 _buildTimeInfoItem(
                   icon: Icons.timelapse,
-                  title: '残り日数',
-                  value: '$remainingDays日',
-                  color: remainingDays < 7 ? Colors.red : Colors.blue,
+                  title: '残り時間',
+                  value: remainingTimeText,
+                  color: isAlmostOutOfTime ? Colors.red : Colors.blue,
                 ),
               ],
             ),
@@ -719,7 +732,9 @@ class GoalDetailScreenWithData extends ConsumerWidget {
 
   // 進捗セクション
   Widget _buildProgressSection(GoalsModel goalDetail) {
-    final progressColor = _getProgressColor(goalDetail.progressPercent);
+    // 進捗率を計算
+    final progressRate = goalDetail.getProgressRate();
+    final progressColor = _getProgressColor(progressRate);
 
     return Card(
       elevation: 2,
@@ -742,7 +757,7 @@ class GoalDetailScreenWithData extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '進捗率: ${(goalDetail.progressPercent * 100).toStringAsFixed(1)}%',
+                  '進捗率: ${(progressRate * 100).toStringAsFixed(1)}%',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: progressColor,
@@ -757,7 +772,7 @@ class GoalDetailScreenWithData extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             LinearProgressIndicator(
-              value: goalDetail.progressPercent,
+              value: progressRate,
               backgroundColor: Colors.grey.shade200,
               valueColor: AlwaysStoppedAnimation<Color>(progressColor),
               minHeight: 12,

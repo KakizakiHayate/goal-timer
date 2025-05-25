@@ -63,7 +63,8 @@ class GoalDetailSettingScreen extends ConsumerWidget {
 
   Widget _buildGoalCard(BuildContext context, GoalsModel goal, WidgetRef ref) {
     final remainingDays = goal.deadline.difference(DateTime.now()).inDays;
-    final progressColor = _getProgressColor(goal.progressPercent);
+    final progressRate = goal.getProgressRate();
+    final progressColor = _getProgressColor(progressRate);
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -134,7 +135,7 @@ class GoalDetailSettingScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 12),
               LinearProgressIndicator(
-                value: goal.progressPercent,
+                value: progressRate,
                 backgroundColor: Colors.grey[200],
                 valueColor: AlwaysStoppedAnimation<Color>(progressColor),
                 minHeight: 10,
@@ -145,7 +146,7 @@ class GoalDetailSettingScreen extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    '進捗: ${(goal.progressPercent * 100).toStringAsFixed(1)}%',
+                    '進捗: ${(progressRate * 100).toStringAsFixed(1)}%',
                     style: TextStyle(
                       color: progressColor,
                       fontWeight: FontWeight.bold,

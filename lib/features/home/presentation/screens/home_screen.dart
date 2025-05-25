@@ -316,9 +316,9 @@ class _HomePage extends ConsumerWidget {
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           subtitle: Text(
-                            '達成率: ${(goal.progressPercent * 100).toStringAsFixed(1)}%',
+                            '達成率: ${(goal.getProgressRate() * 100).toStringAsFixed(1)}%',
                             style: TextStyle(
-                              color: _getProgressColor(goal.progressPercent),
+                              color: _getProgressColor(goal.getProgressRate()),
                             ),
                           ),
                           trailing: const Icon(Icons.timer),
@@ -430,14 +430,14 @@ class _TimerPage extends ConsumerWidget {
                           children: [
                             const SizedBox(height: 8),
                             Text(
-                              '達成率: ${(goal.progressPercent * 100).toStringAsFixed(1)}%',
+                              '達成率: ${(goal.getProgressRate() * 100).toStringAsFixed(1)}%',
                             ),
                             const SizedBox(height: 4),
                             LinearProgressIndicator(
-                              value: goal.progressPercent,
+                              value: goal.getProgressRate(),
                               backgroundColor: Colors.grey[200],
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                _getProgressColor(goal.progressPercent),
+                                _getProgressColor(goal.getProgressRate()),
                               ),
                             ),
                           ],

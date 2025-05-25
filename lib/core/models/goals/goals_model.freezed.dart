@@ -41,9 +41,6 @@ mixin _$GoalsModel {
   /// 目標達成しなかったら自分に課すこと
   String get avoidMessage => throw _privateConstructorUsedError;
 
-  /// 目標の進捗率（0.0-100.0）
-  double get progressPercent => throw _privateConstructorUsedError;
-
   /// 目標達成に必要な総時間（時間単位）
   int get totalTargetHours => throw _privateConstructorUsedError;
 
@@ -70,7 +67,6 @@ abstract class $GoalsModelCopyWith<$Res> {
       DateTime deadline,
       bool isCompleted,
       String avoidMessage,
-      double progressPercent,
       int totalTargetHours,
       int spentMinutes});
 }
@@ -95,7 +91,6 @@ class _$GoalsModelCopyWithImpl<$Res, $Val extends GoalsModel>
     Object? deadline = null,
     Object? isCompleted = null,
     Object? avoidMessage = null,
-    Object? progressPercent = null,
     Object? totalTargetHours = null,
     Object? spentMinutes = null,
   }) {
@@ -128,10 +123,6 @@ class _$GoalsModelCopyWithImpl<$Res, $Val extends GoalsModel>
           ? _value.avoidMessage
           : avoidMessage // ignore: cast_nullable_to_non_nullable
               as String,
-      progressPercent: null == progressPercent
-          ? _value.progressPercent
-          : progressPercent // ignore: cast_nullable_to_non_nullable
-              as double,
       totalTargetHours: null == totalTargetHours
           ? _value.totalTargetHours
           : totalTargetHours // ignore: cast_nullable_to_non_nullable
@@ -160,7 +151,6 @@ abstract class _$$GoalsModelImplCopyWith<$Res>
       DateTime deadline,
       bool isCompleted,
       String avoidMessage,
-      double progressPercent,
       int totalTargetHours,
       int spentMinutes});
 }
@@ -183,7 +173,6 @@ class __$$GoalsModelImplCopyWithImpl<$Res>
     Object? deadline = null,
     Object? isCompleted = null,
     Object? avoidMessage = null,
-    Object? progressPercent = null,
     Object? totalTargetHours = null,
     Object? spentMinutes = null,
   }) {
@@ -216,10 +205,6 @@ class __$$GoalsModelImplCopyWithImpl<$Res>
           ? _value.avoidMessage
           : avoidMessage // ignore: cast_nullable_to_non_nullable
               as String,
-      progressPercent: null == progressPercent
-          ? _value.progressPercent
-          : progressPercent // ignore: cast_nullable_to_non_nullable
-              as double,
       totalTargetHours: null == totalTargetHours
           ? _value.totalTargetHours
           : totalTargetHours // ignore: cast_nullable_to_non_nullable
@@ -243,7 +228,6 @@ class _$GoalsModelImpl implements _GoalsModel {
       required this.deadline,
       required this.isCompleted,
       required this.avoidMessage,
-      required this.progressPercent,
       required this.totalTargetHours,
       required this.spentMinutes});
 
@@ -278,10 +262,6 @@ class _$GoalsModelImpl implements _GoalsModel {
   @override
   final String avoidMessage;
 
-  /// 目標の進捗率（0.0-100.0）
-  @override
-  final double progressPercent;
-
   /// 目標達成に必要な総時間（時間単位）
   @override
   final int totalTargetHours;
@@ -292,7 +272,7 @@ class _$GoalsModelImpl implements _GoalsModel {
 
   @override
   String toString() {
-    return 'GoalsModel(id: $id, userId: $userId, title: $title, description: $description, deadline: $deadline, isCompleted: $isCompleted, avoidMessage: $avoidMessage, progressPercent: $progressPercent, totalTargetHours: $totalTargetHours, spentMinutes: $spentMinutes)';
+    return 'GoalsModel(id: $id, userId: $userId, title: $title, description: $description, deadline: $deadline, isCompleted: $isCompleted, avoidMessage: $avoidMessage, totalTargetHours: $totalTargetHours, spentMinutes: $spentMinutes)';
   }
 
   @override
@@ -311,8 +291,6 @@ class _$GoalsModelImpl implements _GoalsModel {
                 other.isCompleted == isCompleted) &&
             (identical(other.avoidMessage, avoidMessage) ||
                 other.avoidMessage == avoidMessage) &&
-            (identical(other.progressPercent, progressPercent) ||
-                other.progressPercent == progressPercent) &&
             (identical(other.totalTargetHours, totalTargetHours) ||
                 other.totalTargetHours == totalTargetHours) &&
             (identical(other.spentMinutes, spentMinutes) ||
@@ -321,18 +299,8 @@ class _$GoalsModelImpl implements _GoalsModel {
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      id,
-      userId,
-      title,
-      description,
-      deadline,
-      isCompleted,
-      avoidMessage,
-      progressPercent,
-      totalTargetHours,
-      spentMinutes);
+  int get hashCode => Object.hash(runtimeType, id, userId, title, description,
+      deadline, isCompleted, avoidMessage, totalTargetHours, spentMinutes);
 
   @JsonKey(ignore: true)
   @override
@@ -357,7 +325,6 @@ abstract class _GoalsModel implements GoalsModel {
       required final DateTime deadline,
       required final bool isCompleted,
       required final String avoidMessage,
-      required final double progressPercent,
       required final int totalTargetHours,
       required final int spentMinutes}) = _$GoalsModelImpl;
 
@@ -392,10 +359,6 @@ abstract class _GoalsModel implements GoalsModel {
 
   /// 目標達成しなかったら自分に課すこと
   String get avoidMessage;
-  @override
-
-  /// 目標の進捗率（0.0-100.0）
-  double get progressPercent;
   @override
 
   /// 目標達成に必要な総時間（時間単位）

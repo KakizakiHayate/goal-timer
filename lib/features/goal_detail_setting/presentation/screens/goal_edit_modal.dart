@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:goal_timer/core/utils/color_consts.dart';
 import 'package:goal_timer/core/models/goals/goals_model.dart';
+import 'package:goal_timer/core/utils/time_utils.dart';
 import 'package:goal_timer/features/goal_detail_setting/presentation/viewmodels/goal_detail_view_model.dart';
 
 class GoalEditModal extends ConsumerStatefulWidget {
@@ -19,6 +20,7 @@ class _GoalEditModalState extends ConsumerState<GoalEditModal> {
   late final TextEditingController _titleController;
   late final TextEditingController _avoidMessageController;
   late int _targetMinutesPerDay;
+  late int _totalTargetHours;
   late DateTime _targetDate;
 
   @override
@@ -42,12 +44,14 @@ class _GoalEditModalState extends ConsumerState<GoalEditModal> {
       _targetMinutesPerDay =
           ((goalDetail.totalTargetHours * 60) ~/ remainingDays).clamp(5, 240);
 
+      _totalTargetHours = goalDetail.totalTargetHours;
       _targetDate = goalDetail.deadline;
     } else {
       // 新規追加モード
       _titleController = TextEditingController();
       _avoidMessageController = TextEditingController();
       _targetMinutesPerDay = 60; // デフォルト：1時間
+      _totalTargetHours = 30; // デフォルト：30時間
       _targetDate = DateTime.now().add(const Duration(days: 30)); // デフォルト：30日後
     }
   }
@@ -148,9 +152,47 @@ class _GoalEditModalState extends ConsumerState<GoalEditModal> {
               ),
               const SizedBox(height: 24),
 
+              // 総目標時間
+              const Text(
+                '③ 目標時間（総時間）',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: ColorConsts.textDark,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: Slider(
+                      value: _totalTargetHours.toDouble(),
+                      min: 1,
+                      max: 1000,
+                      divisions: 100,
+                      activeColor: ColorConsts.primary,
+                      label: '$_totalTargetHours時間',
+                      onChanged: (value) {
+                        setState(() {
+                          _totalTargetHours = value.round();
+                        });
+                      },
+                    ),
+                  ),
+                  Text(
+                    '$_totalTargetHours時間',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+
               // 1日の目標時間
               const Text(
-                '③ 1日の目標時間',
+                '④ 1日の目標時間',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -189,7 +231,7 @@ class _GoalEditModalState extends ConsumerState<GoalEditModal> {
 
               // 目標達成日
               const Text(
-                '④ 目標達成予定日',
+                '⑤ 目標達成予定日',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -234,7 +276,7 @@ class _GoalEditModalState extends ConsumerState<GoalEditModal> {
               ),
               const SizedBox(height: 40),
 
-              // 残り日数の表示（参考情報）
+              // 残り時間の表示（参考情報）
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -248,7 +290,7 @@ class _GoalEditModalState extends ConsumerState<GoalEditModal> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        '目標達成まで: ${_targetDate.difference(DateTime.now()).inDays}日',
+                        '目標達成まで残り時間: ${TimeUtils.calculateRemainingTime(_totalTargetHours, 0)}',
                         style: const TextStyle(
                           fontSize: 16,
                           color: Colors.black87,
@@ -280,12 +322,6 @@ class _GoalEditModalState extends ConsumerState<GoalEditModal> {
     final navigator = Navigator.of(context);
     final goalRepository = ref.read(goalDetailRepositoryProvider);
 
-    // 新しい目標の期間（日数）
-    final durationDays = _targetDate.difference(DateTime.now()).inDays;
-
-    // 目標の総時間を計算（1日の目標時間 × 期間日数）
-    final int targetHours = (_targetMinutesPerDay * durationDays) ~/ 60;
-
     try {
       // 編集モードか新規追加モードかに応じて処理を分ける
       if (widget.goalDetail != null) {
@@ -296,7 +332,7 @@ class _GoalEditModalState extends ConsumerState<GoalEditModal> {
               '毎日${_targetMinutesPerDay ~/ 60}時間${_targetMinutesPerDay % 60}分の学習',
           deadline: _targetDate,
           avoidMessage: _avoidMessageController.text.trim(),
-          totalTargetHours: targetHours,
+          totalTargetHours: _totalTargetHours,
         );
 
         // リポジトリを使って目標を更新
@@ -326,8 +362,7 @@ class _GoalEditModalState extends ConsumerState<GoalEditModal> {
           deadline: _targetDate,
           isCompleted: false,
           avoidMessage: _avoidMessageController.text.trim(),
-          progressPercent: 0.0, // 初期進捗率は0
-          totalTargetHours: targetHours,
+          totalTargetHours: _totalTargetHours,
           spentMinutes: 0, // 初期経過時間は0
         );
 

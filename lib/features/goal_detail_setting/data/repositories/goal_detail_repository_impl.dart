@@ -13,7 +13,6 @@ class GoalDetailRepositoryImpl implements GoalDetailRepository {
       deadline: DateTime.now().add(const Duration(days: 30)),
       isCompleted: false,
       avoidMessage: '今すぐやらないと後悔するぞ！',
-      progressPercent: 0.45,
       totalTargetHours: 40,
       spentMinutes: 1080, // 18時間
     ),
@@ -25,7 +24,6 @@ class GoalDetailRepositoryImpl implements GoalDetailRepository {
       deadline: DateTime.now().add(const Duration(days: 45)),
       isCompleted: false,
       avoidMessage: '英語ができないと昇進できないぞ',
-      progressPercent: 0.68,
       totalTargetHours: 60,
       spentMinutes: 2448, // 40.8時間
     ),
@@ -37,7 +35,6 @@ class GoalDetailRepositoryImpl implements GoalDetailRepository {
       deadline: DateTime.now().add(const Duration(days: 60)),
       isCompleted: false,
       avoidMessage: '健康を失うと全てを失う',
-      progressPercent: 0.15,
       totalTargetHours: 45,
       spentMinutes: 405, // 6.75時間
     ),
@@ -85,15 +82,12 @@ class GoalDetailRepositoryImpl implements GoalDetailRepository {
   }
 
   @override
-  Future<GoalsModel> updateGoalProgress(
-    String id,
-    double progressPercent,
-  ) async {
+  Future<GoalsModel> updateGoalProgress(String id, int spentMinutes) async {
     await Future.delayed(const Duration(milliseconds: 300));
     final index = _goalDetails.indexWhere((g) => g.id == id);
     if (index >= 0) {
       final updatedGoal = _goalDetails[index].copyWith(
-        progressPercent: progressPercent,
+        spentMinutes: spentMinutes,
       );
       _goalDetails[index] = updatedGoal;
       return updatedGoal;
@@ -112,17 +106,7 @@ class GoalDetailRepositoryImpl implements GoalDetailRepository {
       final current = _goalDetails[index];
       final newSpentMinutes = current.spentMinutes + additionalMinutes;
 
-      // 進捗率も更新
-      final totalMinutes = current.totalTargetHours * 60;
-      final newProgressPercent = (newSpentMinutes / totalMinutes).clamp(
-        0.0,
-        1.0,
-      );
-
-      final updatedGoal = current.copyWith(
-        spentMinutes: newSpentMinutes,
-        progressPercent: newProgressPercent,
-      );
+      final updatedGoal = current.copyWith(spentMinutes: newSpentMinutes);
 
       _goalDetails[index] = updatedGoal;
       return updatedGoal;

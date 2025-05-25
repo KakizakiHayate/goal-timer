@@ -7,7 +7,7 @@ class UpdateGoalProgressUseCase {
   UpdateGoalProgressUseCase(this.repository);
 
   // 指定されたIDの目標進捗を更新する
-  Future<void> execute(String id, double progressPercent) async {
-    await repository.updateGoalProgress(id, progressPercent);
+  Future<void> execute(String id, int spentMinutes) async {
+    await repository.updateGoalProgress(id, spentMinutes);
   }
 }

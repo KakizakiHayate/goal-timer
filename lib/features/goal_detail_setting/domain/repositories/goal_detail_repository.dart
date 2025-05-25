@@ -17,8 +17,8 @@ abstract class GoalDetailRepository {
   // 目標詳細を削除
   Future<void> deleteGoalDetail(String id);
 
-  // 目標の進捗を更新
-  Future<GoalsModel> updateGoalProgress(String id, double progressPercent);
+  // 目標の進捗を更新（消費時間で更新）
+  Future<GoalsModel> updateGoalProgress(String id, int spentMinutes);
 
   // 目標の費やした時間を更新
   Future<GoalsModel> updateGoalSpentTime(String id, int additionalMinutes);

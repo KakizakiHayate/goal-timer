@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:goal_timer/core/models/goals/goals_model.dart';
 import 'package:goal_timer/core/utils/color_consts.dart';
+import 'package:goal_timer/core/utils/time_utils.dart';
 import 'package:goal_timer/features/home/presentation/viewmodels/home_view_model.dart';
 import 'package:goal_timer/features/goal_detail_setting/presentation/screens/goal_detail_screen.dart';
 
@@ -11,8 +12,9 @@ class GoalListCellWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 残り日数を計算
-    final remainingDays = goal.deadline.difference(DateTime.now()).inDays;
+    // 残り時間を計算
+    final remainingTimeText = goal.getRemainingTimeText();
+    final isAlmostOutOfTime = goal.getRemainingMinutes() < 60; // 残り1時間未満は警告色
 
     return Material(
       color: ColorConsts.cardBackground,
@@ -65,12 +67,21 @@ class GoalListCellWidget extends StatelessWidget {
               Row(
                 children: [
                   Text(
-                    '残り${remainingDays}日',
-                    style: const TextStyle(color: ColorConsts.textLight),
+                    '残り$remainingTimeText',
+                    style: TextStyle(
+                      color:
+                          isAlmostOutOfTime
+                              ? Colors.red
+                              : ColorConsts.textLight,
+                      fontWeight:
+                          isAlmostOutOfTime
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                    ),
                   ),
                   const Spacer(),
                   Text(
-                    '${(goal.progressPercent * 100).toInt()}%',
+                    '${(goal.getProgressRate() * 100).toInt()}%',
                     style: const TextStyle(
                       color: ColorConsts.primary,
                       fontWeight: FontWeight.bold,
@@ -80,7 +91,7 @@ class GoalListCellWidget extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               LinearProgressIndicator(
-                value: goal.progressPercent,
+                value: goal.getProgressRate(),
                 backgroundColor: ColorConsts.border,
                 valueColor: const AlwaysStoppedAnimation<Color>(
                   ColorConsts.success,

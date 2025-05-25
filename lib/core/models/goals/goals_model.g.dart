@@ -15,7 +15,6 @@ _$GoalsModelImpl _$$GoalsModelImplFromJson(Map<String, dynamic> json) =>
       deadline: DateTime.parse(json['deadline'] as String),
       isCompleted: json['isCompleted'] as bool,
       avoidMessage: json['avoidMessage'] as String,
-      progressPercent: (json['progressPercent'] as num).toDouble(),
       totalTargetHours: json['totalTargetHours'] as int,
       spentMinutes: json['spentMinutes'] as int,
     );
@@ -29,7 +28,6 @@ Map<String, dynamic> _$$GoalsModelImplToJson(_$GoalsModelImpl instance) =>
       'deadline': instance.deadline.toIso8601String(),
       'isCompleted': instance.isCompleted,
       'avoidMessage': instance.avoidMessage,
-      'progressPercent': instance.progressPercent,
       'totalTargetHours': instance.totalTargetHours,
       'spentMinutes': instance.spentMinutes,
     };

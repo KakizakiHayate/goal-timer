@@ -56,12 +56,12 @@ final goalDetailProvider = FutureProvider.family<GoalsModel?, String>((
 });
 
 // 目標進捗更新関数プロバイダー
-final updateGoalProgressProvider =
-    Provider<Future<void> Function(String, double)>((ref) {
-      final useCase = ref.watch(updateGoalProgressUseCaseProvider);
-      return (String id, double progressPercent) =>
-          useCase.execute(id, progressPercent);
-    });
+final updateGoalProgressProvider = Provider<Future<void> Function(String, int)>(
+  (ref) {
+    final useCase = ref.watch(updateGoalProgressUseCaseProvider);
+    return (String id, int spentMinutes) => useCase.execute(id, spentMinutes);
+  },
+);
 
 // 目標時間更新関数プロバイダー
 final updateGoalSpentTimeProvider =

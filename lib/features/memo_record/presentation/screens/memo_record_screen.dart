@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:goal_timer/core/utils/color_consts.dart';
-import 'package:goal_timer/features/memo_record/presentation/viewmodels/memo_view_model.dart';
 import 'package:goal_timer/core/models/goals/goals_model.dart';
+import 'package:goal_timer/features/memo_record/presentation/viewmodels/memo_view_model.dart';
 import 'package:goal_timer/features/goal_detail_setting/presentation/viewmodels/goal_detail_view_model.dart';
 
 class MemoRecordScreen extends ConsumerStatefulWidget {
@@ -148,8 +148,10 @@ class _MemoRecordScreenState extends ConsumerState<MemoRecordScreen> {
 
   // 目標情報セクション
   Widget _buildGoalInfoSection(GoalsModel goalDetail) {
-    // 残り日数を計算
-    final remainingDays = goalDetail.deadline.difference(DateTime.now()).inDays;
+    // 残り時間を計算
+    final remainingTimeText = goalDetail.getRemainingTimeText();
+    final isAlmostOutOfTime =
+        goalDetail.getRemainingMinutes() < 60; // 残り1時間未満は警告色
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -173,7 +175,7 @@ class _MemoRecordScreenState extends ConsumerState<MemoRecordScreen> {
             children: [
               Expanded(
                 child: LinearProgressIndicator(
-                  value: goalDetail.progressPercent,
+                  value: goalDetail.getProgressRate(),
                   backgroundColor: Colors.grey.shade200,
                   valueColor: const AlwaysStoppedAnimation<Color>(
                     ColorConsts.primary,
@@ -184,7 +186,7 @@ class _MemoRecordScreenState extends ConsumerState<MemoRecordScreen> {
               ),
               const SizedBox(width: 8),
               Text(
-                '${(goalDetail.progressPercent * 100).toInt()}%',
+                '${(goalDetail.getProgressRate() * 100).toInt()}%',
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   color: ColorConsts.primary,
@@ -193,16 +195,18 @@ class _MemoRecordScreenState extends ConsumerState<MemoRecordScreen> {
             ],
           ),
 
-          // 日数情報
+          // 残り時間情報
           const SizedBox(height: 8),
           Row(
             children: [
-              const Icon(Icons.calendar_today, size: 16, color: Colors.grey),
+              const Icon(Icons.timer, size: 16, color: Colors.grey),
               const SizedBox(width: 4),
               Text(
-                '残り${remainingDays}日',
+                '残り$remainingTimeText',
                 style: TextStyle(
-                  color: remainingDays < 7 ? Colors.red : Colors.grey,
+                  color: isAlmostOutOfTime ? Colors.red : Colors.grey,
+                  fontWeight:
+                      isAlmostOutOfTime ? FontWeight.bold : FontWeight.normal,
                 ),
               ),
             ],

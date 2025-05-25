@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:goal_timer/core/utils/time_utils.dart';
 
 part 'goals_model.freezed.dart';
 part 'goals_model.g.dart';
@@ -26,9 +27,6 @@ class GoalsModel with _$GoalsModel {
 
     /// 目標達成しなかったら自分に課すこと
     required String avoidMessage,
-
-    /// 目標の進捗率（0.0-100.0）
-    required double progressPercent,
 
     /// 目標達成に必要な総時間（時間単位）
     required int totalTargetHours,
@@ -64,19 +62,6 @@ class GoalsModel with _$GoalsModel {
       parsedIsCompleted = false;
     }
 
-    // progressPercentの型変換処理
-    double parsedProgressPercent;
-    final progressValue = map['progress_percent'];
-    if (progressValue is double) {
-      parsedProgressPercent = progressValue;
-    } else if (progressValue is int) {
-      parsedProgressPercent = progressValue.toDouble();
-    } else if (progressValue is String) {
-      parsedProgressPercent = double.tryParse(progressValue) ?? 0.0;
-    } else {
-      parsedProgressPercent = 0.0;
-    }
-
     // 整数値の安全な変換
     int parsedTotalTargetHours;
     final totalTargetValue = map['total_target_hours'];
@@ -106,7 +91,6 @@ class GoalsModel with _$GoalsModel {
       deadline: parsedDeadline,
       isCompleted: parsedIsCompleted,
       avoidMessage: map['avoid_message'] ?? '',
-      progressPercent: parsedProgressPercent,
       totalTargetHours: parsedTotalTargetHours,
       spentMinutes: parsedSpentMinutes,
     );
@@ -124,9 +108,23 @@ extension GoalsModelExtension on GoalsModel {
       'deadline': deadline.toIso8601String(),
       'is_completed': isCompleted,
       'avoid_message': avoidMessage,
-      'progress_percent': progressPercent,
       'total_target_hours': totalTargetHours,
       'spent_minutes': spentMinutes,
     };
+  }
+
+  /// 残り時間を文字列で取得
+  String getRemainingTimeText() {
+    return TimeUtils.calculateRemainingTime(totalTargetHours, spentMinutes);
+  }
+
+  /// 残り時間（分）を取得
+  int getRemainingMinutes() {
+    return TimeUtils.calculateRemainingMinutes(totalTargetHours, spentMinutes);
+  }
+
+  /// 進捗率を取得（0.0〜1.0）
+  double getProgressRate() {
+    return TimeUtils.calculateProgressRate(totalTargetHours, spentMinutes);
   }
 }
