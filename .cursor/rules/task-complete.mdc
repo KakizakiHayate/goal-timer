@@ -1,7 +1,7 @@
 ---
 description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 ----
 description: Apply this rule to the entire repository
@@ -27,4 +27,4 @@ Agentの処理が終了したらこのmdcファイルに書かれていること
 <!-- このテンプレート変数は入力内容に置換されます -->
 </指示>
 
-処理完了時、音声通知でお知らせします。@notification_sound.shを使用します。
+処理完了時、音声通知でお知らせします。@notification_sound.shを使用してください
