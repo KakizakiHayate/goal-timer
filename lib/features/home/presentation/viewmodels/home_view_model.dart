@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:goal_timer/core/models/goals/goals_model.dart';
 import 'package:goal_timer/core/provider/supabase/goals/goals_provider.dart';
-import 'package:goal_timer/features/goal_detail_setting/domain/entities/goal_detail.dart';
 import 'package:goal_timer/features/goal_detail_setting/presentation/viewmodels/goal_detail_view_model.dart';
 import 'package:goal_timer/core/usecases/supabase/goals/fetch_goals_usecase.dart';
 
@@ -14,7 +13,7 @@ final homeViewModelProvider = StateNotifierProvider<HomeViewModel, HomeState>((
 
 // ホーム画面の状態を表すクラス
 class HomeState {
-  final List<GoalItem> goals;
+  final List<GoalsModel> goals;
   final String filterType;
   final bool isLoading;
 
@@ -25,7 +24,7 @@ class HomeState {
   });
 
   HomeState copyWith({
-    List<GoalItem>? goals,
+    List<GoalsModel>? goals,
     String? filterType,
     bool? isLoading,
   }) {
@@ -33,48 +32,6 @@ class HomeState {
       goals: goals ?? this.goals,
       filterType: filterType ?? this.filterType,
       isLoading: isLoading ?? this.isLoading,
-    );
-  }
-}
-
-// 目標項目を表すモデルクラス
-class GoalItem {
-  final String id;
-  final String title;
-  final String avoidMessage;
-  final double progressPercent;
-  final int remainingDays;
-
-  GoalItem({
-    required this.id,
-    required this.title,
-    required this.avoidMessage,
-    required this.progressPercent,
-    required this.remainingDays,
-  });
-
-  // GoalDetailからGoalItemを作成するファクトリメソッド
-  factory GoalItem.fromGoalDetail(GoalDetail goalDetail) {
-    return GoalItem(
-      id: goalDetail.id,
-      title: goalDetail.title,
-      avoidMessage: goalDetail.avoidMessage,
-      progressPercent: goalDetail.progressPercent,
-      remainingDays: goalDetail.remainingDays,
-    );
-  }
-
-  // GoalsModelからGoalItemを作成するファクトリメソッド
-  factory GoalItem.fromGoalsModel(GoalsModel model) {
-    final now = DateTime.now();
-    final remainingDays = model.deadline.difference(now).inDays;
-
-    return GoalItem(
-      id: model.id,
-      title: model.title,
-      avoidMessage: model.avoidMessage,
-      progressPercent: model.progressPercent,
-      remainingDays: remainingDays > 0 ? remainingDays : 0,
     );
   }
 }
@@ -113,19 +70,13 @@ class HomeViewModel extends StateNotifier<HomeState> {
   void _loadGoalsFromMockData() {
     // goalDetailListProviderを監視して、データが変更されたら目標リストを更新
     _ref.listen(goalDetailListProvider, (previous, next) {
-      next.whenData((goalDetails) {
-        final goals =
-            goalDetails
-                .map((detail) => GoalItem.fromGoalDetail(detail))
-                .toList();
+      next.whenData((goals) {
         state = state.copyWith(goals: goals, isLoading: false);
       });
     });
 
     // 初回のデータ読み込み
-    _ref.read(goalDetailListProvider).whenData((goalDetails) {
-      final goals =
-          goalDetails.map((detail) => GoalItem.fromGoalDetail(detail)).toList();
+    _ref.read(goalDetailListProvider).whenData((goals) {
       state = state.copyWith(goals: goals, isLoading: false);
     });
   }
@@ -141,20 +92,14 @@ class HomeViewModel extends StateNotifier<HomeState> {
     _ref.listen(goalsListProvider, (previous, next) {
       // ユースケースを呼び出してGoalsModelのリストを取得
       fetchGoalsUsecase(next).then((goalsModels) {
-        // ViewModelでGoalItemへの変換処理を行う
-        final goalItems =
-            goalsModels.map((goal) => GoalItem.fromGoalsModel(goal)).toList();
-        state = state.copyWith(goals: goalItems, isLoading: false);
+        state = state.copyWith(goals: goalsModels, isLoading: false);
       });
     });
 
     // 3. 初回データ読み込み
     final initialGoalsData = _ref.read(goalsListProvider);
     fetchGoalsUsecase(initialGoalsData).then((goalsModels) {
-      // ViewModelでGoalItemへの変換処理を行う
-      final goalItems =
-          goalsModels.map((goal) => GoalItem.fromGoalsModel(goal)).toList();
-      state = state.copyWith(goals: goalItems, isLoading: false);
+      state = state.copyWith(goals: goalsModels, isLoading: false);
     });
   }
 
@@ -164,7 +109,7 @@ class HomeViewModel extends StateNotifier<HomeState> {
   }
 
   // フィルター済みの目標リストを取得
-  List<GoalItem> get filteredGoals {
+  List<GoalsModel> get filteredGoals {
     if (state.filterType == '全て') {
       return state.goals;
     } else if (state.filterType == '進行中') {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:goal_timer/core/utils/color_consts.dart';
-import 'package:goal_timer/features/goal_detail_setting/domain/entities/goal_detail.dart';
+import 'package:goal_timer/core/models/goals/goals_model.dart';
 import 'package:goal_timer/features/goal_detail_setting/presentation/viewmodels/goal_detail_view_model.dart';
 
 class GoalDetailSettingScreen extends ConsumerWidget {
@@ -45,7 +45,7 @@ class GoalDetailSettingScreen extends ConsumerWidget {
 
   Widget _buildGoalList(
     BuildContext context,
-    List<GoalDetail> goals,
+    List<GoalsModel> goals,
     WidgetRef ref,
   ) {
     if (goals.isEmpty) {
@@ -61,8 +61,8 @@ class GoalDetailSettingScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildGoalCard(BuildContext context, GoalDetail goal, WidgetRef ref) {
-    final remainingDays = goal.remainingDays;
+  Widget _buildGoalCard(BuildContext context, GoalsModel goal, WidgetRef ref) {
+    final remainingDays = goal.deadline.difference(DateTime.now()).inDays;
     final progressColor = _getProgressColor(goal.progressPercent);
 
     return Card(
@@ -152,7 +152,7 @@ class GoalDetailSettingScreen extends ConsumerWidget {
                     ),
                   ),
                   Text(
-                    '目標: ${goal.targetHours}時間（${(goal.spentMinutes / 60).toStringAsFixed(1)}時間経過）',
+                    '目標: ${goal.totalTargetHours}時間（${(goal.spentMinutes / 60).toStringAsFixed(1)}時間経過）',
                     style: const TextStyle(fontSize: 12),
                   ),
                 ],

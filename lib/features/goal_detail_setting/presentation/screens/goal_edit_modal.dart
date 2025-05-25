@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:goal_timer/core/utils/color_consts.dart';
-import 'package:goal_timer/features/goal_detail_setting/domain/entities/goal_detail.dart';
+import 'package:goal_timer/core/models/goals/goals_model.dart';
 import 'package:goal_timer/features/goal_detail_setting/presentation/viewmodels/goal_detail_view_model.dart';
 
 class GoalEditModal extends ConsumerStatefulWidget {
-  final GoalDetail? goalDetail; // 編集時は目標データを渡す、新規追加時はnull
+  final GoalsModel? goalDetail; // 編集時は目標データを渡す、新規追加時はnull
   final String title; // モーダルのタイトル（「目標を追加」または「目標を編集」）
 
   const GoalEditModal({super.key, this.goalDetail, required this.title});
@@ -35,9 +35,12 @@ class _GoalEditModalState extends ConsumerState<GoalEditModal> {
       );
 
       // 1日あたりの目標時間を計算（残り日数から逆算）
-      final remainingDays = goalDetail.remainingDays.clamp(1, double.infinity);
-      _targetMinutesPerDay = ((goalDetail.targetHours * 60) ~/ remainingDays)
-          .clamp(5, 240);
+      final remainingDays = goalDetail.deadline
+          .difference(DateTime.now())
+          .inDays
+          .clamp(1, 365);
+      _targetMinutesPerDay =
+          ((goalDetail.totalTargetHours * 60) ~/ remainingDays).clamp(5, 240);
 
       _targetDate = goalDetail.deadline;
     } else {
@@ -293,7 +296,7 @@ class _GoalEditModalState extends ConsumerState<GoalEditModal> {
               '毎日${_targetMinutesPerDay ~/ 60}時間${_targetMinutesPerDay % 60}分の学習',
           deadline: _targetDate,
           avoidMessage: _avoidMessageController.text.trim(),
-          targetHours: targetHours,
+          totalTargetHours: targetHours,
         );
 
         // リポジトリを使って目標を更新
@@ -314,15 +317,17 @@ class _GoalEditModalState extends ConsumerState<GoalEditModal> {
         );
       } else {
         // 新規追加モード: 新しいデータを作成
-        final newGoal = GoalDetail(
+        final newGoal = GoalsModel(
           id: DateTime.now().millisecondsSinceEpoch.toString(), // 仮のID生成
+          userId: 'user1', // ユーザーIDは仮の値
           title: _titleController.text.trim(),
           description:
               '毎日${_targetMinutesPerDay ~/ 60}時間${_targetMinutesPerDay % 60}分の学習',
           deadline: _targetDate,
+          isCompleted: false,
           avoidMessage: _avoidMessageController.text.trim(),
           progressPercent: 0.0, // 初期進捗率は0
-          targetHours: targetHours,
+          totalTargetHours: targetHours,
           spentMinutes: 0, // 初期経過時間は0
         );
 

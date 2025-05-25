@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:goal_timer/core/models/goals/goals_model.dart';
 import 'package:goal_timer/features/goal_detail_setting/data/repositories/goal_detail_repository_impl.dart';
-import 'package:goal_timer/features/goal_detail_setting/domain/entities/goal_detail.dart';
 import 'package:goal_timer/features/goal_detail_setting/domain/repositories/goal_detail_repository.dart';
 import 'package:goal_timer/features/goal_detail_setting/domain/usecases/get_goal_details_usecase.dart';
 import 'package:goal_timer/features/goal_detail_setting/domain/usecases/get_goal_detail_usecase.dart';
@@ -41,13 +41,13 @@ final updateGoalSpentTimeUseCaseProvider = Provider<UpdateGoalSpentTimeUseCase>(
 );
 
 // 目標詳細リストプロバイダー
-final goalDetailListProvider = FutureProvider<List<GoalDetail>>((ref) async {
+final goalDetailListProvider = FutureProvider<List<GoalsModel>>((ref) async {
   final useCase = ref.watch(getGoalDetailsUseCaseProvider);
   return await useCase.execute();
 });
 
 // 特定目標詳細プロバイダー
-final goalDetailProvider = FutureProvider.family<GoalDetail?, String>((
+final goalDetailProvider = FutureProvider.family<GoalsModel?, String>((
   ref,
   id,
 ) async {

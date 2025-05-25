@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
-
+import 'package:goal_timer/core/models/goals/goals_model.dart';
 import 'package:goal_timer/core/utils/color_consts.dart';
 import 'package:goal_timer/features/home/presentation/viewmodels/home_view_model.dart';
 import 'package:goal_timer/features/goal_detail_setting/presentation/screens/goal_detail_screen.dart';
 
 class GoalListCellWidget extends StatelessWidget {
-  final GoalItem goal;
+  final GoalsModel goal;
 
   const GoalListCellWidget({super.key, required this.goal});
 
   @override
   Widget build(BuildContext context) {
+    // 残り日数を計算
+    final remainingDays = goal.deadline.difference(DateTime.now()).inDays;
+
     return Material(
       color: ColorConsts.cardBackground,
       borderRadius: BorderRadius.circular(12),
@@ -20,7 +23,7 @@ class GoalListCellWidget extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => GoalDetailScreen(goalId: goal.id),
+              builder: (context) => GoalDetailScreenWithData(goal: goal),
             ),
           );
         },
@@ -62,7 +65,7 @@ class GoalListCellWidget extends StatelessWidget {
               Row(
                 children: [
                   Text(
-                    '残り${goal.remainingDays}日',
+                    '残り${remainingDays}日',
                     style: const TextStyle(color: ColorConsts.textLight),
                   ),
                   const Spacer(),

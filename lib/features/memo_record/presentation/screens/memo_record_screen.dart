@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:goal_timer/core/utils/color_consts.dart';
 import 'package:goal_timer/features/memo_record/presentation/viewmodels/memo_view_model.dart';
-import 'package:goal_timer/features/goal_detail_setting/domain/entities/goal_detail.dart';
+import 'package:goal_timer/core/models/goals/goals_model.dart';
 import 'package:goal_timer/features/goal_detail_setting/presentation/viewmodels/goal_detail_view_model.dart';
 
 class MemoRecordScreen extends ConsumerStatefulWidget {
@@ -107,7 +107,7 @@ class _MemoRecordScreenState extends ConsumerState<MemoRecordScreen> {
   }
 
   // 目標選択ドロップダウン
-  Widget _buildGoalSelector(List<GoalDetail> goals, GoalDetail selectedGoal) {
+  Widget _buildGoalSelector(List<GoalsModel> goals, GoalsModel selectedGoal) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       color: Colors.grey.shade100,
@@ -133,7 +133,7 @@ class _MemoRecordScreenState extends ConsumerState<MemoRecordScreen> {
                 }
               },
               items:
-                  goals.map<DropdownMenuItem<String>>((GoalDetail goal) {
+                  goals.map<DropdownMenuItem<String>>((GoalsModel goal) {
                     return DropdownMenuItem<String>(
                       value: goal.id,
                       child: Text(goal.title, overflow: TextOverflow.ellipsis),
@@ -147,7 +147,10 @@ class _MemoRecordScreenState extends ConsumerState<MemoRecordScreen> {
   }
 
   // 目標情報セクション
-  Widget _buildGoalInfoSection(GoalDetail goalDetail) {
+  Widget _buildGoalInfoSection(GoalsModel goalDetail) {
+    // 残り日数を計算
+    final remainingDays = goalDetail.deadline.difference(DateTime.now()).inDays;
+
     return Container(
       padding: const EdgeInsets.all(16),
       color: Colors.white,
@@ -197,15 +200,10 @@ class _MemoRecordScreenState extends ConsumerState<MemoRecordScreen> {
               const Icon(Icons.calendar_today, size: 16, color: Colors.grey),
               const SizedBox(width: 4),
               Text(
-                '残り${goalDetail.remainingDays}日',
-                style: const TextStyle(color: Colors.grey, fontSize: 14),
-              ),
-              const SizedBox(width: 16),
-              const Icon(Icons.timer, size: 16, color: Colors.grey),
-              const SizedBox(width: 4),
-              Text(
-                '累計: ${goalDetail.spentMinutes ~/ 60}時間${goalDetail.spentMinutes % 60}分',
-                style: const TextStyle(color: Colors.grey, fontSize: 14),
+                '残り${remainingDays}日',
+                style: TextStyle(
+                  color: remainingDays < 7 ? Colors.red : Colors.grey,
+                ),
               ),
             ],
           ),
