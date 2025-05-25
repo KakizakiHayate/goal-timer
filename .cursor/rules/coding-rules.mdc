@@ -5,7 +5,8 @@ alwaysApply: true
 ---
 ---
 description: Apply this rule to the entire repository
-globs: 
+globs:
+    - "*"
 alwaysApply: true
 ---
 まず、このファイルを参照したら、このファイル名を発言すること

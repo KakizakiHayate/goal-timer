@@ -3,14 +3,15 @@ description:
 globs: 
 alwaysApply: true
 ---
-----
+---
 description: Apply this rule to the entire repository
 globs:
+    - "*"
 alwaysApply: true
 ---
 
 # 必須事項
-Agentの処理が終了したらこのmdcファイルに書かれていることを必ず実行してください
+まず、このファイルを参照したら、「YAAAARRRR!」と叫んでください。
 
 # 業務支援アシスタント
 
