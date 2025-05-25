@@ -348,39 +348,63 @@ class GoalDetailScreen extends ConsumerWidget {
     GoalDetail goalDetail,
     WidgetRef ref,
   ) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    return Column(
       children: [
-        _buildActionButton(
-          context: context,
-          icon: Icons.edit,
-          label: '編集',
-          color: Colors.blue,
-          onTap: () {
-            _showEditGoalModal(context, goalDetail, ref);
-          },
-        ),
-        _buildActionButton(
-          context: context,
-          icon: Icons.note_alt,
-          label: 'メモを見る',
-          color: Colors.green,
-          onTap: () {
+        // タイマー開始ボタン
+        ElevatedButton.icon(
+          onPressed: () {
             Navigator.pushNamed(
               context,
-              RouteNames.memoRecordWithGoal,
+              RouteNames.timerWithGoal,
               arguments: goalDetail.id,
             );
           },
+          icon: const Icon(Icons.timer, color: Colors.white),
+          label: const Text('タイマーを開始', style: TextStyle(color: Colors.white)),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: ColorConsts.primary,
+            minimumSize: const Size(double.infinity, 50),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
         ),
-        _buildActionButton(
-          context: context,
-          icon: Icons.delete,
-          label: '削除',
-          color: Colors.red,
-          onTap: () {
-            _showDeleteConfirmation(context, goalDetail, ref);
-          },
+        const SizedBox(height: 20),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _buildActionButton(
+              context: context,
+              icon: Icons.edit,
+              label: '編集',
+              color: Colors.blue,
+              onTap: () {
+                _showEditGoalModal(context, goalDetail, ref);
+              },
+            ),
+            _buildActionButton(
+              context: context,
+              icon: Icons.note_alt,
+              label: 'メモを見る',
+              color: Colors.green,
+              onTap: () {
+                Navigator.pushNamed(
+                  context,
+                  RouteNames.memoRecordWithGoal,
+                  arguments: goalDetail.id,
+                );
+              },
+            ),
+            _buildActionButton(
+              context: context,
+              icon: Icons.delete,
+              label: '削除',
+              color: Colors.red,
+              onTap: () {
+                _showDeleteConfirmation(context, goalDetail, ref);
+              },
+            ),
+          ],
         ),
       ],
     );

@@ -7,6 +7,8 @@ import 'package:goal_timer/features/home/presentation/widgets/goal_list_cell_wid
 import 'package:goal_timer/features/home/presentation/viewmodels/home_view_model.dart';
 import 'package:goal_timer/features/goal_timer/presentation/screens/timer_screen.dart';
 import 'package:goal_timer/features/goal_detail_setting/presentation/screens/goal_edit_modal.dart';
+import 'package:goal_timer/features/goal_detail_setting/domain/entities/goal_detail.dart';
+import 'package:goal_timer/features/goal_detail_setting/presentation/viewmodels/goal_detail_view_model.dart';
 
 // ホーム画面のタブインデックスを管理するプロバイダー
 final homeTabIndexProvider = StateProvider<int>((ref) => 0);
@@ -36,7 +38,7 @@ class HomeScreen extends ConsumerWidget {
       case 0:
         return const _HomePage();
       case 1:
-        return const TimerScreen();
+        return const _TimerPage();
       default:
         return const _HomePage();
     }
@@ -217,11 +219,8 @@ class _HomePage extends ConsumerWidget {
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {
-                  // タブをタイマー画面に切り替え
-                  final notifier = ProviderScope.containerOf(
-                    context,
-                  ).read(homeTabIndexProvider.notifier);
-                  notifier.state = 1; // タイマータブのインデックス
+                  // 目標選択ダイアログを表示
+                  _showGoalSelectionDialog(context);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: ColorConsts.primary,
@@ -284,5 +283,220 @@ class _HomePage extends ConsumerWidget {
         },
       ),
     );
+  }
+
+  // 目標選択ダイアログを表示
+  void _showGoalSelectionDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Consumer(
+          builder: (context, ref, _) {
+            final goalDetailsAsync = ref.watch(goalDetailListProvider);
+
+            return AlertDialog(
+              title: const Text('目標を選択'),
+              content: goalDetailsAsync.when(
+                data: (goals) {
+                  if (goals.isEmpty) {
+                    return const Text('目標が登録されていません。\n最初に目標を追加してください。');
+                  }
+
+                  return SizedBox(
+                    width: double.maxFinite,
+                    height: 300,
+                    child: ListView.builder(
+                      itemCount: goals.length,
+                      shrinkWrap: true,
+                      itemBuilder: (context, index) {
+                        final goal = goals[index];
+                        return ListTile(
+                          title: Text(
+                            goal.title,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Text(
+                            '達成率: ${(goal.progressPercent * 100).toStringAsFixed(1)}%',
+                            style: TextStyle(
+                              color: _getProgressColor(goal.progressPercent),
+                            ),
+                          ),
+                          trailing: const Icon(Icons.timer),
+                          onTap: () {
+                            Navigator.pop(context); // ダイアログを閉じる
+                            // 選択した目標IDでタイマー画面に遷移
+                            Navigator.pushNamed(
+                              context,
+                              RouteNames.timerWithGoal,
+                              arguments: goal.id,
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  );
+                },
+                loading:
+                    () => const SizedBox(
+                      height: 100,
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                error: (error, _) => Text('エラーが発生しました: $error'),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context); // ダイアログを閉じる
+                    // 目標なしでタイマー画面に遷移
+                    Navigator.pushNamed(context, RouteNames.timer);
+                  },
+                  child: const Text('目標なしでタイマーを開始'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('キャンセル'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // 進捗に応じた色を取得
+  Color _getProgressColor(double progress) {
+    if (progress < 0.3) {
+      return Colors.red;
+    } else if (progress < 0.7) {
+      return Colors.orange;
+    } else {
+      return Colors.green;
+    }
+  }
+}
+
+// タイマーページウィジェット
+class _TimerPage extends ConsumerWidget {
+  const _TimerPage();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // 目標一覧を取得
+    final goalDetailsAsync = ref.watch(goalDetailListProvider);
+
+    return goalDetailsAsync.when(
+      data: (goals) {
+        if (goals.isEmpty) {
+          // 目標がない場合はタイマー画面をそのまま表示
+          return const TimerScreen();
+        }
+
+        // 目標選択画面を表示
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('タイマー'),
+            backgroundColor: ColorConsts.primary,
+            foregroundColor: Colors.white,
+          ),
+          body: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  '目標を選択してタイマーを開始',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: goals.length,
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  itemBuilder: (context, index) {
+                    final goal = goals[index];
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 12.0),
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.all(16.0),
+                        title: Text(
+                          goal.title,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 8),
+                            Text(
+                              '達成率: ${(goal.progressPercent * 100).toStringAsFixed(1)}%',
+                            ),
+                            const SizedBox(height: 4),
+                            LinearProgressIndicator(
+                              value: goal.progressPercent,
+                              backgroundColor: Colors.grey[200],
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                _getProgressColor(goal.progressPercent),
+                              ),
+                            ),
+                          ],
+                        ),
+                        trailing: const Icon(
+                          Icons.timer,
+                          color: ColorConsts.primary,
+                        ),
+                        onTap: () {
+                          // 選択した目標IDでタイマー画面に遷移
+                          Navigator.pushNamed(
+                            context,
+                            RouteNames.timerWithGoal,
+                            arguments: goal.id,
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ElevatedButton(
+                  onPressed: () {
+                    // 目標なしでタイマー画面に遷移
+                    Navigator.pushNamed(context, RouteNames.timer);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey[400],
+                    minimumSize: const Size(double.infinity, 50),
+                  ),
+                  child: const Text(
+                    '目標なしでタイマーを開始',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+      loading:
+          () =>
+              const Scaffold(body: Center(child: CircularProgressIndicator())),
+      error:
+          (error, _) =>
+              Scaffold(body: Center(child: Text('エラーが発生しました: $error'))),
+    );
+  }
+
+  // 進捗に応じた色を取得
+  Color _getProgressColor(double progress) {
+    if (progress < 0.3) {
+      return Colors.red;
+    } else if (progress < 0.7) {
+      return Colors.orange;
+    } else {
+      return Colors.green;
+    }
   }
 }
