@@ -11,6 +11,7 @@ import 'package:goal_timer/features/goal_detail/presentation/viewmodels/goal_det
 import 'package:goal_timer/features/goal_detail/presentation/screens/goal_edit_modal.dart';
 
 part '../widgets/add_goal_modal.dart';
+part '../widgets/filter_bar_widget.dart';
 
 // ホーム画面のタブインデックスを管理するプロバイダー
 final homeTabIndexProvider = StateProvider<int>((ref) => 0);
@@ -82,49 +83,6 @@ class _HomeScreen extends ConsumerWidget {
         },
         backgroundColor: ColorConsts.primary,
         child: const Icon(Icons.add, color: Colors.white),
-      ),
-    );
-  }
-
-  // フィルターバーウィジェット
-  Widget _buildFilterBar(
-    BuildContext context,
-    HomeState state,
-    HomeViewModel viewModel,
-  ) {
-    return Material(
-      color: Colors.white,
-      elevation: 1,
-      child: Container(
-        height: 48,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Row(
-          children: [
-            const Text(
-              '表示:',
-              style: TextStyle(fontSize: 14, color: ColorConsts.textLight),
-            ),
-            const SizedBox(width: 8),
-            DropdownButton<String>(
-              value: state.filterType,
-              underline: Container(),
-              icon: const Icon(
-                Icons.arrow_drop_down,
-                color: ColorConsts.primary,
-              ),
-              items: const [
-                DropdownMenuItem(value: '全て', child: Text('全て')),
-                DropdownMenuItem(value: '進行中', child: Text('進行中')),
-                DropdownMenuItem(value: '完了', child: Text('完了')),
-              ],
-              onChanged: (String? value) {
-                if (value != null) {
-                  viewModel.changeFilter(value);
-                }
-              },
-            ),
-          ],
-        ),
       ),
     );
   }
