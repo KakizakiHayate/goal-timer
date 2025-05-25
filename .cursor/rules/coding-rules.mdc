@@ -103,7 +103,7 @@ alwaysApply: true
 
 6. **守るべきルールのディレクトリ/ファイル**
 
-   - ./cursor/rules/dev-rules/*.mdc 
+   - ./cursor/rules/*.mdc 
    - 上記ファイルのルールを厳守してください。
 
 ---
