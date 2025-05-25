@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:goal_timer/core/utils/color_consts.dart';
 import 'package:goal_timer/core/models/goals/goals_model.dart';
 import 'package:goal_timer/features/memo_record/presentation/viewmodels/memo_view_model.dart';
-import 'package:goal_timer/features/goal_detail_setting/presentation/viewmodels/goal_detail_view_model.dart';
+import 'package:goal_timer/features/goal_detail/presentation/viewmodels/goal_detail_view_model.dart';
 
 class MemoRecordScreen extends ConsumerStatefulWidget {
   final String? goalId; // 特定の目標IDが渡されたら、その目標のメモを表示

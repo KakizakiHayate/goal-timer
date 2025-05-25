@@ -4,9 +4,9 @@ import 'package:intl/intl.dart';
 import 'package:goal_timer/core/utils/color_consts.dart';
 import 'package:goal_timer/core/models/goals/goals_model.dart';
 import 'package:goal_timer/core/utils/time_utils.dart';
-import 'package:goal_timer/features/goal_detail_setting/presentation/viewmodels/goal_detail_view_model.dart';
+import 'package:goal_timer/features/goal_detail/presentation/viewmodels/goal_detail_view_model.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:goal_timer/features/goal_detail_setting/presentation/screens/goal_edit_modal.dart';
+import 'package:goal_timer/features/goal_detail/presentation/screens/goal_edit_modal.dart';
 import 'package:goal_timer/core/utils/route_names.dart';
 
 /// 目標IDを使用して詳細データを取得する画面

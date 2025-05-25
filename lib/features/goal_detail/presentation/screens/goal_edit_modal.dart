@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:goal_timer/core/utils/color_consts.dart';
 import 'package:goal_timer/core/models/goals/goals_model.dart';
 import 'package:goal_timer/core/utils/time_utils.dart';
-import 'package:goal_timer/features/goal_detail_setting/presentation/viewmodels/goal_detail_view_model.dart';
+import 'package:goal_timer/features/goal_detail/presentation/viewmodels/goal_detail_view_model.dart';
 
 class GoalEditModal extends ConsumerStatefulWidget {
   final GoalsModel? goalDetail; // 編集時は目標データを渡す、新規追加時はnull

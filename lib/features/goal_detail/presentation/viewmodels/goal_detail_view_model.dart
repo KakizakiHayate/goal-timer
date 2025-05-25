@@ -1,11 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:goal_timer/core/models/goals/goals_model.dart';
-import 'package:goal_timer/features/goal_detail_setting/data/repositories/goal_detail_repository_impl.dart';
-import 'package:goal_timer/features/goal_detail_setting/domain/repositories/goal_detail_repository.dart';
-import 'package:goal_timer/features/goal_detail_setting/domain/usecases/get_goal_details_usecase.dart';
-import 'package:goal_timer/features/goal_detail_setting/domain/usecases/get_goal_detail_usecase.dart';
-import 'package:goal_timer/features/goal_detail_setting/domain/usecases/update_goal_progress_usecase.dart';
-import 'package:goal_timer/features/goal_detail_setting/domain/usecases/update_goal_spent_time_usecase.dart';
+import 'package:goal_timer/features/goal_detail/data/repositories/goal_detail_repository_impl.dart';
+import 'package:goal_timer/features/goal_detail/domain/repositories/goal_detail_repository.dart';
+import 'package:goal_timer/features/goal_detail/domain/usecases/get_goal_details_usecase.dart';
+import 'package:goal_timer/features/goal_detail/domain/usecases/get_goal_detail_usecase.dart';
+import 'package:goal_timer/features/goal_detail/domain/usecases/update_goal_progress_usecase.dart';
+import 'package:goal_timer/features/goal_detail/domain/usecases/update_goal_spent_time_usecase.dart';
 
 // リポジトリプロバイダー
 final goalDetailRepositoryProvider = Provider<GoalDetailRepository>((ref) {

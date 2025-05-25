@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:goal_timer/core/utils/platform_route.dart';
 import 'package:goal_timer/core/utils/route_names.dart';
-import 'package:goal_timer/features/goal_detail_setting/presentation/screens/goal_detail_setting_screen.dart';
-import 'package:goal_timer/features/goal_detail_setting/presentation/screens/goal_detail_screen.dart';
+import 'package:goal_timer/features/goal_detail/presentation/screens/goal_detail_setting_screen.dart';
+import 'package:goal_timer/features/goal_detail/presentation/screens/goal_detail_screen.dart';
 import 'package:goal_timer/features/goal_timer/presentation/screens/timer_screen.dart';
 import 'package:goal_timer/features/home/presentation/screens/home_screen.dart';
 import 'package:goal_timer/features/memo_record/presentation/screens/memo_record_screen.dart';

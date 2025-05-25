@@ -6,9 +6,9 @@ import 'package:goal_timer/core/utils/route_names.dart';
 import 'package:goal_timer/features/home/presentation/widgets/goal_list_cell_widget.dart';
 import 'package:goal_timer/features/home/presentation/viewmodels/home_view_model.dart';
 import 'package:goal_timer/features/goal_timer/presentation/screens/timer_screen.dart';
-import 'package:goal_timer/features/goal_detail_setting/presentation/screens/goal_edit_modal.dart';
+import 'package:goal_timer/features/goal_detail/presentation/screens/goal_edit_modal.dart';
 import 'package:goal_timer/core/models/goals/goals_model.dart';
-import 'package:goal_timer/features/goal_detail_setting/presentation/viewmodels/goal_detail_view_model.dart';
+import 'package:goal_timer/features/goal_detail/presentation/viewmodels/goal_detail_view_model.dart';
 
 // ホーム画面のタブインデックスを管理するプロバイダー
 final homeTabIndexProvider = StateProvider<int>((ref) => 0);

@@ -3,7 +3,7 @@ import 'package:goal_timer/core/models/goals/goals_model.dart';
 import 'package:goal_timer/core/utils/color_consts.dart';
 import 'package:goal_timer/core/utils/time_utils.dart';
 import 'package:goal_timer/features/home/presentation/viewmodels/home_view_model.dart';
-import 'package:goal_timer/features/goal_detail_setting/presentation/screens/goal_detail_screen.dart';
+import 'package:goal_timer/features/goal_detail/presentation/screens/goal_detail_screen.dart';
 
 class GoalListCellWidget extends StatelessWidget {
   final GoalsModel goal;
