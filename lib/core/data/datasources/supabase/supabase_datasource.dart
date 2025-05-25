@@ -2,7 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:goal_timer/core/config/env_config.dart';
-import 'package:goal_timer/data/repositories/supabase/supabase_repository.dart';
+import 'package:goal_timer/core/data/repositories/supabase/supabase_repository.dart';
 import 'package:goal_timer/core/provider/providers.dart';
 import 'package:goal_timer/core/utils/app_logger.dart';
 

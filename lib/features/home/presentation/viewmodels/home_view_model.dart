@@ -1,10 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:goal_timer/core/models/goals/goals_model.dart';
+import 'package:goal_timer/core/provider/goals_provider.dart';
+import 'package:goal_timer/features/goal_detail_setting/domain/entities/goal_detail.dart';
+import 'package:goal_timer/features/goal_detail_setting/presentation/viewmodels/goal_detail_view_model.dart';
 
 // ホーム画面の状態を管理するプロバイダー
 final homeViewModelProvider = StateNotifierProvider<HomeViewModel, HomeState>((
   ref,
 ) {
-  return HomeViewModel();
+  return HomeViewModel(ref);
 });
 
 // ホーム画面の状態を表すクラス
@@ -47,45 +51,101 @@ class GoalItem {
     required this.progressPercent,
     required this.remainingDays,
   });
+
+  // GoalDetailからGoalItemを作成するファクトリメソッド
+  factory GoalItem.fromGoalDetail(GoalDetail goalDetail) {
+    return GoalItem(
+      id: goalDetail.id,
+      title: goalDetail.title,
+      avoidMessage: goalDetail.avoidMessage,
+      progressPercent: goalDetail.progressPercent,
+      remainingDays: goalDetail.remainingDays,
+    );
+  }
+
+  // GoalsModelからGoalItemを作成するファクトリメソッド
+  factory GoalItem.fromGoalsModel(GoalsModel model) {
+    final now = DateTime.now();
+    final remainingDays = model.deadline.difference(now).inDays;
+
+    return GoalItem(
+      id: model.id,
+      title: model.title,
+      avoidMessage: model.avoidMessage,
+      progressPercent: model.progressPercent,
+      remainingDays: remainingDays > 0 ? remainingDays : 0,
+    );
+  }
 }
 
 // ホーム画面のビューモデル
 class HomeViewModel extends StateNotifier<HomeState> {
-  HomeViewModel() : super(HomeState()) {
+  final Ref _ref;
+
+  HomeViewModel(this._ref) : super(HomeState()) {
     // 初期データの読み込み
     _loadGoals();
   }
 
-  // 目標データの読み込み（ダミーデータ）
+  // 目標データの読み込み
   void _loadGoals() {
     state = state.copyWith(isLoading: true);
 
-    // ダミーデータを作成
-    final mockGoals = [
-      GoalItem(
-        id: '1',
-        title: 'Flutterの基礎を完全に理解する',
-        avoidMessage: '今すぐやらないと後悔するぞ！',
-        progressPercent: 0.45,
-        remainingDays: 30,
-      ),
-      GoalItem(
-        id: '2',
-        title: 'TOEIC 800点を達成する',
-        avoidMessage: '英語ができないと昇進できないぞ',
-        progressPercent: 0.68,
-        remainingDays: 45,
-      ),
-      GoalItem(
-        id: '3',
-        title: '毎日の運動習慣を身につける',
-        avoidMessage: '健康を失うと全てを失う',
-        progressPercent: 0.15,
-        remainingDays: 60,
-      ),
-    ];
+    // モックデータが必要な場合はgoalDetailListProviderを使用
+    if (_shouldUseMockData()) {
+      _loadGoalsFromMockData();
+      return;
+    }
 
-    state = state.copyWith(goals: mockGoals, isLoading: false);
+    // 実際のデータ（Supabase）から取得
+    _loadGoalsFromSupabase();
+  }
+
+  // モックデータを使うべきかどうかを判断
+  bool _shouldUseMockData() {
+    // TODO: 開発環境や設定に応じて判断するロジックを追加
+    // return true; // 常にモックデータを使用する場合
+    return false; // 常に実際のデータを使用する場合
+  }
+
+  // モックデータから目標を読み込む
+  void _loadGoalsFromMockData() {
+    // goalDetailListProviderを監視して、データが変更されたら目標リストを更新
+    _ref.listen(goalDetailListProvider, (previous, next) {
+      next.whenData((goalDetails) {
+        final goals =
+            goalDetails
+                .map((detail) => GoalItem.fromGoalDetail(detail))
+                .toList();
+        state = state.copyWith(goals: goals, isLoading: false);
+      });
+    });
+
+    // 初回のデータ読み込み
+    _ref.read(goalDetailListProvider).whenData((goalDetails) {
+      final goals =
+          goalDetails.map((detail) => GoalItem.fromGoalDetail(detail)).toList();
+      state = state.copyWith(goals: goals, isLoading: false);
+    });
+  }
+
+  // Supabaseから目標を読み込む
+  void _loadGoalsFromSupabase() {
+    // goalsListProviderを監視して、データが変更されたら目標リストを更新
+    _ref.listen(goalsListProvider, (previous, next) {
+      next.whenData((goals) {
+        final goalItems =
+            goals.map((goal) => GoalItem.fromGoalsModel(goal)).toList();
+        state = state.copyWith(goals: goalItems, isLoading: false);
+      });
+    });
+
+    // 初回のデータ読み込み
+    _ref.read(goalsListProvider).whenData((goals) {
+      final goalItems =
+          goals.map((goal) => GoalItem.fromGoalsModel(goal)).toList();
+      state = state.copyWith(goals: goalItems, isLoading: false);
+    });
   }
 
   // フィルター変更処理

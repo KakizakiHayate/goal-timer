@@ -64,6 +64,40 @@ class GoalsModel with _$GoalsModel {
       parsedIsCompleted = false;
     }
 
+    // progressPercentの型変換処理
+    double parsedProgressPercent;
+    final progressValue = map['progress_percent'];
+    if (progressValue is double) {
+      parsedProgressPercent = progressValue;
+    } else if (progressValue is int) {
+      parsedProgressPercent = progressValue.toDouble();
+    } else if (progressValue is String) {
+      parsedProgressPercent = double.tryParse(progressValue) ?? 0.0;
+    } else {
+      parsedProgressPercent = 0.0;
+    }
+
+    // 整数値の安全な変換
+    int parsedTotalTargetHours;
+    final totalTargetValue = map['total_target_hours'];
+    if (totalTargetValue is int) {
+      parsedTotalTargetHours = totalTargetValue;
+    } else if (totalTargetValue is String) {
+      parsedTotalTargetHours = int.tryParse(totalTargetValue) ?? 0;
+    } else {
+      parsedTotalTargetHours = 0;
+    }
+
+    int parsedSpentMinutes;
+    final spentMinutesValue = map['spent_minutes'];
+    if (spentMinutesValue is int) {
+      parsedSpentMinutes = spentMinutesValue;
+    } else if (spentMinutesValue is String) {
+      parsedSpentMinutes = int.tryParse(spentMinutesValue) ?? 0;
+    } else {
+      parsedSpentMinutes = 0;
+    }
+
     return GoalsModel(
       id: map['id'] ?? '',
       userId: map['user_id'] ?? '',
@@ -72,9 +106,9 @@ class GoalsModel with _$GoalsModel {
       deadline: parsedDeadline,
       isCompleted: parsedIsCompleted,
       avoidMessage: map['avoid_message'] ?? '',
-      progressPercent: (map['progress_percent'] ?? 0.0).toDouble(),
-      totalTargetHours: map['total_target_hours'] ?? 0,
-      spentMinutes: map['spent_minutes'] ?? 0,
+      progressPercent: parsedProgressPercent,
+      totalTargetHours: parsedTotalTargetHours,
+      spentMinutes: parsedSpentMinutes,
     );
   }
 }
