@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:goal_timer/core/models/goals/goals_model.dart';
-import 'package:goal_timer/core/provider/goals_provider.dart';
+import 'package:goal_timer/core/provider/supabase/goals/goals_provider.dart';
 import 'package:goal_timer/features/goal_detail_setting/domain/entities/goal_detail.dart';
 import 'package:goal_timer/features/goal_detail_setting/presentation/viewmodels/goal_detail_view_model.dart';
 
