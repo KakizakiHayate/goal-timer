@@ -131,9 +131,3 @@ class SplashViewModel extends StateNotifier<SplashState> {
     await _initialize();
   }
 }
-
-// スプラッシュ画面のViewModelを提供するProvider
-final splashViewModelProvider =
-    StateNotifierProvider<SplashViewModel, SplashState>((ref) {
-      return SplashViewModel();
-    });

@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:goal_timer/core/config/env_config.dart';
 import 'package:goal_timer/features/home/presentation/screens/home_screen.dart';
-import 'package:goal_timer/features/splash/presentation/viewmodels/splash_view_model.dart';
+import 'package:goal_timer/features/splash/provider/splash_provider.dart';
 
 class SplashScreen extends ConsumerWidget {
   const SplashScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // スプラッシュViewModelの状態を監視
     final splashState = ref.watch(splashViewModelProvider);
 
     // 接続に成功した場合、ホーム画面に移動
