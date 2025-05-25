@@ -6,9 +6,11 @@ import 'package:goal_timer/core/utils/route_names.dart';
 import 'package:goal_timer/features/home/presentation/widgets/goal_list_cell_widget.dart';
 import 'package:goal_timer/features/home/presentation/viewmodels/home_view_model.dart';
 import 'package:goal_timer/features/goal_timer/presentation/screens/timer_screen.dart';
-import 'package:goal_timer/features/goal_detail/presentation/screens/goal_edit_modal.dart';
 import 'package:goal_timer/core/models/goals/goals_model.dart';
 import 'package:goal_timer/features/goal_detail/presentation/viewmodels/goal_detail_view_model.dart';
+import 'package:goal_timer/features/goal_detail/presentation/screens/goal_edit_modal.dart';
+
+part '../widgets/add_goal_modal.dart';
 
 // ホーム画面のタブインデックスを管理するプロバイダー
 final homeTabIndexProvider = StateProvider<int>((ref) => 0);
@@ -81,33 +83,6 @@ class _HomeScreen extends ConsumerWidget {
         backgroundColor: ColorConsts.primary,
         child: const Icon(Icons.add, color: Colors.white),
       ),
-    );
-  }
-
-  // 目標追加モーダルを表示
-  void _showAddGoalModal(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true, // フルスクリーンに近い高さで表示
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return FractionallySizedBox(
-          heightFactor: 0.95, // 画面の95%の高さ
-          child: Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(20),
-                topRight: Radius.circular(20),
-              ),
-            ),
-            child: const GoalEditModal(
-              title: '目標を追加',
-              goalDetail: null, // 新規追加なのでnull
-            ),
-          ),
-        );
-      },
     );
   }
 
