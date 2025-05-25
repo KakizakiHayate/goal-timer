@@ -4,6 +4,7 @@ import 'package:goal_timer/core/utils/color_consts.dart';
 import 'package:goal_timer/core/models/goals/goals_model.dart';
 import 'package:goal_timer/core/utils/time_utils.dart';
 import 'package:goal_timer/features/goal_detail/presentation/viewmodels/goal_detail_view_model.dart';
+import 'package:goal_timer/core/provider/supabase/goals/goals_provider.dart';
 
 class GoalEditModal extends ConsumerStatefulWidget {
   final GoalsModel? goalDetail; // 編集時は目標データを渡す、新規追加時はnull
@@ -320,7 +321,7 @@ class _GoalEditModalState extends ConsumerState<GoalEditModal> {
     // 非同期処理のために最初にcontextを保存
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
-    final goalRepository = ref.read(goalDetailRepositoryProvider);
+    final goalsNotifier = ref.read(goalsNotifierProvider.notifier);
 
     try {
       // 編集モードか新規追加モードかに応じて処理を分ける
@@ -336,7 +337,7 @@ class _GoalEditModalState extends ConsumerState<GoalEditModal> {
         );
 
         // リポジトリを使って目標を更新
-        await goalRepository.updateGoalDetail(updatedGoal);
+        await goalsNotifier.updateGoal(updatedGoal);
 
         // リストを更新するためにプロバイダーを更新
         // ignore: unused_result
@@ -367,7 +368,7 @@ class _GoalEditModalState extends ConsumerState<GoalEditModal> {
         );
 
         // リポジトリを使って目標を追加
-        await goalRepository.addGoalDetail(newGoal);
+        await goalsNotifier.createGoal(newGoal);
 
         // リストを更新するためにプロバイダーを更新
         // ignore: unused_result

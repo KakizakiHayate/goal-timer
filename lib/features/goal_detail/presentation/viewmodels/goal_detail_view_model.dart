@@ -1,74 +1,54 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:goal_timer/core/models/goals/goals_model.dart';
-import 'package:goal_timer/features/goal_detail/data/repositories/goal_detail_repository_impl.dart';
-import 'package:goal_timer/features/goal_detail/domain/repositories/goal_detail_repository.dart';
-import 'package:goal_timer/features/goal_detail/domain/usecases/get_goal_details_usecase.dart';
-import 'package:goal_timer/features/goal_detail/domain/usecases/get_goal_detail_usecase.dart';
-import 'package:goal_timer/features/goal_detail/domain/usecases/update_goal_progress_usecase.dart';
-import 'package:goal_timer/features/goal_detail/domain/usecases/update_goal_spent_time_usecase.dart';
+import 'package:goal_timer/core/provider/supabase/goals/goals_provider.dart';
+import 'package:goal_timer/core/utils/app_logger.dart';
 
-// リポジトリプロバイダー
-final goalDetailRepositoryProvider = Provider<GoalDetailRepository>((ref) {
-  return GoalDetailRepositoryImpl();
-});
-
-// 全目標詳細取得ユースケースプロバイダー
-final getGoalDetailsUseCaseProvider = Provider<GetGoalDetailsUseCase>((ref) {
-  final repository = ref.watch(goalDetailRepositoryProvider);
-  return GetGoalDetailsUseCase(repository);
-});
-
-// 特定目標詳細取得ユースケースプロバイダー
-final getGoalDetailUseCaseProvider = Provider<GetGoalDetailUseCase>((ref) {
-  final repository = ref.watch(goalDetailRepositoryProvider);
-  return GetGoalDetailUseCase(repository);
-});
-
-// 目標進捗更新ユースケースプロバイダー
-final updateGoalProgressUseCaseProvider = Provider<UpdateGoalProgressUseCase>((
-  ref,
-) {
-  final repository = ref.watch(goalDetailRepositoryProvider);
-  return UpdateGoalProgressUseCase(repository);
-});
-
-// 目標費やし時間更新ユースケースプロバイダー
-final updateGoalSpentTimeUseCaseProvider = Provider<UpdateGoalSpentTimeUseCase>(
-  (ref) {
-    final repository = ref.watch(goalDetailRepositoryProvider);
-    return UpdateGoalSpentTimeUseCase(repository);
-  },
-);
-
-// 目標詳細リストプロバイダー
+// 目標詳細リストプロバイダー - Supabaseのデータを使用
 final goalDetailListProvider = FutureProvider<List<GoalsModel>>((ref) async {
-  final useCase = ref.watch(getGoalDetailsUseCaseProvider);
-  return await useCase.execute();
+  final goalsAsync = ref.watch(goalsListProvider);
+  return goalsAsync.when(
+    data: (goals) => goals,
+    error: (_, __) => [],
+    loading: () => [],
+  );
 });
 
-// 特定目標詳細プロバイダー
+// 特定目標詳細プロバイダー - Supabaseのデータを使用
 final goalDetailProvider = FutureProvider.family<GoalsModel?, String>((
   ref,
   id,
 ) async {
-  final useCase = ref.watch(getGoalDetailUseCaseProvider);
-  return await useCase.execute(id);
+  final goalAsync = ref.watch(goalByIdProvider(id));
+  return goalAsync.when(
+    data: (goal) => goal,
+    error: (_, __) => null,
+    loading: () => null,
+  );
 });
-
-// 目標進捗更新関数プロバイダー
-final updateGoalProgressProvider = Provider<Future<void> Function(String, int)>(
-  (ref) {
-    final useCase = ref.watch(updateGoalProgressUseCaseProvider);
-    return (String id, int spentMinutes) => useCase.execute(id, spentMinutes);
-  },
-);
 
 // 目標時間更新関数プロバイダー
 final updateGoalSpentTimeProvider =
     Provider<Future<void> Function(String, int)>((ref) {
-      final useCase = ref.watch(updateGoalSpentTimeUseCaseProvider);
-      return (String id, int additionalMinutes) =>
-          useCase.execute(id, additionalMinutes);
+      final goalsNotifier = ref.watch(goalsNotifierProvider.notifier);
+
+      return (String id, int additionalMinutes) async {
+        try {
+          // 現在の目標を取得
+          final goalAsync = await ref.read(goalByIdProvider(id).future);
+          if (goalAsync == null) {
+            throw Exception('目標が見つかりませんでした');
+          }
+
+          // 学習時間を追加して更新
+          final newSpentMinutes = goalAsync.spentMinutes + additionalMinutes;
+          final updatedGoal = goalAsync.copyWith(spentMinutes: newSpentMinutes);
+
+          await goalsNotifier.updateGoal(updatedGoal);
+        } catch (e) {
+          AppLogger.instance.e('目標の学習時間更新に失敗しました: $e');
+          rethrow;
+        }
+      };
     });
 
 // 目標詳細ビューモデルプロバイダー
@@ -91,11 +71,13 @@ class GoalDetailViewModel extends StateNotifier<void> {
       await updateSpentTime(goalId, minutes);
 
       // 更新後に目標詳細を再取得するためにキャッシュを無効化
+      _ref.invalidate(goalByIdProvider(goalId));
+      _ref.invalidate(goalsListProvider);
       _ref.invalidate(goalDetailProvider(goalId));
       _ref.invalidate(goalDetailListProvider);
     } catch (e) {
       // エラー処理
-      print('目標の学習時間更新に失敗しました: $e');
+      AppLogger.instance.e('目標の学習時間更新に失敗しました: $e');
     }
   }
 }
