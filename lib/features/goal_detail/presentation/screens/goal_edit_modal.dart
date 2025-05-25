@@ -344,6 +344,9 @@ class _GoalEditModalState extends ConsumerState<GoalEditModal> {
         ref.refresh(goalDetailListProvider);
         // ignore: unused_result
         ref.refresh(goalDetailProvider(updatedGoal.id));
+        // goalsListProviderも更新
+        // ignore: unused_result
+        ref.refresh(goalsListProvider);
 
         // 成功メッセージを表示
         scaffoldMessenger.showSnackBar(
@@ -373,6 +376,9 @@ class _GoalEditModalState extends ConsumerState<GoalEditModal> {
         // リストを更新するためにプロバイダーを更新
         // ignore: unused_result
         ref.refresh(goalDetailListProvider);
+        // goalsListProviderも更新
+        // ignore: unused_result
+        ref.refresh(goalsListProvider);
 
         // 成功メッセージを表示
         scaffoldMessenger.showSnackBar(

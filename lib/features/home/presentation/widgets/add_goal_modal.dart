@@ -23,5 +23,14 @@ void _showAddGoalModal(BuildContext context) {
         ),
       );
     },
-  );
+  ).then((_) {
+    // モーダルが閉じられた後に呼ばれるコールバック
+    if (context.mounted) {
+      // ホーム画面のViewModelを取得して目標リストを再読み込み
+      final homeViewModel = ProviderScope.containerOf(
+        context,
+      ).read(homeViewModelProvider.notifier);
+      homeViewModel.reloadGoals();
+    }
+  });
 }

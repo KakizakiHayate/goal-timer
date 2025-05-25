@@ -43,6 +43,11 @@ class HomeViewModel extends StateNotifier<HomeState> {
     _loadGoalsFromSupabase();
   }
 
+  // 外部から呼び出せる目標データのリロードメソッド
+  void reloadGoals() {
+    // _loadGoals();
+  }
+
   // Supabaseから目標を読み込む
   void _loadGoalsFromSupabase() {
     state = state.copyWith(isLoading: true);
