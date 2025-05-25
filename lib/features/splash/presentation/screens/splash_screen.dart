@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:goal_timer/core/config/env_config.dart';
 import 'package:goal_timer/features/home/presentation/screens/home_screen.dart';
 import 'package:goal_timer/features/splash/presentation/viewmodels/splash_view_model.dart';
-import 'dart:math' as math;
 
 class SplashScreen extends ConsumerWidget {
   const SplashScreen({super.key});

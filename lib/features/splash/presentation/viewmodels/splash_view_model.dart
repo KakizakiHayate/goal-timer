@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:goal_timer/core/config/env_config.dart';
-import 'package:goal_timer/core/provider/providers.dart';
-import 'package:goal_timer/core/utils/supabase_utils.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 // スプラッシュ画面の状態

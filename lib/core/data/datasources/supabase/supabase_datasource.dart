@@ -89,17 +89,7 @@ class SupabaseDatasource implements SupabaseRepository {
           return true;
         } catch (tableErr) {
           AppLogger.instance.w('テーブル接続テストエラー: $tableErr');
-
-          // 接続テスト方法3: auth.getUser()を使用（認証が必要）
-          try {
-            final user = await client.auth.getUser();
-            AppLogger.instance.i('Auth User取得テスト成功: ${user != null}');
-            return true;
-          } catch (authErr) {
-            AppLogger.instance.e('Auth User取得エラー', authErr);
-            AppLogger.instance.e('全ての接続テストに失敗しました');
-            return false;
-          }
+          return false;
         }
       }
     } catch (e) {

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:goal_timer/core/config/env_config.dart';
 import 'package:goal_timer/core/provider/providers.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Supabase関連のユーティリティを提供するクラス
 class SupabaseUtils {
@@ -45,17 +44,7 @@ class SupabaseUtils {
           return true;
         } catch (tableErr) {
           debugPrint('テーブル接続テストエラー: $tableErr');
-
-          // 接続テスト方法3: auth.getUser()を使用（認証が必要）
-          try {
-            final user = await client.auth.getUser();
-            debugPrint('Auth User取得テスト成功: ${user != null}');
-            return true;
-          } catch (authErr) {
-            debugPrint('Auth User取得エラー: $authErr');
-            debugPrint('全ての接続テストに失敗しました');
-            return false;
-          }
+          return false;
         }
       }
     } catch (e) {

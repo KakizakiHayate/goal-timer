@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:goal_timer/core/models/goals/goals_model.dart';
 import 'package:goal_timer/core/provider/supabase/goals/goals_provider.dart';
-import 'package:goal_timer/features/goal_detail/presentation/viewmodels/goal_detail_view_model.dart';
 import 'package:goal_timer/core/usecases/supabase/goals/fetch_goals_usecase.dart';
 
 // ホーム画面の状態を管理するプロバイダー
@@ -51,13 +50,6 @@ class HomeViewModel extends StateNotifier<HomeState> {
 
     // 実際のデータ（Supabase）から取得
     _loadGoalsFromSupabase();
-  }
-
-  // モックデータを使うべきかどうかを判断
-  bool _shouldUseMockData() {
-    // TODO: 開発環境や設定に応じて判断するロジックを追加
-    // return true; // 常にモックデータを使用する場合
-    return false; // 常に実際のデータを使用する場合
   }
 
   // Supabaseから目標を読み込む

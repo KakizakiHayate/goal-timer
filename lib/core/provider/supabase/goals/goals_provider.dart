@@ -29,15 +29,14 @@ final goalByIdProvider = FutureProvider.family<GoalsModel?, String>((
 final goalsNotifierProvider =
     StateNotifierProvider<GoalsNotifier, AsyncValue<List<GoalsModel>>>((ref) {
       final repository = ref.watch(goalsRepositoryProvider);
-      return GoalsNotifier(repository, ref);
+      return GoalsNotifier(repository);
     });
 
 /// 目標データの操作を担当するStateNotifier
 class GoalsNotifier extends StateNotifier<AsyncValue<List<GoalsModel>>> {
   final SupabaseGoalsRepository _repository;
-  final Ref _ref;
 
-  GoalsNotifier(this._repository, this._ref)
+  GoalsNotifier(this._repository)
     : super(const AsyncValue.loading()) {
     loadGoals();
   }
