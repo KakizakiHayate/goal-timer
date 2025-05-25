@@ -9,15 +9,12 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 環境変数ファイルの読み込み
   await dotenv.load(fileName: '.env');
 
-  // 環境変数のログ出力（デバッグ用）
   AppLogger.instance.i('環境変数: SUPABASE_URL = ${EnvConfig.supabaseUrl}');
   AppLogger.instance.i('環境変数: APP_ENV = ${EnvConfig.appEnv}');
   AppLogger.instance.i('環境変数: DEBUG_MODE = ${EnvConfig.isDebugMode}');
 
-  // UIのレンダリングを最適化
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
@@ -32,7 +29,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Goal Timer',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
