@@ -3,6 +3,7 @@ import 'package:goal_timer/core/models/goals/goals_model.dart';
 import 'package:goal_timer/core/provider/supabase/goals/goals_provider.dart';
 import 'package:goal_timer/features/goal_detail_setting/domain/entities/goal_detail.dart';
 import 'package:goal_timer/features/goal_detail_setting/presentation/viewmodels/goal_detail_view_model.dart';
+import 'package:goal_timer/core/usecases/supabase/goals/fetch_goals_usecase.dart';
 
 // ホーム画面の状態を管理するプロバイダー
 final homeViewModelProvider = StateNotifierProvider<HomeViewModel, HomeState>((
@@ -131,19 +132,28 @@ class HomeViewModel extends StateNotifier<HomeState> {
 
   // Supabaseから目標を読み込む
   void _loadGoalsFromSupabase() {
-    // goalsListProviderを監視して、データが変更されたら目標リストを更新
+    state = state.copyWith(isLoading: true);
+
+    // 1. ユースケースのインスタンスを取得
+    final fetchGoalsUsecase = _ref.read(fetchGoalsUsecaseProvider);
+
+    // 2. goalsListProviderの監視を設定
     _ref.listen(goalsListProvider, (previous, next) {
-      next.whenData((goals) {
+      // ユースケースを呼び出してGoalsModelのリストを取得
+      fetchGoalsUsecase(next).then((goalsModels) {
+        // ViewModelでGoalItemへの変換処理を行う
         final goalItems =
-            goals.map((goal) => GoalItem.fromGoalsModel(goal)).toList();
+            goalsModels.map((goal) => GoalItem.fromGoalsModel(goal)).toList();
         state = state.copyWith(goals: goalItems, isLoading: false);
       });
     });
 
-    // 初回のデータ読み込み
-    _ref.read(goalsListProvider).whenData((goals) {
+    // 3. 初回データ読み込み
+    final initialGoalsData = _ref.read(goalsListProvider);
+    fetchGoalsUsecase(initialGoalsData).then((goalsModels) {
+      // ViewModelでGoalItemへの変換処理を行う
       final goalItems =
-          goals.map((goal) => GoalItem.fromGoalsModel(goal)).toList();
+          goalsModels.map((goal) => GoalItem.fromGoalsModel(goal)).toList();
       state = state.copyWith(goals: goalItems, isLoading: false);
     });
   }
