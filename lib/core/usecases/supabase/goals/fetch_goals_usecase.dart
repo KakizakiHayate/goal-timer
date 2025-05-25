@@ -13,8 +13,3 @@ class FetchGoalsUsecase {
     );
   }
 }
-
-// ユースケースを提供するプロバイダー
-final fetchGoalsUsecaseProvider = Provider<FetchGoalsUsecase>((ref) {
-  return FetchGoalsUsecase();
-});

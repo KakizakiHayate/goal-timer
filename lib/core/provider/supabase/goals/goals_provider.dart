@@ -3,12 +3,20 @@ import 'package:goal_timer/core/models/goals/goals_model.dart';
 import 'package:goal_timer/core/provider/providers.dart';
 import 'package:goal_timer/core/data/repositories/supabase/goals/supabase_goals_repository.dart';
 import 'package:goal_timer/core/data/datasources/supabase/goals/supabase_goals_datasource.dart';
+import 'package:goal_timer/core/usecases/supabase/goals/fetch_goals_usecase.dart';
 
-/// GoalsRepositoryプロバイダー
+// MARK: - Provider
+
 final goalsRepositoryProvider = Provider<SupabaseGoalsDatasource>((ref) {
   final client = ref.watch(supabaseClientProvider);
   return SupabaseGoalsDatasource(client);
 });
+
+final fetchGoalsUsecaseProvider = Provider<FetchGoalsUsecase>((ref) {
+  return FetchGoalsUsecase();
+});
+
+// MARK: - FutureProvider
 
 /// 全目標リストを取得するFutureProvider
 final goalsListProvider = FutureProvider<List<GoalsModel>>((ref) async {
@@ -24,6 +32,8 @@ final goalByIdProvider = FutureProvider.family<GoalsModel?, String>((
   final repository = ref.watch(goalsRepositoryProvider);
   return repository.getGoalById(id);
 });
+
+// MARK: - StateNotifierProvider
 
 /// 目標操作用のStateNotifierProvider
 final goalsNotifierProvider =
