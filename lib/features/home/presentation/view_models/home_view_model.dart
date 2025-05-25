@@ -3,14 +3,6 @@ import 'package:goal_timer/core/models/goals/goals_model.dart';
 import 'package:goal_timer/core/provider/supabase/goals/goals_provider.dart';
 import 'package:goal_timer/core/usecases/supabase/goals/fetch_goals_usecase.dart';
 
-// ホーム画面の状態を管理するプロバイダー
-final homeViewModelProvider = StateNotifierProvider<HomeViewModel, HomeState>((
-  ref,
-) {
-  return HomeViewModel(ref);
-});
-
-// ホーム画面の状態を表すクラス
 class HomeState {
   final List<GoalsModel> goals;
   final String filterType;
@@ -35,7 +27,6 @@ class HomeState {
   }
 }
 
-// ホーム画面のビューモデル
 class HomeViewModel extends StateNotifier<HomeState> {
   final Ref _ref;
 
