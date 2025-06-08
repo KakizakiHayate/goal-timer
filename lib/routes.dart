@@ -8,11 +8,14 @@ import 'package:goal_timer/features/home/presentation/screens/home_screen.dart';
 import 'package:goal_timer/features/memo_record/presentation/screens/memo_record_screen.dart';
 import 'package:goal_timer/features/statistics/presentation/screens/statistics_screen.dart';
 import 'package:goal_timer/features/settings/presentation/screens/settings_screen.dart';
+import 'package:goal_timer/core/utils/app_logger.dart';
 
 // TODO: 中規模・大規模になってきたら疎結合にすることを考える
 
 // アプリのルーティング設定
 Route<dynamic> generateRoute(RouteSettings settings) {
+  AppLogger.instance.i('ルート要求: ${settings.name}, 引数: ${settings.arguments}');
+
   switch (settings.name) {
     case RouteNames.home:
       return platformPageRoute(builder: (context) => const HomeScreen());
@@ -22,10 +25,12 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       );
     case RouteNames.timer:
       // 引数なしの場合は通常のタイマー画面
+      AppLogger.instance.i('通常タイマー画面に遷移します');
       return platformPageRoute(builder: (context) => const TimerScreen());
     // 特定の目標IDを指定したタイマー画面
     case RouteNames.timerWithGoal:
       final goalId = settings.arguments as String;
+      AppLogger.instance.i('目標付きタイマー画面に遷移します: goalId=$goalId');
       return platformPageRoute(
         builder: (context) => TimerScreen(goalId: goalId),
       );
@@ -51,10 +56,12 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return platformPageRoute(builder: (context) => const SettingsScreen());
     // 不明なルート
     default:
+      AppLogger.instance.e('不明なルートが要求されました: ${settings.name}');
       return platformPageRoute(
         builder:
-            (context) =>
-                const Scaffold(body: Center(child: Text('ページが見つかりません'))),
+            (context) => Scaffold(
+              body: Center(child: Text('ページが見つかりません: ${settings.name}')),
+            ),
       );
   }
 }

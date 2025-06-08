@@ -40,9 +40,22 @@ class MyApp extends StatelessWidget {
       ),
       debugShowCheckedModeBanner: false,
       home: const SplashScreen(),
+      routes: {
+        RouteNames.timer: (context) => const TimerScreen(),
+        // その他の引数不要なルートをここに追加
+      },
       onGenerateRoute: generateRoute,
       initialRoute: null,
-      routes: {RouteNames.timer: (context) => const TimerScreen()},
+      onUnknownRoute: (settings) {
+        AppLogger.instance.e('不明なルートが呼ばれました: ${settings.name}');
+        return MaterialPageRoute(
+          builder:
+              (context) => Scaffold(
+                appBar: AppBar(title: const Text('エラー')),
+                body: Center(child: Text('ページが見つかりません: ${settings.name}')),
+              ),
+        );
+      },
     );
   }
 }

@@ -11,6 +11,8 @@ import 'package:goal_timer/features/goal_detail/presentation/viewmodels/goal_det
 import 'package:goal_timer/features/goal_detail/presentation/screens/goal_edit_modal.dart';
 import 'package:goal_timer/features/home/provider/home_provider.dart';
 import 'package:goal_timer/features/statistics/presentation/screens/statistics_screen.dart';
+import 'package:goal_timer/features/goal_timer/presentation/viewmodels/timer_view_model.dart';
+import 'package:goal_timer/core/utils/app_logger.dart';
 
 part '../widgets/add_goal_modal.dart';
 part '../widgets/filter_bar_widget.dart';
@@ -122,6 +124,17 @@ class _HomeScreen extends ConsumerWidget {
       ),
     );
   }
+
+  // 進捗に応じた色を取得
+  Color _getProgressColor(double progress) {
+    if (progress < 0.3) {
+      return Colors.red;
+    } else if (progress < 0.7) {
+      return Colors.orange;
+    } else {
+      return Colors.green;
+    }
+  }
 }
 
 // タイマーページウィジェット
@@ -164,78 +177,96 @@ class _TimerPage extends ConsumerWidget {
                     final goal = goals[index];
                     return Card(
                       margin: const EdgeInsets.only(bottom: 12.0),
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.all(16.0),
-                        title: Text(
-                          goal.title,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 8),
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 8,
-                                horizontal: 10,
-                              ),
-                              margin: const EdgeInsets.only(bottom: 8),
-                              decoration: BoxDecoration(
-                                color: Colors.red.shade50,
-                                borderRadius: BorderRadius.circular(4),
-                                border: Border.all(color: Colors.red.shade200),
-                              ),
-                              child: Row(
+                      child: InkWell(
+                        onTap: () {
+                          // 選択した目標IDでタイマー画面に遷移（直接ルート方式）
+                          AppLogger.instance.i(
+                            '目標付きタイマーに遷移します: ID=${goal.id}（直接ルート方式）',
+                          );
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => TimerScreen(goalId: goal.id),
+                            ),
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(12),
+                        splashColor: ColorConsts.primary.withOpacity(0.1),
+                        highlightColor: ColorConsts.primary.withOpacity(0.05),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
                                 children: [
-                                  const Icon(
-                                    Icons.warning_amber_rounded,
-                                    color: Colors.red,
-                                    size: 16,
-                                  ),
-                                  const SizedBox(width: 6),
                                   Expanded(
                                     child: Text(
-                                      goal.avoidMessage,
-                                      style: TextStyle(
-                                        color: Colors.red.shade900,
-                                        fontSize: 13,
+                                      goal.title,
+                                      style: const TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        fontStyle: FontStyle.italic,
+                                        fontSize: 18,
                                       ),
                                     ),
                                   ),
+                                  const Icon(
+                                    Icons.timer,
+                                    color: ColorConsts.primary,
+                                  ),
                                 ],
                               ),
-                            ),
-                            Text(
-                              '達成率: ${(goal.getProgressRate() * 100).toStringAsFixed(1)}%',
-                            ),
-                            const SizedBox(height: 4),
-                            LinearProgressIndicator(
-                              value: goal.getProgressRate(),
-                              backgroundColor: Colors.grey[200],
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                _getProgressColor(goal.getProgressRate()),
+                              const SizedBox(height: 8),
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 8,
+                                  horizontal: 10,
+                                ),
+                                margin: const EdgeInsets.only(bottom: 8),
+                                decoration: BoxDecoration(
+                                  color: Colors.red.shade50,
+                                  borderRadius: BorderRadius.circular(4),
+                                  border: Border.all(
+                                    color: Colors.red.shade200,
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.warning_amber_rounded,
+                                      color: Colors.red,
+                                      size: 16,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Expanded(
+                                      child: Text(
+                                        goal.avoidMessage,
+                                        style: TextStyle(
+                                          color: Colors.red.shade900,
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.bold,
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                              Text(
+                                '達成率: ${(goal.getProgressRate() * 100).toStringAsFixed(1)}%',
+                              ),
+                              const SizedBox(height: 4),
+                              LinearProgressIndicator(
+                                value: goal.getProgressRate(),
+                                backgroundColor: Colors.grey[200],
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  _getProgressColor(goal.getProgressRate()),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        trailing: const Icon(
-                          Icons.timer,
-                          color: ColorConsts.primary,
-                        ),
-                        onTap: () {
-                          // 選択した目標IDでタイマー画面に遷移
-                          Navigator.pushNamed(
-                            context,
-                            RouteNames.timerWithGoal,
-                            arguments: goal.id,
-                          );
-                        },
                       ),
                     );
                   },
@@ -246,7 +277,13 @@ class _TimerPage extends ConsumerWidget {
                 child: ElevatedButton(
                   onPressed: () {
                     // 目標なしでタイマー画面に遷移
-                    Navigator.pushNamed(context, RouteNames.timer);
+                    AppLogger.instance.i('目標なしタイマーに遷移します（直接ルート方式）');
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const TimerScreen(),
+                      ),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.grey[400],

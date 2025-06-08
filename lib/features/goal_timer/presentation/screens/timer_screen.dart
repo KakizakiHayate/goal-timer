@@ -10,11 +10,19 @@ import 'package:goal_timer/core/utils/app_logger.dart';
 
 class TimerScreen extends ConsumerWidget {
   final String? goalId;
+  // 一度だけログを出力するための変数
+  static final Set<String?> _loggedGoalIds = {};
 
   const TimerScreen({super.key, this.goalId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // 同じgoalIdに対して一度だけログを出力する
+    if (!_loggedGoalIds.contains(goalId)) {
+      AppLogger.instance.i('TimerScreen: goalId=$goalId');
+      _loggedGoalIds.add(goalId);
+    }
+
     final timerState = ref.watch(timerViewModelProvider);
     final timerViewModel = ref.read(timerViewModelProvider.notifier);
 
@@ -51,47 +59,52 @@ class TimerScreen extends ConsumerWidget {
       backgroundColor: Colors.white,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // 目標情報を表示（存在する場合）
-            if (goalId != null) ...[
-              goalAsyncValue.when(
-                data: (goalDetail) {
-                  if (goalDetail == null) {
-                    return const Text('目標情報の取得に失敗しました');
-                  }
-                  return _buildGoalInfo(context, goalDetail);
-                },
-                loading: () => const CircularProgressIndicator(),
-                error: (_, __) => const Text('目標情報の取得に失敗しました'),
-              ),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              // 目標情報とavoidMessageバナーは、goalIdがあり、かつカウントアップモードの場合のみ表示
+              if (goalId != null && timerState.mode == TimerMode.countup) ...[
+                goalAsyncValue.when(
+                  data: (goalDetail) {
+                    if (goalDetail == null) {
+                      return const Text('目標情報の取得に失敗しました');
+                    }
+                    return _buildGoalInfo(context, goalDetail);
+                  },
+                  loading: () => const CircularProgressIndicator(),
+                  error: (_, __) => const Text('目標情報の取得に失敗しました'),
+                ),
+                const SizedBox(height: 20),
+
+                // 避けたい未来メッセージを表示
+                goalAsyncValue.when(
+                  data: (goalDetail) {
+                    if (goalDetail == null) {
+                      return const SizedBox.shrink();
+                    }
+                    return _buildAvoidMessageBanner(
+                      context,
+                      goalDetail,
+                      isTimeRunningOut: isTimeRunningOut,
+                    );
+                  },
+                  loading: () => const SizedBox.shrink(),
+                  error: (_, __) => const SizedBox.shrink(),
+                ),
+                const SizedBox(height: 30),
+              ],
+
+              // タイマー関連のUI
+              _buildModeSwitcher(context, timerState, timerViewModel),
+              const SizedBox(height: 30),
+              _buildTimerDisplay(context, timerState),
+              const SizedBox(height: 30),
+              _buildControlButtons(context, timerState, timerViewModel),
+
+              // 下部に余白を追加
               const SizedBox(height: 20),
             ],
-            _buildModeSwitcher(context, timerState, timerViewModel),
-            const SizedBox(height: 40),
-            _buildTimerDisplay(context, timerState),
-            const SizedBox(height: 40),
-            // 目標IDがある場合、避けたい未来メッセージを大きく表示
-            if (goalId != null) ...[
-              goalAsyncValue.when(
-                data: (goalDetail) {
-                  if (goalDetail == null) {
-                    return const SizedBox.shrink();
-                  }
-                  return _buildAvoidMessageBanner(
-                    context,
-                    goalDetail,
-                    isTimeRunningOut: isTimeRunningOut,
-                  );
-                },
-                loading: () => const SizedBox.shrink(),
-                error: (_, __) => const SizedBox.shrink(),
-              ),
-              const SizedBox(height: 30),
-            ],
-            _buildControlButtons(context, timerState, timerViewModel),
-          ],
+          ),
         ),
       ),
     );
@@ -130,45 +143,6 @@ class TimerScreen extends ConsumerWidget {
           Text(
             '期限: ${_formatDate(goal.deadline)}',
             style: const TextStyle(fontSize: 14, color: Colors.black54),
-          ),
-          const SizedBox(height: 16),
-          // 避けたい未来（avoidMessage）を強調表示
-          Container(
-            padding: const EdgeInsets.all(12),
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: Colors.red.shade50,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.red.shade300, width: 1.5),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Row(
-                  children: [
-                    Icon(Icons.warning_amber, color: Colors.red, size: 20),
-                    SizedBox(width: 6),
-                    Text(
-                      '避けたい未来',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.red,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  goal.avoidMessage,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontStyle: FontStyle.italic,
-                    color: Colors.black87,
-                  ),
-                ),
-              ],
-            ),
           ),
         ],
       ),
