@@ -8,4 +8,8 @@ final class RouteNames {
   static const String statistics = '/statistics';
   static const String memoRecordWithGoal = '/memo-record-with-goal';
   static const String settings = '/settings';
+
+  // デバッグ画面
+  static const String syncDebug = '/debug/sync';
+  static const String sqliteViewer = '/debug/sqlite-viewer';
 }

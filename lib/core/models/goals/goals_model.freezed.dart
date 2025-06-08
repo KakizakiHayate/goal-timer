@@ -47,6 +47,15 @@ mixin _$GoalsModel {
   /// 実際に使った時間（分単位）
   int get spentMinutes => throw _privateConstructorUsedError;
 
+  /// 最終更新日時
+  DateTime? get updatedAt => throw _privateConstructorUsedError;
+
+  /// バージョン番号
+  int get version => throw _privateConstructorUsedError;
+
+  /// 同期状態（ローカルDBのみで使用）
+  bool get isSynced => throw _privateConstructorUsedError;
+
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
   $GoalsModelCopyWith<GoalsModel> get copyWith =>
@@ -68,7 +77,10 @@ abstract class $GoalsModelCopyWith<$Res> {
       bool isCompleted,
       String avoidMessage,
       int totalTargetHours,
-      int spentMinutes});
+      int spentMinutes,
+      DateTime? updatedAt,
+      int version,
+      bool isSynced});
 }
 
 /// @nodoc
@@ -93,6 +105,9 @@ class _$GoalsModelCopyWithImpl<$Res, $Val extends GoalsModel>
     Object? avoidMessage = null,
     Object? totalTargetHours = null,
     Object? spentMinutes = null,
+    Object? updatedAt = freezed,
+    Object? version = null,
+    Object? isSynced = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -131,6 +146,18 @@ class _$GoalsModelCopyWithImpl<$Res, $Val extends GoalsModel>
           ? _value.spentMinutes
           : spentMinutes // ignore: cast_nullable_to_non_nullable
               as int,
+      updatedAt: freezed == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      version: null == version
+          ? _value.version
+          : version // ignore: cast_nullable_to_non_nullable
+              as int,
+      isSynced: null == isSynced
+          ? _value.isSynced
+          : isSynced // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -152,7 +179,10 @@ abstract class _$$GoalsModelImplCopyWith<$Res>
       bool isCompleted,
       String avoidMessage,
       int totalTargetHours,
-      int spentMinutes});
+      int spentMinutes,
+      DateTime? updatedAt,
+      int version,
+      bool isSynced});
 }
 
 /// @nodoc
@@ -175,6 +205,9 @@ class __$$GoalsModelImplCopyWithImpl<$Res>
     Object? avoidMessage = null,
     Object? totalTargetHours = null,
     Object? spentMinutes = null,
+    Object? updatedAt = freezed,
+    Object? version = null,
+    Object? isSynced = null,
   }) {
     return _then(_$GoalsModelImpl(
       id: null == id
@@ -213,6 +246,18 @@ class __$$GoalsModelImplCopyWithImpl<$Res>
           ? _value.spentMinutes
           : spentMinutes // ignore: cast_nullable_to_non_nullable
               as int,
+      updatedAt: freezed == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      version: null == version
+          ? _value.version
+          : version // ignore: cast_nullable_to_non_nullable
+              as int,
+      isSynced: null == isSynced
+          ? _value.isSynced
+          : isSynced // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -229,7 +274,10 @@ class _$GoalsModelImpl implements _GoalsModel {
       required this.isCompleted,
       required this.avoidMessage,
       required this.totalTargetHours,
-      required this.spentMinutes});
+      required this.spentMinutes,
+      this.updatedAt = null,
+      this.version = 1,
+      this.isSynced = false});
 
   factory _$GoalsModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$GoalsModelImplFromJson(json);
@@ -270,9 +318,24 @@ class _$GoalsModelImpl implements _GoalsModel {
   @override
   final int spentMinutes;
 
+  /// 最終更新日時
+  @override
+  @JsonKey()
+  final DateTime? updatedAt;
+
+  /// バージョン番号
+  @override
+  @JsonKey()
+  final int version;
+
+  /// 同期状態（ローカルDBのみで使用）
+  @override
+  @JsonKey()
+  final bool isSynced;
+
   @override
   String toString() {
-    return 'GoalsModel(id: $id, userId: $userId, title: $title, description: $description, deadline: $deadline, isCompleted: $isCompleted, avoidMessage: $avoidMessage, totalTargetHours: $totalTargetHours, spentMinutes: $spentMinutes)';
+    return 'GoalsModel(id: $id, userId: $userId, title: $title, description: $description, deadline: $deadline, isCompleted: $isCompleted, avoidMessage: $avoidMessage, totalTargetHours: $totalTargetHours, spentMinutes: $spentMinutes, updatedAt: $updatedAt, version: $version, isSynced: $isSynced)';
   }
 
   @override
@@ -294,13 +357,30 @@ class _$GoalsModelImpl implements _GoalsModel {
             (identical(other.totalTargetHours, totalTargetHours) ||
                 other.totalTargetHours == totalTargetHours) &&
             (identical(other.spentMinutes, spentMinutes) ||
-                other.spentMinutes == spentMinutes));
+                other.spentMinutes == spentMinutes) &&
+            (identical(other.updatedAt, updatedAt) ||
+                other.updatedAt == updatedAt) &&
+            (identical(other.version, version) || other.version == version) &&
+            (identical(other.isSynced, isSynced) ||
+                other.isSynced == isSynced));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, id, userId, title, description,
-      deadline, isCompleted, avoidMessage, totalTargetHours, spentMinutes);
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      userId,
+      title,
+      description,
+      deadline,
+      isCompleted,
+      avoidMessage,
+      totalTargetHours,
+      spentMinutes,
+      updatedAt,
+      version,
+      isSynced);
 
   @JsonKey(ignore: true)
   @override
@@ -326,7 +406,10 @@ abstract class _GoalsModel implements GoalsModel {
       required final bool isCompleted,
       required final String avoidMessage,
       required final int totalTargetHours,
-      required final int spentMinutes}) = _$GoalsModelImpl;
+      required final int spentMinutes,
+      final DateTime? updatedAt,
+      final int version,
+      final bool isSynced}) = _$GoalsModelImpl;
 
   factory _GoalsModel.fromJson(Map<String, dynamic> json) =
       _$GoalsModelImpl.fromJson;
@@ -367,6 +450,18 @@ abstract class _GoalsModel implements GoalsModel {
 
   /// 実際に使った時間（分単位）
   int get spentMinutes;
+  @override
+
+  /// 最終更新日時
+  DateTime? get updatedAt;
+  @override
+
+  /// バージョン番号
+  int get version;
+  @override
+
+  /// 同期状態（ローカルDBのみで使用）
+  bool get isSynced;
   @override
   @JsonKey(ignore: true)
   _$$GoalsModelImplCopyWith<_$GoalsModelImpl> get copyWith =>

@@ -17,7 +17,6 @@ class TimerScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // 同じgoalIdに対して一度だけログを出力する
     if (!_loggedGoalIds.contains(goalId)) {
       AppLogger.instance.i('TimerScreen: goalId=$goalId');
       _loggedGoalIds.add(goalId);
@@ -49,7 +48,7 @@ class TimerScreen extends ConsumerWidget {
       ),
       backgroundColor: Colors.white,
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: SingleChildScrollView(
           child: Column(
             children: [

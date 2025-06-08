@@ -33,6 +33,15 @@ class GoalsModel with _$GoalsModel {
 
     /// 実際に使った時間（分単位）
     required int spentMinutes,
+
+    /// 最終更新日時
+    @Default(null) DateTime? updatedAt,
+
+    /// バージョン番号
+    @Default(1) int version,
+
+    /// 同期状態（ローカルDBのみで使用）
+    @Default(false) bool isSynced,
   }) = _GoalsModel;
 
   /// Supabaseからのデータを元にGoalsModelを生成
@@ -83,6 +92,38 @@ class GoalsModel with _$GoalsModel {
       parsedSpentMinutes = 0;
     }
 
+    // updatedAtの変換
+    DateTime? parsedUpdatedAt;
+    if (map['updated_at'] != null) {
+      if (map['updated_at'] is String) {
+        parsedUpdatedAt = DateTime.parse(map['updated_at']);
+      } else if (map['updated_at'] is DateTime) {
+        parsedUpdatedAt = map['updated_at'];
+      }
+    }
+
+    // バージョンの変換
+    int parsedVersion = 1;
+    if (map['version'] != null) {
+      if (map['version'] is int) {
+        parsedVersion = map['version'];
+      } else if (map['version'] is String) {
+        parsedVersion = int.tryParse(map['version']) ?? 1;
+      }
+    }
+
+    // 同期状態の変換
+    bool parsedIsSynced = false;
+    if (map['is_synced'] != null) {
+      if (map['is_synced'] is bool) {
+        parsedIsSynced = map['is_synced'];
+      } else if (map['is_synced'] is int) {
+        parsedIsSynced = map['is_synced'] == 1;
+      } else if (map['is_synced'] is String) {
+        parsedIsSynced = map['is_synced'] == 'true' || map['is_synced'] == '1';
+      }
+    }
+
     return GoalsModel(
       id: map['id'] ?? '',
       userId: map['user_id'] ?? '',
@@ -93,6 +134,9 @@ class GoalsModel with _$GoalsModel {
       avoidMessage: map['avoid_message'] ?? '',
       totalTargetHours: parsedTotalTargetHours,
       spentMinutes: parsedSpentMinutes,
+      updatedAt: parsedUpdatedAt,
+      version: parsedVersion,
+      isSynced: parsedIsSynced,
     );
   }
 }
@@ -100,7 +144,7 @@ class GoalsModel with _$GoalsModel {
 extension GoalsModelExtension on GoalsModel {
   /// SupabaseへのInsert/Update用のMapに変換
   Map<String, dynamic> toMap() {
-    return {
+    final map = {
       'id': id,
       'user_id': userId,
       'title': title,
@@ -111,6 +155,14 @@ extension GoalsModelExtension on GoalsModel {
       'total_target_hours': totalTargetHours,
       'spent_minutes': spentMinutes,
     };
+
+    // 同期関連フィールドを追加
+    if (this.updatedAt != null) {
+      map['updated_at'] = this.updatedAt!.toIso8601String();
+    }
+    map['version'] = this.version;
+
+    return map;
   }
 
   /// 残り時間を文字列で取得

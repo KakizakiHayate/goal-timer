@@ -8,7 +8,9 @@ import 'package:goal_timer/core/utils/app_logger.dart';
 
 class SupabaseDatasource implements SupabaseRepository {
   bool _initialized = false;
-  static late final SupabaseClient client;
+  final SupabaseClient client;
+
+  SupabaseDatasource({required this.client});
 
   @override
   Future<void> initialize() async {
@@ -23,11 +25,6 @@ class SupabaseDatasource implements SupabaseRepository {
         throw Exception('Supabase環境変数が設定されていません');
       }
 
-      // Supabaseの初期化
-      await Supabase.initialize(url: supabaseUrl, anonKey: supabaseAnonKey);
-
-      // クライアントインスタンスを保持
-      client = Supabase.instance.client;
       _initialized = true;
 
       AppLogger.instance.i('Supabase initialized successfully');
@@ -69,8 +66,6 @@ class SupabaseDatasource implements SupabaseRepository {
         AppLogger.instance.w('⚠️ Supabase環境変数が正しく設定されていません');
         return false;
       }
-
-      final client = ref.read(supabaseClientProvider);
 
       // 接続テスト方法1: 単純なRPC呼び出し（認証不要）
       try {

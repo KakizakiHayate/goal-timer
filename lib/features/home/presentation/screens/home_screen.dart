@@ -14,6 +14,7 @@ import 'package:goal_timer/features/statistics/presentation/screens/statistics_s
 import 'package:goal_timer/features/goal_timer/presentation/viewmodels/timer_view_model.dart';
 import 'package:goal_timer/core/utils/app_logger.dart';
 import 'package:goal_timer/features/settings/presentation/screens/settings_screen.dart';
+import 'package:goal_timer/core/provider/providers.dart';
 
 part '../widgets/add_goal_modal.dart';
 part '../widgets/filter_bar_widget.dart';
@@ -29,11 +30,34 @@ final _pages = [
   const StatisticsScreen(),
 ];
 
-class HomeScreen extends ConsumerWidget {
+// StatefulWidgetに変更
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  HomeScreenState createState() => HomeScreenState();
+}
+
+class HomeScreenState extends ConsumerState<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    // ウィジェットの描画後に実行
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Goals同期
+      ref.read(hybridGoalsRepositoryProvider).syncWithRemote();
+
+      // ユーザー同期
+      ref.read(hybridUsersRepositoryProvider).syncWithRemote();
+
+      // 学習記録同期
+      ref.read(hybridDailyStudyLogsRepositoryProvider).syncWithRemote();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final currentIndex = ref.watch(homeTabIndexProvider);
 
     return Scaffold(
@@ -60,6 +84,18 @@ class _HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final homeState = ref.watch(homeViewModelProvider);
     final homeViewModel = ref.read(homeViewModelProvider.notifier);
+
+    // 初回レンダリング時にリモートデータの同期を実行
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Goals同期
+      ref.read(hybridGoalsRepositoryProvider).syncWithRemote();
+
+      // ユーザー同期
+      ref.read(hybridUsersRepositoryProvider).syncWithRemote();
+
+      // 学習記録同期
+      ref.read(hybridDailyStudyLogsRepositoryProvider).syncWithRemote();
+    });
 
     return Scaffold(
       backgroundColor: ColorConsts.background,

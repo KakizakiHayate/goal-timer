@@ -17,6 +17,11 @@ _$GoalsModelImpl _$$GoalsModelImplFromJson(Map<String, dynamic> json) =>
       avoidMessage: json['avoidMessage'] as String,
       totalTargetHours: json['totalTargetHours'] as int,
       spentMinutes: json['spentMinutes'] as int,
+      updatedAt: json['updatedAt'] == null
+          ? null
+          : DateTime.parse(json['updatedAt'] as String),
+      version: json['version'] as int? ?? 1,
+      isSynced: json['isSynced'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$$GoalsModelImplToJson(_$GoalsModelImpl instance) =>
@@ -30,4 +35,7 @@ Map<String, dynamic> _$$GoalsModelImplToJson(_$GoalsModelImpl instance) =>
       'avoidMessage': instance.avoidMessage,
       'totalTargetHours': instance.totalTargetHours,
       'spentMinutes': instance.spentMinutes,
+      'updatedAt': instance.updatedAt?.toIso8601String(),
+      'version': instance.version,
+      'isSynced': instance.isSynced,
     };

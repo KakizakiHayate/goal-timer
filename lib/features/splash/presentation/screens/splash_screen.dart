@@ -17,7 +17,7 @@ class SplashScreen extends ConsumerWidget {
       Future.delayed(Duration.zero, () {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const AppRouter()),
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
         );
       });
     }
@@ -85,7 +85,7 @@ class SplashScreen extends ConsumerWidget {
                   message,
                   overflow: TextOverflow.visible,
                   softWrap: true,
-                )
+                ),
               ),
             ],
           ),
@@ -103,10 +103,7 @@ class SplashScreen extends ConsumerWidget {
                       color: Colors.grey[200],
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: Text(
-                      details,
-                      style: const TextStyle(fontSize: 14),
-                    ),
+                    child: Text(details, style: const TextStyle(fontSize: 14)),
                   ),
                 ],
                 const SizedBox(height: 16),
@@ -155,20 +152,6 @@ class SplashScreen extends ConsumerWidget {
           ],
         );
       },
-    );
-  }
-}
-
-class AppRouter extends StatelessWidget {
-  const AppRouter({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Goal Timer',
-      theme: Theme.of(context),
-      debugShowCheckedModeBanner: false,
-      home: const HomeScreen(),
     );
   }
 }
