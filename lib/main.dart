@@ -39,13 +39,8 @@ class MyApp extends StatelessWidget {
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       debugShowCheckedModeBanner: false,
-      home: const SplashScreen(),
-      routes: {
-        RouteNames.timer: (context) => const TimerScreen(),
-        // その他の引数不要なルートをここに追加
-      },
+      initialRoute: '/',
       onGenerateRoute: generateRoute,
-      initialRoute: null,
       onUnknownRoute: (settings) {
         AppLogger.instance.e('不明なルートが呼ばれました: ${settings.name}');
         return MaterialPageRoute(

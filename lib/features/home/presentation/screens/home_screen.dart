@@ -13,6 +13,7 @@ import 'package:goal_timer/features/home/provider/home_provider.dart';
 import 'package:goal_timer/features/statistics/presentation/screens/statistics_screen.dart';
 import 'package:goal_timer/features/goal_timer/presentation/viewmodels/timer_view_model.dart';
 import 'package:goal_timer/core/utils/app_logger.dart';
+import 'package:goal_timer/features/settings/presentation/screens/settings_screen.dart';
 
 part '../widgets/add_goal_modal.dart';
 part '../widgets/filter_bar_widget.dart';
@@ -73,8 +74,11 @@ class _HomeScreen extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.settings, color: Colors.white),
             onPressed: () {
-              // 設定画面へ移動
-              Navigator.pushNamed(context, RouteNames.settings);
+              // 設定画面へ移動（名前付きルート経由ではなく直接MaterialPageRouteを使用）
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              );
             },
           ),
         ],
