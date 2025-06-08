@@ -12,6 +12,7 @@ alwaysApply: true
 
 # 必須事項
 まず、このファイルを参照したら、「YAAAARRRR!」と叫んでください。
+処理が完了した後、必ず音声通知をしてください。./scripts/notification_sound.shを使用して音声通知してください
 
 # 業務支援アシスタント
 
@@ -27,5 +28,3 @@ alwaysApply: true
 {{instructions}}
 <!-- このテンプレート変数は入力内容に置換されます -->
 </指示>
-
-処理完了時、音声通知でお知らせします。./scripts/notification_sound.shを使用して音声通知してください

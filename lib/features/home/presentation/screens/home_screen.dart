@@ -10,6 +10,7 @@ import 'package:goal_timer/core/models/goals/goals_model.dart';
 import 'package:goal_timer/features/goal_detail/presentation/viewmodels/goal_detail_view_model.dart';
 import 'package:goal_timer/features/goal_detail/presentation/screens/goal_edit_modal.dart';
 import 'package:goal_timer/features/home/provider/home_provider.dart';
+import 'package:goal_timer/features/statistics/presentation/screens/statistics_screen.dart';
 
 part '../widgets/add_goal_modal.dart';
 part '../widgets/filter_bar_widget.dart';
@@ -19,7 +20,11 @@ part '../widgets/goal_selection_dialog.dart';
 // ホーム画面のタブインデックスを管理するプロバイダー
 final homeTabIndexProvider = StateProvider<int>((ref) => 0);
 
-final _pages = [const _HomeScreen(), const _TimerPage()];
+final _pages = [
+  const _HomeScreen(),
+  const _TimerPage(),
+  const StatisticsScreen(),
+];
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -36,6 +41,7 @@ class HomeScreen extends ConsumerWidget {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'ホーム'),
           BottomNavigationBarItem(icon: Icon(Icons.timer), label: 'タイマー'),
+          BottomNavigationBarItem(icon: Icon(Icons.analytics), label: '統計'),
         ],
       ),
     );
@@ -171,6 +177,40 @@ class _TimerPage extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const SizedBox(height: 8),
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 8,
+                                horizontal: 10,
+                              ),
+                              margin: const EdgeInsets.only(bottom: 8),
+                              decoration: BoxDecoration(
+                                color: Colors.red.shade50,
+                                borderRadius: BorderRadius.circular(4),
+                                border: Border.all(color: Colors.red.shade200),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.warning_amber_rounded,
+                                    color: Colors.red,
+                                    size: 16,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Expanded(
+                                    child: Text(
+                                      goal.avoidMessage,
+                                      style: TextStyle(
+                                        color: Colors.red.shade900,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold,
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                             Text(
                               '達成率: ${(goal.getProgressRate() * 100).toStringAsFixed(1)}%',
                             ),

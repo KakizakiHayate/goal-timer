@@ -5,6 +5,10 @@ import 'package:goal_timer/core/config/env_config.dart';
 import 'package:goal_timer/core/utils/app_logger.dart';
 import 'package:goal_timer/features/splash/presentation/screens/splash_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:goal_timer/routes.dart';
+import 'package:goal_timer/core/utils/route_names.dart';
+import 'package:goal_timer/features/goal_timer/presentation/screens/timer_screen.dart';
+import 'package:goal_timer/features/home/presentation/screens/home_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,6 +40,9 @@ class MyApp extends StatelessWidget {
       ),
       debugShowCheckedModeBanner: false,
       home: const SplashScreen(),
+      onGenerateRoute: generateRoute,
+      initialRoute: null,
+      routes: {RouteNames.timer: (context) => const TimerScreen()},
     );
   }
 }

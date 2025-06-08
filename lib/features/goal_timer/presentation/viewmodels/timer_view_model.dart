@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:goal_timer/features/goal_detail/presentation/viewmodels/goal_detail_view_model.dart';
+import 'package:goal_timer/core/utils/app_logger.dart';
 
 // タイマーの状態を管理するプロバイダー
 final timerViewModelProvider =
@@ -154,10 +155,24 @@ class TimerViewModel extends StateNotifier<TimerState> {
             : _elapsedSeconds ~/ 60; // 経過した時間（分）
 
     if (studyMinutes > 0 && state.goalId != null) {
+      AppLogger.instance.i(
+        'タイマー完了: 目標ID ${state.goalId} に $studyMinutes 分を追加します',
+      );
+
       // 目標の学習時間を更新
       _ref
           .read(goalDetailViewModelProvider.notifier)
-          .addStudyTime(state.goalId!, studyMinutes);
+          .addStudyTime(state.goalId!, studyMinutes)
+          .then((_) {
+            AppLogger.instance.i('学習時間の更新が完了しました');
+          })
+          .catchError((error) {
+            AppLogger.instance.e('学習時間の更新に失敗しました: $error');
+          });
+    } else {
+      AppLogger.instance.w(
+        '学習時間の更新条件を満たしていません: 学習時間=$studyMinutes分, 目標ID=${state.goalId}',
+      );
     }
   }
 

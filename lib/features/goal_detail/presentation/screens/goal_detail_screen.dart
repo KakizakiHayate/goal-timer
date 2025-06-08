@@ -7,6 +7,8 @@ import 'package:goal_timer/features/goal_detail/presentation/viewmodels/goal_det
 import 'package:fl_chart/fl_chart.dart';
 import 'package:goal_timer/features/goal_detail/presentation/screens/goal_edit_modal.dart';
 import 'package:goal_timer/core/utils/route_names.dart';
+import 'package:goal_timer/core/utils/app_logger.dart';
+import 'package:goal_timer/features/goal_timer/presentation/screens/timer_screen.dart';
 
 /// 目標IDを使用して詳細データを取得する画面
 class GoalDetailScreen extends ConsumerWidget {
@@ -365,10 +367,13 @@ class GoalDetailScreen extends ConsumerWidget {
         // タイマー開始ボタン
         ElevatedButton.icon(
           onPressed: () {
-            Navigator.pushNamed(
+            AppLogger.instance.i('タイマー開始ボタンが押されました。目標ID: ${goalDetail.id}');
+            // ルート名による遷移の代わりに、直接画面遷移を行う
+            Navigator.push(
               context,
-              RouteNames.timerWithGoal,
-              arguments: goalDetail.id,
+              MaterialPageRoute(
+                builder: (context) => TimerScreen(goalId: goalDetail.id),
+              ),
             );
           },
           icon: const Icon(Icons.timer, color: Colors.white),
@@ -873,10 +878,13 @@ class GoalDetailScreenWithData extends ConsumerWidget {
         // タイマー開始ボタン
         ElevatedButton.icon(
           onPressed: () {
-            Navigator.pushNamed(
+            AppLogger.instance.i('タイマー開始ボタンが押されました。目標ID: ${goalDetail.id}');
+            // ルート名による遷移の代わりに、直接画面遷移を行う
+            Navigator.push(
               context,
-              RouteNames.timerWithGoal,
-              arguments: goalDetail.id,
+              MaterialPageRoute(
+                builder: (context) => TimerScreen(goalId: goalDetail.id),
+              ),
             );
           },
           icon: const Icon(Icons.timer, color: Colors.white),
