@@ -1,4 +1,5 @@
-import 'package:goal_timer/core/repositories/daily_study_log_repository.dart';
+import 'package:goal_timer/core/data/repositories/hybrid/daily_study_logs/hybrid_daily_study_logs_repository.dart';
+import 'package:goal_timer/core/models/daily_study_logs/daily_study_log_model.dart';
 import 'package:goal_timer/features/statistics/domain/entities/daily_stats.dart';
 import 'package:goal_timer/features/statistics/domain/entities/statistics.dart';
 import 'package:goal_timer/features/statistics/domain/repositories/statistics_repository.dart';
@@ -6,9 +7,10 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:goal_timer/core/utils/app_logger.dart';
 
 class StatisticsRepositoryImpl implements StatisticsRepository {
-  final DailyStudyLogRepository _dailyStudyLogRepository =
-      DailyStudyLogRepository();
+  final HybridDailyStudyLogsRepository _dailyStudyLogRepository;
   final SupabaseClient _client = Supabase.instance.client;
+
+  StatisticsRepositoryImpl(this._dailyStudyLogRepository);
 
   @override
   Future<List<Statistics>> getStatistics({
@@ -26,9 +28,9 @@ class StatisticsRepositoryImpl implements StatisticsRepository {
       );
 
       // 日付ごとにグループ化
-      final Map<String, List<Map<String, dynamic>>> logsByDate = {};
+      final Map<String, List<DailyStudyLogModel>> logsByDate = {};
       for (var log in dailyLogs) {
-        final dateStr = log['date'] as String;
+        final dateStr = log.date.toIso8601String().split('T')[0];
         logsByDate.putIfAbsent(dateStr, () => []).add(log);
       }
 
@@ -43,8 +45,8 @@ class StatisticsRepositoryImpl implements StatisticsRepository {
         final Set<String> uniqueGoalIds = {};
 
         for (var log in entry.value) {
-          totalMinutes += log['minutes'] as int;
-          uniqueGoalIds.add(log['goal_id'] as String);
+          totalMinutes += log.minutes;
+          uniqueGoalIds.add(log.goalId);
         }
 
         goalCount = uniqueGoalIds.length;
@@ -84,8 +86,8 @@ class StatisticsRepositoryImpl implements StatisticsRepository {
       final Set<String> uniqueGoalIds = {};
 
       for (var log in logs) {
-        totalMinutes += log['minutes'] as int;
-        uniqueGoalIds.add(log['goal_id'] as String);
+        totalMinutes += log.minutes;
+        uniqueGoalIds.add(log.goalId);
       }
 
       return Statistics(
@@ -126,8 +128,8 @@ class StatisticsRepositoryImpl implements StatisticsRepository {
 
       // 目標IDごとに学習時間を集計
       for (var log in logs) {
-        final goalId = log['goal_id'] as String;
-        final minutes = log['minutes'] as int;
+        final goalId = log.goalId;
+        final minutes = log.minutes;
 
         totalMinutes += minutes;
         goalMinutes[goalId] = (goalMinutes[goalId] ?? 0) + minutes;

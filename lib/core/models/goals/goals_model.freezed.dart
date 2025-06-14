@@ -50,9 +50,6 @@ mixin _$GoalsModel {
   /// 最終更新日時
   DateTime? get updatedAt => throw _privateConstructorUsedError;
 
-  /// バージョン番号
-  int get version => throw _privateConstructorUsedError;
-
   /// 同期状態（ローカルDBのみで使用）
   bool get isSynced => throw _privateConstructorUsedError;
 
@@ -79,7 +76,6 @@ abstract class $GoalsModelCopyWith<$Res> {
       int totalTargetHours,
       int spentMinutes,
       DateTime? updatedAt,
-      int version,
       bool isSynced});
 }
 
@@ -106,7 +102,6 @@ class _$GoalsModelCopyWithImpl<$Res, $Val extends GoalsModel>
     Object? totalTargetHours = null,
     Object? spentMinutes = null,
     Object? updatedAt = freezed,
-    Object? version = null,
     Object? isSynced = null,
   }) {
     return _then(_value.copyWith(
@@ -150,10 +145,6 @@ class _$GoalsModelCopyWithImpl<$Res, $Val extends GoalsModel>
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime?,
-      version: null == version
-          ? _value.version
-          : version // ignore: cast_nullable_to_non_nullable
-              as int,
       isSynced: null == isSynced
           ? _value.isSynced
           : isSynced // ignore: cast_nullable_to_non_nullable
@@ -181,7 +172,6 @@ abstract class _$$GoalsModelImplCopyWith<$Res>
       int totalTargetHours,
       int spentMinutes,
       DateTime? updatedAt,
-      int version,
       bool isSynced});
 }
 
@@ -206,7 +196,6 @@ class __$$GoalsModelImplCopyWithImpl<$Res>
     Object? totalTargetHours = null,
     Object? spentMinutes = null,
     Object? updatedAt = freezed,
-    Object? version = null,
     Object? isSynced = null,
   }) {
     return _then(_$GoalsModelImpl(
@@ -250,10 +239,6 @@ class __$$GoalsModelImplCopyWithImpl<$Res>
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime?,
-      version: null == version
-          ? _value.version
-          : version // ignore: cast_nullable_to_non_nullable
-              as int,
       isSynced: null == isSynced
           ? _value.isSynced
           : isSynced // ignore: cast_nullable_to_non_nullable
@@ -276,7 +261,6 @@ class _$GoalsModelImpl implements _GoalsModel {
       required this.totalTargetHours,
       required this.spentMinutes,
       this.updatedAt = null,
-      this.version = 1,
       this.isSynced = false});
 
   factory _$GoalsModelImpl.fromJson(Map<String, dynamic> json) =>
@@ -323,11 +307,6 @@ class _$GoalsModelImpl implements _GoalsModel {
   @JsonKey()
   final DateTime? updatedAt;
 
-  /// バージョン番号
-  @override
-  @JsonKey()
-  final int version;
-
   /// 同期状態（ローカルDBのみで使用）
   @override
   @JsonKey()
@@ -335,7 +314,7 @@ class _$GoalsModelImpl implements _GoalsModel {
 
   @override
   String toString() {
-    return 'GoalsModel(id: $id, userId: $userId, title: $title, description: $description, deadline: $deadline, isCompleted: $isCompleted, avoidMessage: $avoidMessage, totalTargetHours: $totalTargetHours, spentMinutes: $spentMinutes, updatedAt: $updatedAt, version: $version, isSynced: $isSynced)';
+    return 'GoalsModel(id: $id, userId: $userId, title: $title, description: $description, deadline: $deadline, isCompleted: $isCompleted, avoidMessage: $avoidMessage, totalTargetHours: $totalTargetHours, spentMinutes: $spentMinutes, updatedAt: $updatedAt, isSynced: $isSynced)';
   }
 
   @override
@@ -360,7 +339,6 @@ class _$GoalsModelImpl implements _GoalsModel {
                 other.spentMinutes == spentMinutes) &&
             (identical(other.updatedAt, updatedAt) ||
                 other.updatedAt == updatedAt) &&
-            (identical(other.version, version) || other.version == version) &&
             (identical(other.isSynced, isSynced) ||
                 other.isSynced == isSynced));
   }
@@ -379,7 +357,6 @@ class _$GoalsModelImpl implements _GoalsModel {
       totalTargetHours,
       spentMinutes,
       updatedAt,
-      version,
       isSynced);
 
   @JsonKey(ignore: true)
@@ -408,7 +385,6 @@ abstract class _GoalsModel implements GoalsModel {
       required final int totalTargetHours,
       required final int spentMinutes,
       final DateTime? updatedAt,
-      final int version,
       final bool isSynced}) = _$GoalsModelImpl;
 
   factory _GoalsModel.fromJson(Map<String, dynamic> json) =
@@ -454,10 +430,6 @@ abstract class _GoalsModel implements GoalsModel {
 
   /// 最終更新日時
   DateTime? get updatedAt;
-  @override
-
-  /// バージョン番号
-  int get version;
   @override
 
   /// 同期状態（ローカルDBのみで使用）

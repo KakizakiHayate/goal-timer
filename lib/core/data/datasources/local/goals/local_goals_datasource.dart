@@ -46,7 +46,6 @@ class LocalGoalsDatasource {
               ? goal.copyWith(
                 id: const Uuid().v4(),
                 updatedAt: now,
-                version: 1,
                 isSynced: false,
               )
               : goal.copyWith(updatedAt: now, isSynced: false);
@@ -70,24 +69,8 @@ class LocalGoalsDatasource {
     try {
       final db = await _database.database;
 
-      // 現在のバージョンを取得
-      final result = await db.query(
-        _tableName,
-        columns: ['version'],
-        where: 'id = ?',
-        whereArgs: [goal.id],
-      );
-
-      final currentVersion =
-          result.isNotEmpty ? (result.first['version'] as int) : 0;
-      final newVersion = currentVersion + 1;
-
       final now = DateTime.now().toUtc();
-      final updatedGoal = goal.copyWith(
-        updatedAt: now,
-        version: newVersion,
-        isSynced: false,
-      );
+      final updatedGoal = goal.copyWith(updatedAt: now, isSynced: false);
 
       final map = _convertToMap(updatedGoal);
 
@@ -134,6 +117,27 @@ class LocalGoalsDatasource {
     }
   }
 
+  // 目標を追加または更新（同期時に使用）
+  Future<void> upsertGoal(GoalsModel goal) async {
+    final db = await AppDatabase.instance.database;
+
+    await db.insert('goals', {
+      'id': goal.id,
+      'user_id': goal.userId,
+      'title': goal.title,
+      'description': goal.description,
+      'deadline': goal.deadline.toIso8601String(),
+      'is_completed': goal.isCompleted ? 1 : 0,
+      'avoid_message': goal.avoidMessage,
+      'total_target_hours': goal.totalTargetHours,
+      'spent_minutes': goal.spentMinutes,
+      'updated_at':
+          goal.updatedAt?.toIso8601String() ?? DateTime.now().toIso8601String(),
+      'sync_updated_at': DateTime.now().toIso8601String(),
+      'is_synced': goal.isSynced ? 1 : 0,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
   // 同期フラグを更新
   Future<void> markAsSynced(String id) async {
     try {
@@ -170,6 +174,25 @@ class LocalGoalsDatasource {
 
   // SQLiteとGoalsModel間のマッピング
   Map<String, dynamic> _convertToMap(GoalsModel goal) {
+    final now = DateTime.now().toUtc().toIso8601String();
+    return {
+      'id': goal.id,
+      'user_id': goal.userId,
+      'title': goal.title,
+      'description': goal.description,
+      'deadline': goal.deadline.toIso8601String(),
+      'is_completed': goal.isCompleted ? 1 : 0,
+      'avoid_message': goal.avoidMessage,
+      'total_target_hours': goal.totalTargetHours,
+      'spent_minutes': goal.spentMinutes,
+      'updated_at': goal.updatedAt?.toIso8601String() ?? now,
+      'sync_updated_at': now, // 同期管理用の更新時刻
+      'is_synced': goal.isSynced ? 1 : 0,
+    };
+  }
+
+  // 同期用のマッピング（リモートのsync_updated_atを保持）
+  Map<String, dynamic> _convertToMapForSync(GoalsModel goal) {
     return {
       'id': goal.id,
       'user_id': goal.userId,
@@ -183,8 +206,8 @@ class LocalGoalsDatasource {
       'updated_at':
           goal.updatedAt?.toIso8601String() ??
           DateTime.now().toUtc().toIso8601String(),
-      'version': goal.version,
-      'is_synced': goal.isSynced ? 1 : 0,
+      'sync_updated_at': DateTime.now().toUtc().toIso8601String(), // 同期時の現在時刻
+      'is_synced': 1, // 同期済みとしてマーク
     };
   }
 
@@ -201,7 +224,6 @@ class LocalGoalsDatasource {
       totalTargetHours: map['total_target_hours'] as int,
       spentMinutes: map['spent_minutes'] as int,
       updatedAt: DateTime.parse(map['updated_at'] as String),
-      version: map['version'] as int,
       isSynced: (map['is_synced'] as int) == 1,
     );
   }

@@ -123,8 +123,8 @@ class LocalDailyStudyLogsDatasource {
         'date': newLog.date.toIso8601String().split('T')[0],
         'minutes': newLog.minutes,
         'updated_at': now.toIso8601String(),
-        'version': existingLog != null ? await _getNextVersion(newLog.id) : 1,
-        'is_synced': 0, // 未同期状態
+        'sync_updated_at': now.toIso8601String(),
+        'is_synced': 0,
       };
 
       if (existingLog == null) {
@@ -203,26 +203,6 @@ class LocalDailyStudyLogsDatasource {
     } catch (e) {
       print('同期フラグの更新に失敗しました: $id, $e');
       rethrow;
-    }
-  }
-
-  // 次のバージョン番号を取得
-  Future<int> _getNextVersion(String id) async {
-    try {
-      final db = await _database.database;
-      final result = await db.query(
-        _tableName,
-        columns: ['version'],
-        where: 'id = ?',
-        whereArgs: [id],
-      );
-
-      final currentVersion =
-          result.isNotEmpty ? (result.first['version'] as int) : 0;
-      return currentVersion + 1;
-    } catch (e) {
-      print('バージョン番号の取得に失敗しました: $e');
-      return 1;
     }
   }
 

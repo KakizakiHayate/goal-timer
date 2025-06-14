@@ -96,4 +96,24 @@ class SupabaseUsersDatasource {
       return null;
     }
   }
+
+  /// リモートデータの最終同期更新時刻を取得
+  Future<DateTime?> getLastModified() async {
+    try {
+      final data = await _client
+          .from(_tableName)
+          .select('sync_updated_at')
+          .order('sync_updated_at', ascending: false)
+          .limit(1);
+
+      if (data.isNotEmpty) {
+        final syncUpdatedAtStr = data.first['sync_updated_at'] as String;
+        return DateTime.parse(syncUpdatedAtStr);
+      }
+      return null;
+    } catch (e, stackTrace) {
+      AppLogger.instance.e('リモート最終同期更新時刻の取得に失敗しました', e, stackTrace);
+      return null;
+    }
+  }
 }

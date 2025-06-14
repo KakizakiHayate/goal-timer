@@ -37,9 +37,6 @@ class GoalsModel with _$GoalsModel {
     /// 最終更新日時
     @Default(null) DateTime? updatedAt,
 
-    /// バージョン番号
-    @Default(1) int version,
-
     /// 同期状態（ローカルDBのみで使用）
     @Default(false) bool isSynced,
   }) = _GoalsModel;
@@ -102,16 +99,6 @@ class GoalsModel with _$GoalsModel {
       }
     }
 
-    // バージョンの変換
-    int parsedVersion = 1;
-    if (map['version'] != null) {
-      if (map['version'] is int) {
-        parsedVersion = map['version'];
-      } else if (map['version'] is String) {
-        parsedVersion = int.tryParse(map['version']) ?? 1;
-      }
-    }
-
     // 同期状態の変換
     bool parsedIsSynced = false;
     if (map['is_synced'] != null) {
@@ -135,7 +122,6 @@ class GoalsModel with _$GoalsModel {
       totalTargetHours: parsedTotalTargetHours,
       spentMinutes: parsedSpentMinutes,
       updatedAt: parsedUpdatedAt,
-      version: parsedVersion,
       isSynced: parsedIsSynced,
     );
   }
@@ -160,7 +146,6 @@ extension GoalsModelExtension on GoalsModel {
     if (this.updatedAt != null) {
       map['updated_at'] = this.updatedAt!.toIso8601String();
     }
-    map['version'] = this.version;
 
     return map;
   }

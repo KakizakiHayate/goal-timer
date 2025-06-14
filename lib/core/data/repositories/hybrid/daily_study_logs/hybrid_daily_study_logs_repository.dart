@@ -1,11 +1,12 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:goal_timer/core/data/datasources/local/daily_study_logs/local_daily_study_logs_datasource.dart';
 import 'package:goal_timer/core/data/datasources/supabase/daily_study_logs/supabase_daily_study_logs_datasource.dart';
+import 'package:goal_timer/core/data/repositories/daily_study_logs/daily_study_logs_repository.dart';
 import 'package:goal_timer/core/models/daily_study_logs/daily_study_log_model.dart';
 import 'package:goal_timer/core/provider/sync_state_provider.dart';
 import 'package:goal_timer/core/utils/app_logger.dart';
 
-class HybridDailyStudyLogsRepository {
+class HybridDailyStudyLogsRepository implements DailyStudyLogsRepository {
   final LocalDailyStudyLogsDatasource _localDatasource;
   final SupabaseDailyStudyLogsDatasource _remoteDatasource;
   final SyncStateNotifier _syncNotifier;

@@ -242,18 +242,12 @@ class _SyncDebugViewState extends ConsumerState<SyncDebugView> {
                   final goal = goals[index];
                   return ListTile(
                     title: Text(goal.title),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('ID: ${goal.id.substring(0, 8)}...'),
-                        if (title == 'ローカルデータ')
-                          Text('同期済み: ${goal.isSynced ? '✓' : '✗'}'),
-                        Text(
-                          '更新: ${_formatDateTime(goal.updatedAt ?? DateTime.now())}',
-                        ),
-                      ],
+                    subtitle: Text(
+                      'ID: ${goal.id}\n'
+                      '更新: ${goal.updatedAt?.toString() ?? "未設定"}\n'
+                      '同期: ${goal.isSynced ? "済" : "未"}',
                     ),
-                    trailing: Text('v${goal.version}'),
+                    trailing: Text('同期状態'),
                   );
                 },
               ),

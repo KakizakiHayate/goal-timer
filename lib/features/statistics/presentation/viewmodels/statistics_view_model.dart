@@ -1,15 +1,35 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:goal_timer/core/provider/providers.dart';
 import '../../domain/entities/statistics.dart';
 import '../../domain/entities/daily_stats.dart';
 import '../../domain/usecases/get_statistics_usecase.dart';
 import '../../domain/usecases/get_daily_stats_usecase.dart';
 import '../../data/repositories/statistics_repository_impl.dart';
 
+// リポジトリプロバイダー
+final statisticsRepositoryProvider = Provider<StatisticsRepositoryImpl>((ref) {
+  final dailyStudyLogsRepository = ref.watch(
+    hybridDailyStudyLogsRepositoryProvider,
+  );
+  return StatisticsRepositoryImpl(dailyStudyLogsRepository);
+});
+
+// ユースケースプロバイダー
+final getStatisticsUseCaseProvider = Provider<GetStatisticsUseCase>((ref) {
+  final repository = ref.watch(statisticsRepositoryProvider);
+  return GetStatisticsUseCase(repository);
+});
+
+final getDailyStatsUseCaseProvider = Provider<GetDailyStatsUseCase>((ref) {
+  final repository = ref.watch(statisticsRepositoryProvider);
+  return GetDailyStatsUseCase(repository);
+});
+
 // 統計データの状態管理プロバイダー
 final statisticsProvider = FutureProvider.autoDispose<List<Statistics>>((
   ref,
 ) async {
-  final useCase = GetStatisticsUseCase(StatisticsRepositoryImpl());
+  final useCase = ref.watch(getStatisticsUseCaseProvider);
   return useCase.execute();
 });
 
@@ -33,7 +53,7 @@ class DateRange {
 final filteredStatisticsProvider = FutureProvider.autoDispose<List<Statistics>>(
   (ref) async {
     final dateRange = ref.watch(dateRangeProvider);
-    final useCase = GetStatisticsUseCase(StatisticsRepositoryImpl());
+    final useCase = ref.watch(getStatisticsUseCaseProvider);
     return useCase.execute(
       startDate: dateRange.startDate,
       endDate: dateRange.endDate,
@@ -47,6 +67,6 @@ final selectedDateProvider = StateProvider<DateTime>((ref) => DateTime.now());
 // 選択された日付の詳細統計データのプロバイダー
 final dailyStatsProvider = FutureProvider.autoDispose<DailyStats>((ref) async {
   final selectedDate = ref.watch(selectedDateProvider);
-  final useCase = GetDailyStatsUseCase(StatisticsRepositoryImpl());
+  final useCase = ref.watch(getDailyStatsUseCaseProvider);
   return useCase.execute(selectedDate);
 });

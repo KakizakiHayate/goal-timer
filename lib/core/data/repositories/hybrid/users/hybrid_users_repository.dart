@@ -1,11 +1,12 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:goal_timer/core/data/datasources/local/users/local_users_datasource.dart';
 import 'package:goal_timer/core/data/datasources/supabase/users/supabase_users_datasource.dart';
+import 'package:goal_timer/core/data/repositories/users/users_repository.dart';
 import 'package:goal_timer/core/models/users/users_model.dart';
 import 'package:goal_timer/core/provider/sync_state_provider.dart';
 import 'package:goal_timer/core/utils/app_logger.dart';
 
-class HybridUsersRepository {
+class HybridUsersRepository implements UsersRepository {
   final LocalUsersDatasource _localDatasource;
   final SupabaseUsersDatasource _remoteDatasource;
   final SyncStateNotifier _syncNotifier;

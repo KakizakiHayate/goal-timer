@@ -15,6 +15,7 @@ import 'package:goal_timer/features/goal_timer/presentation/viewmodels/timer_vie
 import 'package:goal_timer/core/utils/app_logger.dart';
 import 'package:goal_timer/features/settings/presentation/screens/settings_screen.dart';
 import 'package:goal_timer/core/provider/providers.dart';
+import 'package:goal_timer/features/shared/widgets/sync_status_indicator.dart';
 
 part '../widgets/add_goal_modal.dart';
 part '../widgets/filter_bar_widget.dart';
@@ -42,18 +43,7 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void initState() {
     super.initState();
-
-    // ウィジェットの描画後に実行
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Goals同期
-      ref.read(hybridGoalsRepositoryProvider).syncWithRemote();
-
-      // ユーザー同期
-      ref.read(hybridUsersRepositoryProvider).syncWithRemote();
-
-      // 学習記録同期
-      ref.read(hybridDailyStudyLogsRepositoryProvider).syncWithRemote();
-    });
+    // 同期処理はHomeViewModelで自動的に実行されるため、ここでは何もしない
   }
 
   @override
@@ -85,17 +75,7 @@ class _HomeScreen extends ConsumerWidget {
     final homeState = ref.watch(homeViewModelProvider);
     final homeViewModel = ref.read(homeViewModelProvider.notifier);
 
-    // 初回レンダリング時にリモートデータの同期を実行
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Goals同期
-      ref.read(hybridGoalsRepositoryProvider).syncWithRemote();
-
-      // ユーザー同期
-      ref.read(hybridUsersRepositoryProvider).syncWithRemote();
-
-      // 学習記録同期
-      ref.read(hybridDailyStudyLogsRepositoryProvider).syncWithRemote();
-    });
+    // 同期処理はHomeViewModelで自動的に実行されるため、ここでは削除
 
     return Scaffold(
       backgroundColor: ColorConsts.background,
@@ -107,6 +87,8 @@ class _HomeScreen extends ConsumerWidget {
         backgroundColor: ColorConsts.primary,
         elevation: 0,
         actions: [
+          // 同期状態インジケーター
+          const SyncStatusIndicator(),
           IconButton(
             icon: const Icon(Icons.settings, color: Colors.white),
             onPressed: () {

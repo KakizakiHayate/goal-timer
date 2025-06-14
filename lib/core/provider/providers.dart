@@ -18,6 +18,10 @@ import 'package:goal_timer/core/data/datasources/local/daily_study_logs/local_da
 import 'package:goal_timer/core/data/datasources/supabase/daily_study_logs/supabase_daily_study_logs_datasource.dart';
 import 'package:goal_timer/core/data/repositories/hybrid/daily_study_logs/hybrid_daily_study_logs_repository.dart';
 
+// UseCaseのインポート
+import 'package:goal_timer/core/usecases/goals/fetch_goals_usecase.dart';
+import 'package:goal_timer/core/usecases/goals/sync_goals_usecase.dart';
+
 // ProviderScopeでアプリをラップするために使用するプロバイダーコンテナ
 final counterStateProvider = StateProvider<int>((ref) => 0);
 
@@ -154,3 +158,17 @@ final hybridDailyStudyLogsRepositoryProvider =
         syncNotifier: syncNotifier,
       );
     });
+
+// ===== UseCaseプロバイダー =====
+
+/// 目標データ取得UseCaseプロバイダー
+final fetchGoalsUseCaseProvider = Provider<FetchGoalsUseCase>((ref) {
+  final repository = ref.watch(hybridGoalsRepositoryProvider);
+  return FetchGoalsUseCase(repository);
+});
+
+/// 目標データ同期UseCaseプロバイダー
+final syncGoalsUseCaseProvider = Provider<SyncGoalsUseCase>((ref) {
+  final repository = ref.watch(hybridGoalsRepositoryProvider);
+  return SyncGoalsUseCase(repository);
+});

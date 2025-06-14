@@ -37,7 +37,7 @@ class AppDatabase {
 
       return await openDatabase(
         path,
-        version: 1,
+        version: 3,
         onCreate: _createDB,
         onUpgrade: _upgradeDB,
       );
@@ -106,6 +106,7 @@ class AppDatabase {
         display_name TEXT,
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL,
+        sync_updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
         last_login TEXT,
         is_synced INTEGER DEFAULT 0
       )
@@ -124,7 +125,7 @@ class AppDatabase {
         total_target_hours INTEGER NOT NULL,
         spent_minutes INTEGER NOT NULL,
         updated_at TEXT NOT NULL,
-        version INTEGER NOT NULL DEFAULT 1,
+        sync_updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
         is_synced INTEGER DEFAULT 0,
         FOREIGN KEY (user_id) REFERENCES users (id)
       )
@@ -138,7 +139,7 @@ class AppDatabase {
         date TEXT NOT NULL,
         minutes INTEGER NOT NULL DEFAULT 0,
         updated_at TEXT NOT NULL,
-        version INTEGER NOT NULL DEFAULT 1,
+        sync_updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
         is_synced INTEGER DEFAULT 0,
         FOREIGN KEY (goal_id) REFERENCES goals (id)
       )
@@ -149,6 +150,14 @@ class AppDatabase {
       CREATE TABLE sync_metadata (
         table_name TEXT PRIMARY KEY,
         last_sync_time TEXT NOT NULL
+      )
+      ''');
+
+      // リモート最終更新時刻テーブル
+      await db.execute('''
+      CREATE TABLE remote_last_modified (
+        table_name TEXT PRIMARY KEY,
+        last_modified TEXT NOT NULL
       )
       ''');
 
@@ -169,9 +178,112 @@ class AppDatabase {
   }
 
   Future<void> _upgradeDB(Database db, int oldVersion, int newVersion) async {
-    // 将来的なデータベーススキーマのアップグレード処理
-    if (oldVersion < 2) {
-      // バージョン2へのマイグレーション処理
+    try {
+      AppLogger.instance.i('データベースをバージョン$oldVersionから$newVersionにアップグレードします');
+
+      if (oldVersion < 2) {
+        // バージョン2へのマイグレーション: sync_updated_atカラムを追加
+        AppLogger.instance.i('sync_updated_atカラムを追加しています...');
+
+        // usersテーブルにsync_updated_atカラムを追加
+        await db.execute('''
+          ALTER TABLE users ADD COLUMN sync_updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        ''');
+
+        // goalsテーブルにsync_updated_atカラムを追加
+        await db.execute('''
+          ALTER TABLE goals ADD COLUMN sync_updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        ''');
+
+        // daily_study_logsテーブルにsync_updated_atカラムを追加
+        await db.execute('''
+          ALTER TABLE daily_study_logs ADD COLUMN sync_updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        ''');
+
+        // 既存レコードのsync_updated_atを現在時刻で初期化
+        final now = DateTime.now().toIso8601String();
+        await db.execute('UPDATE users SET sync_updated_at = ?', [now]);
+        await db.execute('UPDATE goals SET sync_updated_at = ?', [now]);
+        await db.execute('UPDATE daily_study_logs SET sync_updated_at = ?', [
+          now,
+        ]);
+
+        AppLogger.instance.i('sync_updated_atカラムの追加が完了しました');
+      }
+
+      if (oldVersion < 3) {
+        // バージョン3へのマイグレーション: versionカラムを削除
+        AppLogger.instance.i('不要なversionカラムを削除しています...');
+
+        // SQLiteではALTER TABLE DROP COLUMNが制限されているため、
+        // テーブルを再作成する方法を使用
+
+        // goalsテーブルのversionカラムを削除
+        await db.execute('''
+          CREATE TABLE goals_new (
+            id TEXT PRIMARY KEY,
+            user_id TEXT NOT NULL,
+            title TEXT NOT NULL,
+            description TEXT,
+            deadline TEXT,
+            is_completed INTEGER NOT NULL,
+            avoid_message TEXT NOT NULL,
+            total_target_hours INTEGER NOT NULL,
+            spent_minutes INTEGER NOT NULL,
+            updated_at TEXT NOT NULL,
+            sync_updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            is_synced INTEGER DEFAULT 0,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+          )
+        ''');
+
+        await db.execute('''
+          INSERT INTO goals_new (id, user_id, title, description, deadline, is_completed, 
+                                avoid_message, total_target_hours, spent_minutes, updated_at, 
+                                sync_updated_at, is_synced)
+          SELECT id, user_id, title, description, deadline, is_completed, 
+                 avoid_message, total_target_hours, spent_minutes, updated_at, 
+                 sync_updated_at, is_synced
+          FROM goals
+        ''');
+
+        await db.execute('DROP TABLE goals');
+        await db.execute('ALTER TABLE goals_new RENAME TO goals');
+
+        // daily_study_logsテーブルのversionカラムを削除
+        await db.execute('''
+          CREATE TABLE daily_study_logs_new (
+            id TEXT PRIMARY KEY,
+            goal_id TEXT NOT NULL,
+            date TEXT NOT NULL,
+            minutes INTEGER NOT NULL DEFAULT 0,
+            updated_at TEXT NOT NULL,
+            sync_updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            is_synced INTEGER DEFAULT 0,
+            FOREIGN KEY (goal_id) REFERENCES goals (id)
+          )
+        ''');
+
+        await db.execute('''
+          INSERT INTO daily_study_logs_new (id, goal_id, date, minutes, updated_at, 
+                                           sync_updated_at, is_synced)
+          SELECT id, goal_id, date, minutes, updated_at, 
+                 sync_updated_at, is_synced
+          FROM daily_study_logs
+        ''');
+
+        await db.execute('DROP TABLE daily_study_logs');
+        await db.execute(
+          'ALTER TABLE daily_study_logs_new RENAME TO daily_study_logs',
+        );
+
+        AppLogger.instance.i('versionカラムの削除が完了しました');
+      }
+
+      AppLogger.instance.i('データベースアップグレードが完了しました');
+    } catch (e) {
+      AppLogger.instance.e('データベースアップグレードに失敗しました', e);
+      rethrow;
     }
   }
 
