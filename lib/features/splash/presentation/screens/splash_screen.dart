@@ -15,10 +15,12 @@ class SplashScreen extends ConsumerWidget {
     if (!splashState.isLoading && splashState.isConnectionOk) {
       // 画面遷移を遅延実行（すぐに遷移するとスプラッシュが見えない）
       Future.delayed(Duration.zero, () {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
-        );
+        if (context.mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
+        }
       });
     }
 
@@ -26,14 +28,16 @@ class SplashScreen extends ConsumerWidget {
     if (splashState.errorMessage != null) {
       // ダイアログを遅延表示（ビルド完了後に表示）
       Future.delayed(Duration.zero, () {
-        showNetworkErrorDialog(
-          context,
-          message: splashState.errorMessage!,
-          details: splashState.errorDetails,
-          onRetry: () {
-            ref.read(splashViewModelProvider.notifier).retryConnection();
-          },
-        );
+        if (context.mounted) {
+          showNetworkErrorDialog(
+            context,
+            message: splashState.errorMessage!,
+            details: splashState.errorDetails,
+            onRetry: () {
+              ref.read(splashViewModelProvider.notifier).retryConnection();
+            },
+          );
+        }
       });
     }
 

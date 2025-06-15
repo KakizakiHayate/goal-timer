@@ -7,58 +7,60 @@ import 'package:goal_timer/core/provider/sync_state_provider.dart';
 import 'package:goal_timer/features/shared/widgets/sync_status_indicator.dart';
 
 class SyncDebugView extends ConsumerStatefulWidget {
-  const SyncDebugView({Key? key}) : super(key: key);
+  const SyncDebugView({super.key});
 
   @override
   ConsumerState<SyncDebugView> createState() => _SyncDebugViewState();
 }
 
 class _SyncDebugViewState extends ConsumerState<SyncDebugView> {
-  bool _isLoading = false;
-  List<GoalsModel> _localGoals = [];
-  List<GoalsModel> _remoteGoals = [];
-  String _syncStatus = "未確認";
-  String _errorMessage = "";
+  bool isLoading = false;
+  List<GoalsModel> localGoals = [];
+  List<GoalsModel> remoteGoals = [];
+  String syncStatus = "未確認";
+  String errorMessage = "";
 
   @override
   void initState() {
     super.initState();
-    _loadData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      loadData();
+    });
   }
 
-  Future<void> _loadData() async {
+  Future<void> loadData() async {
     setState(() {
-      _isLoading = true;
-      _errorMessage = "";
+      isLoading = true;
+      errorMessage = "";
     });
 
     try {
       // ローカルデータの取得
       final localDataSource = LocalGoalsDatasource();
-      _localGoals = await localDataSource.getGoals();
+      localGoals = await localDataSource.getGoals();
 
       // リモートデータの取得
       final remoteDataSource = ref.read(goalsRepositoryProvider);
-      _remoteGoals = await remoteDataSource.getGoals();
+      remoteGoals = await remoteDataSource.getGoals();
 
       // 同期状態の確認
-      final hybridRepo = ref.read(hybridGoalsRepositoryProvider);
-      _syncStatus = hybridRepo != null ? "ハイブリッドリポジトリ準備完了" : "未初期化";
+      ref.read(hybridGoalsRepositoryProvider);
+      syncStatus = "ハイブリッドリポジトリ準備完了";
     } catch (e) {
       setState(() {
-        _errorMessage = "データ取得エラー: $e";
+        errorMessage = "データ取得エラー: $e";
       });
     } finally {
       setState(() {
-        _isLoading = false;
+        isLoading = false;
       });
     }
   }
 
-  Future<void> _performManualSync() async {
+  Future<void> performManualSync() async {
     setState(() {
-      _isLoading = true;
-      _errorMessage = "";
+      isLoading = true;
+      errorMessage = "";
     });
 
     try {
@@ -72,17 +74,17 @@ class _SyncDebugViewState extends ConsumerState<SyncDebugView> {
       syncNotifier.setSynced();
 
       // データを再読み込み
-      await _loadData();
+      await loadData();
     } catch (e) {
       setState(() {
-        _errorMessage = "同期エラー: $e";
+        errorMessage = "同期エラー: $e";
       });
 
       final syncNotifier = ref.read(syncStateProvider.notifier);
       syncNotifier.setError(e.toString());
     } finally {
       setState(() {
-        _isLoading = false;
+        isLoading = false;
       });
     }
   }
@@ -97,31 +99,31 @@ class _SyncDebugViewState extends ConsumerState<SyncDebugView> {
         actions: const [SyncStatusIndicator()],
       ),
       body:
-          _isLoading
+          isLoading
               ? const Center(child: CircularProgressIndicator())
               : RefreshIndicator(
-                onRefresh: _loadData,
+                onRefresh: loadData,
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (_errorMessage.isNotEmpty)
+                      if (errorMessage.isNotEmpty)
                         Container(
                           padding: const EdgeInsets.all(8.0),
                           color: Colors.red.shade100,
                           width: double.infinity,
                           child: Text(
-                            _errorMessage,
+                            errorMessage,
                             style: TextStyle(color: Colors.red.shade900),
                           ),
                         ),
                       const SizedBox(height: 16),
                       _buildSyncStatusSection(syncState),
                       const SizedBox(height: 16),
-                      _buildDataSection('ローカルデータ', _localGoals),
+                      _buildDataSection('ローカルデータ', localGoals),
                       const SizedBox(height: 24),
-                      _buildDataSection('リモートデータ', _remoteGoals),
+                      _buildDataSection('リモートデータ', remoteGoals),
                     ],
                   ),
                 ),
@@ -134,14 +136,14 @@ class _SyncDebugViewState extends ConsumerState<SyncDebugView> {
             children: [
               Expanded(
                 child: ElevatedButton(
-                  onPressed: _isLoading ? null : _loadData,
+                  onPressed: isLoading ? null : loadData,
                   child: const Text('データ再読込'),
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: _isLoading ? null : _performManualSync,
+                  onPressed: isLoading ? null : performManualSync,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     foregroundColor: Colors.white,
@@ -209,7 +211,7 @@ class _SyncDebugViewState extends ConsumerState<SyncDebugView> {
               Text('最終同期: ${_formatDateTime(state.lastSyncTime!)}'),
             ],
             const SizedBox(height: 8),
-            Text('ハイブリッドリポジトリ: $_syncStatus'),
+            Text('ハイブリッドリポジトリ: $syncStatus'),
           ],
         ),
       ),
@@ -247,7 +249,7 @@ class _SyncDebugViewState extends ConsumerState<SyncDebugView> {
                       '更新: ${goal.updatedAt?.toString() ?? "未設定"}\n'
                       '同期: ${goal.isSynced ? "済" : "未"}',
                     ),
-                    trailing: Text('同期状態'),
+                    trailing: const Text('同期状態'),
                   );
                 },
               ),

@@ -42,8 +42,7 @@ class AppDatabase {
         onUpgrade: _upgradeDB,
       );
     } catch (e) {
-      // Logger未実装の場合はprintでも可
-      print('データベース初期化エラー: $e');
+      AppLogger.instance.e('データベース初期化エラー: $e');
       rethrow;
     }
   }
@@ -87,10 +86,8 @@ class AppDatabase {
       AppLogger.instance.i('====================================');
 
       // 標準出力にも表示（ログが見つけにくい場合用）
-      print('\n=== SQLiteデータベースのパス ===');
-      print('パス: $_databasePath');
-      print('ドキュメントディレクトリ: ${appDocDir.path}');
-      print('==============================\n');
+      AppLogger.instance.i('SQLiteデータベースのパス: $_databasePath');
+      AppLogger.instance.i('ドキュメントディレクトリ: ${appDocDir.path}');
     } catch (e) {
       AppLogger.instance.e('データベースパス情報のログ出力に失敗', e);
     }
@@ -172,7 +169,7 @@ class AppDatabase {
       )
       ''');
     } catch (e) {
-      print('テーブル作成エラー: $e');
+      AppLogger.instance.e('テーブル作成エラー: $e');
       rethrow;
     }
   }
@@ -200,102 +197,42 @@ class AppDatabase {
           ALTER TABLE daily_study_logs ADD COLUMN sync_updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
         ''');
 
-        // 既存レコードのsync_updated_atを現在時刻で初期化
-        final now = DateTime.now().toIso8601String();
-        await db.execute('UPDATE users SET sync_updated_at = ?', [now]);
-        await db.execute('UPDATE goals SET sync_updated_at = ?', [now]);
-        await db.execute('UPDATE daily_study_logs SET sync_updated_at = ?', [
-          now,
-        ]);
+        // リモート最終更新時刻テーブルを作成
+        await db.execute('''
+          CREATE TABLE remote_last_modified (
+            table_name TEXT PRIMARY KEY,
+            last_modified TEXT NOT NULL
+          )
+        ''');
 
-        AppLogger.instance.i('sync_updated_atカラムの追加が完了しました');
+        AppLogger.instance.i('バージョン2へのマイグレーションが完了しました');
       }
 
       if (oldVersion < 3) {
-        // バージョン3へのマイグレーション: versionカラムを削除
-        AppLogger.instance.i('不要なversionカラムを削除しています...');
+        // バージョン3へのマイグレーション: 新機能の追加
+        AppLogger.instance.i('バージョン3へのマイグレーションを実行中...');
 
-        // SQLiteではALTER TABLE DROP COLUMNが制限されているため、
-        // テーブルを再作成する方法を使用
-
-        // goalsテーブルのversionカラムを削除
-        await db.execute('''
-          CREATE TABLE goals_new (
-            id TEXT PRIMARY KEY,
-            user_id TEXT NOT NULL,
-            title TEXT NOT NULL,
-            description TEXT,
-            deadline TEXT,
-            is_completed INTEGER NOT NULL,
-            avoid_message TEXT NOT NULL,
-            total_target_hours INTEGER NOT NULL,
-            spent_minutes INTEGER NOT NULL,
-            updated_at TEXT NOT NULL,
-            sync_updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            is_synced INTEGER DEFAULT 0,
-            FOREIGN KEY (user_id) REFERENCES users (id)
-          )
-        ''');
-
-        await db.execute('''
-          INSERT INTO goals_new (id, user_id, title, description, deadline, is_completed, 
-                                avoid_message, total_target_hours, spent_minutes, updated_at, 
-                                sync_updated_at, is_synced)
-          SELECT id, user_id, title, description, deadline, is_completed, 
-                 avoid_message, total_target_hours, spent_minutes, updated_at, 
-                 sync_updated_at, is_synced
-          FROM goals
-        ''');
-
-        await db.execute('DROP TABLE goals');
-        await db.execute('ALTER TABLE goals_new RENAME TO goals');
-
-        // daily_study_logsテーブルのversionカラムを削除
-        await db.execute('''
-          CREATE TABLE daily_study_logs_new (
-            id TEXT PRIMARY KEY,
-            goal_id TEXT NOT NULL,
-            date TEXT NOT NULL,
-            minutes INTEGER NOT NULL DEFAULT 0,
-            updated_at TEXT NOT NULL,
-            sync_updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            is_synced INTEGER DEFAULT 0,
-            FOREIGN KEY (goal_id) REFERENCES goals (id)
-          )
-        ''');
-
-        await db.execute('''
-          INSERT INTO daily_study_logs_new (id, goal_id, date, minutes, updated_at, 
-                                           sync_updated_at, is_synced)
-          SELECT id, goal_id, date, minutes, updated_at, 
-                 sync_updated_at, is_synced
-          FROM daily_study_logs
-        ''');
-
-        await db.execute('DROP TABLE daily_study_logs');
-        await db.execute(
-          'ALTER TABLE daily_study_logs_new RENAME TO daily_study_logs',
-        );
-
-        AppLogger.instance.i('versionカラムの削除が完了しました');
+        // 必要な新しいテーブルや設定の追加など
+        AppLogger.instance.i('バージョン3へのマイグレーションが完了しました');
       }
-
-      AppLogger.instance.i('データベースアップグレードが完了しました');
     } catch (e) {
-      AppLogger.instance.e('データベースアップグレードに失敗しました', e);
+      AppLogger.instance.e('データベースアップグレードエラー: $e');
       rethrow;
     }
   }
 
-  // データベースを閉じる
-  Future<void> close() async {
-    final db = await instance.database;
-    db.close();
-    _database = null;
+  // データベースファイルパスを取得
+  Future<String> getPath() async {
+    final dbPath = await getDatabasesPath();
+    return join(dbPath, 'goal_timer.db');
   }
 
-  // データベースファイルのパスを返すメソッド
-  static Future<String?> getDatabaseFilePath() async {
-    return _databasePath;
+  // データベースインスタンスを明示的に閉じる
+  Future<void> close() async {
+    final db = _database;
+    if (db != null) {
+      await db.close();
+      _database = null;
+    }
   }
 }

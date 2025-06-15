@@ -1,23 +1,12 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:goal_timer/core/config/env_config.dart';
 import 'package:goal_timer/core/utils/app_logger.dart';
-import 'package:goal_timer/features/splash/presentation/screens/splash_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:goal_timer/routes.dart';
-import 'package:goal_timer/core/utils/route_names.dart';
-import 'package:goal_timer/features/goal_timer/presentation/screens/timer_screen.dart';
-import 'package:goal_timer/features/home/presentation/screens/home_screen.dart';
-import 'package:goal_timer/features/debug/sync_debug_view.dart';
 import 'package:goal_timer/core/services/sync_service.dart';
 import 'package:goal_timer/core/data/local/database/app_database.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as path_lib;
-import 'package:sqflite/sqflite.dart';
-import 'package:goal_timer/core/provider/providers.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,9 +24,7 @@ void main() async {
   // AppDatabaseクラスがパス情報を既に表示しているので、ここでの出力は不要
   // データベースパスのみシンプルに標準出力に表示
   final dbPath = AppDatabase.databasePath;
-  print('\n============ データベースパス（main.dart） ============');
-  print('SQLiteデータベースパス: $dbPath');
-  print('=====================================================\n');
+  AppLogger.instance.i('SQLiteデータベースパス: $dbPath');
 
   // Supabaseの初期化はSplashScreenとprovidersで行うため、ここでは行わない
 
@@ -51,11 +38,11 @@ void main() async {
 
   runApp(
     ProviderScope(
-      child: const MyApp(),
       overrides: [
         // 同期サービスの初期化
         syncServiceInitializerProvider,
       ],
+      child: const MyApp(),
     ),
   );
 }

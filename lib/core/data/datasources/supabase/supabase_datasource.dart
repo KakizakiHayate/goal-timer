@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:goal_timer/core/config/env_config.dart';
 import 'package:goal_timer/core/data/repositories/supabase/supabase_repository.dart';
-import 'package:goal_timer/core/provider/providers.dart';
 import 'package:goal_timer/core/utils/app_logger.dart';
 
 class SupabaseDatasource implements SupabaseRepository {
@@ -17,10 +16,6 @@ class SupabaseDatasource implements SupabaseRepository {
     if (_initialized) return;
 
     try {
-      // 環境変数からSupabase認証情報を取得
-      final supabaseUrl = EnvConfig.supabaseUrl;
-      final supabaseAnonKey = EnvConfig.supabaseAnonKey;
-
       if (!EnvConfig.validateSupabaseConfig()) {
         throw Exception('Supabase環境変数が設定されていません');
       }
@@ -51,6 +46,7 @@ class SupabaseDatasource implements SupabaseRepository {
 
   /// [ref] RiverpodのRefオブジェクト
   /// 返り値: 接続状態に問題がなければtrue
+  @override
   Future<bool> checkConnection(WidgetRef ref) async {
     try {
       // 環境変数の値を確認

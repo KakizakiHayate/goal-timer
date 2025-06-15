@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:goal_timer/core/provider/providers.dart';
 import 'package:goal_timer/core/provider/sync_state_provider.dart';
 
 class SyncStatusIndicator extends ConsumerWidget {
-  const SyncStatusIndicator({Key? key}) : super(key: key);
+  const SyncStatusIndicator({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

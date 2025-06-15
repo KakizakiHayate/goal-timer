@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:goal_timer/core/utils/color_consts.dart';
-import 'package:goal_timer/features/goal_detail/presentation/viewmodels/goal_detail_view_model.dart';
 import 'package:goal_timer/features/goal_timer/presentation/viewmodels/timer_view_model.dart';
-import 'package:goal_timer/features/goal_timer/presentation/widgets/timer_progress_ring.dart';
 import 'package:goal_timer/core/utils/app_logger.dart';
+
+import 'package:goal_timer/core/utils/color_consts.dart';
+import 'package:goal_timer/features/goal_timer/presentation/widgets/timer_progress_ring.dart';
 
 class TimerScreen extends ConsumerWidget {
   final String goalId;

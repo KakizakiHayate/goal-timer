@@ -1,7 +1,7 @@
 import 'package:goal_timer/core/data/local/database/app_database.dart';
 import 'package:goal_timer/core/models/daily_study_logs/daily_study_log_model.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
+import 'package:goal_timer/core/utils/app_logger.dart';
 
 class LocalDailyStudyLogsDatasource {
   final AppDatabase _database = AppDatabase.instance;
@@ -15,7 +15,7 @@ class LocalDailyStudyLogsDatasource {
 
       return maps.map((map) => _convertToDailyStudyLogModel(map)).toList();
     } catch (e) {
-      print('ローカルからの学習記録取得に失敗しました: $e');
+      AppLogger.instance.e('ローカルからの学習記録取得に失敗しました: $e');
       return [];
     }
   }
@@ -35,7 +35,7 @@ class LocalDailyStudyLogsDatasource {
 
       return maps.map((map) => _convertToDailyStudyLogModel(map)).toList();
     } catch (e) {
-      print('ローカルからの日付別学習記録取得に失敗しました: $e');
+      AppLogger.instance.e('ローカルからの日付別学習記録取得に失敗しました: $e');
       return [];
     }
   }
@@ -59,7 +59,7 @@ class LocalDailyStudyLogsDatasource {
 
       return maps.map((map) => _convertToDailyStudyLogModel(map)).toList();
     } catch (e) {
-      print('ローカルからの期間別学習記録取得に失敗しました: $e');
+      AppLogger.instance.e('ローカルからの期間別学習記録取得に失敗しました: $e');
       return [];
     }
   }
@@ -77,7 +77,7 @@ class LocalDailyStudyLogsDatasource {
 
       return maps.map((map) => _convertToDailyStudyLogModel(map)).toList();
     } catch (e) {
-      print('ローカルからの目標別学習記録取得に失敗しました: $e');
+      AppLogger.instance.e('ローカルからの目標別学習記録取得に失敗しました: $e');
       return [];
     }
   }
@@ -91,7 +91,7 @@ class LocalDailyStudyLogsDatasource {
       if (maps.isEmpty) return null;
       return _convertToDailyStudyLogModel(maps.first);
     } catch (e) {
-      print('ローカルからの学習記録取得に失敗しました: $id, $e');
+      AppLogger.instance.e('ローカルからの学習記録取得に失敗しました: $id, $e');
       return null;
     }
   }
@@ -146,7 +146,7 @@ class LocalDailyStudyLogsDatasource {
 
       return _convertToDailyStudyLogModel(map);
     } catch (e) {
-      print('ローカルでの学習記録作成/更新に失敗しました: $e');
+      AppLogger.instance.e('ローカルでの学習記録作成/更新に失敗しました: $e');
       rethrow;
     }
   }
@@ -168,7 +168,7 @@ class LocalDailyStudyLogsDatasource {
       }
       return false;
     } catch (e) {
-      print('ローカルでの学習記録削除に失敗しました: $id, $e');
+      AppLogger.instance.e('ローカルでの学習記録削除に失敗しました: $id, $e');
       return false;
     }
   }
@@ -185,7 +185,7 @@ class LocalDailyStudyLogsDatasource {
 
       return maps.map((map) => _convertToDailyStudyLogModel(map)).toList();
     } catch (e) {
-      print('未同期の学習記録の取得に失敗しました: $e');
+      AppLogger.instance.e('未同期の学習記録の取得に失敗しました: $e');
       return [];
     }
   }
@@ -201,7 +201,7 @@ class LocalDailyStudyLogsDatasource {
         whereArgs: [id],
       );
     } catch (e) {
-      print('同期フラグの更新に失敗しました: $id, $e');
+      AppLogger.instance.e('同期フラグの更新に失敗しました: $id, $e');
       rethrow;
     }
   }
@@ -220,7 +220,7 @@ class LocalDailyStudyLogsDatasource {
         'timestamp': DateTime.now().toUtc().toIso8601String(),
       });
     } catch (e) {
-      print('オフライン操作の記録に失敗しました: $e');
+      AppLogger.instance.e('オフライン操作の記録に失敗しました: $e');
     }
   }
 

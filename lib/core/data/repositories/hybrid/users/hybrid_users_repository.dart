@@ -23,6 +23,7 @@ class HybridUsersRepository implements UsersRepository {
        _connectivity = connectivity ?? Connectivity();
 
   // 全ユーザーを取得
+  @override
   Future<List<UsersModel>> getUsers() async {
     try {
       // まずローカルDBからデータを取得
@@ -48,6 +49,7 @@ class HybridUsersRepository implements UsersRepository {
   }
 
   // 特定のIDのユーザーを取得
+  @override
   Future<UsersModel?> getUserById(String id) async {
     try {
       // まずローカルDBから検索
@@ -83,6 +85,7 @@ class HybridUsersRepository implements UsersRepository {
   }
 
   // 現在のユーザー情報を取得
+  @override
   Future<UsersModel?> getCurrentUser() async {
     try {
       // リモートから現在のユーザー情報を取得
@@ -115,6 +118,7 @@ class HybridUsersRepository implements UsersRepository {
   }
 
   // ユーザー情報を更新
+  @override
   Future<UsersModel> updateUser(UsersModel user) async {
     try {
       // まずローカルDBに保存
@@ -152,6 +156,7 @@ class HybridUsersRepository implements UsersRepository {
   }
 
   // リモートと同期を実行
+  @override
   Future<void> syncWithRemote() async {
     _syncNotifier.setSyncing();
 

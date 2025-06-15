@@ -1,6 +1,6 @@
 import 'package:goal_timer/core/data/local/database/app_database.dart';
 import 'package:goal_timer/core/models/users/users_model.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:goal_timer/core/utils/app_logger.dart';
 
 class LocalUsersDatasource {
   final AppDatabase _database = AppDatabase.instance;
@@ -14,7 +14,7 @@ class LocalUsersDatasource {
 
       return maps.map((map) => _convertToUsersModel(map)).toList();
     } catch (e) {
-      print('ローカルからのユーザーデータ取得に失敗しました: $e');
+      AppLogger.instance.e('ローカルからのユーザーデータ取得に失敗しました: $e');
       return [];
     }
   }
@@ -28,24 +28,34 @@ class LocalUsersDatasource {
       if (maps.isEmpty) return null;
       return _convertToUsersModel(maps.first);
     } catch (e) {
-      print('ローカルからのユーザーデータ取得に失敗しました: $id, $e');
+      AppLogger.instance.e('ローカルからのユーザーデータ取得に失敗しました: $id, $e');
       return null;
     }
   }
 
-  // 新しいユーザーを作成または更新
+  // 現在のユーザーを取得
+  Future<UsersModel?> getCurrentUser() async {
+    try {
+      final db = await _database.database;
+      final maps = await db.query(_tableName, limit: 1);
+
+      if (maps.isEmpty) return null;
+      return _convertToUsersModel(maps.first);
+    } catch (e) {
+      AppLogger.instance.e('現在のユーザーの取得に失敗しました: $e');
+      return null;
+    }
+  }
+
+  // ユーザーを追加または更新
   Future<UsersModel> upsertUser(UsersModel user) async {
     try {
       final db = await _database.database;
-      final now = DateTime.now().toUtc();
-
-      // 更新日時を現在時刻に設定
-      final updatedUser = user.copyWith(updatedAt: now);
-
-      final map = _convertToMap(updatedUser);
+      final map = _convertToMap(user);
 
       // ユーザーが既に存在するか確認
       final existingUser = await getUserById(user.id);
+
       if (existingUser == null) {
         // 新規作成
         await db.insert(_tableName, map);
@@ -54,13 +64,24 @@ class LocalUsersDatasource {
         await db.update(_tableName, map, where: 'id = ?', whereArgs: [user.id]);
       }
 
-      // オフライン操作を記録
-      final operationType = existingUser == null ? 'create' : 'update';
-      await _recordOfflineOperation(operationType, user.id);
-
-      return updatedUser;
+      return user;
     } catch (e) {
-      print('ローカルでのユーザー作成/更新に失敗しました: $e');
+      AppLogger.instance.e('ローカルでのユーザー作成/更新に失敗しました: $e');
+      rethrow;
+    }
+  }
+
+  // ユーザーを更新
+  Future<UsersModel> updateUser(UsersModel user) async {
+    try {
+      final db = await _database.database;
+      final map = _convertToMap(user);
+
+      await db.update(_tableName, map, where: 'id = ?', whereArgs: [user.id]);
+
+      return user;
+    } catch (e) {
+      AppLogger.instance.e('ローカルでのユーザー更新に失敗しました: ${user.id}, $e');
       rethrow;
     }
   }
@@ -69,15 +90,11 @@ class LocalUsersDatasource {
   Future<List<UsersModel>> getUnsyncedUsers() async {
     try {
       final db = await _database.database;
-      final maps = await db.query(
-        _tableName,
-        where: 'is_synced = ?',
-        whereArgs: [0],
-      );
+      final maps = await db.query(_tableName);
 
       return maps.map((map) => _convertToUsersModel(map)).toList();
     } catch (e) {
-      print('未同期のユーザーデータの取得に失敗しました: $e');
+      AppLogger.instance.e('未同期のユーザーデータの取得に失敗しました: $e');
       return [];
     }
   }
@@ -88,31 +105,13 @@ class LocalUsersDatasource {
       final db = await _database.database;
       await db.update(
         _tableName,
-        {'is_synced': 1},
+        {'updated_at': DateTime.now().toIso8601String()},
         where: 'id = ?',
         whereArgs: [id],
       );
     } catch (e) {
-      print('同期フラグの更新に失敗しました: $id, $e');
+      AppLogger.instance.e('同期フラグの更新に失敗しました: $id, $e');
       rethrow;
-    }
-  }
-
-  // オフライン操作を記録
-  Future<void> _recordOfflineOperation(
-    String operationType,
-    String recordId,
-  ) async {
-    try {
-      final db = await _database.database;
-      await db.insert('offline_operations', {
-        'table_name': _tableName,
-        'operation_type': operationType,
-        'record_id': recordId,
-        'timestamp': DateTime.now().toUtc().toIso8601String(),
-      });
-    } catch (e) {
-      print('オフライン操作の記録に失敗しました: $e');
     }
   }
 
@@ -125,11 +124,9 @@ class LocalUsersDatasource {
       'created_at': user.createdAt.toIso8601String(),
       'updated_at': user.updatedAt.toIso8601String(),
       'last_login': user.lastLogin?.toIso8601String(),
-      'is_synced': 0, // 未同期状態
     };
   }
 
-  // SQLiteの型をUsersModelに合わせて変換
   UsersModel _convertToUsersModel(Map<String, dynamic> map) {
     return UsersModel(
       id: map['id'] as String,

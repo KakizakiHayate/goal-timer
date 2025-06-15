@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:goal_timer/core/utils/color_consts.dart';
-import 'package:goal_timer/core/utils/route_names.dart';
+
 import 'package:goal_timer/features/home/presentation/widgets/goal_list_cell_widget.dart';
 import 'package:goal_timer/features/home/presentation/view_models/home_view_model.dart';
 import 'package:goal_timer/features/goal_timer/presentation/screens/timer_screen.dart';
@@ -18,7 +18,6 @@ import 'package:goal_timer/features/shared/widgets/sync_status_indicator.dart';
 part '../widgets/add_goal_modal.dart';
 part '../widgets/filter_bar_widget.dart';
 part '../widgets/today_progress_widget.dart';
-part '../widgets/goal_selection_dialog.dart';
 
 // ホーム画面のタブインデックスを管理するプロバイダー
 final homeTabIndexProvider = StateProvider<int>((ref) => 0);
@@ -144,17 +143,6 @@ class _HomeScreen extends ConsumerWidget {
       ),
     );
   }
-
-  // 進捗に応じた色を取得
-  Color _getProgressColor(double progress) {
-    if (progress < 0.3) {
-      return Colors.red;
-    } else if (progress < 0.7) {
-      return Colors.orange;
-    } else {
-      return Colors.green;
-    }
-  }
 }
 
 // タイマーページウィジェット
@@ -249,8 +237,10 @@ class _TimerPage extends ConsumerWidget {
                           );
                         },
                         borderRadius: BorderRadius.circular(12),
-                        splashColor: ColorConsts.primary.withOpacity(0.1),
-                        highlightColor: ColorConsts.primary.withOpacity(0.05),
+                        splashColor: ColorConsts.primary.withValues(alpha: 0.1),
+                        highlightColor: ColorConsts.primary.withValues(
+                          alpha: 0.05,
+                        ),
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
                           child: Column(
@@ -317,8 +307,8 @@ class _TimerPage extends ConsumerWidget {
                               LinearProgressIndicator(
                                 value: goal.getProgressRate(),
                                 backgroundColor: Colors.grey[200],
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  _getProgressColor(goal.getProgressRate()),
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                  ColorConsts.primary,
                                 ),
                               ),
                             ],
@@ -340,16 +330,5 @@ class _TimerPage extends ConsumerWidget {
           (error, _) =>
               Scaffold(body: Center(child: Text('エラーが発生しました: $error'))),
     );
-  }
-
-  // 進捗に応じた色を取得
-  Color _getProgressColor(double progress) {
-    if (progress < 0.3) {
-      return Colors.red;
-    } else if (progress < 0.7) {
-      return Colors.orange;
-    } else {
-      return Colors.green;
-    }
   }
 }

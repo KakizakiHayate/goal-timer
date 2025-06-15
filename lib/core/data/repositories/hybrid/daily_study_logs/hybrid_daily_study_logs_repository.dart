@@ -22,7 +22,7 @@ class HybridDailyStudyLogsRepository implements DailyStudyLogsRepository {
        _syncNotifier = syncNotifier,
        _connectivity = connectivity ?? Connectivity();
 
-  // 全学習記録を取得
+  @override
   Future<List<DailyStudyLogModel>> getAllLogs() async {
     try {
       // まずローカルDBからデータを取得
@@ -47,7 +47,7 @@ class HybridDailyStudyLogsRepository implements DailyStudyLogsRepository {
     }
   }
 
-  // 特定の日付の学習記録を取得
+  @override
   Future<List<DailyStudyLogModel>> getDailyLogs(DateTime date) async {
     try {
       // まずローカルDBからデータを取得
@@ -71,7 +71,7 @@ class HybridDailyStudyLogsRepository implements DailyStudyLogsRepository {
     }
   }
 
-  // 特定の期間の学習記録を取得
+  @override
   Future<List<DailyStudyLogModel>> getLogsByDateRange(
     DateTime startDate,
     DateTime endDate,
@@ -101,7 +101,7 @@ class HybridDailyStudyLogsRepository implements DailyStudyLogsRepository {
     }
   }
 
-  // 特定の目標IDの学習記録を取得
+  @override
   Future<List<DailyStudyLogModel>> getLogsByGoalId(String goalId) async {
     try {
       // まずローカルDBからデータを取得
@@ -125,7 +125,7 @@ class HybridDailyStudyLogsRepository implements DailyStudyLogsRepository {
     }
   }
 
-  // 特定のIDの学習記録を取得
+  @override
   Future<DailyStudyLogModel?> getLogById(String id) async {
     try {
       // まずローカルDBから検索
@@ -160,7 +160,7 @@ class HybridDailyStudyLogsRepository implements DailyStudyLogsRepository {
     }
   }
 
-  // 学習記録を追加または更新
+  @override
   Future<DailyStudyLogModel> upsertDailyLog(DailyStudyLogModel log) async {
     try {
       // まずローカルDBに保存
@@ -197,7 +197,7 @@ class HybridDailyStudyLogsRepository implements DailyStudyLogsRepository {
     }
   }
 
-  // 学習記録を削除
+  @override
   Future<bool> deleteDailyLog(String id) async {
     try {
       // まずローカルDBから削除
@@ -233,7 +233,7 @@ class HybridDailyStudyLogsRepository implements DailyStudyLogsRepository {
     }
   }
 
-  // リモートと同期を実行
+  @override
   Future<void> syncWithRemote() async {
     _syncNotifier.setSyncing();
 

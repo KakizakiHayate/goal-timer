@@ -4,9 +4,10 @@ import 'package:path/path.dart' as path_lib;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:goal_timer/core/data/local/database/app_database.dart';
 import 'package:flutter/services.dart';
+import 'package:goal_timer/core/utils/app_logger.dart';
 
 class SQLiteViewerScreen extends ConsumerStatefulWidget {
-  const SQLiteViewerScreen({Key? key}) : super(key: key);
+  const SQLiteViewerScreen({super.key});
 
   @override
   ConsumerState<SQLiteViewerScreen> createState() => _SQLiteViewerScreenState();
@@ -51,7 +52,7 @@ class _SQLiteViewerScreenState extends ConsumerState<SQLiteViewerScreen> {
         await _loadTableData(_selectedTable!);
       }
     } catch (e) {
-      print('データベース初期化エラー: $e');
+      AppLogger.instance.e('データベース初期化エラー', e);
       if (mounted) {
         ScaffoldMessenger.of(
           context,
@@ -81,7 +82,7 @@ class _SQLiteViewerScreenState extends ConsumerState<SQLiteViewerScreen> {
       // テーブルのデータを取得
       _tableData = await db.query(tableName);
     } catch (e) {
-      print('テーブルデータ取得エラー: $e');
+      AppLogger.instance.e('テーブルデータ取得エラー', e);
       if (mounted) {
         ScaffoldMessenger.of(
           context,

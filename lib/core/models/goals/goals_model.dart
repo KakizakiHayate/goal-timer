@@ -143,8 +143,8 @@ extension GoalsModelExtension on GoalsModel {
     };
 
     // 同期関連フィールドを追加
-    if (this.updatedAt != null) {
-      map['updated_at'] = this.updatedAt!.toIso8601String();
+    if (updatedAt != null) {
+      map['updated_at'] = updatedAt!.toIso8601String();
     }
 
     return map;

@@ -148,9 +148,7 @@ class StatisticsRepositoryImpl implements StatisticsRepository {
                     .eq('id', goalId)
                     .single();
 
-            if (goalData != null) {
-              goalTitles[goalId] = goalData['title'] as String;
-            }
+            goalTitles[goalId] = goalData['title'] as String;
           }
         } catch (e) {
           AppLogger.instance.e('目標名の取得に失敗しました', e);

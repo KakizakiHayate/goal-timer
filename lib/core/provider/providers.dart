@@ -31,7 +31,7 @@ final supabaseInitProvider = FutureProvider<void>((ref) async {
     // Supabaseの初期化状態をチェック
     try {
       // すでに初期化されているか確認
-      final client = Supabase.instance.client;
+      Supabase.instance.client;
       AppLogger.instance.i('Supabaseはすでに初期化されています');
       return;
     } catch (e) {
@@ -45,7 +45,7 @@ final supabaseInitProvider = FutureProvider<void>((ref) async {
     }
   } catch (e) {
     AppLogger.instance.e('Supabase初期化中にエラーが発生しました', e);
-    throw e;
+    rethrow;
   }
 });
 

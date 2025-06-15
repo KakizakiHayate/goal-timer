@@ -1,7 +1,8 @@
 import 'package:goal_timer/core/data/local/database/app_database.dart';
 import 'package:goal_timer/core/models/goals/goals_model.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
+import 'package:goal_timer/core/utils/app_logger.dart';
+import 'package:sqflite/sqflite.dart';
 
 class LocalGoalsDatasource {
   final AppDatabase _database = AppDatabase.instance;
@@ -15,7 +16,7 @@ class LocalGoalsDatasource {
 
       return maps.map((map) => _convertToGoalsModel(map)).toList();
     } catch (e) {
-      print('ローカルからの目標データ取得に失敗しました: $e');
+      AppLogger.instance.e('ローカルからの目標データ取得に失敗しました: $e');
       return [];
     }
   }
@@ -29,7 +30,7 @@ class LocalGoalsDatasource {
       if (maps.isEmpty) return null;
       return _convertToGoalsModel(maps.first);
     } catch (e) {
-      print('ローカルからの目標データ取得に失敗しました: $id, $e');
+      AppLogger.instance.e('ローカルからの目標データ取得に失敗しました: $id, $e');
       return null;
     }
   }
@@ -59,7 +60,7 @@ class LocalGoalsDatasource {
 
       return newGoal;
     } catch (e) {
-      print('ローカルでの目標作成に失敗しました: $e');
+      AppLogger.instance.e('ローカルでの目標作成に失敗しました: $e');
       rethrow;
     }
   }
@@ -81,7 +82,7 @@ class LocalGoalsDatasource {
 
       return updatedGoal;
     } catch (e) {
-      print('ローカルでの目標更新に失敗しました: ${goal.id}, $e');
+      AppLogger.instance.e('ローカルでの目標更新に失敗しました: ${goal.id}, $e');
       rethrow;
     }
   }
@@ -95,7 +96,7 @@ class LocalGoalsDatasource {
       // オフライン操作を記録
       await _recordOfflineOperation('delete', id);
     } catch (e) {
-      print('ローカルでの目標削除に失敗しました: $id, $e');
+      AppLogger.instance.e('ローカルでの目標削除に失敗しました: $id, $e');
       rethrow;
     }
   }
@@ -112,7 +113,7 @@ class LocalGoalsDatasource {
 
       return maps.map((map) => _convertToGoalsModel(map)).toList();
     } catch (e) {
-      print('未同期の目標データの取得に失敗しました: $e');
+      AppLogger.instance.e('未同期の目標データの取得に失敗しました: $e');
       return [];
     }
   }
@@ -149,7 +150,7 @@ class LocalGoalsDatasource {
         whereArgs: [id],
       );
     } catch (e) {
-      print('同期フラグの更新に失敗しました: $id, $e');
+      AppLogger.instance.e('同期フラグの更新に失敗しました: $id, $e');
       rethrow;
     }
   }
@@ -168,7 +169,7 @@ class LocalGoalsDatasource {
         'timestamp': DateTime.now().toUtc().toIso8601String(),
       });
     } catch (e) {
-      print('オフライン操作の記録に失敗しました: $e');
+      AppLogger.instance.e('オフライン操作の記録に失敗しました: $e');
     }
   }
 
@@ -191,39 +192,26 @@ class LocalGoalsDatasource {
     };
   }
 
-  // 同期用のマッピング（リモートのsync_updated_atを保持）
-  Map<String, dynamic> _convertToMapForSync(GoalsModel goal) {
-    return {
-      'id': goal.id,
-      'user_id': goal.userId,
-      'title': goal.title,
-      'description': goal.description,
-      'deadline': goal.deadline.toIso8601String(),
-      'is_completed': goal.isCompleted ? 1 : 0,
-      'avoid_message': goal.avoidMessage,
-      'total_target_hours': goal.totalTargetHours,
-      'spent_minutes': goal.spentMinutes,
-      'updated_at':
-          goal.updatedAt?.toIso8601String() ??
-          DateTime.now().toUtc().toIso8601String(),
-      'sync_updated_at': DateTime.now().toUtc().toIso8601String(), // 同期時の現在時刻
-      'is_synced': 1, // 同期済みとしてマーク
-    };
-  }
-
-  // SQLiteの型をGoalsModelに合わせて変換
   GoalsModel _convertToGoalsModel(Map<String, dynamic> map) {
     return GoalsModel(
       id: map['id'] as String,
       userId: map['user_id'] as String,
       title: map['title'] as String,
-      description: map['description'] as String? ?? '',
-      deadline: DateTime.parse(map['deadline'] as String),
+      description: map['description'] as String,
+      deadline:
+          map['deadline'] is String
+              ? DateTime.parse(map['deadline'])
+              : (map['deadline'] as DateTime),
       isCompleted: (map['is_completed'] as int) == 1,
       avoidMessage: map['avoid_message'] as String,
       totalTargetHours: map['total_target_hours'] as int,
       spentMinutes: map['spent_minutes'] as int,
-      updatedAt: DateTime.parse(map['updated_at'] as String),
+      updatedAt:
+          map['updated_at'] != null
+              ? (map['updated_at'] is String
+                  ? DateTime.parse(map['updated_at'])
+                  : (map['updated_at'] as DateTime))
+              : null,
       isSynced: (map['is_synced'] as int) == 1,
     );
   }
