@@ -59,14 +59,6 @@ void _showGoalSelectionDialog(BuildContext context) {
             ),
             actions: [
               TextButton(
-                onPressed: () {
-                  Navigator.pop(context); // ダイアログを閉じる
-                  // 目標なしでタイマー画面に遷移
-                  Navigator.pushNamed(context, RouteNames.timer);
-                },
-                child: const Text('目標なしでタイマーを開始'),
-              ),
-              TextButton(
                 onPressed: () => Navigator.pop(context),
                 child: const Text('キャンセル'),
               ),

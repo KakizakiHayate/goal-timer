@@ -29,7 +29,7 @@ class TimerState {
   final int currentSeconds; // 現在の秒数（カウントダウン/カウントアップ両用）
   final TimerStatus status; // 状態
   final TimerMode mode; // モード
-  final String? goalId; // 関連する目標ID
+  final String? goalId; // 関連する目標ID（必須になる予定だが、初期化時はnullを許可）
 
   TimerState({
     this.totalSeconds = 25 * 60, // デフォルト25分
@@ -72,6 +72,9 @@ class TimerState {
     final seconds = currentSeconds % 60;
     return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
+
+  // 目標IDが設定されているかチェック
+  bool get hasGoal => goalId != null && goalId!.isNotEmpty;
 }
 
 // タイマービューモデル
@@ -90,6 +93,12 @@ class TimerViewModel extends StateNotifier<TimerState> {
   // タイマーの開始
   void startTimer() {
     if (state.status == TimerStatus.running) return;
+
+    // 目標IDが設定されていない場合はタイマーを開始しない
+    if (!state.hasGoal) {
+      AppLogger.instance.e('目標IDが設定されていないため、タイマーを開始できません');
+      return;
+    }
 
     state = state.copyWith(status: TimerStatus.running);
     _elapsedSeconds = 0; // 経過秒数リセット
@@ -139,14 +148,21 @@ class TimerViewModel extends StateNotifier<TimerState> {
     _timer?.cancel();
     state = state.copyWith(status: TimerStatus.completed);
 
-    // 目標IDがある場合は学習時間を更新
-    if (state.goalId != null) {
+    // 目標IDが設定されている場合のみ学習時間を更新
+    if (state.hasGoal) {
       _updateGoalStudyTime();
+    } else {
+      AppLogger.instance.e('目標IDが設定されていないため、学習時間を記録できません');
     }
   }
 
   // 目標の学習時間を更新
   void _updateGoalStudyTime() {
+    if (!state.hasGoal) {
+      AppLogger.instance.e('目標IDが設定されていないため、学習時間を更新できません');
+      return;
+    }
+
     // カウントダウンモードの場合は設定時間、カウントアップモードの場合は経過時間を使用
     final studyMinutes =
         state.mode == TimerMode.countdown
@@ -154,7 +170,7 @@ class TimerViewModel extends StateNotifier<TimerState> {
                 60 // 設定した時間（分）
             : _elapsedSeconds ~/ 60; // 経過した時間（分）
 
-    if (studyMinutes > 0 && state.goalId != null) {
+    if (studyMinutes > 0) {
       AppLogger.instance.i(
         'タイマー完了: 目標ID ${state.goalId} に $studyMinutes 分を追加します',
       );
@@ -171,7 +187,7 @@ class TimerViewModel extends StateNotifier<TimerState> {
           });
     } else {
       AppLogger.instance.w(
-        '学習時間の更新条件を満たしていません: 学習時間=$studyMinutes分, 目標ID=${state.goalId}',
+        '学習時間が0分のため記録しません: 学習時間=$studyMinutes分, 目標ID=${state.goalId}',
       );
     }
   }

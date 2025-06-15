@@ -3,17 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:goal_timer/core/utils/color_consts.dart';
 import 'package:goal_timer/features/goal_detail/presentation/viewmodels/goal_detail_view_model.dart';
-import 'package:goal_timer/core/models/goals/goals_model.dart';
 import 'package:goal_timer/features/goal_timer/presentation/viewmodels/timer_view_model.dart';
 import 'package:goal_timer/features/goal_timer/presentation/widgets/timer_progress_ring.dart';
 import 'package:goal_timer/core/utils/app_logger.dart';
 
 class TimerScreen extends ConsumerWidget {
-  final String? goalId;
+  final String goalId;
   // 一度だけログを出力するための変数
-  static final Set<String?> _loggedGoalIds = {};
+  static final Set<String> _loggedGoalIds = {};
 
-  const TimerScreen({super.key, this.goalId});
+  const TimerScreen({super.key, required this.goalId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -25,18 +24,11 @@ class TimerScreen extends ConsumerWidget {
     final timerState = ref.watch(timerViewModelProvider);
     final timerViewModel = ref.read(timerViewModelProvider.notifier);
 
-    // 目標情報を取得（存在する場合）
-    final goalAsyncValue =
-        goalId != null
-            ? ref.watch(goalDetailProvider(goalId!))
-            : const AsyncValue<GoalsModel?>.data(null);
-
     // 目標IDをタイマービューモデルに設定
-    if (goalId != null && timerState.goalId != goalId) {
+    if (timerState.goalId != goalId) {
       // 画面表示後に一度だけ実行するために遅延実行
       Future.microtask(() {
-        timerViewModel.setGoalId(goalId!);
-        // 自動的にタイマーを開始する処理を削除
+        timerViewModel.setGoalId(goalId);
       });
     }
 

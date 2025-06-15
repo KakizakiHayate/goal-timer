@@ -6,7 +6,7 @@ import 'package:goal_timer/features/debug/sqlite_viewer.dart';
 import 'package:goal_timer/features/goal_detail/presentation/screens/goal_detail_setting_screen.dart';
 import 'package:goal_timer/features/goal_detail/presentation/screens/goal_detail_screen.dart';
 import 'package:goal_timer/features/goal_timer/presentation/screens/timer_screen.dart';
-import 'package:goal_timer/features/home/presentation/screens/home_screen.dart';
+
 import 'package:goal_timer/features/memo_record/presentation/screens/memo_record_screen.dart';
 import 'package:goal_timer/features/statistics/presentation/screens/statistics_screen.dart';
 import 'package:goal_timer/features/settings/presentation/screens/settings_screen.dart';
@@ -27,10 +27,6 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return platformPageRoute(
         builder: (context) => const GoalDetailSettingScreen(),
       );
-    case RouteNames.timer:
-      // 引数なしの場合は通常のタイマー画面
-      AppLogger.instance.i('通常タイマー画面に遷移します');
-      return platformPageRoute(builder: (context) => const TimerScreen());
     // 特定の目標IDを指定したタイマー画面
     case RouteNames.timerWithGoal:
       final goalId = settings.arguments as String;

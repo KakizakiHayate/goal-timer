@@ -11,10 +11,8 @@ import 'package:goal_timer/features/goal_detail/presentation/viewmodels/goal_det
 import 'package:goal_timer/features/goal_detail/presentation/screens/goal_edit_modal.dart';
 import 'package:goal_timer/features/home/provider/home_provider.dart';
 import 'package:goal_timer/features/statistics/presentation/screens/statistics_screen.dart';
-import 'package:goal_timer/features/goal_timer/presentation/viewmodels/timer_view_model.dart';
 import 'package:goal_timer/core/utils/app_logger.dart';
 import 'package:goal_timer/features/settings/presentation/screens/settings_screen.dart';
-import 'package:goal_timer/core/provider/providers.dart';
 import 'package:goal_timer/features/shared/widgets/sync_status_indicator.dart';
 
 part '../widgets/add_goal_modal.dart';
@@ -171,8 +169,45 @@ class _TimerPage extends ConsumerWidget {
     return goalDetailsAsync.when(
       data: (goals) {
         if (goals.isEmpty) {
-          // 目標がない場合はタイマー画面をそのまま表示
-          return const TimerScreen();
+          // 目標がない場合は目標作成を促すメッセージを表示
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('タイマー'),
+              backgroundColor: ColorConsts.primary,
+              foregroundColor: Colors.white,
+            ),
+            body: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.flag, size: 80, color: Colors.grey),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'タイマーを使用するには\n目標を作成してください',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 18, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        // ホーム画面の目標タブに遷移
+                        ref.read(homeTabIndexProvider.notifier).state = 0;
+                      },
+                      icon: const Icon(Icons.add),
+                      label: const Text('目標を作成する'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: ColorConsts.primary,
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(200, 50),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
         }
 
         // 目標選択画面を表示
@@ -292,29 +327,6 @@ class _TimerPage extends ConsumerWidget {
                       ),
                     );
                   },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: ElevatedButton(
-                  onPressed: () {
-                    // 目標なしでタイマー画面に遷移
-                    AppLogger.instance.i('目標なしタイマーに遷移します（直接ルート方式）');
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const TimerScreen(),
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey[400],
-                    minimumSize: const Size(double.infinity, 50),
-                  ),
-                  child: const Text(
-                    '目標なしでタイマーを開始',
-                    style: TextStyle(color: Colors.white),
-                  ),
                 ),
               ),
             ],
