@@ -1,0 +1,230 @@
+// coverage:ignore-file
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint
+// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
+
+part of 'daily_study_log_model.dart';
+
+// **************************************************************************
+// FreezedGenerator
+// **************************************************************************
+
+T _$identity<T>(T value) => value;
+
+final _privateConstructorUsedError = UnsupportedError(
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
+
+DailyStudyLogModel _$DailyStudyLogModelFromJson(Map<String, dynamic> json) {
+  return _DailyStudyLogModel.fromJson(json);
+}
+
+/// @nodoc
+mixin _$DailyStudyLogModel {
+  /// 自動生成される一意のID
+  String get id => throw _privateConstructorUsedError;
+
+  /// 関連する目標のID
+  String get goalId => throw _privateConstructorUsedError;
+
+  /// 学習した日付
+  DateTime get date => throw _privateConstructorUsedError;
+
+  /// 学習した時間（分）
+  int get minutes => throw _privateConstructorUsedError;
+
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  $DailyStudyLogModelCopyWith<DailyStudyLogModel> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $DailyStudyLogModelCopyWith<$Res> {
+  factory $DailyStudyLogModelCopyWith(
+          DailyStudyLogModel value, $Res Function(DailyStudyLogModel) then) =
+      _$DailyStudyLogModelCopyWithImpl<$Res, DailyStudyLogModel>;
+  @useResult
+  $Res call({String id, String goalId, DateTime date, int minutes});
+}
+
+/// @nodoc
+class _$DailyStudyLogModelCopyWithImpl<$Res, $Val extends DailyStudyLogModel>
+    implements $DailyStudyLogModelCopyWith<$Res> {
+  _$DailyStudyLogModelCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? goalId = null,
+    Object? date = null,
+    Object? minutes = null,
+  }) {
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      goalId: null == goalId
+          ? _value.goalId
+          : goalId // ignore: cast_nullable_to_non_nullable
+              as String,
+      date: null == date
+          ? _value.date
+          : date // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      minutes: null == minutes
+          ? _value.minutes
+          : minutes // ignore: cast_nullable_to_non_nullable
+              as int,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$DailyStudyLogModelImplCopyWith<$Res>
+    implements $DailyStudyLogModelCopyWith<$Res> {
+  factory _$$DailyStudyLogModelImplCopyWith(_$DailyStudyLogModelImpl value,
+          $Res Function(_$DailyStudyLogModelImpl) then) =
+      __$$DailyStudyLogModelImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({String id, String goalId, DateTime date, int minutes});
+}
+
+/// @nodoc
+class __$$DailyStudyLogModelImplCopyWithImpl<$Res>
+    extends _$DailyStudyLogModelCopyWithImpl<$Res, _$DailyStudyLogModelImpl>
+    implements _$$DailyStudyLogModelImplCopyWith<$Res> {
+  __$$DailyStudyLogModelImplCopyWithImpl(_$DailyStudyLogModelImpl _value,
+      $Res Function(_$DailyStudyLogModelImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? goalId = null,
+    Object? date = null,
+    Object? minutes = null,
+  }) {
+    return _then(_$DailyStudyLogModelImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      goalId: null == goalId
+          ? _value.goalId
+          : goalId // ignore: cast_nullable_to_non_nullable
+              as String,
+      date: null == date
+          ? _value.date
+          : date // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      minutes: null == minutes
+          ? _value.minutes
+          : minutes // ignore: cast_nullable_to_non_nullable
+              as int,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$DailyStudyLogModelImpl implements _DailyStudyLogModel {
+  const _$DailyStudyLogModelImpl(
+      {required this.id,
+      required this.goalId,
+      required this.date,
+      required this.minutes});
+
+  factory _$DailyStudyLogModelImpl.fromJson(Map<String, dynamic> json) =>
+      _$$DailyStudyLogModelImplFromJson(json);
+
+  /// 自動生成される一意のID
+  @override
+  final String id;
+
+  /// 関連する目標のID
+  @override
+  final String goalId;
+
+  /// 学習した日付
+  @override
+  final DateTime date;
+
+  /// 学習した時間（分）
+  @override
+  final int minutes;
+
+  @override
+  String toString() {
+    return 'DailyStudyLogModel(id: $id, goalId: $goalId, date: $date, minutes: $minutes)';
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$DailyStudyLogModelImpl &&
+            (identical(other.id, id) || other.id == id) &&
+            (identical(other.goalId, goalId) || other.goalId == goalId) &&
+            (identical(other.date, date) || other.date == date) &&
+            (identical(other.minutes, minutes) || other.minutes == minutes));
+  }
+
+  @JsonKey(ignore: true)
+  @override
+  int get hashCode => Object.hash(runtimeType, id, goalId, date, minutes);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$DailyStudyLogModelImplCopyWith<_$DailyStudyLogModelImpl> get copyWith =>
+      __$$DailyStudyLogModelImplCopyWithImpl<_$DailyStudyLogModelImpl>(
+          this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$DailyStudyLogModelImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _DailyStudyLogModel implements DailyStudyLogModel {
+  const factory _DailyStudyLogModel(
+      {required final String id,
+      required final String goalId,
+      required final DateTime date,
+      required final int minutes}) = _$DailyStudyLogModelImpl;
+
+  factory _DailyStudyLogModel.fromJson(Map<String, dynamic> json) =
+      _$DailyStudyLogModelImpl.fromJson;
+
+  @override
+
+  /// 自動生成される一意のID
+  String get id;
+  @override
+
+  /// 関連する目標のID
+  String get goalId;
+  @override
+
+  /// 学習した日付
+  DateTime get date;
+  @override
+
+  /// 学習した時間（分）
+  int get minutes;
+  @override
+  @JsonKey(ignore: true)
+  _$$DailyStudyLogModelImplCopyWith<_$DailyStudyLogModelImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}

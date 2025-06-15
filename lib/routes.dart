@@ -1,27 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:goal_timer/core/utils/platform_route.dart';
 import 'package:goal_timer/core/utils/route_names.dart';
-import 'package:goal_timer/features/goal_detail_setting/presentation/screens/goal_detail_setting_screen.dart';
-import 'package:goal_timer/features/goal_detail_setting/presentation/screens/goal_detail_screen.dart';
+import 'package:goal_timer/features/debug/sync_debug_view.dart';
+import 'package:goal_timer/features/debug/sqlite_viewer.dart';
+import 'package:goal_timer/features/goal_detail/presentation/screens/goal_detail_setting_screen.dart';
+import 'package:goal_timer/features/goal_detail/presentation/screens/goal_detail_screen.dart';
 import 'package:goal_timer/features/goal_timer/presentation/screens/timer_screen.dart';
-import 'package:goal_timer/features/home/presentation/screens/home_screen.dart';
+
 import 'package:goal_timer/features/memo_record/presentation/screens/memo_record_screen.dart';
 import 'package:goal_timer/features/statistics/presentation/screens/statistics_screen.dart';
 import 'package:goal_timer/features/settings/presentation/screens/settings_screen.dart';
+import 'package:goal_timer/features/splash/presentation/screens/splash_screen.dart';
+import 'package:goal_timer/core/utils/app_logger.dart';
 
 // TODO: 中規模・大規模になってきたら疎結合にすることを考える
 
 // アプリのルーティング設定
 Route<dynamic> generateRoute(RouteSettings settings) {
+  AppLogger.instance.i('ルート要求: ${settings.name}, 引数: ${settings.arguments}');
+
   switch (settings.name) {
     case RouteNames.home:
-      return platformPageRoute(builder: (context) => const HomeScreen());
+      // 初期ルートはSplashScreenに設定
+      return platformPageRoute(builder: (context) => const SplashScreen());
     case RouteNames.goalDetailSetting:
       return platformPageRoute(
         builder: (context) => const GoalDetailSettingScreen(),
       );
-    case RouteNames.timer:
-      return platformPageRoute(builder: (context) => const TimerScreen());
+    // 特定の目標IDを指定したタイマー画面
+    case RouteNames.timerWithGoal:
+      final goalId = settings.arguments as String;
+      AppLogger.instance.i('目標付きタイマー画面に遷移します: goalId=$goalId');
+      return platformPageRoute(
+        builder: (context) => TimerScreen(goalId: goalId),
+      );
     // 目標詳細画面
     case RouteNames.goalDetail:
       final goalId = settings.arguments as String;
@@ -42,12 +54,22 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     // 設定画面
     case RouteNames.settings:
       return platformPageRoute(builder: (context) => const SettingsScreen());
+    // デバッグ画面
+    case RouteNames.syncDebug:
+      return platformPageRoute(builder: (context) => const SyncDebugView());
+    // SQLiteビューア画面
+    case RouteNames.sqliteViewer:
+      return platformPageRoute(
+        builder: (context) => const SQLiteViewerScreen(),
+      );
     // 不明なルート
     default:
+      AppLogger.instance.e('不明なルートが要求されました: ${settings.name}');
       return platformPageRoute(
         builder:
-            (context) =>
-                const Scaffold(body: Center(child: Text('ページが見つかりません'))),
+            (context) => Scaffold(
+              body: Center(child: Text('ページが見つかりません: ${settings.name}')),
+            ),
       );
   }
 }

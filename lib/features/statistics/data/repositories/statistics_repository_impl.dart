@@ -1,36 +1,174 @@
-import '../../domain/entities/statistics.dart';
-import '../../domain/repositories/statistics_repository.dart';
+import 'package:goal_timer/core/data/repositories/hybrid/daily_study_logs/hybrid_daily_study_logs_repository.dart';
+import 'package:goal_timer/core/models/daily_study_logs/daily_study_log_model.dart';
+import 'package:goal_timer/features/statistics/domain/entities/daily_stats.dart';
+import 'package:goal_timer/features/statistics/domain/entities/statistics.dart';
+import 'package:goal_timer/features/statistics/domain/repositories/statistics_repository.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:goal_timer/core/utils/app_logger.dart';
 
 class StatisticsRepositoryImpl implements StatisticsRepository {
+  final HybridDailyStudyLogsRepository _dailyStudyLogRepository;
+  final SupabaseClient _client = Supabase.instance.client;
+
+  StatisticsRepositoryImpl(this._dailyStudyLogRepository);
+
   @override
-  Future<List<Statistics>> getStatistics(
-      {DateTime? startDate, DateTime? endDate}) async {
-    // TODO: 実際のデータソースからデータを取得する実装
-    // 仮のデータを返す
-    return [
-      Statistics(
-        id: '1',
-        date: DateTime.now().subtract(const Duration(days: 1)),
-        totalMinutes: 120,
-        goalCount: 3,
-      ),
-      Statistics(
-        id: '2',
-        date: DateTime.now().subtract(const Duration(days: 2)),
-        totalMinutes: 90,
-        goalCount: 2,
-      ),
-    ];
+  Future<List<Statistics>> getStatistics({
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
+    final start = startDate ?? DateTime.now().subtract(const Duration(days: 7));
+    final end = endDate ?? DateTime.now();
+
+    try {
+      // 日付範囲内の日々の学習記録を取得
+      final dailyLogs = await _dailyStudyLogRepository.getLogsByDateRange(
+        start,
+        end,
+      );
+
+      // 日付ごとにグループ化
+      final Map<String, List<DailyStudyLogModel>> logsByDate = {};
+      for (var log in dailyLogs) {
+        final dateStr = log.date.toIso8601String().split('T')[0];
+        logsByDate.putIfAbsent(dateStr, () => []).add(log);
+      }
+
+      // 統計データに変換
+      final List<Statistics> statistics = [];
+      for (var entry in logsByDate.entries) {
+        final date = DateTime.parse(entry.key);
+        int totalMinutes = 0;
+        int goalCount = 0;
+
+        // 目標IDごとにユニークカウント
+        final Set<String> uniqueGoalIds = {};
+
+        for (var log in entry.value) {
+          totalMinutes += log.minutes;
+          uniqueGoalIds.add(log.goalId);
+        }
+
+        goalCount = uniqueGoalIds.length;
+
+        statistics.add(
+          Statistics(
+            id: entry.key,
+            date: date,
+            totalMinutes: totalMinutes,
+            goalCount: goalCount,
+          ),
+        );
+      }
+
+      // 日付順にソート
+      statistics.sort((a, b) => b.date.compareTo(a.date));
+
+      return statistics;
+    } catch (e, stackTrace) {
+      AppLogger.instance.e('getStatistics error', e, stackTrace);
+      return [];
+    }
   }
 
   @override
   Future<Statistics> getStatisticsById(String id) async {
-    // TODO: 実際のデータソースからデータを取得する実装
-    return Statistics(
-      id: id,
-      date: DateTime.now(),
-      totalMinutes: 60,
-      goalCount: 1,
-    );
+    // IDは日付文字列を想定
+    try {
+      final date = DateTime.parse(id);
+      final logs = await _dailyStudyLogRepository.getDailyLogs(date);
+
+      if (logs.isEmpty) {
+        return Statistics(id: id, date: date, totalMinutes: 0, goalCount: 0);
+      }
+
+      int totalMinutes = 0;
+      final Set<String> uniqueGoalIds = {};
+
+      for (var log in logs) {
+        totalMinutes += log.minutes;
+        uniqueGoalIds.add(log.goalId);
+      }
+
+      return Statistics(
+        id: id,
+        date: date,
+        totalMinutes: totalMinutes,
+        goalCount: uniqueGoalIds.length,
+      );
+    } catch (e, stackTrace) {
+      AppLogger.instance.e('getStatisticsById error', e, stackTrace);
+      return Statistics(
+        id: id,
+        date: DateTime.now(),
+        totalMinutes: 0,
+        goalCount: 0,
+      );
+    }
+  }
+
+  @override
+  Future<DailyStats> getDailyStats(DateTime date) async {
+    try {
+      // 指定日の学習ログを取得
+      final logs = await _dailyStudyLogRepository.getDailyLogs(date);
+
+      if (logs.isEmpty) {
+        return DailyStats(
+          date: date,
+          totalMinutes: 0,
+          goalMinutes: {},
+          goalTitles: {},
+        );
+      }
+
+      int totalMinutes = 0;
+      final Map<String, int> goalMinutes = {};
+      final Map<String, String> goalTitles = {};
+
+      // 目標IDごとに学習時間を集計
+      for (var log in logs) {
+        final goalId = log.goalId;
+        final minutes = log.minutes;
+
+        totalMinutes += minutes;
+        goalMinutes[goalId] = (goalMinutes[goalId] ?? 0) + minutes;
+      }
+
+      // 目標名を取得
+      final goalIds = goalMinutes.keys.toList();
+      if (goalIds.isNotEmpty) {
+        try {
+          // 個別に目標情報を取得
+          for (final goalId in goalIds) {
+            final goalData =
+                await _client
+                    .from('goals')
+                    .select('title')
+                    .eq('id', goalId)
+                    .single();
+
+            goalTitles[goalId] = goalData['title'] as String;
+          }
+        } catch (e) {
+          AppLogger.instance.e('目標名の取得に失敗しました', e);
+        }
+      }
+
+      return DailyStats(
+        date: date,
+        totalMinutes: totalMinutes,
+        goalMinutes: goalMinutes,
+        goalTitles: goalTitles,
+      );
+    } catch (e, stackTrace) {
+      AppLogger.instance.e('getDailyStats error', e, stackTrace);
+      return DailyStats(
+        date: date,
+        totalMinutes: 0,
+        goalMinutes: {},
+        goalTitles: {},
+      );
+    }
   }
 }

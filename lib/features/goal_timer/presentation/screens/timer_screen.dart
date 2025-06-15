@@ -1,17 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:goal_timer/core/utils/color_consts.dart';
 import 'package:goal_timer/features/goal_timer/presentation/viewmodels/timer_view_model.dart';
+import 'package:goal_timer/core/utils/app_logger.dart';
+
+import 'package:goal_timer/core/utils/color_consts.dart';
 import 'package:goal_timer/features/goal_timer/presentation/widgets/timer_progress_ring.dart';
 
 class TimerScreen extends ConsumerWidget {
-  const TimerScreen({super.key});
+  final String goalId;
+  // 一度だけログを出力するための変数
+  static final Set<String> _loggedGoalIds = {};
+
+  const TimerScreen({super.key, required this.goalId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (!_loggedGoalIds.contains(goalId)) {
+      AppLogger.instance.i('TimerScreen: goalId=$goalId');
+      _loggedGoalIds.add(goalId);
+    }
+
     final timerState = ref.watch(timerViewModelProvider);
     final timerViewModel = ref.read(timerViewModelProvider.notifier);
+
+    // 目標IDをタイマービューモデルに設定
+    if (timerState.goalId != goalId) {
+      // 画面表示後に一度だけ実行するために遅延実行
+      Future.microtask(() {
+        timerViewModel.setGoalId(goalId);
+      });
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -21,16 +40,21 @@ class TimerScreen extends ConsumerWidget {
       ),
       backgroundColor: Colors.white,
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildModeSwitcher(context, timerState, timerViewModel),
-            const SizedBox(height: 40),
-            _buildTimerDisplay(context, timerState),
-            const SizedBox(height: 40),
-            _buildControlButtons(context, timerState, timerViewModel),
-          ],
+        padding: const EdgeInsets.all(16),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              // タイマー関連のUI
+              _buildModeSwitcher(context, timerState, timerViewModel),
+              const SizedBox(height: 30),
+              _buildTimerDisplay(context, timerState),
+              const SizedBox(height: 30),
+              _buildControlButtons(context, timerState, timerViewModel),
+
+              // 下部に余白を追加
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );

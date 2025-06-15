@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:goal_timer/core/utils/color_consts.dart';
 import '../viewmodels/settings_view_model.dart';
 import '../../domain/entities/settings.dart';
+import 'package:goal_timer/core/utils/route_names.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -168,6 +169,12 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ],
         ),
+
+        const SizedBox(height: 16),
+
+        // デバッグセクション（開発時のみ表示するなど条件付きで表示も可能）
+        if (true) // or: if (EnvConfig.isDebugMode)
+          _buildDebugSection(context),
       ],
     );
   }
@@ -483,6 +490,34 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ],
           ),
+    );
+  }
+
+  // デバッグ用のセクションを追加
+  Widget _buildDebugSection(BuildContext context) {
+    return _buildSectionCard(
+      context,
+      title: 'デバッグ',
+      icon: Icons.bug_report,
+      children: [
+        ListTile(
+          leading: const Icon(Icons.sync, color: ColorConsts.primary),
+          title: const Text('同期デバッグ'),
+          subtitle: const Text('ローカルDBとSupabaseの同期状態を確認'),
+          onTap: () {
+            Navigator.of(context).pushNamed(RouteNames.syncDebug);
+          },
+        ),
+        const Divider(),
+        ListTile(
+          leading: const Icon(Icons.storage, color: ColorConsts.primary),
+          title: const Text('SQLiteデータビューア'),
+          subtitle: const Text('ローカルデータベースの内容確認'),
+          onTap: () {
+            Navigator.of(context).pushNamed(RouteNames.sqliteViewer);
+          },
+        ),
+      ],
     );
   }
 }
