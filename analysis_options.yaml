@@ -13,6 +13,8 @@ analyzer:
   errors:
     # Disable non_nullable_equals_parameter for Freezed generated files
     non_nullable_equals_parameter: ignore
+    # Disable asset_does_not_exist for .env file (not included in repository)
+    asset_does_not_exist: ignore
   exclude:
     # Exclude generated files from analysis
     - "**.freezed.dart"
