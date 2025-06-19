@@ -5,6 +5,9 @@ import 'package:goal_timer/core/models/goals/goals_model.dart';
 import 'package:goal_timer/core/utils/time_utils.dart';
 import 'package:goal_timer/features/goal_detail/presentation/viewmodels/goal_detail_view_model.dart';
 import 'package:goal_timer/core/provider/supabase/goals/goals_provider.dart';
+import 'package:goal_timer/core/provider/providers.dart';
+import 'package:goal_timer/features/auth/provider/auth_provider.dart';
+import 'package:goal_timer/features/auth/domain/entities/auth_state.dart';
 
 class GoalEditModal extends ConsumerStatefulWidget {
   final GoalsModel? goalDetail; // 編集時は目標データを渡す、新規追加時はnull
@@ -323,6 +326,27 @@ class _GoalEditModalState extends ConsumerState<GoalEditModal> {
     final navigator = Navigator.of(context);
     final goalsNotifier = ref.read(goalsNotifierProvider.notifier);
 
+    // 認証状態を確認
+    final authState = ref.read(globalAuthStateProvider);
+    if (authState != AuthState.authenticated) {
+      scaffoldMessenger.showSnackBar(
+        const SnackBar(content: Text('認証が必要です'), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
+    // 認証ユーザーを取得
+    final currentUser = await ref.read(getCurrentUserUseCaseProvider).call();
+    if (currentUser == null) {
+      scaffoldMessenger.showSnackBar(
+        const SnackBar(
+          content: Text('ユーザー情報が取得できませんでした'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     try {
       // 編集モードか新規追加モードかに応じて処理を分ける
       if (widget.goalDetail != null) {
@@ -359,7 +383,7 @@ class _GoalEditModalState extends ConsumerState<GoalEditModal> {
         // 新規追加モード: 新しいデータを作成
         final newGoal = GoalsModel(
           id: DateTime.now().millisecondsSinceEpoch.toString(), // 仮のID生成
-          userId: 'a9d7e8b2-5678-4f3c-bdef-abcdef123456',
+          userId: currentUser.id, // 認証されたユーザーのIDを使用
           title: _titleController.text.trim(),
           description:
               '毎日${_targetMinutesPerDay ~/ 60}時間${_targetMinutesPerDay % 60}分の学習',

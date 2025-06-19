@@ -4,18 +4,22 @@ import 'package:goal_timer/core/config/env_config.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:goal_timer/core/utils/app_logger.dart';
 
+import 'package:goal_timer/core/provider/providers.dart';
+
 // スプラッシュ画面の状態
 class SplashState {
   final bool isLoading;
   final String? errorMessage;
   final String? errorDetails;
   final bool isConnectionOk;
+  final bool isAuthReady;
 
   SplashState({
     this.isLoading = true,
     this.errorMessage,
     this.errorDetails,
     this.isConnectionOk = false,
+    this.isAuthReady = false,
   });
 
   SplashState copyWith({
@@ -23,19 +27,26 @@ class SplashState {
     String? errorMessage,
     String? errorDetails,
     bool? isConnectionOk,
+    bool? isAuthReady,
   }) {
     return SplashState(
       isLoading: isLoading ?? this.isLoading,
       errorMessage: errorMessage ?? this.errorMessage,
       errorDetails: errorDetails ?? this.errorDetails,
       isConnectionOk: isConnectionOk ?? this.isConnectionOk,
+      isAuthReady: isAuthReady ?? this.isAuthReady,
     );
   }
+
+  // 初期化が完了しているかどうか
+  bool get isReady => isConnectionOk && isAuthReady;
 }
 
 // スプラッシュ画面のViewModel
 class SplashViewModel extends StateNotifier<SplashState> {
-  SplashViewModel() : super(SplashState()) {
+  final Ref _ref;
+
+  SplashViewModel(this._ref) : super(SplashState()) {
     _initialize();
   }
 
@@ -60,17 +71,50 @@ class SplashViewModel extends StateNotifier<SplashState> {
   // 初期化処理
   Future<void> _initialize() async {
     try {
-      // Supabaseの初期化はプロバイダーで行うので、ここではSupabaseの接続状態のみを確認する
-      AppLogger.instance.i('SplashViewModel: Supabase接続状態を確認します');
+      AppLogger.instance.i('SplashViewModel: アプリケーション初期化を開始します');
 
-      // 初期化後に接続状態を確認
+      // Step 1: Supabaseの初期化確認
       await _checkSupabaseConnection();
+
+      if (!state.isConnectionOk) {
+        return; // 接続に失敗した場合は早期リターン
+      }
+
+      // Step 2: 認証システムの初期化
+      await _initializeAuth();
     } catch (error) {
       AppLogger.instance.e('SplashViewModel初期化エラー', error);
       _safeUpdateState(
         (state) => state.copyWith(
           isLoading: false,
-          errorMessage: 'Supabase初期化エラー',
+          errorMessage: 'アプリケーション初期化エラー',
+          errorDetails: error.toString(),
+        ),
+      );
+    }
+  }
+
+  // 認証システムの初期化
+  Future<void> _initializeAuth() async {
+    try {
+      if (_isDisposed) return;
+
+      AppLogger.instance.i('SplashViewModel: 認証システムを初期化します');
+
+      // authInitializationProviderから認証初期化を実行
+      await _ref.read(authInitializationProvider.future);
+
+      _safeUpdateState(
+        (state) => state.copyWith(isAuthReady: true, isLoading: false),
+      );
+
+      AppLogger.instance.i('SplashViewModel: 初期化が完了しました');
+    } catch (error) {
+      AppLogger.instance.e('認証システムの初期化に失敗しました', error);
+      _safeUpdateState(
+        (state) => state.copyWith(
+          isLoading: false,
+          errorMessage: '認証システム初期化エラー',
           errorDetails: error.toString(),
         ),
       );
@@ -109,10 +153,8 @@ class SplashViewModel extends StateNotifier<SplashState> {
         // 接続テスト方法1: 単純なRPC呼び出し（認証不要）
         await client.rpc('current_timestamp');
 
-        // 全て成功
-        _safeUpdateState(
-          (state) => state.copyWith(isLoading: false, isConnectionOk: true),
-        );
+        // 接続成功
+        _safeUpdateState((state) => state.copyWith(isConnectionOk: true));
       } catch (rpcErr) {
         debugPrint('RPC current_timestamp失敗: $rpcErr');
 
@@ -123,10 +165,8 @@ class SplashViewModel extends StateNotifier<SplashState> {
         try {
           await client.from('users').select().limit(1).single();
 
-          // 全て成功
-          _safeUpdateState(
-            (state) => state.copyWith(isLoading: false, isConnectionOk: true),
-          );
+          // 接続成功
+          _safeUpdateState((state) => state.copyWith(isConnectionOk: true));
         } catch (tableErr) {
           debugPrint('テーブル接続テストエラー: $tableErr');
 
@@ -137,10 +177,8 @@ class SplashViewModel extends StateNotifier<SplashState> {
           try {
             await client.auth.getUser();
 
-            // 全て成功
-            _safeUpdateState(
-              (state) => state.copyWith(isLoading: false, isConnectionOk: true),
-            );
+            // 接続成功
+            _safeUpdateState((state) => state.copyWith(isConnectionOk: true));
           } catch (authErr) {
             // 全ての接続テストに失敗
             _safeUpdateState(
@@ -171,6 +209,8 @@ class SplashViewModel extends StateNotifier<SplashState> {
         isLoading: true,
         errorMessage: null,
         errorDetails: null,
+        isConnectionOk: false,
+        isAuthReady: false,
       ),
     );
     await _initialize();

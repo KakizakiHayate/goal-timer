@@ -9,6 +9,7 @@ import 'package:goal_timer/features/goal_detail/presentation/screens/goal_edit_m
 import 'package:goal_timer/core/utils/route_names.dart';
 import 'package:goal_timer/core/utils/app_logger.dart';
 import 'package:goal_timer/features/goal_timer/presentation/screens/timer_screen.dart';
+import 'package:goal_timer/core/provider/supabase/goals/goals_provider.dart';
 
 /// 目標IDを使用して詳細データを取得する画面
 class GoalDetailScreen extends ConsumerWidget {
@@ -445,22 +446,47 @@ class GoalDetailScreen extends ConsumerWidget {
                 child: const Text('キャンセル'),
               ),
               TextButton(
-                onPressed: () {
-                  // TODO: 目標を削除する処理を実装
-                  // モックリポジトリなので、ディープリンクと表示のリフレッシュだけ行う
-                  Navigator.pop(context); // ダイアログを閉じる
-                  Navigator.pop(context); // 詳細画面を閉じる
+                onPressed: () async {
+                  try {
+                    final goalsNotifier = ref.read(
+                      goalsNotifierProvider.notifier,
+                    );
 
-                  // リストを更新するためにプロバイダーを更新
-                  final _ = ref.refresh(goalDetailListProvider);
+                    // 目標を削除
+                    await goalsNotifier.deleteGoal(goalDetail.id);
 
-                  // 成功メッセージを表示
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('目標が削除されました'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
+                    // ダイアログと詳細画面を閉じる
+                    if (context.mounted) {
+                      Navigator.pop(context); // ダイアログを閉じる
+                      Navigator.pop(context); // 詳細画面を閉じる
+
+                      // リストを更新するためにプロバイダーを更新
+                      // ignore: unused_result
+                      ref.refresh(goalDetailListProvider);
+                      // ignore: unused_result
+                      ref.refresh(goalsListProvider);
+
+                      // 成功メッセージを表示
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('目標が削除されました'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  } catch (error) {
+                    // エラーが発生した場合
+                    if (context.mounted) {
+                      Navigator.pop(context); // ダイアログを閉じる
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('削除に失敗しました: $error'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  }
                 },
                 style: TextButton.styleFrom(foregroundColor: Colors.red),
                 child: const Text('削除する'),
@@ -956,22 +982,47 @@ class GoalDetailScreenWithData extends ConsumerWidget {
                 child: const Text('キャンセル'),
               ),
               TextButton(
-                onPressed: () {
-                  // TODO: 目標を削除する処理を実装
-                  // モックリポジトリなので、ディープリンクと表示のリフレッシュだけ行う
-                  Navigator.pop(context); // ダイアログを閉じる
-                  Navigator.pop(context); // 詳細画面を閉じる
+                onPressed: () async {
+                  try {
+                    final goalsNotifier = ref.read(
+                      goalsNotifierProvider.notifier,
+                    );
 
-                  // リストを更新するためにプロバイダーを更新
-                  final _ = ref.refresh(goalDetailListProvider);
+                    // 目標を削除
+                    await goalsNotifier.deleteGoal(goalDetail.id);
 
-                  // 成功メッセージを表示
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('目標が削除されました'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
+                    // ダイアログと詳細画面を閉じる
+                    if (context.mounted) {
+                      Navigator.pop(context); // ダイアログを閉じる
+                      Navigator.pop(context); // 詳細画面を閉じる
+
+                      // リストを更新するためにプロバイダーを更新
+                      // ignore: unused_result
+                      ref.refresh(goalDetailListProvider);
+                      // ignore: unused_result
+                      ref.refresh(goalsListProvider);
+
+                      // 成功メッセージを表示
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('目標が削除されました'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  } catch (error) {
+                    // エラーが発生した場合
+                    if (context.mounted) {
+                      Navigator.pop(context); // ダイアログを閉じる
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('削除に失敗しました: $error'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  }
                 },
                 style: TextButton.styleFrom(foregroundColor: Colors.red),
                 child: const Text('削除する'),

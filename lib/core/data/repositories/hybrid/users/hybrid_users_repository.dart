@@ -117,6 +117,44 @@ class HybridUsersRepository implements UsersRepository {
     }
   }
 
+  // 新規ユーザーを作成
+  @override
+  Future<UsersModel> createUser(UsersModel user) async {
+    try {
+      // まずローカルDBに保存
+      final localUser = await _localDatasource.upsertUser(user);
+
+      // ネットワーク接続がある場合はリモートにも保存
+      final connectivityResult = await _connectivity.checkConnectivity();
+      if (connectivityResult != ConnectivityResult.none) {
+        try {
+          // リモートに保存
+          final remoteUser = await _remoteDatasource.createUser(localUser);
+
+          // 同期済みとしてマーク
+          await _localDatasource.markAsSynced(remoteUser.id);
+
+          // 同期成功を通知
+          _syncNotifier.setSynced();
+
+          return remoteUser;
+        } catch (e) {
+          // リモート保存に失敗しても、ローカル保存は成功しているのでエラーにはしない
+          AppLogger.instance.e('リモートへのユーザー作成に失敗しました', e);
+          _syncNotifier.setUnsynced();
+        }
+      } else {
+        _syncNotifier.setOffline();
+      }
+
+      return localUser;
+    } catch (e) {
+      AppLogger.instance.e('ユーザーの作成に失敗しました', e);
+      _syncNotifier.setError(e.toString());
+      rethrow;
+    }
+  }
+
   // ユーザー情報を更新
   @override
   Future<UsersModel> updateUser(UsersModel user) async {
@@ -150,6 +188,44 @@ class HybridUsersRepository implements UsersRepository {
       return localUser;
     } catch (e) {
       AppLogger.instance.e('ユーザー情報の更新に失敗しました', e);
+      _syncNotifier.setError(e.toString());
+      rethrow;
+    }
+  }
+
+  // ユーザーを追加または更新
+  @override
+  Future<UsersModel> upsertUser(UsersModel user) async {
+    try {
+      // まずローカルDBに保存
+      final localUser = await _localDatasource.upsertUser(user);
+
+      // ネットワーク接続がある場合はリモートにも保存
+      final connectivityResult = await _connectivity.checkConnectivity();
+      if (connectivityResult != ConnectivityResult.none) {
+        try {
+          // リモートに保存
+          final remoteUser = await _remoteDatasource.upsertUser(localUser);
+
+          // 同期済みとしてマーク
+          await _localDatasource.markAsSynced(remoteUser.id);
+
+          // 同期成功を通知
+          _syncNotifier.setSynced();
+
+          return remoteUser;
+        } catch (e) {
+          // リモート保存に失敗しても、ローカル保存は成功しているのでエラーにはしない
+          AppLogger.instance.e('リモートへのユーザー保存に失敗しました', e);
+          _syncNotifier.setUnsynced();
+        }
+      } else {
+        _syncNotifier.setOffline();
+      }
+
+      return localUser;
+    } catch (e) {
+      AppLogger.instance.e('ユーザーのupsertに失敗しました', e);
       _syncNotifier.setError(e.toString());
       rethrow;
     }

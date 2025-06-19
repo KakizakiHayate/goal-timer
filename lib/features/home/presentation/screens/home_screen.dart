@@ -15,6 +15,13 @@ import 'package:goal_timer/core/utils/app_logger.dart';
 import 'package:goal_timer/features/settings/presentation/screens/settings_screen.dart';
 import 'package:goal_timer/features/shared/widgets/sync_status_indicator.dart';
 
+// 認証状態チェック用のインポート
+import 'package:goal_timer/core/provider/providers.dart';
+import 'package:goal_timer/features/auth/domain/entities/auth_state.dart'
+    as app_auth;
+import 'package:goal_timer/features/auth/provider/auth_provider.dart';
+import 'package:goal_timer/core/utils/route_names.dart';
+
 part '../widgets/add_goal_modal.dart';
 part '../widgets/filter_bar_widget.dart';
 part '../widgets/today_progress_widget.dart';
@@ -47,15 +54,65 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final currentIndex = ref.watch(homeTabIndexProvider);
 
+    // 認証状態をチェック
+    final authState = ref.watch(globalAuthStateProvider);
+
+    // 認証状態監視：未認証の場合はログイン画面に戻る
+    ref.listen(globalAuthStateProvider, (previous, next) {
+      if (next == app_auth.AuthState.unauthenticated) {
+        Navigator.of(context).pushReplacementNamed(RouteNames.login);
+      }
+    });
+
+    // 認証されていない場合は読み込み画面を表示
+    if (authState != app_auth.AuthState.authenticated) {
+      return const Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('認証状態を確認中...'),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       body: _buildPage(currentIndex),
       bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
         currentIndex: currentIndex,
         onTap: (index) => ref.read(homeTabIndexProvider.notifier).state = index,
+        selectedItemColor: ColorConsts.primary,
+        unselectedItemColor: Colors.grey,
+        backgroundColor: Colors.white,
+        selectedLabelStyle: const TextStyle(
+          fontWeight: FontWeight.w600,
+          fontSize: 12,
+        ),
+        unselectedLabelStyle: const TextStyle(
+          fontWeight: FontWeight.w400,
+          fontSize: 12,
+        ),
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'ホーム'),
-          BottomNavigationBarItem(icon: Icon(Icons.timer), label: 'タイマー'),
-          BottomNavigationBarItem(icon: Icon(Icons.analytics), label: '統計'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home_outlined),
+            activeIcon: Icon(Icons.home),
+            label: 'ホーム',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.timer_outlined),
+            activeIcon: Icon(Icons.timer),
+            label: 'タイマー',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.analytics_outlined),
+            activeIcon: Icon(Icons.analytics),
+            label: '統計',
+          ),
         ],
       ),
     );
@@ -86,15 +143,45 @@ class _HomeScreen extends ConsumerWidget {
         actions: [
           // 同期状態インジケーター
           const SyncStatusIndicator(),
-          IconButton(
-            icon: const Icon(Icons.settings, color: Colors.white),
-            onPressed: () {
-              // 設定画面へ移動（名前付きルート経由ではなく直接MaterialPageRouteを使用）
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SettingsScreen()),
-              );
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert, color: Colors.white),
+            onSelected: (value) {
+              switch (value) {
+                case 'settings':
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SettingsScreen(),
+                    ),
+                  );
+                  break;
+                case 'signout':
+                  _showSignOutDialog(context, ref);
+                  break;
+              }
             },
+            itemBuilder:
+                (BuildContext context) => [
+                  const PopupMenuItem<String>(
+                    value: 'settings',
+                    child: ListTile(
+                      leading: Icon(Icons.settings),
+                      title: Text('設定'),
+                      dense: true,
+                    ),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: 'signout',
+                    child: ListTile(
+                      leading: Icon(Icons.logout, color: Colors.red),
+                      title: Text(
+                        'サインアウト',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                      dense: true,
+                    ),
+                  ),
+                ],
           ),
         ],
       ),
@@ -141,6 +228,46 @@ class _HomeScreen extends ConsumerWidget {
           return GoalListCellWidget(goal: goals[index]);
         },
       ),
+    );
+  }
+
+  /// サインアウト確認ダイアログを表示
+  void _showSignOutDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('サインアウト'),
+          content: const Text('サインアウトしますか？'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('キャンセル'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                try {
+                  // サインアウト実行
+                  final authNotifier = ref.read(authViewModelProvider.notifier);
+                  await authNotifier.signOut();
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('サインアウトに失敗しました: $e'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              },
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text('サインアウト'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
