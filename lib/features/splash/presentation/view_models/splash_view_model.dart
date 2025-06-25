@@ -150,45 +150,32 @@ class SplashViewModel extends StateNotifier<SplashState> {
         // 処理中にdisposeされた場合は早期リターン
         if (_isDisposed) return;
 
-        // 接続テスト方法1: 単純なRPC呼び出し（認証不要）
-        await client.rpc('current_timestamp');
+        // 接続テスト方法1: 単純なテーブル存在確認（認証不要）
+        await client.from('users').select('id').limit(1);
 
         // 接続成功
         _safeUpdateState((state) => state.copyWith(isConnectionOk: true));
-      } catch (rpcErr) {
-        debugPrint('RPC current_timestamp失敗: $rpcErr');
+      } catch (tableErr) {
+        debugPrint('テーブル接続テストエラー: $tableErr');
 
         // 処理中にdisposeされた場合は早期リターン
         if (_isDisposed) return;
 
-        // 接続テスト方法2: 単純なテーブル存在確認（認証不要）
+        // 接続テスト方法2: auth.getUser()を使用（認証が必要）
         try {
-          await client.from('users').select().limit(1).single();
+          await client.auth.getUser();
 
           // 接続成功
           _safeUpdateState((state) => state.copyWith(isConnectionOk: true));
-        } catch (tableErr) {
-          debugPrint('テーブル接続テストエラー: $tableErr');
-
-          // 処理中にdisposeされた場合は早期リターン
-          if (_isDisposed) return;
-
-          // 接続テスト方法3: auth.getUser()を使用（認証が必要）
-          try {
-            await client.auth.getUser();
-
-            // 接続成功
-            _safeUpdateState((state) => state.copyWith(isConnectionOk: true));
-          } catch (authErr) {
-            // 全ての接続テストに失敗
-            _safeUpdateState(
-              (state) => state.copyWith(
-                isLoading: false,
-                errorMessage: 'サーバーに接続できません',
-                errorDetails: 'あなたのデバイスがネットワークに接続されていない可能性があります。',
-              ),
-            );
-          }
+        } catch (authErr) {
+          // 全ての接続テストに失敗
+          _safeUpdateState(
+            (state) => state.copyWith(
+              isLoading: false,
+              errorMessage: 'サーバーに接続できません',
+              errorDetails: 'あなたのデバイスがネットワークに接続されていない可能性があります。',
+            ),
+          );
         }
       }
     } catch (error) {

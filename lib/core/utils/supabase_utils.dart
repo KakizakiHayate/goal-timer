@@ -27,23 +27,22 @@ class SupabaseUtils {
 
       final client = ref.read(supabaseClientProvider);
 
-      // 接続テスト方法1: 単純なRPC呼び出し（認証不要）
+      // 接続テスト方法1: 単純なテーブル存在確認（認証不要）
       try {
-        await client.rpc('current_timestamp');
-        debugPrint('RPC current_timestamp成功');
+        // テーブルの存在確認のみ（データが存在しなくても接続は確認できる）
+        await client.from('users').select('id').limit(1);
+        debugPrint('テーブル接続テスト成功');
         return true;
-      } catch (rpcErr) {
-        debugPrint('RPC current_timestamp失敗: $rpcErr');
-
-        // 接続テスト方法2: 単純なテーブル存在確認（認証不要）
+      } catch (tableErr) {
+        debugPrint('テーブル接続テストエラー: $tableErr');
+        
+        // 接続テスト方法2: auth.getUser()を使用
         try {
-          // 構文を修正: count(*)ではなく単純にlimit(1)を使用
-          final user = await client.from('users').select().limit(1).single();
-
-          debugPrint('テーブル接続テスト成功: ${user.toString()}');
+          await client.auth.getUser();
+          debugPrint('認証接続テスト成功');
           return true;
-        } catch (tableErr) {
-          debugPrint('テーブル接続テストエラー: $tableErr');
+        } catch (authErr) {
+          debugPrint('認証接続テストエラー: $authErr');
           return false;
         }
       }
