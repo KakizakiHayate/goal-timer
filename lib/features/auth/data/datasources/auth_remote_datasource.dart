@@ -5,6 +5,7 @@ import 'package:crypto/crypto.dart';
 import 'dart:convert';
 import 'dart:math';
 import '../../domain/entities/app_user.dart';
+import '../../../../core/utils/app_logger.dart';
 
 /// リモート認証を管理するデータソース
 abstract class AuthRemoteDataSource {
@@ -107,32 +108,59 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<AppUser> signInWithGoogle() async {
+    AppLogger.instance.i('Googleログイン開始');
+    
     try {
+      AppLogger.instance.d('Google Sign-In ダイアログを表示中...');
       final googleUser = await _googleSignIn.signIn();
+      
       if (googleUser == null) {
+        AppLogger.instance.w('Googleログインがユーザーによってキャンセルされました');
         throw Exception('Googleログインがキャンセルされました');
       }
 
+      AppLogger.instance.d('Googleユーザー情報取得成功: ${googleUser.email}');
+      AppLogger.instance.d('Google認証トークンを取得中...');
+      
       final googleAuth = await googleUser.authentication;
       final accessToken = googleAuth.accessToken;
       final idToken = googleAuth.idToken;
 
+      AppLogger.instance.d('アクセストークン取得: ${accessToken != null ? "成功" : "失敗"}');
+      AppLogger.instance.d('IDトークン取得: ${idToken != null ? "成功" : "失敗"}');
+
       if (accessToken == null) {
+        AppLogger.instance.e('Googleアクセストークンがnull');
         throw Exception('Googleアクセストークンの取得に失敗しました');
       }
 
+      if (idToken == null) {
+        AppLogger.instance.e('GoogleIDトークンがnull');
+        throw Exception('GoogleIDトークンの取得に失敗しました');
+      }
+
+      AppLogger.instance.d('Supabaseでの認証を開始...');
       final response = await _supabase.auth.signInWithIdToken(
         provider: OAuthProvider.google,
-        idToken: idToken!,
+        idToken: idToken,
         accessToken: accessToken,
       );
 
       if (response.user == null) {
+        AppLogger.instance.e('Supabase認証レスポンスでユーザーがnull');
+        AppLogger.instance.e('認証レスポンス詳細: ${response.toString()}');
         throw Exception('Googleログインに失敗しました');
       }
 
-      return _mapToAppUser(response.user!);
-    } catch (e) {
+      final appUser = _mapToAppUser(response.user!);
+      AppLogger.instance.i('Googleログイン成功: ユーザーID=${appUser.id}, Email=${appUser.email}');
+      return appUser;
+      
+    } on Exception catch (e) {
+      AppLogger.instance.e('Googleログイン Exception', e);
+      rethrow;
+    } catch (e, stackTrace) {
+      AppLogger.instance.e('Googleログイン 予期しないエラー', e, stackTrace);
       throw Exception('Googleログインエラー: ${e.toString()}');
     }
   }
