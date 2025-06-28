@@ -32,6 +32,15 @@ mixin _$DailyStudyLogModel {
   /// 学習した時間（分）
   int get minutes => throw _privateConstructorUsedError;
 
+  /// 最終更新日時
+  DateTime? get updatedAt => throw _privateConstructorUsedError;
+
+  /// 同期時の最終更新日時（同期処理で使用）
+  DateTime? get syncUpdatedAt => throw _privateConstructorUsedError;
+
+  /// 同期状態（ローカルDBのみで使用）
+  bool get isSynced => throw _privateConstructorUsedError;
+
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
   $DailyStudyLogModelCopyWith<DailyStudyLogModel> get copyWith =>
@@ -44,7 +53,14 @@ abstract class $DailyStudyLogModelCopyWith<$Res> {
           DailyStudyLogModel value, $Res Function(DailyStudyLogModel) then) =
       _$DailyStudyLogModelCopyWithImpl<$Res, DailyStudyLogModel>;
   @useResult
-  $Res call({String id, String goalId, DateTime date, int minutes});
+  $Res call(
+      {String id,
+      String goalId,
+      DateTime date,
+      int minutes,
+      DateTime? updatedAt,
+      DateTime? syncUpdatedAt,
+      bool isSynced});
 }
 
 /// @nodoc
@@ -64,6 +80,9 @@ class _$DailyStudyLogModelCopyWithImpl<$Res, $Val extends DailyStudyLogModel>
     Object? goalId = null,
     Object? date = null,
     Object? minutes = null,
+    Object? updatedAt = freezed,
+    Object? syncUpdatedAt = freezed,
+    Object? isSynced = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -82,6 +101,18 @@ class _$DailyStudyLogModelCopyWithImpl<$Res, $Val extends DailyStudyLogModel>
           ? _value.minutes
           : minutes // ignore: cast_nullable_to_non_nullable
               as int,
+      updatedAt: freezed == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      syncUpdatedAt: freezed == syncUpdatedAt
+          ? _value.syncUpdatedAt
+          : syncUpdatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      isSynced: null == isSynced
+          ? _value.isSynced
+          : isSynced // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -94,7 +125,14 @@ abstract class _$$DailyStudyLogModelImplCopyWith<$Res>
       __$$DailyStudyLogModelImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String id, String goalId, DateTime date, int minutes});
+  $Res call(
+      {String id,
+      String goalId,
+      DateTime date,
+      int minutes,
+      DateTime? updatedAt,
+      DateTime? syncUpdatedAt,
+      bool isSynced});
 }
 
 /// @nodoc
@@ -112,6 +150,9 @@ class __$$DailyStudyLogModelImplCopyWithImpl<$Res>
     Object? goalId = null,
     Object? date = null,
     Object? minutes = null,
+    Object? updatedAt = freezed,
+    Object? syncUpdatedAt = freezed,
+    Object? isSynced = null,
   }) {
     return _then(_$DailyStudyLogModelImpl(
       id: null == id
@@ -130,6 +171,18 @@ class __$$DailyStudyLogModelImplCopyWithImpl<$Res>
           ? _value.minutes
           : minutes // ignore: cast_nullable_to_non_nullable
               as int,
+      updatedAt: freezed == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      syncUpdatedAt: freezed == syncUpdatedAt
+          ? _value.syncUpdatedAt
+          : syncUpdatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      isSynced: null == isSynced
+          ? _value.isSynced
+          : isSynced // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -141,7 +194,10 @@ class _$DailyStudyLogModelImpl implements _DailyStudyLogModel {
       {required this.id,
       required this.goalId,
       required this.date,
-      required this.minutes});
+      required this.minutes,
+      this.updatedAt = null,
+      this.syncUpdatedAt = null,
+      this.isSynced = false});
 
   factory _$DailyStudyLogModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$DailyStudyLogModelImplFromJson(json);
@@ -162,9 +218,24 @@ class _$DailyStudyLogModelImpl implements _DailyStudyLogModel {
   @override
   final int minutes;
 
+  /// 最終更新日時
+  @override
+  @JsonKey()
+  final DateTime? updatedAt;
+
+  /// 同期時の最終更新日時（同期処理で使用）
+  @override
+  @JsonKey()
+  final DateTime? syncUpdatedAt;
+
+  /// 同期状態（ローカルDBのみで使用）
+  @override
+  @JsonKey()
+  final bool isSynced;
+
   @override
   String toString() {
-    return 'DailyStudyLogModel(id: $id, goalId: $goalId, date: $date, minutes: $minutes)';
+    return 'DailyStudyLogModel(id: $id, goalId: $goalId, date: $date, minutes: $minutes, updatedAt: $updatedAt, syncUpdatedAt: $syncUpdatedAt, isSynced: $isSynced)';
   }
 
   @override
@@ -175,12 +246,19 @@ class _$DailyStudyLogModelImpl implements _DailyStudyLogModel {
             (identical(other.id, id) || other.id == id) &&
             (identical(other.goalId, goalId) || other.goalId == goalId) &&
             (identical(other.date, date) || other.date == date) &&
-            (identical(other.minutes, minutes) || other.minutes == minutes));
+            (identical(other.minutes, minutes) || other.minutes == minutes) &&
+            (identical(other.updatedAt, updatedAt) ||
+                other.updatedAt == updatedAt) &&
+            (identical(other.syncUpdatedAt, syncUpdatedAt) ||
+                other.syncUpdatedAt == syncUpdatedAt) &&
+            (identical(other.isSynced, isSynced) ||
+                other.isSynced == isSynced));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, id, goalId, date, minutes);
+  int get hashCode => Object.hash(runtimeType, id, goalId, date, minutes,
+      updatedAt, syncUpdatedAt, isSynced);
 
   @JsonKey(ignore: true)
   @override
@@ -202,7 +280,10 @@ abstract class _DailyStudyLogModel implements DailyStudyLogModel {
       {required final String id,
       required final String goalId,
       required final DateTime date,
-      required final int minutes}) = _$DailyStudyLogModelImpl;
+      required final int minutes,
+      final DateTime? updatedAt,
+      final DateTime? syncUpdatedAt,
+      final bool isSynced}) = _$DailyStudyLogModelImpl;
 
   factory _DailyStudyLogModel.fromJson(Map<String, dynamic> json) =
       _$DailyStudyLogModelImpl.fromJson;
@@ -223,6 +304,18 @@ abstract class _DailyStudyLogModel implements DailyStudyLogModel {
 
   /// 学習した時間（分）
   int get minutes;
+  @override
+
+  /// 最終更新日時
+  DateTime? get updatedAt;
+  @override
+
+  /// 同期時の最終更新日時（同期処理で使用）
+  DateTime? get syncUpdatedAt;
+  @override
+
+  /// 同期状態（ローカルDBのみで使用）
+  bool get isSynced;
   @override
   @JsonKey(ignore: true)
   _$$DailyStudyLogModelImplCopyWith<_$DailyStudyLogModelImpl> get copyWith =>

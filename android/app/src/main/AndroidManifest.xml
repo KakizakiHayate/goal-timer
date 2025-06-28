@@ -1,5 +1,4 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.h_dev.goal_timer">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
         android:label="goal_timer"
         android:name="${applicationName}"

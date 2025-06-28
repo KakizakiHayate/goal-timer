@@ -255,8 +255,13 @@ class HybridUsersRepository implements UsersRepository {
             // リモートに存在しない場合は新規作成
             await _remoteDatasource.createUser(localUser);
           } else {
-            // リモートに存在する場合は更新
-            await _remoteDatasource.updateUser(localUser);
+            // syncUpdatedAtで比較して更新が必要かチェック
+            if (localUser.syncUpdatedAt != null &&
+                remoteUser.syncUpdatedAt != null &&
+                localUser.syncUpdatedAt!.isAfter(remoteUser.syncUpdatedAt!)) {
+              // ローカルの方が新しい場合は更新
+              await _remoteDatasource.updateUser(localUser);
+            }
           }
 
           // 同期済みとしてマーク
@@ -275,31 +280,17 @@ class HybridUsersRepository implements UsersRepository {
           final localUser = await _localDatasource.getUserById(remoteUser.id);
 
           if (localUser == null) {
-            // ローカルに存在しない場合は新規作成を試みる
-            try {
-              await _localDatasource.upsertUser(remoteUser);
-              await _localDatasource.markAsSynced(remoteUser.id);
-              AppLogger.instance.i('ローカルにユーザーを作成しました: ${remoteUser.id}');
-            } catch (insertError) {
-              // 主キー制約エラーが発生した場合は、ログに記録
-              AppLogger.instance.w(
-                'ユーザー作成に失敗: ${remoteUser.id} - ${insertError.toString()}',
-              );
-            }
-          } else {
-            // 既に同期されているかどうかをLocalUsersDatasourceから取得した情報でチェック
-            final isLocalDataUnsynced = await _isUserUnsynced(localUser.id);
-
-            if (isLocalDataUnsynced) {
-              // ローカルに存在し、未同期の場合（ローカルでの変更がある場合）
-              // この場合はローカルの変更を優先
-              AppLogger.instance.i('ローカルの変更を優先: ${remoteUser.id}');
-            } else {
-              // ローカルに存在し、かつ同期済みの場合は更新
-              await _localDatasource.upsertUser(remoteUser);
-              await _localDatasource.markAsSynced(remoteUser.id);
-              AppLogger.instance.i('ローカルのユーザーを更新しました: ${remoteUser.id}');
-            }
+            // ローカルに存在しない場合は新規作成
+            final syncedUser = remoteUser.copyWith(isSynced: true);
+            await _localDatasource.upsertUser(syncedUser);
+            AppLogger.instance.i('ローカルにユーザーを作成しました: ${remoteUser.id}');
+          } else if (remoteUser.syncUpdatedAt != null &&
+              localUser.syncUpdatedAt != null &&
+              remoteUser.syncUpdatedAt!.isAfter(localUser.syncUpdatedAt!)) {
+            // リモートの方が新しい場合は更新
+            final syncedUser = remoteUser.copyWith(isSynced: true);
+            await _localDatasource.upsertUser(syncedUser);
+            AppLogger.instance.i('ローカルのユーザーを更新しました: ${remoteUser.id}');
           }
         } catch (e) {
           AppLogger.instance.e('ローカルへの同期に失敗しました: ${remoteUser.id}', e);
@@ -315,9 +306,4 @@ class HybridUsersRepository implements UsersRepository {
     }
   }
 
-  // ユーザーが未同期かどうかを確認するヘルパーメソッド
-  Future<bool> _isUserUnsynced(String userId) async {
-    final unsyncedUsers = await _localDatasource.getUnsyncedUsers();
-    return unsyncedUsers.any((user) => user.id == userId);
-  }
 }

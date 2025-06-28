@@ -28,6 +28,18 @@ class HybridGoalsRepository implements GoalsRepository {
        _connectivity = connectivity ?? Connectivity(),
        _syncMetadata = syncMetadata ?? SyncMetadataManager();
 
+  /// 同期処理をスキップしてローカルデータのみを取得
+  Future<List<GoalsModel>> getLocalGoalsOnly() async {
+    try {
+      final localGoals = await _localDatasource.getGoals();
+      AppLogger.instance.i('ローカルから${localGoals.length}件の目標を取得しました（同期スキップ）');
+      return localGoals;
+    } catch (e) {
+      AppLogger.instance.e('ローカル目標データの取得に失敗しました', e);
+      rethrow;
+    }
+  }
+
   @override
   Future<List<GoalsModel>> getGoals() async {
     try {
@@ -269,10 +281,10 @@ class HybridGoalsRepository implements GoalsRepository {
             await _remoteDatasource.createGoal(localGoal);
             AppLogger.instance.i('リモートに新規作成: ${localGoal.id}');
           } else {
-            // リモートに存在する場合は、更新時刻比較
-            if (localGoal.updatedAt != null &&
-                remoteGoal.updatedAt != null &&
-                localGoal.updatedAt!.isAfter(remoteGoal.updatedAt!)) {
+            // リモートに存在する場合は、同期更新時刻比較
+            if (localGoal.syncUpdatedAt != null &&
+                remoteGoal.syncUpdatedAt != null &&
+                localGoal.syncUpdatedAt!.isAfter(remoteGoal.syncUpdatedAt!)) {
               // ローカルの方が新しい場合は更新
               await _remoteDatasource.updateGoal(localGoal);
               AppLogger.instance.i('リモートを更新: ${localGoal.id}');
@@ -300,9 +312,9 @@ class HybridGoalsRepository implements GoalsRepository {
             final syncedGoal = remoteGoal.copyWith(isSynced: true);
             await _localDatasource.createGoal(syncedGoal);
             AppLogger.instance.i('ローカルに新規作成: ${remoteGoal.id}');
-          } else if (remoteGoal.updatedAt != null &&
-              localGoal.updatedAt != null &&
-              remoteGoal.updatedAt!.isAfter(localGoal.updatedAt!)) {
+          } else if (remoteGoal.syncUpdatedAt != null &&
+              localGoal.syncUpdatedAt != null &&
+              remoteGoal.syncUpdatedAt!.isAfter(localGoal.syncUpdatedAt!)) {
             // リモートの方が新しい場合は更新
             final syncedGoal = remoteGoal.copyWith(isSynced: true);
             await _localDatasource.updateGoal(syncedGoal);
@@ -336,7 +348,7 @@ class HybridGoalsRepository implements GoalsRepository {
       for (final localGoal in unsyncedGoals) {
         try {
           // 最終同期時刻以降に更新されたもののみ処理
-          if (localGoal.updatedAt?.isAfter(lastSyncTime) ?? false) {
+          if (localGoal.syncUpdatedAt?.isAfter(lastSyncTime) ?? false) {
             final remoteGoal = await _remoteDatasource.getGoalById(
               localGoal.id,
             );
@@ -344,9 +356,9 @@ class HybridGoalsRepository implements GoalsRepository {
             if (remoteGoal == null) {
               await _remoteDatasource.createGoal(localGoal);
               AppLogger.instance.i('リモートに新規作成: ${localGoal.id}');
-            } else if (localGoal.updatedAt != null &&
-                remoteGoal.updatedAt != null &&
-                localGoal.updatedAt!.isAfter(remoteGoal.updatedAt!)) {
+            } else if (localGoal.syncUpdatedAt != null &&
+                remoteGoal.syncUpdatedAt != null &&
+                localGoal.syncUpdatedAt!.isAfter(remoteGoal.syncUpdatedAt!)) {
               await _remoteDatasource.updateGoal(localGoal);
               AppLogger.instance.i('リモートを更新: ${localGoal.id}');
             }
@@ -373,9 +385,9 @@ class HybridGoalsRepository implements GoalsRepository {
             final syncedGoal = remoteGoal.copyWith(isSynced: true);
             await _localDatasource.createGoal(syncedGoal);
             AppLogger.instance.i('ローカルに新規作成: ${remoteGoal.id}');
-          } else if (remoteGoal.updatedAt != null &&
-              localGoal.updatedAt != null &&
-              remoteGoal.updatedAt!.isAfter(localGoal.updatedAt!)) {
+          } else if (remoteGoal.syncUpdatedAt != null &&
+              localGoal.syncUpdatedAt != null &&
+              remoteGoal.syncUpdatedAt!.isAfter(localGoal.syncUpdatedAt!)) {
             final syncedGoal = remoteGoal.copyWith(isSynced: true);
             await _localDatasource.updateGoal(syncedGoal);
             AppLogger.instance.i('ローカルを更新: ${remoteGoal.id}');

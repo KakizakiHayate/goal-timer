@@ -38,6 +38,12 @@ mixin _$UsersModel {
   /// 最終ログイン日時
   DateTime? get lastLogin => throw _privateConstructorUsedError;
 
+  /// 同期時の最終更新日時（同期処理で使用）
+  DateTime? get syncUpdatedAt => throw _privateConstructorUsedError;
+
+  /// 同期状態（ローカルDBのみで使用）
+  bool get isSynced => throw _privateConstructorUsedError;
+
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
   $UsersModelCopyWith<UsersModel> get copyWith =>
@@ -56,7 +62,9 @@ abstract class $UsersModelCopyWith<$Res> {
       String displayName,
       DateTime createdAt,
       DateTime updatedAt,
-      DateTime? lastLogin});
+      DateTime? lastLogin,
+      DateTime? syncUpdatedAt,
+      bool isSynced});
 }
 
 /// @nodoc
@@ -78,6 +86,8 @@ class _$UsersModelCopyWithImpl<$Res, $Val extends UsersModel>
     Object? createdAt = null,
     Object? updatedAt = null,
     Object? lastLogin = freezed,
+    Object? syncUpdatedAt = freezed,
+    Object? isSynced = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -104,6 +114,14 @@ class _$UsersModelCopyWithImpl<$Res, $Val extends UsersModel>
           ? _value.lastLogin
           : lastLogin // ignore: cast_nullable_to_non_nullable
               as DateTime?,
+      syncUpdatedAt: freezed == syncUpdatedAt
+          ? _value.syncUpdatedAt
+          : syncUpdatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      isSynced: null == isSynced
+          ? _value.isSynced
+          : isSynced // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -122,7 +140,9 @@ abstract class _$$UsersModelImplCopyWith<$Res>
       String displayName,
       DateTime createdAt,
       DateTime updatedAt,
-      DateTime? lastLogin});
+      DateTime? lastLogin,
+      DateTime? syncUpdatedAt,
+      bool isSynced});
 }
 
 /// @nodoc
@@ -142,6 +162,8 @@ class __$$UsersModelImplCopyWithImpl<$Res>
     Object? createdAt = null,
     Object? updatedAt = null,
     Object? lastLogin = freezed,
+    Object? syncUpdatedAt = freezed,
+    Object? isSynced = null,
   }) {
     return _then(_$UsersModelImpl(
       id: null == id
@@ -168,6 +190,14 @@ class __$$UsersModelImplCopyWithImpl<$Res>
           ? _value.lastLogin
           : lastLogin // ignore: cast_nullable_to_non_nullable
               as DateTime?,
+      syncUpdatedAt: freezed == syncUpdatedAt
+          ? _value.syncUpdatedAt
+          : syncUpdatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      isSynced: null == isSynced
+          ? _value.isSynced
+          : isSynced // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -181,7 +211,9 @@ class _$UsersModelImpl implements _UsersModel {
       required this.displayName,
       required this.createdAt,
       required this.updatedAt,
-      this.lastLogin});
+      this.lastLogin,
+      this.syncUpdatedAt = null,
+      this.isSynced = false});
 
   factory _$UsersModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$UsersModelImplFromJson(json);
@@ -210,9 +242,19 @@ class _$UsersModelImpl implements _UsersModel {
   @override
   final DateTime? lastLogin;
 
+  /// 同期時の最終更新日時（同期処理で使用）
+  @override
+  @JsonKey()
+  final DateTime? syncUpdatedAt;
+
+  /// 同期状態（ローカルDBのみで使用）
+  @override
+  @JsonKey()
+  final bool isSynced;
+
   @override
   String toString() {
-    return 'UsersModel(id: $id, email: $email, displayName: $displayName, createdAt: $createdAt, updatedAt: $updatedAt, lastLogin: $lastLogin)';
+    return 'UsersModel(id: $id, email: $email, displayName: $displayName, createdAt: $createdAt, updatedAt: $updatedAt, lastLogin: $lastLogin, syncUpdatedAt: $syncUpdatedAt, isSynced: $isSynced)';
   }
 
   @override
@@ -229,13 +271,17 @@ class _$UsersModelImpl implements _UsersModel {
             (identical(other.updatedAt, updatedAt) ||
                 other.updatedAt == updatedAt) &&
             (identical(other.lastLogin, lastLogin) ||
-                other.lastLogin == lastLogin));
+                other.lastLogin == lastLogin) &&
+            (identical(other.syncUpdatedAt, syncUpdatedAt) ||
+                other.syncUpdatedAt == syncUpdatedAt) &&
+            (identical(other.isSynced, isSynced) ||
+                other.isSynced == isSynced));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(
-      runtimeType, id, email, displayName, createdAt, updatedAt, lastLogin);
+  int get hashCode => Object.hash(runtimeType, id, email, displayName,
+      createdAt, updatedAt, lastLogin, syncUpdatedAt, isSynced);
 
   @JsonKey(ignore: true)
   @override
@@ -258,7 +304,9 @@ abstract class _UsersModel implements UsersModel {
       required final String displayName,
       required final DateTime createdAt,
       required final DateTime updatedAt,
-      final DateTime? lastLogin}) = _$UsersModelImpl;
+      final DateTime? lastLogin,
+      final DateTime? syncUpdatedAt,
+      final bool isSynced}) = _$UsersModelImpl;
 
   factory _UsersModel.fromJson(Map<String, dynamic> json) =
       _$UsersModelImpl.fromJson;
@@ -287,6 +335,14 @@ abstract class _UsersModel implements UsersModel {
 
   /// 最終ログイン日時
   DateTime? get lastLogin;
+  @override
+
+  /// 同期時の最終更新日時（同期処理で使用）
+  DateTime? get syncUpdatedAt;
+  @override
+
+  /// 同期状態（ローカルDBのみで使用）
+  bool get isSynced;
   @override
   @JsonKey(ignore: true)
   _$$UsersModelImplCopyWith<_$UsersModelImpl> get copyWith =>

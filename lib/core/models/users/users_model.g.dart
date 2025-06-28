@@ -16,6 +16,10 @@ _$UsersModelImpl _$$UsersModelImplFromJson(Map<String, dynamic> json) =>
       lastLogin: json['lastLogin'] == null
           ? null
           : DateTime.parse(json['lastLogin'] as String),
+      syncUpdatedAt: json['syncUpdatedAt'] == null
+          ? null
+          : DateTime.parse(json['syncUpdatedAt'] as String),
+      isSynced: json['isSynced'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$$UsersModelImplToJson(_$UsersModelImpl instance) =>
@@ -26,4 +30,6 @@ Map<String, dynamic> _$$UsersModelImplToJson(_$UsersModelImpl instance) =>
       'createdAt': instance.createdAt.toIso8601String(),
       'updatedAt': instance.updatedAt.toIso8601String(),
       'lastLogin': instance.lastLogin?.toIso8601String(),
+      'syncUpdatedAt': instance.syncUpdatedAt?.toIso8601String(),
+      'isSynced': instance.isSynced,
     };

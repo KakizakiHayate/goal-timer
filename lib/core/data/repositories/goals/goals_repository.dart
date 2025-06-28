@@ -5,6 +5,9 @@ abstract class GoalsRepository {
   /// すべての目標を取得
   Future<List<GoalsModel>> getGoals();
 
+  /// 同期処理をスキップしてローカルデータのみを取得
+  Future<List<GoalsModel>> getLocalGoalsOnly();
+
   /// 特定のIDの目標を取得
   Future<GoalsModel?> getGoalById(String id);
 

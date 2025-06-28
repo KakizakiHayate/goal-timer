@@ -37,6 +37,9 @@ class GoalsModel with _$GoalsModel {
     /// 最終更新日時
     @Default(null) DateTime? updatedAt,
 
+    /// 同期時の最終更新日時（同期処理で使用）
+    @Default(null) DateTime? syncUpdatedAt,
+
     /// 同期状態（ローカルDBのみで使用）
     @Default(false) bool isSynced,
   }) = _GoalsModel;
@@ -99,6 +102,16 @@ class GoalsModel with _$GoalsModel {
       }
     }
 
+    // syncUpdatedAtの変換
+    DateTime? parsedSyncUpdatedAt;
+    if (map['sync_updated_at'] != null) {
+      if (map['sync_updated_at'] is String) {
+        parsedSyncUpdatedAt = DateTime.parse(map['sync_updated_at']);
+      } else if (map['sync_updated_at'] is DateTime) {
+        parsedSyncUpdatedAt = map['sync_updated_at'];
+      }
+    }
+
     // 同期状態の変換
     bool parsedIsSynced = false;
     if (map['is_synced'] != null) {
@@ -122,6 +135,7 @@ class GoalsModel with _$GoalsModel {
       totalTargetHours: parsedTotalTargetHours,
       spentMinutes: parsedSpentMinutes,
       updatedAt: parsedUpdatedAt,
+      syncUpdatedAt: parsedSyncUpdatedAt,
       isSynced: parsedIsSynced,
     );
   }

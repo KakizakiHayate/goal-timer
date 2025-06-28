@@ -17,6 +17,15 @@ class DailyStudyLogModel with _$DailyStudyLogModel {
 
     /// 学習した時間（分）
     required int minutes,
+
+    /// 最終更新日時
+    @Default(null) DateTime? updatedAt,
+
+    /// 同期時の最終更新日時（同期処理で使用）
+    @Default(null) DateTime? syncUpdatedAt,
+
+    /// 同期状態（ローカルDBのみで使用）
+    @Default(false) bool isSynced,
   }) = _DailyStudyLogModel;
 
   /// Supabaseからのデータを元にDailyStudyLogModelを生成
@@ -46,11 +55,46 @@ class DailyStudyLogModel with _$DailyStudyLogModel {
       parsedMinutes = 0;
     }
 
+    // updatedAtの変換
+    DateTime? parsedUpdatedAt;
+    if (map['updated_at'] != null) {
+      if (map['updated_at'] is String) {
+        parsedUpdatedAt = DateTime.parse(map['updated_at']);
+      } else if (map['updated_at'] is DateTime) {
+        parsedUpdatedAt = map['updated_at'];
+      }
+    }
+
+    // syncUpdatedAtの変換
+    DateTime? parsedSyncUpdatedAt;
+    if (map['sync_updated_at'] != null) {
+      if (map['sync_updated_at'] is String) {
+        parsedSyncUpdatedAt = DateTime.parse(map['sync_updated_at']);
+      } else if (map['sync_updated_at'] is DateTime) {
+        parsedSyncUpdatedAt = map['sync_updated_at'];
+      }
+    }
+
+    // 同期状態の変換
+    bool parsedIsSynced = false;
+    if (map['is_synced'] != null) {
+      if (map['is_synced'] is bool) {
+        parsedIsSynced = map['is_synced'];
+      } else if (map['is_synced'] is int) {
+        parsedIsSynced = map['is_synced'] == 1;
+      } else if (map['is_synced'] is String) {
+        parsedIsSynced = map['is_synced'] == 'true' || map['is_synced'] == '1';
+      }
+    }
+
     return DailyStudyLogModel(
       id: map['id'] ?? '',
       goalId: map['goal_id'] ?? '',
       date: parsedDate,
       minutes: parsedMinutes,
+      updatedAt: parsedUpdatedAt,
+      syncUpdatedAt: parsedSyncUpdatedAt,
+      isSynced: parsedIsSynced,
     );
   }
 }

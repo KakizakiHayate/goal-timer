@@ -83,8 +83,11 @@ class HomeViewModel extends StateNotifier<HomeState> {
   // 同期後のデータ再読み込み
   void _reloadGoalsAfterSync() async {
     try {
-      // UseCaseを通じてデータを再取得（クリーンアーキテクチャに準拠）
-      final goals = await _ref.read(fetchGoalsUseCaseProvider).call();
+      // 同期後の再読み込みでは同期を避けるため、直接ローカルから取得
+      final repository = _ref.read(goalsRepositoryProvider);
+      
+      // ローカルデータのみを取得（同期処理をスキップ）
+      final goals = await repository.getLocalGoalsOnly();
 
       state = state.copyWith(goals: goals);
       AppLogger.instance.i('同期後のデータ再読み込みが完了しました: ${goals.length}件');

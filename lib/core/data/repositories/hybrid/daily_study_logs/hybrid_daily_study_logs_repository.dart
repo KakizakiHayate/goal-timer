@@ -256,8 +256,13 @@ class HybridDailyStudyLogsRepository implements DailyStudyLogsRepository {
             // リモートに存在しない場合は新規作成
             await _remoteDatasource.createDailyLog(localLog);
           } else {
-            // リモートに存在する場合は更新
-            await _remoteDatasource.updateDailyLog(localLog);
+            // syncUpdatedAtで比較して更新が必要かチェック
+            if (localLog.syncUpdatedAt != null &&
+                remoteLog.syncUpdatedAt != null &&
+                localLog.syncUpdatedAt!.isAfter(remoteLog.syncUpdatedAt!)) {
+              // ローカルの方が新しい場合は更新
+              await _remoteDatasource.updateDailyLog(localLog);
+            }
           }
 
           // 同期済みとしてマーク
@@ -277,10 +282,15 @@ class HybridDailyStudyLogsRepository implements DailyStudyLogsRepository {
 
           if (localLog == null) {
             // ローカルに存在しない場合は新規作成
-            await _localDatasource.upsertDailyLog(remoteLog);
-            await _localDatasource.markAsSynced(remoteLog.id);
+            final syncedLog = remoteLog.copyWith(isSynced: true);
+            await _localDatasource.upsertDailyLog(syncedLog);
+          } else if (remoteLog.syncUpdatedAt != null &&
+              localLog.syncUpdatedAt != null &&
+              remoteLog.syncUpdatedAt!.isAfter(localLog.syncUpdatedAt!)) {
+            // リモートの方が新しい場合は更新
+            final syncedLog = remoteLog.copyWith(isSynced: true);
+            await _localDatasource.upsertDailyLog(syncedLog);
           }
-          // ローカルに存在する場合は何もしない（ローカルの変更が優先）
         } catch (e) {
           AppLogger.instance.e('ローカルへの同期に失敗しました: ${remoteLog.id}', e);
           // 個別の失敗は全体の失敗とはせず、続行

@@ -59,6 +59,7 @@ dependencies:
   
   # 生体認証（オプション）
   local_auth: ^2.1.8
+  firebase_core: ^3.14.0
 
 dev_dependencies:
   flutter_test:
