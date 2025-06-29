@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(dart run build_runner build:*)",
+      "Bash(./gradlew:*)",
+      "Bash(flutter doctor:*)",
+      "Bash(flutter run:*)",
+      "Bash(keytool:*)",
+      "Bash(chmod:*)",
+      "Bash(/Users/a8810/Documents/my-app/goal_timer/scripts/get_sha1.sh:*)",
+      "Bash(./scripts/google_setup_check.sh:*)",
+      "Bash(./temp_google_services_fix.sh:*)",
+      "Bash(flutter clean:*)",
+      "Bash(flutter pub:*)",
+      "Bash(rg:*)",
+      "Bash(flutter:*)",
+      "Bash(adb:*)",
+      "Bash(/Users/a8810/Library/Android/sdk/platform-tools/adb devices)",
+      "Bash(firebase login:*)",
+      "Bash(firebase projects:list:*)",
+      "Bash(./scripts/get_sha1.sh:*)",
+      "Bash(mkdir:*)",
+      "Bash(rm:*)",
+      "Bash(git branch:*)",
+      "Bash(git worktree:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
+    ],
+    "deny": []
+  }
+}

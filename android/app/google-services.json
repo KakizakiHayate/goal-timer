@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "817605522713",
+    "project_id": "goal-timer-43a41",
+    "storage_bucket": "goal-timer-43a41.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:817605522713:android:8c470807928f452f9a4188",
+        "android_client_info": {
+          "package_name": "com.goal.timer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "817605522713-037cipbqtfbj2k9aslf37354th773o4k.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.goal.timer",
+            "certificate_hash": "d5d514134d53effafc5e8f33a147d379c0da6bf6"
+          }
+        },
+        {
+          "client_id": "817605522713-p9i4g0ers283pcjreoogb89tqsvuq0se.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDP_Vvrt89kHciKgGHWG83cp77Y2troe2k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "817605522713-p9i4g0ers283pcjreoogb89tqsvuq0se.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "817605522713-inj03mbi20bsc85lp2mvpq9kh497d180.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.goal.timer"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
