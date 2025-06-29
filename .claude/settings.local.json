@@ -29,8 +29,16 @@
       "Bash(git commit:*)",
       "Bash(git push:*)",
       "Bash(gh pr create:*)",
-      "Bash(echo $MCP_ENABLED)"
+      "Bash(echo $MCP_ENABLED)",
+      "Bash(git rm:*)",
+      "Bash(npx @modelcontextprotocol/server-github:*)"
     ],
     "deny": []
-  }
+  },
+  "enabledMcpjsonServers": [
+    "github",
+    "notionApi",
+    "supabase",
+    "firebase"
+  ]
 }
