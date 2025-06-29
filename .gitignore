@@ -49,4 +49,4 @@ pubspec.lock
 # 環境変数ファイル
 .env
 .env.local
-.env.production
+.env.production.mcp.json

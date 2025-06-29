@@ -104,7 +104,7 @@ class _GoalEditModalState extends ConsumerState<GoalEditModal> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: ColorConsts.textDark,
+                  color: ColorConsts.textPrimary,
                 ),
               ),
               const SizedBox(height: 8),
@@ -133,7 +133,7 @@ class _GoalEditModalState extends ConsumerState<GoalEditModal> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: ColorConsts.textDark,
+                  color: ColorConsts.textPrimary,
                 ),
               ),
               const SizedBox(height: 8),
@@ -162,7 +162,7 @@ class _GoalEditModalState extends ConsumerState<GoalEditModal> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: ColorConsts.textDark,
+                  color: ColorConsts.textPrimary,
                 ),
               ),
               const SizedBox(height: 8),
@@ -200,7 +200,7 @@ class _GoalEditModalState extends ConsumerState<GoalEditModal> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: ColorConsts.textDark,
+                  color: ColorConsts.textPrimary,
                 ),
               ),
               const SizedBox(height: 8),
@@ -239,7 +239,7 @@ class _GoalEditModalState extends ConsumerState<GoalEditModal> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: ColorConsts.textDark,
+                  color: ColorConsts.textPrimary,
                 ),
               ),
               const SizedBox(height: 8),

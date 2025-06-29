@@ -45,13 +45,13 @@ class GoalListCellWidget extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: ColorConsts.textDark,
+                          color: ColorConsts.textPrimary,
                         ),
                       ),
                     ),
                     const Icon(
                       Icons.arrow_forward_ios,
-                      color: ColorConsts.textLight,
+                      color: ColorConsts.textSecondary,
                       size: 16,
                     ),
                   ],
@@ -108,7 +108,7 @@ class GoalListCellWidget extends StatelessWidget {
                         color:
                             isAlmostOutOfTime
                                 ? Colors.red
-                                : ColorConsts.textLight,
+                                : ColorConsts.textSecondary,
                         fontWeight:
                             isAlmostOutOfTime
                                 ? FontWeight.bold

@@ -165,7 +165,7 @@ class _MemoRecordScreenState extends ConsumerState<MemoRecordScreen> {
             style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: ColorConsts.textDark,
+              color: ColorConsts.textPrimary,
             ),
           ),
           const SizedBox(height: 8),
@@ -258,7 +258,7 @@ class _MemoRecordScreenState extends ConsumerState<MemoRecordScreen> {
             // メモ本文
             Text(
               memo.content,
-              style: const TextStyle(fontSize: 16, color: ColorConsts.textDark),
+              style: const TextStyle(fontSize: 16, color: ColorConsts.textPrimary),
             ),
 
             const SizedBox(height: 8),

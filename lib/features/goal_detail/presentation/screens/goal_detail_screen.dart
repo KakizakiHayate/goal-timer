@@ -56,7 +56,7 @@ class GoalDetailScreen extends ConsumerWidget {
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: ColorConsts.textDark,
+              color: ColorConsts.textPrimary,
             ),
           ),
           const SizedBox(height: 24),
@@ -145,7 +145,7 @@ class GoalDetailScreen extends ConsumerWidget {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: ColorConsts.textDark,
+                color: ColorConsts.textPrimary,
               ),
             ),
             const SizedBox(height: 16),
@@ -243,7 +243,7 @@ class GoalDetailScreen extends ConsumerWidget {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: ColorConsts.textDark,
+                color: ColorConsts.textPrimary,
               ),
             ),
             const SizedBox(height: 16),
@@ -592,7 +592,7 @@ class GoalDetailScreenWithData extends ConsumerWidget {
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: ColorConsts.textDark,
+              color: ColorConsts.textPrimary,
             ),
           ),
           const SizedBox(height: 24),
@@ -681,7 +681,7 @@ class GoalDetailScreenWithData extends ConsumerWidget {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: ColorConsts.textDark,
+                color: ColorConsts.textPrimary,
               ),
             ),
             const SizedBox(height: 16),
@@ -779,7 +779,7 @@ class GoalDetailScreenWithData extends ConsumerWidget {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: ColorConsts.textDark,
+                color: ColorConsts.textPrimary,
               ),
             ),
             const SizedBox(height: 16),

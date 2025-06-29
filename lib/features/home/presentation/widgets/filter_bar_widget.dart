@@ -15,7 +15,7 @@ Widget _buildFilterBar(
         children: [
           const Text(
             '表示:',
-            style: TextStyle(fontSize: 14, color: ColorConsts.textLight),
+            style: TextStyle(fontSize: 14, color: ColorConsts.textSecondary),
           ),
           const SizedBox(width: 8),
           DropdownButton<String>(

@@ -54,12 +54,12 @@ class _AuthTextFieldState extends State<AuthTextField> {
           obscureText: widget.obscureText && _isObscured,
           keyboardType: widget.keyboardType,
           onChanged: widget.onChanged,
-          style: const TextStyle(fontSize: 16, color: ColorConsts.textDark),
+          style: const TextStyle(fontSize: 16, color: ColorConsts.textPrimary),
           decoration: InputDecoration(
             labelText: widget.labelText,
             labelStyle: TextStyle(
               fontSize: 16,
-              color: widget.enabled ? ColorConsts.textLight : Colors.grey,
+              color: widget.enabled ? ColorConsts.textSecondary : Colors.grey,
             ),
             errorText: widget.errorText,
             errorStyle: const TextStyle(fontSize: 14, color: Colors.red),
@@ -102,7 +102,7 @@ class _AuthTextFieldState extends State<AuthTextField> {
                     ? IconButton(
                       icon: Icon(
                         _isObscured ? Icons.visibility_off : Icons.visibility,
-                        color: ColorConsts.textLight,
+                        color: ColorConsts.textSecondary,
                       ),
                       onPressed: () {
                         setState(() {

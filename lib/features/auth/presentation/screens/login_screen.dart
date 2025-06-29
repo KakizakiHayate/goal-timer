@@ -104,13 +104,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
-            color: ColorConsts.textDark,
+            color: ColorConsts.textPrimary,
           ),
         ),
         const SizedBox(height: 8),
         const Text(
           '目標達成への道のりを続けましょう',
-          style: TextStyle(fontSize: 16, color: ColorConsts.textLight),
+          style: TextStyle(fontSize: 16, color: ColorConsts.textSecondary),
           textAlign: TextAlign.center,
         ),
       ],
@@ -164,7 +164,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           padding: EdgeInsets.symmetric(horizontal: 16),
           child: Text(
             'または',
-            style: TextStyle(fontSize: 14, color: ColorConsts.textLight),
+            style: TextStyle(fontSize: 14, color: ColorConsts.textSecondary),
           ),
         ),
         Expanded(child: Container(height: 1, color: ColorConsts.border)),
@@ -205,7 +205,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       children: [
         const Text(
           'アカウントをお持ちでない方は ',
-          style: TextStyle(fontSize: 14, color: ColorConsts.textLight),
+          style: TextStyle(fontSize: 14, color: ColorConsts.textSecondary),
         ),
         GestureDetector(
           onTap: () {

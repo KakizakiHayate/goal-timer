@@ -132,7 +132,7 @@ class _HomeScreen extends ConsumerWidget {
     // 同期処理はHomeViewModelで自動的に実行されるため、ここでは削除
 
     return Scaffold(
-      backgroundColor: ColorConsts.background,
+      backgroundColor: ColorConsts.backgroundPrimary,
       appBar: AppBar(
         title: const Text(
           'マイ目標',
@@ -214,7 +214,7 @@ class _HomeScreen extends ConsumerWidget {
           child: Text(
             '目標がありません。\n右下の+ボタンから追加してください。',
             textAlign: TextAlign.center,
-            style: TextStyle(color: ColorConsts.textLight, fontSize: 16),
+            style: TextStyle(color: ColorConsts.textSecondary, fontSize: 16),
           ),
         ),
       );

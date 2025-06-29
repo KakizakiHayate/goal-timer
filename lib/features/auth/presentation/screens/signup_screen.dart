@@ -44,7 +44,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: ColorConsts.textDark),
+          icon: const Icon(Icons.arrow_back, color: ColorConsts.textPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -114,13 +114,13 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
-            color: ColorConsts.textDark,
+            color: ColorConsts.textPrimary,
           ),
         ),
         const SizedBox(height: 8),
         const Text(
           '目標達成の旅を始めましょう',
-          style: TextStyle(fontSize: 16, color: ColorConsts.textLight),
+          style: TextStyle(fontSize: 16, color: ColorConsts.textSecondary),
           textAlign: TextAlign.center,
         ),
       ],
@@ -204,7 +204,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           padding: EdgeInsets.symmetric(horizontal: 16),
           child: Text(
             'または',
-            style: TextStyle(fontSize: 14, color: ColorConsts.textLight),
+            style: TextStyle(fontSize: 14, color: ColorConsts.textSecondary),
           ),
         ),
         Expanded(child: Container(height: 1, color: ColorConsts.border)),
@@ -246,7 +246,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       children: [
         const Text(
           'すでにアカウントをお持ちですか？ ',
-          style: TextStyle(fontSize: 14, color: ColorConsts.textLight),
+          style: TextStyle(fontSize: 14, color: ColorConsts.textSecondary),
         ),
         GestureDetector(
           onTap: () {
