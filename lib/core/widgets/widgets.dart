@@ -7,3 +7,5 @@ export 'animated_check_icon.dart';
 export 'streak_indicator.dart';
 export 'circular_progress_indicator_v2.dart';
 export 'goal_card_v2.dart';
+export 'custom_text_field_v2.dart';
+export 'modal_bottom_sheet_v2.dart';
