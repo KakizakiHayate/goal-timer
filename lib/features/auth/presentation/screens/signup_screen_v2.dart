@@ -83,59 +83,74 @@ class _SignupScreenV2State extends ConsumerState<SignupScreenV2>
       }
     });
 
+    final mediaQuery = MediaQuery.of(context);
+    final screenHeight = mediaQuery.size.height;
+    final isSmallScreen = screenHeight < 700; // iPhone SE等の判定
+
     return Scaffold(
       backgroundColor: ColorConsts.backgroundPrimary,
+      resizeToAvoidBottomInset: false, // キーボード表示時のリサイズを無効化
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: SpacingConsts.xl),
-            child: FadeTransition(
-              opacity: _fadeAnimation,
-              child: SlideTransition(
-                position: _slideAnimation,
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const SizedBox(height: SpacingConsts.xxl),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: SpacingConsts.xl),
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: SlideTransition(
+              position: _slideAnimation,
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // 上部の固定コンテンツ
+                    SizedBox(height: isSmallScreen ? SpacingConstsV2.s : SpacingConstsV2.l),
 
-                      // 戻るボタン
-                      _buildBackButton(),
+                    // 戻るボタン
+                    _buildBackButton(),
 
-                      const SizedBox(height: SpacingConstsV2.l),
+                    SizedBox(height: isSmallScreen ? SpacingConstsV2.xs : SpacingConstsV2.s),
 
-                      // ヘッダーセクション
-                      _buildHeader(),
+                    // ヘッダーセクション
+                    _buildHeader(),
 
-                      const SizedBox(height: SpacingConsts.xxl),
+                    SizedBox(height: isSmallScreen ? SpacingConstsV2.s : SpacingConstsV2.l),
 
-                      // フォームセクション
-                      _buildForm(),
+                    // 中央の可変コンテンツ
+                    Expanded(
+                      child: SingleChildScrollView(
+                        physics: isSmallScreen ? const ClampingScrollPhysics() : const NeverScrollableScrollPhysics(),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            // フォームセクション
+                            _buildForm(),
 
-                      const SizedBox(height: SpacingConsts.xl),
+                            SizedBox(height: isSmallScreen ? SpacingConstsV2.s : SpacingConstsV2.l),
 
-                      // サインアップボタン
-                      _buildSignupButton(authState, authNotifier),
+                            // サインアップボタン
+                            _buildSignupButton(authState, authNotifier),
 
-                      const SizedBox(height: SpacingConsts.xl),
+                            SizedBox(height: isSmallScreen ? SpacingConstsV2.s : SpacingConstsV2.l),
 
-                      // 区切り線
-                      _buildDivider(),
+                            // 区切り線
+                            _buildDivider(),
 
-                      const SizedBox(height: SpacingConsts.xl),
+                            SizedBox(height: isSmallScreen ? SpacingConstsV2.s : SpacingConstsV2.l),
 
-                      // ソーシャルサインアップボタン
-                      _buildSocialSignupButtons(authState, authNotifier),
+                            // ソーシャルサインアップボタン
+                            _buildSocialSignupButtons(authState, authNotifier),
 
-                      const SizedBox(height: SpacingConsts.xxl),
+                            SizedBox(height: isSmallScreen ? SpacingConstsV2.l : SpacingConsts.xl),
+                          ],
+                        ),
+                      ),
+                    ),
 
-                      // ログインリンク
-                      _buildLoginLink(),
-
-                      const SizedBox(height: SpacingConsts.xl),
-                    ],
-                  ),
+                    // 下部の固定コンテンツ
+                    // ログインリンク
+                    _buildLoginLink(),
+                    SizedBox(height: isSmallScreen ? SpacingConstsV2.s : SpacingConstsV2.l),
+                  ],
                 ),
               ),
             ),
@@ -174,22 +189,23 @@ class _SignupScreenV2State extends ConsumerState<SignupScreenV2>
   }
 
   Widget _buildHeader() {
+    final isSmallScreen = MediaQuery.of(context).size.height < 700;
     return Column(
       children: [
         Text(
           'アカウント作成',
-          style: TextConsts.h1.copyWith(
+          style: (isSmallScreen ? TextConsts.h2 : TextConsts.h1).copyWith(
             color: ColorConsts.textPrimary,
             fontWeight: FontWeight.bold,
             letterSpacing: -1,
           ),
         ),
-        const SizedBox(height: SpacingConstsV2.s),
+        SizedBox(height: SpacingConstsV2.xs),
         Text(
           '目標達成への旅を\n今日から始めましょう',
-          style: TextConstsV2.body.copyWith(
+          style: (isSmallScreen ? TextConstsV2.caption : TextConstsV2.body).copyWith(
             color: ColorConsts.textSecondary,
-            height: 1.5,
+            height: 1.4,
           ),
           textAlign: TextAlign.center,
         ),
@@ -332,8 +348,9 @@ class _SignupScreenV2State extends ConsumerState<SignupScreenV2>
   }
 
   Widget _buildLoginLink() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Wrap(
+      alignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         Text(
           'すでにアカウントをお持ちの方は ',
