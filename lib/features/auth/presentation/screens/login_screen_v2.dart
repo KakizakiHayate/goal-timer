@@ -214,7 +214,7 @@ class _LoginScreenV2State extends ConsumerState<LoginScreenV2>
           keyboardType: TextInputType.emailAddress,
           textInputAction: TextInputAction.next,
           errorText: _emailError,
-          autofocus: true,
+          autofocus: false,
           onChanged: (value) {
             setState(() {
               _email = value;
