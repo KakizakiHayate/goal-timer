@@ -31,7 +31,15 @@
       "Bash(gh pr create:*)",
       "Bash(echo $MCP_ENABLED)",
       "Bash(git rm:*)",
-      "Bash(npx @modelcontextprotocol/server-github:*)"
+      "Bash(npx @modelcontextprotocol/server-github:*)",
+      "mcp__github__create_pull_request",
+      "Bash(ls:*)",
+      "Bash(pod install:*)",
+      "Bash(cp:*)",
+      "Bash(PROJECT_DIR=\"/Users/a8810/Documents/my-app/goal_timer/ios\" /Users/a8810/Documents/my-app/goal_timer/ios/Scripts/generate_secrets.sh)",
+      "Bash(xcodebuild:*)",
+      "mcp__supabase__search_docs",
+      "Bash(mv:*)"
     ],
     "deny": []
   },
