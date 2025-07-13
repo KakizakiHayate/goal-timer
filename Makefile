@@ -26,3 +26,10 @@ analyze:
 
 a: analyze
 
+rebuild:
+	flutter clean
+	flutter pub get
+	cd ios
+	pod install
+	$(make) build
+	$(make) run

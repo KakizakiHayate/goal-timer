@@ -9,15 +9,16 @@ import '../../../../core/widgets/streak_indicator.dart';
 import '../../../../core/widgets/pressable_card.dart';
 import '../../../../core/models/goals/goals_model.dart';
 import '../../../goal_timer/presentation/screens/timer_screen_v2.dart';
+import '../viewmodels/goal_detail_view_model.dart';
 import 'goal_edit_modal_v2.dart';
 
 /// 改善された目標詳細画面
 class GoalDetailScreenV2 extends ConsumerStatefulWidget {
-  final GoalsModel goal;
+  final String goalId;
 
   const GoalDetailScreenV2({
     super.key,
-    required this.goal,
+    required this.goalId,
   });
 
   @override
@@ -69,6 +70,49 @@ class _GoalDetailScreenV2State extends ConsumerState<GoalDetailScreenV2>
 
   @override
   Widget build(BuildContext context) {
+    final goalAsync = ref.watch(goalDetailProvider(widget.goalId));
+    
+    return goalAsync.when(
+      data: (goal) {
+        if (goal == null) {
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('目標詳細'),
+              backgroundColor: ColorConsts.primary,
+              foregroundColor: Colors.white,
+            ),
+            body: const Center(
+              child: Text('目標が見つかりません'),
+            ),
+          );
+        }
+        
+        return _buildGoalDetail(context, goal);
+      },
+      loading: () => Scaffold(
+        appBar: AppBar(
+          title: const Text('目標詳細'),
+          backgroundColor: ColorConsts.primary,
+          foregroundColor: Colors.white,
+        ),
+        body: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      ),
+      error: (error, stack) => Scaffold(
+        appBar: AppBar(
+          title: const Text('目標詳細'),
+          backgroundColor: ColorConsts.primary,
+          foregroundColor: Colors.white,
+        ),
+        body: Center(
+          child: Text('エラーが発生しました: $error'),
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildGoalDetail(BuildContext context, GoalsModel goal) {
     return Scaffold(
       backgroundColor: ColorConsts.backgroundPrimary,
       body: FadeTransition(
@@ -78,7 +122,7 @@ class _GoalDetailScreenV2State extends ConsumerState<GoalDetailScreenV2>
           child: CustomScrollView(
             slivers: [
               // アプリバー
-              _buildSliverAppBar(),
+              _buildSliverAppBar(goal),
               
               // コンテンツ
               SliverToBoxAdapter(

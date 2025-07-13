@@ -3,6 +3,7 @@ import '../utils/color_consts.dart';
 import '../utils/text_consts.dart';
 import '../utils/spacing_consts.dart';
 import '../utils/animation_consts.dart';
+import '../utils/v2_constants_adapter.dart';
 
 /// 改善された達成バッジウィジェット
 /// 達成感を演出するバッジ表示
@@ -93,7 +94,7 @@ class _AchievementBadgeV2State extends State<AchievementBadgeV2>
           return Transform.scale(
             scale: widget.isUnlocked ? _scaleAnimation.value : 1.0,
             child: Container(
-              padding: const EdgeInsets.all(SpacingConsts.l),
+              padding: const EdgeInsets.all(SpacingConstsV2.l),
               decoration: BoxDecoration(
                 color: widget.isUnlocked
                     ? ColorConsts.cardBackground
@@ -121,12 +122,12 @@ class _AchievementBadgeV2State extends State<AchievementBadgeV2>
                   // バッジアイコン
                   _buildBadgeIcon(),
                   
-                  const SizedBox(height: SpacingConsts.m),
+                  const SizedBox(height: SpacingConstsV2.m),
                   
                   // タイトル
                   Text(
                     widget.title,
-                    style: TextConsts.body.copyWith(
+                    style: TextConstsV2.body.copyWith(
                       color: widget.isUnlocked
                           ? ColorConsts.textPrimary
                           : ColorConsts.textTertiary,
@@ -137,7 +138,7 @@ class _AchievementBadgeV2State extends State<AchievementBadgeV2>
                     overflow: TextOverflow.ellipsis,
                   ),
                   
-                  const SizedBox(height: SpacingConsts.s),
+                  const SizedBox(height: SpacingConstsV2.s),
                   
                   // 説明
                   Text(
@@ -155,7 +156,7 @@ class _AchievementBadgeV2State extends State<AchievementBadgeV2>
                   
                   // 解除日時
                   if (widget.isUnlocked && widget.unlockedAt != null) ...[
-                    const SizedBox(height: SpacingConsts.s),
+                    const SizedBox(height: SpacingConstsV2.s),
                     Text(
                       _formatUnlockedDate(widget.unlockedAt!),
                       style: TextConsts.caption.copyWith(

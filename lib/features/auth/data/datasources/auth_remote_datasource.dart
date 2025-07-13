@@ -144,6 +144,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         provider: OAuthProvider.google,
         idToken: idToken,
         accessToken: accessToken,
+        nonce: null,
       );
 
       if (response.user == null) {

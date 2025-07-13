@@ -11,8 +11,8 @@ import 'package:goal_timer/features/memo_record/presentation/screens/memo_record
 import 'package:goal_timer/features/statistics/presentation/screens/statistics_screen.dart';
 import 'package:goal_timer/features/settings/presentation/screens/settings_screen.dart';
 import 'package:goal_timer/features/splash/presentation/screens/splash_screen.dart';
-import 'package:goal_timer/features/auth/presentation/screens/login_screen.dart';
-import 'package:goal_timer/features/auth/presentation/screens/signup_screen.dart';
+import 'package:goal_timer/features/auth/presentation/screens/login_screen_v2.dart';
+import 'package:goal_timer/features/auth/presentation/screens/signup_screen_v2.dart';
 import 'package:goal_timer/features/home/presentation/screens/home_screen.dart';
 import 'package:goal_timer/core/utils/app_logger.dart';
 
@@ -62,9 +62,9 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return platformPageRoute(builder: (context) => const SettingsScreen());
     // 認証画面
     case RouteNames.login:
-      return platformPageRoute(builder: (context) => const LoginScreen());
+      return platformPageRoute(builder: (context) => const LoginScreenV2());
     case RouteNames.signup:
-      return platformPageRoute(builder: (context) => const SignupScreen());
+      return platformPageRoute(builder: (context) => const SignupScreenV2());
     // デバッグ画面
     case RouteNames.syncDebug:
       return platformPageRoute(builder: (context) => const SyncDebugView());

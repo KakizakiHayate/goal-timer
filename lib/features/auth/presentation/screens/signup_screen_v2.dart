@@ -9,6 +9,8 @@ import '../../../../core/utils/route_names.dart';
 import '../../../../core/utils/text_consts.dart';
 import '../../../../core/utils/spacing_consts.dart';
 import '../../../../core/utils/animation_consts.dart';
+import '../../../../core/utils/v2_constants_adapter.dart';
+import '../../../../core/utils/app_logger.dart';
 
 /// 改善されたサインアップ画面
 class SignupScreenV2 extends ConsumerStatefulWidget {
@@ -101,7 +103,7 @@ class _SignupScreenV2State extends ConsumerState<SignupScreenV2>
                       // 戻るボタン
                       _buildBackButton(),
 
-                      const SizedBox(height: SpacingConsts.l),
+                      const SizedBox(height: SpacingConstsV2.l),
 
                       // ヘッダーセクション
                       _buildHeader(),
@@ -182,10 +184,10 @@ class _SignupScreenV2State extends ConsumerState<SignupScreenV2>
             letterSpacing: -1,
           ),
         ),
-        const SizedBox(height: SpacingConsts.s),
+        const SizedBox(height: SpacingConstsV2.s),
         Text(
           '目標達成への旅を\n今日から始めましょう',
-          style: TextConsts.body.copyWith(
+          style: TextConstsV2.body.copyWith(
             color: ColorConsts.textSecondary,
             height: 1.5,
           ),
@@ -211,7 +213,7 @@ class _SignupScreenV2State extends ConsumerState<SignupScreenV2>
             });
           },
         ),
-        const SizedBox(height: SpacingConsts.l),
+        const SizedBox(height: SpacingConstsV2.l),
         AuthTextFieldV2(
           labelText: 'パスワード',
           obscureText: true,
@@ -228,7 +230,7 @@ class _SignupScreenV2State extends ConsumerState<SignupScreenV2>
             });
           },
         ),
-        const SizedBox(height: SpacingConsts.l),
+        const SizedBox(height: SpacingConstsV2.l),
         AuthTextFieldV2(
           labelText: 'パスワード確認',
           obscureText: true,
@@ -276,7 +278,7 @@ class _SignupScreenV2State extends ConsumerState<SignupScreenV2>
           ),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: SpacingConsts.l),
+          padding: const EdgeInsets.symmetric(horizontal: SpacingConstsV2.l),
           child: Text(
             'または',
             style: TextConsts.caption.copyWith(
@@ -317,7 +319,7 @@ class _SignupScreenV2State extends ConsumerState<SignupScreenV2>
 
         // AppleサインアップボタンはiOSのみ
         if (AuthButtonV2.shouldShowAppleLogin()) ...[
-          const SizedBox(height: SpacingConsts.m),
+          const SizedBox(height: SpacingConstsV2.m),
           AuthButtonV2(
             type: AuthButtonType.apple,
             text: 'Appleでサインアップ',
@@ -335,7 +337,7 @@ class _SignupScreenV2State extends ConsumerState<SignupScreenV2>
       children: [
         Text(
           'すでにアカウントをお持ちの方は ',
-          style: TextConsts.body.copyWith(
+          style: TextConstsV2.body.copyWith(
             color: ColorConsts.textSecondary,
           ),
         ),
@@ -345,7 +347,7 @@ class _SignupScreenV2State extends ConsumerState<SignupScreenV2>
           },
           child: Text(
             'ログイン',
-            style: TextConsts.body.copyWith(
+            style: TextConstsV2.body.copyWith(
               color: ColorConsts.primary,
               fontWeight: FontWeight.w700,
               decoration: TextDecoration.underline,
@@ -416,7 +418,8 @@ class _SignupScreenV2State extends ConsumerState<SignupScreenV2>
       await authNotifier.signInWithApple();
     } catch (e) {
       if (mounted) {
-        _showErrorSnackBar('Appleサインアップに失敗しました');
+        AppLogger.instance.e('Apple Sign-In Error', e);
+        _showErrorSnackBar('Appleサインアップに失敗しました: ${e.toString()}');
       }
     }
   }
@@ -432,7 +435,7 @@ class _SignupScreenV2State extends ConsumerState<SignupScreenV2>
         ),
         backgroundColor: ColorConsts.error,
         behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(SpacingConsts.l),
+        margin: const EdgeInsets.all(SpacingConstsV2.l),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),

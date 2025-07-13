@@ -59,12 +59,13 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyDujLVNqo7VsJ7h52JaiENPskL-lxJ60jo',
-    appId: '1:817605522713:ios:d747a1806892cb069a4188',
+    appId: '1:817605522713:ios:b2065632a5d5f6709a4188',
     messagingSenderId: '817605522713',
     projectId: 'goal-timer-43a41',
     storageBucket: 'goal-timer-43a41.firebasestorage.app',
     androidClientId: '817605522713-037cipbqtfbj2k9aslf37354th773o4k.apps.googleusercontent.com',
-    iosClientId: '817605522713-inj03mbi20bsc85lp2mvpq9kh497d180.apps.googleusercontent.com',
-    iosBundleId: 'com.goal.timer',
+    iosClientId: '817605522713-jdqagc6p9g4mhs27q5osmu3rol87ac31.apps.googleusercontent.com',
+    iosBundleId: 'com.goal.timer.20250704',
   );
+
 }
