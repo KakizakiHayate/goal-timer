@@ -6,6 +6,11 @@ import '../../provider/auth_provider.dart';
 import '../../domain/entities/auth_state.dart';
 import '../../../../core/utils/color_consts.dart';
 import '../../../../core/utils/route_names.dart';
+import '../../../../core/utils/text_consts.dart';
+import '../../../../core/utils/spacing_consts.dart';
+import '../../../../core/utils/animation_consts.dart';
+import '../../../../core/utils/v2_constants_adapter.dart';
+import '../../../../core/utils/app_logger.dart';
 
 /// サインアップ画面
 class SignupScreen extends ConsumerStatefulWidget {
@@ -15,16 +20,56 @@ class SignupScreen extends ConsumerStatefulWidget {
   ConsumerState<SignupScreen> createState() => _SignupScreenState();
 }
 
-class _SignupScreenState extends ConsumerState<SignupScreen> {
+class _SignupScreenState extends ConsumerState<SignupScreen>
+    with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
-  String _displayName = '';
   String _email = '';
   String _password = '';
   String _confirmPassword = '';
-  String? _displayNameError;
   String? _emailError;
   String? _passwordError;
   String? _confirmPasswordError;
+  
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: AnimationConsts.slow,
+      vsync: this,
+    );
+    
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
+      ),
+    );
+    
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.1),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.2, 1.0, curve: Curves.easeOutCubic),
+      ),
+    );
+    
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,55 +83,75 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       }
     });
 
+    final mediaQuery = MediaQuery.of(context);
+    final screenHeight = mediaQuery.size.height;
+    final isSmallScreen = screenHeight < 700; // iPhone SE等の判定
+
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: ColorConsts.textPrimary),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ),
+      backgroundColor: ColorConsts.backgroundPrimary,
+      resizeToAvoidBottomInset: false, // キーボード表示時のリサイズを無効化
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // ヘッダーセクション
-                  _buildHeader(),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: SpacingConsts.xl),
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: SlideTransition(
+              position: _slideAnimation,
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // 上部の固定コンテンツ
+                    SizedBox(height: isSmallScreen ? SpacingConstsV2.s : SpacingConstsV2.l),
 
-                  const SizedBox(height: 32),
+                    // 戻るボタン
+                    _buildBackButton(),
 
-                  // フォームセクション
-                  _buildForm(),
+                    SizedBox(height: isSmallScreen ? SpacingConstsV2.xs : SpacingConstsV2.s),
 
-                  const SizedBox(height: 32),
+                    // ヘッダーセクション
+                    _buildHeader(),
 
-                  // サインアップボタン
-                  _buildSignupButton(authState, authNotifier),
+                    SizedBox(height: isSmallScreen ? SpacingConstsV2.s : SpacingConstsV2.l),
 
-                  const SizedBox(height: 24),
+                    // 中央の可変コンテンツ
+                    Expanded(
+                      child: SingleChildScrollView(
+                        physics: isSmallScreen ? const ClampingScrollPhysics() : const NeverScrollableScrollPhysics(),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            // フォームセクション
+                            _buildForm(),
 
-                  // 区切り線
-                  _buildDivider(),
+                            SizedBox(height: isSmallScreen ? SpacingConstsV2.s : SpacingConstsV2.l),
 
-                  const SizedBox(height: 24),
+                            // サインアップボタン
+                            _buildSignupButton(authState, authNotifier),
 
-                  // ソーシャルログインボタン
-                  _buildSocialLoginButtons(authState, authNotifier),
+                            SizedBox(height: isSmallScreen ? SpacingConstsV2.s : SpacingConstsV2.l),
 
-                  const SizedBox(height: 32),
+                            // 区切り線
+                            _buildDivider(),
 
-                  // ログインリンク
-                  _buildLoginLink(),
+                            SizedBox(height: isSmallScreen ? SpacingConstsV2.s : SpacingConstsV2.l),
 
-                  const SizedBox(height: 24),
-                ],
+                            // ソーシャルサインアップボタン
+                            _buildSocialSignupButtons(authState, authNotifier),
+
+                            SizedBox(height: isSmallScreen ? SpacingConstsV2.l : SpacingConsts.xl),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    // 下部の固定コンテンツ
+                    // ログインリンク
+                    _buildLoginLink(),
+                    SizedBox(height: isSmallScreen ? SpacingConstsV2.s : SpacingConstsV2.l),
+                  ],
+                ),
               ),
             ),
           ),
@@ -95,32 +160,53 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     );
   }
 
-  Widget _buildHeader() {
-    return Column(
-      children: [
-        // アプリアイコン（仮）
-        Container(
-          width: 80,
-          height: 80,
+  Widget _buildBackButton() {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: GestureDetector(
+        onTap: () => Navigator.of(context).pop(),
+        child: Container(
+          padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: ColorConsts.primary,
-            borderRadius: BorderRadius.circular(20),
+            color: ColorConsts.cardBackground,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: ColorConsts.shadowLight,
+                offset: const Offset(0, 2),
+                blurRadius: 8,
+              ),
+            ],
           ),
-          child: const Icon(Icons.timer, color: Colors.white, size: 40),
-        ),
-        const SizedBox(height: 24),
-        const Text(
-          'アカウント作成',
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
+          child: const Icon(
+            Icons.arrow_back_ios_new,
+            size: 20,
             color: ColorConsts.textPrimary,
           ),
         ),
-        const SizedBox(height: 8),
-        const Text(
-          '目標達成の旅を始めましょう',
-          style: TextStyle(fontSize: 16, color: ColorConsts.textSecondary),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    final isSmallScreen = MediaQuery.of(context).size.height < 700;
+    return Column(
+      children: [
+        Text(
+          'アカウント作成',
+          style: (isSmallScreen ? TextConsts.h2 : TextConsts.h1).copyWith(
+            color: ColorConsts.textPrimary,
+            fontWeight: FontWeight.bold,
+            letterSpacing: -1,
+          ),
+        ),
+        SizedBox(height: SpacingConstsV2.xs),
+        Text(
+          '目標達成への旅を\n今日から始めましょう',
+          style: (isSmallScreen ? TextConstsV2.caption : TextConstsV2.body).copyWith(
+            color: ColorConsts.textSecondary,
+            height: 1.4,
+          ),
           textAlign: TextAlign.center,
         ),
       ],
@@ -131,21 +217,11 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     return Column(
       children: [
         AuthTextField(
-          labelText: 'ユーザー名',
-          keyboardType: TextInputType.name,
-          errorText: _displayNameError,
-          onChanged: (value) {
-            setState(() {
-              _displayName = value;
-              _displayNameError = _validateDisplayName(value);
-            });
-          },
-        ),
-        const SizedBox(height: 16),
-        AuthTextField(
           labelText: 'メールアドレス',
           keyboardType: TextInputType.emailAddress,
+          textInputAction: TextInputAction.next,
           errorText: _emailError,
+          autofocus: false,
           onChanged: (value) {
             setState(() {
               _email = value;
@@ -153,28 +229,28 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
             });
           },
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: SpacingConstsV2.l),
         AuthTextField(
           labelText: 'パスワード',
           obscureText: true,
+          textInputAction: TextInputAction.next,
           errorText: _passwordError,
           onChanged: (value) {
             setState(() {
               _password = value;
               _passwordError = _validatePassword(value);
-              // パスワードが変更されたら確認パスワードも再チェック
+              // パスワード確認の再検証
               if (_confirmPassword.isNotEmpty) {
-                _confirmPasswordError = _validateConfirmPassword(
-                  _confirmPassword,
-                );
+                _confirmPasswordError = _validateConfirmPassword(_confirmPassword);
               }
             });
           },
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: SpacingConstsV2.l),
         AuthTextField(
           labelText: 'パスワード確認',
           obscureText: true,
+          textInputAction: TextInputAction.done,
           errorText: _confirmPasswordError,
           onChanged: (value) {
             setState(() {
@@ -182,13 +258,18 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               _confirmPasswordError = _validateConfirmPassword(value);
             });
           },
+          onSubmitted: (_) {
+            if (_isFormValid()) {
+              _handleEmailSignup(ref.read(authViewModelProvider.notifier));
+            }
+          },
         ),
       ],
     );
   }
 
   Widget _buildSignupButton(AuthState authState, dynamic authNotifier) {
-    return AuthButton(
+    return AuthButtonV2(
       type: AuthButtonType.email,
       text: 'アカウントを作成',
       isLoading: authState == AuthState.loading,
@@ -199,20 +280,47 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   Widget _buildDivider() {
     return Row(
       children: [
-        Expanded(child: Container(height: 1, color: ColorConsts.border)),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16),
-          child: Text(
-            'または',
-            style: TextStyle(fontSize: 14, color: ColorConsts.textSecondary),
+        Expanded(
+          child: Container(
+            height: 1,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  ColorConsts.border.withOpacity(0),
+                  ColorConsts.border,
+                ],
+              ),
+            ),
           ),
         ),
-        Expanded(child: Container(height: 1, color: ColorConsts.border)),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: SpacingConstsV2.l),
+          child: Text(
+            'または',
+            style: TextConsts.caption.copyWith(
+              color: ColorConsts.textTertiary,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Container(
+            height: 1,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  ColorConsts.border,
+                  ColorConsts.border.withOpacity(0),
+                ],
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildSocialLoginButtons(AuthState authState, dynamic authNotifier) {
+  Widget _buildSocialSignupButtons(AuthState authState, dynamic authNotifier) {
     final bool isLoading = authState == AuthState.loading;
 
     return Column(
@@ -220,20 +328,19 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         // Googleサインアップボタン
         AuthButton(
           type: AuthButtonType.google,
-          text: 'Googleで作成',
+          text: 'Googleでサインアップ',
           isLoading: isLoading,
           onPressed: isLoading ? null : () => _handleGoogleSignup(authNotifier),
         ),
 
         // AppleサインアップボタンはiOSのみ
         if (AuthButton.shouldShowAppleLogin()) ...[
-          const SizedBox(height: 12),
+          const SizedBox(height: SpacingConstsV2.m),
           AuthButton(
             type: AuthButtonType.apple,
-            text: 'Appleで作成',
+            text: 'Appleでサインアップ',
             isLoading: isLoading,
-            onPressed:
-                isLoading ? null : () => _handleAppleSignup(authNotifier),
+            onPressed: isLoading ? null : () => _handleAppleSignup(authNotifier),
           ),
         ],
       ],
@@ -241,23 +348,27 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   }
 
   Widget _buildLoginLink() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Wrap(
+      alignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        const Text(
-          'すでにアカウントをお持ちですか？ ',
-          style: TextStyle(fontSize: 14, color: ColorConsts.textSecondary),
+        Text(
+          'すでにアカウントをお持ちの方は ',
+          style: TextConstsV2.body.copyWith(
+            color: ColorConsts.textSecondary,
+          ),
         ),
         GestureDetector(
           onTap: () {
             Navigator.of(context).pop();
           },
-          child: const Text(
+          child: Text(
             'ログイン',
-            style: TextStyle(
-              fontSize: 14,
+            style: TextConstsV2.body.copyWith(
               color: ColorConsts.primary,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
+              decoration: TextDecoration.underline,
+              decorationColor: ColorConsts.primary,
             ),
           ),
         ),
@@ -266,13 +377,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   }
 
   // バリデーション関数
-  String? _validateDisplayName(String value) {
-    if (value.isEmpty) return 'ユーザー名を入力してください';
-    if (value.length < 2) return 'ユーザー名は2文字以上で入力してください';
-    if (value.length > 50) return 'ユーザー名は50文字以下で入力してください';
-    return null;
-  }
-
   String? _validateEmail(String value) {
     if (value.isEmpty) return 'メールアドレスを入力してください';
     if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
@@ -284,7 +388,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   String? _validatePassword(String value) {
     if (value.isEmpty) return 'パスワードを入力してください';
     if (value.length < 6) return 'パスワードは6文字以上で入力してください';
-    if (value.length > 100) return 'パスワードは100文字以下で入力してください';
+    if (!RegExp(r'^(?=.*[a-zA-Z])(?=.*\d)').hasMatch(value)) {
+      return 'パスワードには英字と数字を含めてください';
+    }
     return null;
   }
 
@@ -295,11 +401,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   }
 
   bool _isFormValid() {
-    return _displayName.isNotEmpty &&
-        _email.isNotEmpty &&
+    return _email.isNotEmpty &&
         _password.isNotEmpty &&
         _confirmPassword.isNotEmpty &&
-        _displayNameError == null &&
         _emailError == null &&
         _passwordError == null &&
         _confirmPasswordError == null;
@@ -308,10 +412,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   // 認証処理
   Future<void> _handleEmailSignup(dynamic authNotifier) async {
     try {
-      await authNotifier.signUpWithEmail(_email, _password, _displayName);
+      await authNotifier.signUpWithEmail(_email, _password);
     } catch (e) {
       if (mounted) {
-        _showErrorDialog('アカウント作成に失敗しました', e.toString());
+        _showErrorSnackBar('アカウント作成に失敗しました');
       }
     }
   }
@@ -321,7 +425,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       await authNotifier.signInWithGoogle();
     } catch (e) {
       if (mounted) {
-        _showErrorDialog('Googleアカウント作成に失敗しました', e.toString());
+        _showErrorSnackBar('Googleサインアップに失敗しました');
       }
     }
   }
@@ -331,25 +435,28 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       await authNotifier.signInWithApple();
     } catch (e) {
       if (mounted) {
-        _showErrorDialog('Appleアカウント作成に失敗しました', e.toString());
+        AppLogger.instance.e('Apple Sign-In Error', e);
+        _showErrorSnackBar('Appleサインアップに失敗しました: ${e.toString()}');
       }
     }
   }
 
-  void _showErrorDialog(String title, String message) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text(title),
-            content: Text(message),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('OK'),
-              ),
-            ],
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(
+            fontWeight: FontWeight.w500,
           ),
+        ),
+        backgroundColor: ColorConsts.error,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(SpacingConstsV2.l),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
     );
   }
 }
