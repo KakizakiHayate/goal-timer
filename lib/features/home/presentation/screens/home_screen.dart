@@ -17,7 +17,10 @@ import '../../../auth/domain/entities/auth_state.dart' as app_auth;
 import '../../../auth/provider/auth_provider.dart';
 import '../../../../core/utils/route_names.dart';
 import '../../../../core/models/goals/goals_model.dart';
-import '../../../goal_detail/presentation/screens/goal_edit_modal.dart';
+import '../../../goal_detail/presentation/screens/goal_create_modal.dart';
+import '../../../../core/widgets/common_button.dart';
+import '../../../../core/widgets/pressable_card.dart';
+import '../../../goal_detail/presentation/viewmodels/goal_detail_view_model.dart';
 
 /// 改善されたホーム画面
 class HomeScreen extends ConsumerStatefulWidget {
@@ -91,16 +94,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       );
     }
 
+    final pages = [
+      const _HomeTabContent(),
+      const _TimerPage(),
+      const StatisticsScreen(),
+    ];
+
     return Scaffold(
       backgroundColor: ColorConsts.backgroundPrimary,
-      body: TabBarView(
-        controller: _tabController,
-        children: const [
-          _HomeTabContent(),
-          _TimerTabContent(),
-          StatisticsScreen(),
-        ],
-      ),
+      body: pages[_tabController.index],
       bottomNavigationBar: _buildBottomNavigationBar(),
       floatingActionButton: _buildFloatingActionButton(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -127,21 +129,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               ),
             ],
           ),
-          child: TabBar(
-            controller: _tabController,
-            labelColor: ColorConsts.primary,
-            unselectedLabelColor: ColorConsts.textTertiary,
-            indicatorColor: Colors.transparent,
-            labelStyle: TextConsts.caption.copyWith(
-              fontWeight: FontWeight.w700,
+          child: BottomNavigationBar(
+            currentIndex: _tabController.index,
+            onTap: (index) {
+              _tabController.animateTo(index);
+              setState(() {});
+            },
+            type: BottomNavigationBarType.fixed,
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            selectedItemColor: ColorConsts.primary,
+            unselectedItemColor: ColorConsts.textTertiary,
+            selectedLabelStyle: TextConsts.caption.copyWith(
+              fontWeight: FontWeight.w600,
             ),
-            unselectedLabelStyle: TextConsts.caption.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
-            tabs: [
-              _buildTabItem(Icons.home_outlined, Icons.home, 'ホーム', 0),
-              _buildTabItem(Icons.timer_outlined, Icons.timer, 'タイマー', 1),
-              _buildTabItem(Icons.analytics_outlined, Icons.analytics, '統計', 2),
+            unselectedLabelStyle: TextConsts.caption,
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home_outlined),
+                activeIcon: Icon(Icons.home),
+                label: 'ホーム',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.timer_outlined),
+                activeIcon: Icon(Icons.timer),
+                label: 'タイマー',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.bar_chart_outlined),
+                activeIcon: Icon(Icons.bar_chart),
+                label: '統計',
+              ),
             ],
           ),
         );
@@ -149,33 +167,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
-  Widget _buildTabItem(
-    IconData outlinedIcon,
-    IconData filledIcon,
-    String label,
-    int index,
-  ) {
-    final isSelected = _tabController.index == index;
-    
-    return Tab(
-      height: 70,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          AnimatedSwitcher(
-            duration: AnimationConsts.fast,
-            child: Icon(
-              isSelected ? filledIcon : outlinedIcon,
-              key: ValueKey(isSelected),
-              size: 24,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(label),
-        ],
-      ),
-    );
-  }
 
   Widget _buildFloatingActionButton() {
     return AnimatedBuilder(
@@ -220,20 +211,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 
   void _showAddGoalModal(BuildContext context) {
-    // TODO: 目標追加モーダルの実装
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('目標追加'),
-        content: const Text('目標追加機能は実装中です'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return FractionallySizedBox(
+          heightFactor: 0.95,
+          child: Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+            ),
+            child: const GoalCreateModal(),
           ),
-        ],
-      ),
-    );
+        );
+      },
+    ).then((_) {
+      if (context.mounted) {
+        // 目標リストを再読み込み
+        ref.invalidate(goalDetailListProvider);
+        ref.read(homeViewModelProvider.notifier).reloadGoals();
+      }
+    });
   }
 }
 
@@ -242,7 +245,6 @@ class _HomeTabContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final homeState = ref.watch(homeViewModelProvider);
     final homeViewModel = ref.read(homeViewModelProvider.notifier);
 
     return CustomScrollView(
@@ -461,25 +463,210 @@ class _HomeTabContent extends ConsumerWidget {
   }
 }
 
-class _TimerTabContent extends ConsumerWidget {
-  const _TimerTabContent();
+class _TimerPage extends ConsumerWidget {
+  const _TimerPage();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // TODO: タイマー選択画面の実装
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('タイマー'),
-        backgroundColor: ColorConsts.primary,
-        foregroundColor: Colors.white,
+    // 目標一覧を取得
+    final goalDetailsAsync = ref.watch(goalDetailListProvider);
+
+    return goalDetailsAsync.when(
+      data: (goals) {
+        if (goals.isEmpty) {
+          // 目標がない場合は目標作成を促すメッセージを表示
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('タイマー'),
+              backgroundColor: ColorConsts.primary,
+              foregroundColor: Colors.white,
+            ),
+            body: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(SpacingConsts.l),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.flag,
+                      size: 80,
+                      color: ColorConsts.textTertiary,
+                    ),
+                    const SizedBox(height: SpacingConsts.l),
+                    Text(
+                      'タイマーを使用するには\n目標を作成してください',
+                      textAlign: TextAlign.center,
+                      style: TextConsts.h3.copyWith(
+                        color: ColorConsts.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: SpacingConsts.xl),
+                    CommonButton(
+                      text: '目標を作成',
+                      variant: ButtonVariant.primary,
+                      onPressed: () => _showAddGoalModal(context, ref),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+
+        // 目標がある場合は目標一覧を表示
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('タイマー'),
+            backgroundColor: ColorConsts.primary,
+            foregroundColor: Colors.white,
+          ),
+          body: Padding(
+            padding: const EdgeInsets.all(SpacingConsts.l),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'タイマーを開始する目標を選択してください',
+                  style: TextConsts.h4.copyWith(
+                    color: ColorConsts.textPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: SpacingConsts.l),
+                Expanded(
+                  child: ListView.separated(
+                    itemCount: goals.length,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: SpacingConsts.m),
+                    itemBuilder: (context, index) {
+                      final goal = goals[index];
+                      return _buildGoalTimerCard(context, goal);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+      loading: () => Scaffold(
+        appBar: AppBar(
+          title: const Text('タイマー'),
+          backgroundColor: ColorConsts.primary,
+          foregroundColor: Colors.white,
+        ),
+        body: const Center(
+          child: CircularProgressIndicator(),
+        ),
       ),
-      body: const Center(
-        child: Text(
-          'タイマー選択画面\n（実装中）',
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 18),
+      error: (error, stack) => Scaffold(
+        appBar: AppBar(
+          title: const Text('タイマー'),
+          backgroundColor: ColorConsts.primary,
+          foregroundColor: Colors.white,
+        ),
+        body: Center(
+          child: Text('エラーが発生しました: $error'),
         ),
       ),
     );
+  }
+
+  Widget _buildGoalTimerCard(BuildContext context, GoalsModel goal) {
+    return PressableCard(
+      onTap: () {
+        // タイマー画面に遷移
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => TimerScreen(goalId: goal.id),
+          ),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(SpacingConsts.l),
+        child: Row(
+          children: [
+            // アイコン
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: ColorConsts.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.play_arrow,
+                color: ColorConsts.primary,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: SpacingConsts.l),
+
+            // テキスト情報
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    goal.title,
+                    style: TextConsts.h4.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: SpacingConsts.xs),
+                  Text(
+                    '${goal.spentMinutes}分 / ${goal.totalTargetHours * 60}分',
+                    style: TextConsts.body.copyWith(
+                      color: ColorConsts.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // 進捗率
+            Text(
+              '${((goal.spentMinutes / (goal.totalTargetHours * 60)) * 100).toInt()}%',
+              style: TextConsts.body.copyWith(
+                color: ColorConsts.primary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showAddGoalModal(BuildContext context, WidgetRef ref) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return FractionallySizedBox(
+          heightFactor: 0.95,
+          child: Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+            ),
+            child: const GoalCreateModal(),
+          ),
+        );
+      },
+    ).then((_) {
+      if (context.mounted) {
+        // 目標リストを再読み込み
+        ref.invalidate(goalDetailListProvider);
+        ref.read(homeViewModelProvider.notifier).reloadGoals();
+      }
+    });
   }
 }

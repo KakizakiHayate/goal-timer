@@ -9,23 +9,23 @@ import '../../../../features/auth/presentation/widgets/auth_button.dart';
 import '../../../../core/models/goals/goals_model.dart';
 
 /// 改善された目標作成モーダル
-class GoalCreateModalV2 extends ConsumerStatefulWidget {
-  const GoalCreateModalV2({super.key});
+class GoalCreateModal extends ConsumerStatefulWidget {
+  const GoalCreateModal({super.key});
 
   @override
-  ConsumerState<GoalCreateModalV2> createState() => _GoalCreateModalV2State();
+  ConsumerState<GoalCreateModal> createState() => _GoalCreateModalState();
 
   static Future<GoalsModel?> show(BuildContext context) {
     return ModalBottomSheet.show<GoalsModel>(
       context: context,
       title: '新しい目標を作成',
       height: MediaQuery.of(context).size.height * 0.85,
-      child: const GoalCreateModalV2(),
+      child: const GoalCreateModal(),
     );
   }
 }
 
-class _GoalCreateModalV2State extends ConsumerState<GoalCreateModalV2> {
+class _GoalCreateModalState extends ConsumerState<GoalCreateModal> {
   final _formKey = GlobalKey<FormState>();
   
   String _title = '';
@@ -310,11 +310,12 @@ class _GoalCreateModalV2State extends ConsumerState<GoalCreateModalV2> {
         userId: 'current_user_id', // TODO: 実際のユーザーIDに置き換え
         title: _title,
         description: _description,
+        deadline: DateTime.now().add(const Duration(days: 30)), // 30日後に設定
+        isCompleted: false,
         avoidMessage: _avoidMessage,
-        targetMinutes: _targetMinutes,
-        createdAt: DateTime.now(),
+        totalTargetHours: (_targetMinutes / 60).round(),
+        spentMinutes: 0,
         updatedAt: DateTime.now(),
-        isActive: true,
       );
 
       if (mounted) {

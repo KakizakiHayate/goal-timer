@@ -4,6 +4,7 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:crypto/crypto.dart';
 import 'dart:convert';
 import 'dart:math';
+import 'dart:io';
 import '../../domain/entities/app_user.dart';
 import '../../../../core/utils/app_logger.dart';
 
@@ -111,6 +112,17 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     AppLogger.instance.i('Googleログイン開始');
     
     try {
+      // ネットワーク状態チェック（追加）
+      final hasNetwork = await _checkNetworkConnection();
+      if (!hasNetwork) {
+        AppLogger.instance.w('ネットワークに接続されていません');
+        throw Exception('インターネット接続を確認してください');
+      }
+
+      // セッションを完全にクリア（追加）
+      await _googleSignIn.signOut();
+      AppLogger.instance.d('既存のGoogleセッションをクリア');
+
       AppLogger.instance.d('Google Sign-In ダイアログを表示中...');
       final googleUser = await _googleSignIn.signIn();
       
@@ -158,12 +170,54 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       return appUser;
       
     } on Exception catch (e) {
+      // エラーハンドリング改善（追加）
+      if (e.toString().contains('ApiException: 7')) {
+        AppLogger.instance.w('ネットワークエラーを検出、リトライします...');
+        // 短時間待機してリトライ
+        await Future.delayed(const Duration(seconds: 2));
+        return _retryGoogleSignIn();
+      }
       AppLogger.instance.e('Googleログイン Exception', e);
       rethrow;
     } catch (e, stackTrace) {
       AppLogger.instance.e('Googleログイン 予期しないエラー', e, stackTrace);
       throw Exception('Googleログインエラー: ${e.toString()}');
     }
+  }
+
+  /// Google Sign-In リトライメソッド
+  Future<AppUser> _retryGoogleSignIn() async {
+    AppLogger.instance.d('Googleログイン リトライ実行');
+    final googleUser = await _googleSignIn.signIn();
+    
+    if (googleUser == null) {
+      throw Exception('Googleログインがキャンセルされました');
+    }
+
+    AppLogger.instance.d('リトライ: Googleユーザー情報取得成功: ${googleUser.email}');
+    final googleAuth = await googleUser.authentication;
+    final accessToken = googleAuth.accessToken;
+    final idToken = googleAuth.idToken;
+
+    if (accessToken == null || idToken == null) {
+      throw Exception('Googleトークンの取得に失敗しました');
+    }
+
+    AppLogger.instance.d('リトライ: Supabaseでの認証を開始...');
+    final response = await _supabase.auth.signInWithIdToken(
+      provider: OAuthProvider.google,
+      idToken: idToken,
+      accessToken: accessToken,
+      nonce: null,
+    );
+
+    if (response.user == null) {
+      throw Exception('Googleログインに失敗しました');
+    }
+
+    final appUser = _mapToAppUser(response.user!);
+    AppLogger.instance.i('Googleログイン リトライ成功: ユーザーID=${appUser.id}');
+    return appUser;
   }
 
   @override
@@ -205,10 +259,17 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<void> signOut() async {
     try {
+      // Supabaseからサインアウト
       await _supabase.auth.signOut();
+      
+      // Googleセッションもクリア（追加/強化）
       await _googleSignIn.signOut();
+      await _googleSignIn.disconnect(); // 完全切断
+      
+      AppLogger.instance.i('サインアウト完了（Google含む）');
     } catch (e) {
-      throw Exception('サインアウトエラー: ${e.toString()}');
+      AppLogger.instance.e('サインアウトエラー', e);
+      rethrow;
     }
   }
 
@@ -266,5 +327,16 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       length,
       (_) => charset[random.nextInt(charset.length)],
     ).join();
+  }
+
+  /// ネットワーク接続状態をチェック
+  Future<bool> _checkNetworkConnection() async {
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+    } catch (e) {
+      AppLogger.instance.w('ネットワーク接続チェック失敗: $e');
+      return false;
+    }
   }
 }

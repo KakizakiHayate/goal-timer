@@ -542,7 +542,7 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen>
   }
 
   void _showEditModal(GoalsModel goal) async {
-    final result = await GoalEditModalV2.show(context, goal);
+    final result = await GoalEditModal.show(context, goal);
     if (result != null && mounted) {
       // TODO: 目標の更新処理
       setState(() {

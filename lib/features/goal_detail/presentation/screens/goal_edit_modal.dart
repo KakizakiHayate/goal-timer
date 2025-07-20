@@ -9,28 +9,28 @@ import '../../../../features/auth/presentation/widgets/auth_button.dart';
 import '../../../../core/models/goals/goals_model.dart';
 
 /// 改善された目標編集モーダル
-class GoalEditModalV2 extends ConsumerStatefulWidget {
+class GoalEditModal extends ConsumerStatefulWidget {
   final GoalsModel goal;
 
-  const GoalEditModalV2({
+  const GoalEditModal({
     super.key,
     required this.goal,
   });
 
   @override
-  ConsumerState<GoalEditModalV2> createState() => _GoalEditModalV2State();
+  ConsumerState<GoalEditModal> createState() => _GoalEditModalState();
 
   static Future<GoalsModel?> show(BuildContext context, GoalsModel goal) {
     return ModalBottomSheet.show<GoalsModel>(
       context: context,
       title: '目標を編集',
       height: MediaQuery.of(context).size.height * 0.85,
-      child: GoalEditModalV2(goal: goal),
+      child: GoalEditModal(goal: goal),
     );
   }
 }
 
-class _GoalEditModalV2State extends ConsumerState<GoalEditModalV2> {
+class _GoalEditModalState extends ConsumerState<GoalEditModal> {
   final _formKey = GlobalKey<FormState>();
   
   late String _title;
