@@ -7,14 +7,14 @@ import 'pressable_card.dart';
 
 /// 改善されたチャートカードウィジェット
 /// 統計情報をグラフィカルに表示
-class ChartCardV2 extends StatefulWidget {
+class ChartCard extends StatefulWidget {
   final String title;
   final String? subtitle;
   final Widget chart;
   final List<ChartLegendItem>? legendItems;
   final VoidCallback? onTap;
 
-  const ChartCardV2({
+  const ChartCard({
     super.key,
     required this.title,
     this.subtitle,
@@ -24,10 +24,10 @@ class ChartCardV2 extends StatefulWidget {
   });
 
   @override
-  State<ChartCardV2> createState() => _ChartCardV2State();
+  State<ChartCard> createState() => _ChartCardState();
 }
 
-class _ChartCardV2State extends State<ChartCardV2>
+class _ChartCardState extends State<ChartCard>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;

@@ -6,7 +6,7 @@ import '../utils/animation_consts.dart';
 
 /// 改善されたカスタムテキストフィールド
 /// 目標作成・編集フォーム用
-class CustomTextFieldV2 extends StatefulWidget {
+class CustomTextField extends StatefulWidget {
   final String labelText;
   final String? hintText;
   final String? initialValue;
@@ -21,7 +21,7 @@ class CustomTextFieldV2 extends StatefulWidget {
   final TextInputAction? textInputAction;
   final Function(String)? onSubmitted;
 
-  const CustomTextFieldV2({
+  const CustomTextField({
     super.key,
     required this.labelText,
     this.hintText,
@@ -39,10 +39,10 @@ class CustomTextFieldV2 extends StatefulWidget {
   });
 
   @override
-  State<CustomTextFieldV2> createState() => _CustomTextFieldV2State();
+  State<CustomTextField> createState() => _CustomTextFieldState();
 }
 
-class _CustomTextFieldV2State extends State<CustomTextFieldV2>
+class _CustomTextFieldState extends State<CustomTextField>
     with SingleTickerProviderStateMixin {
   late final TextEditingController _controller;
   late final FocusNode _focusNode;
@@ -140,7 +140,7 @@ class _CustomTextFieldV2State extends State<CustomTextFieldV2>
                 boxShadow: [
                   if (_isFocused && !hasError)
                     BoxShadow(
-                      color: ColorConsts.primary.withOpacity(0.15 * _focusAnimation.value),
+                      color: ColorConsts.primary.withValues(alpha: 0.15 * _focusAnimation.value),
                       offset: const Offset(0, 4),
                       blurRadius: 16,
                       spreadRadius: 0,
@@ -208,7 +208,7 @@ class _CustomTextFieldV2State extends State<CustomTextFieldV2>
                   disabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
                     borderSide: BorderSide(
-                      color: ColorConsts.border.withOpacity(0.5),
+                      color: ColorConsts.border.withValues(alpha: 0.5),
                       width: 1.5,
                     ),
                   ),

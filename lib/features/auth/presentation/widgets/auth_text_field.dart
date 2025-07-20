@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/utils/color_consts.dart';
 import '../../../../core/utils/animation_consts.dart';
-import '../../../../core/utils/v2_constants_adapter.dart';
 
 /// 認証フォーム用テキストフィールド
 /// フォーカス状態の視覚的フィードバックを強化

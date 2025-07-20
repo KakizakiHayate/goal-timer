@@ -127,4 +127,8 @@ final class TextConsts {
     color: ColorConsts.primary,
     fontFeatures: [FontFeature.tabularFigures()],
   );
+  
+  // === エイリアス（旧V2定数） ===
+  // これらは旧v2_constants_adapterで定義されていたもの
+  static const TextStyle body = bodyMedium;
 }

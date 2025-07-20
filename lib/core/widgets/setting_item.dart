@@ -6,7 +6,7 @@ import '../utils/animation_consts.dart';
 import 'pressable_card.dart';
 
 /// 改善された設定項目ウィジェット
-class SettingItemV2 extends StatefulWidget {
+class SettingItem extends StatefulWidget {
   final String title;
   final String? subtitle;
   final IconData icon;
@@ -15,7 +15,7 @@ class SettingItemV2 extends StatefulWidget {
   final VoidCallback? onTap;
   final bool enabled;
 
-  const SettingItemV2({
+  const SettingItem({
     super.key,
     required this.title,
     this.subtitle,
@@ -27,10 +27,10 @@ class SettingItemV2 extends StatefulWidget {
   });
 
   @override
-  State<SettingItemV2> createState() => _SettingItemV2State();
+  State<SettingItem> createState() => _SettingItemState();
 }
 
-class _SettingItemV2State extends State<SettingItemV2>
+class _SettingItemState extends State<SettingItem>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;

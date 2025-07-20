@@ -1,523 +1,568 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:goal_timer/core/utils/color_consts.dart';
-import '../viewmodels/settings_view_model.dart';
-import '../../domain/entities/settings.dart';
-import 'package:goal_timer/core/utils/route_names.dart';
+import '../../../../core/utils/color_consts.dart';
+import '../../../../core/utils/text_consts.dart';
+import '../../../../core/utils/spacing_consts.dart';
+import '../../../../core/utils/animation_consts.dart';
+import '../../../../core/widgets/setting_item.dart';
+import '../../../../core/widgets/pressable_card.dart';
+import '../../../auth/provider/auth_provider.dart';
 
-class SettingsScreen extends ConsumerWidget {
+/// 改善された設定画面
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final settingsAsync = ref.watch(settingsProvider);
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
+}
 
+class _SettingsScreenState extends ConsumerState<SettingsScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  
+  bool _notificationsEnabled = true;
+  bool _soundEnabled = true;
+  bool _vibrationEnabled = true;
+  String _selectedTheme = 'system'; // system, light, dark
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: AnimationConsts.medium,
+      vsync: this,
+    );
+    
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeOut,
+      ),
+    );
+    
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: ColorConsts.backgroundPrimary,
       appBar: AppBar(
-        title: const Text('設定'),
+        title: Text(
+          '設定',
+          style: TextConsts.h3.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         backgroundColor: ColorConsts.primary,
-        foregroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
-      body: settingsAsync.when(
-        data: (settings) => _buildSettingsContent(context, ref, settings),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(child: Text('エラーが発生しました: $error')),
+      body: FadeTransition(
+        opacity: _fadeAnimation,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(SpacingConsts.l),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // プロフィールセクション
+              _buildProfileSection(),
+              
+              const SizedBox(height: SpacingConsts.l),
+              
+              // 通知設定
+              _buildNotificationSection(),
+              
+              const SizedBox(height: SpacingConsts.l),
+              
+              // アプリ設定
+              _buildAppSection(),
+              
+              const SizedBox(height: SpacingConsts.l),
+              
+              // データとプライバシー
+              _buildDataSection(),
+              
+              const SizedBox(height: SpacingConsts.l),
+              
+              // サポート
+              _buildSupportSection(),
+              
+              const SizedBox(height: SpacingConsts.l),
+              
+              // アカウント
+              _buildAccountSection(),
+              
+              const SizedBox(height: SpacingConsts.l),
+            ],
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildSettingsContent(
-    BuildContext context,
-    WidgetRef ref,
-    Settings settings,
-  ) {
-    return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      children: [
-        // アプリ設定セクション
-        _buildSectionCard(
-          context,
-          title: 'アプリ設定',
-          icon: Icons.settings_outlined,
-          children: [_buildThemeSelector(context, ref, settings)],
-        ),
-
-        const SizedBox(height: 16),
-
-        // 通知設定セクション
-        _buildSectionCard(
-          context,
-          title: '通知設定',
-          icon: Icons.notifications_outlined,
-          children: [
-            _buildNotificationToggle(context, ref, settings),
-            if (settings.notificationsEnabled)
-              _buildReminderIntervalSelector(context, ref, settings),
-          ],
-        ),
-
-        const SizedBox(height: 16),
-
-        // サウンド設定セクション
-        _buildSectionCard(
-          context,
-          title: 'サウンド設定',
-          icon: Icons.volume_up_outlined,
-          children: [_buildSoundToggle(context, ref, settings)],
-        ),
-
-        const SizedBox(height: 16),
-
-        // タイマー設定セクション
-        _buildSectionCard(
-          context,
-          title: 'タイマー設定',
-          icon: Icons.timer_outlined,
-          children: [
-            _buildDefaultTimerDurationSelector(context, ref, settings),
-          ],
-        ),
-
-        const SizedBox(height: 16),
-
-        // データ管理セクション
-        _buildSectionCard(
-          context,
-          title: 'データ管理',
-          icon: Icons.storage_outlined,
-          children: [
-            ListTile(
-              leading: const Icon(
-                Icons.backup_outlined,
-                color: ColorConsts.primary,
+  Widget _buildProfileSection() {
+    return PressableCard(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.all(SpacingConsts.l),
+      backgroundColor: ColorConsts.cardBackground,
+      borderRadius: 20.0,
+      elevation: 2.0,
+      onTap: _showProfileModal,
+      child: Row(
+        children: [
+          // アバター
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [ColorConsts.primary, ColorConsts.primaryLight],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-              title: const Text('データのバックアップ'),
-              subtitle: const Text('目標データをエクスポートする'),
-              onTap: () {
-                // バックアップ機能の実装
-                _showFeatureNotAvailableDialog(context);
-              },
+              shape: BoxShape.circle,
             ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(
-                Icons.restore_outlined,
-                color: ColorConsts.primary,
-              ),
-              title: const Text('データの復元'),
-              subtitle: const Text('バックアップからデータを復元する'),
-              onTap: () {
-                // 復元機能の実装
-                _showFeatureNotAvailableDialog(context);
-              },
+            child: const Icon(
+              Icons.person,
+              color: Colors.white,
+              size: 32,
             ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.delete_outline, color: Colors.red),
-              title: const Text('すべてのデータを削除'),
-              subtitle: const Text('アプリのすべてのデータを消去する（この操作は元に戻せません）'),
-              onTap: () {
-                // データ削除確認ダイアログ
-                _showDeleteConfirmationDialog(context);
-              },
-            ),
-          ],
-        ),
-
-        const SizedBox(height: 16),
-
-        // アプリ情報セクション
-        _buildSectionCard(
-          context,
-          title: 'アプリ情報',
-          icon: Icons.info_outline,
-          children: [
-            ListTile(
-              leading: const Icon(
-                Icons.info_outline,
-                color: ColorConsts.primary,
-              ),
-              title: const Text('バージョン情報'),
-              subtitle: const Text('v1.0.0'),
-              onTap: () {
-                // バージョン情報の詳細表示
-              },
-            ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(
-                Icons.policy_outlined,
-                color: ColorConsts.primary,
-              ),
-              title: const Text('プライバシーポリシー'),
-              onTap: () {
-                // プライバシーポリシーを表示
-                _showFeatureNotAvailableDialog(context);
-              },
-            ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(
-                Icons.help_outline,
-                color: ColorConsts.primary,
-              ),
-              title: const Text('ヘルプ・サポート'),
-              onTap: () {
-                // ヘルプ・サポート情報を表示
-                _showFeatureNotAvailableDialog(context);
-              },
-            ),
-          ],
-        ),
-
-        const SizedBox(height: 16),
-
-        // デバッグセクション（開発時のみ表示するなど条件付きで表示も可能）
-        if (true) // or: if (EnvConfig.isDebugMode)
-          _buildDebugSection(context),
-      ],
-    );
-  }
-
-  // セクションカードを構築
-  Widget _buildSectionCard(
-    BuildContext context, {
-    required String title,
-    required IconData icon,
-    required List<Widget> children,
-  }) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.grey.shade200),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // セクションヘッダー
-            Row(
+          ),
+          
+          const SizedBox(width: SpacingConsts.l),
+          
+          // ユーザー情報
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(icon, color: ColorConsts.primary),
-                const SizedBox(width: 8),
                 Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: ColorConsts.primary,
+                  'ユーザー名',
+                  style: TextConsts.h4.copyWith(
+                    color: ColorConsts.textPrimary,
                     fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: SpacingConsts.xs),
+                Text(
+                  'user@example.com',
+                  style: TextConsts.body.copyWith(
+                    color: ColorConsts.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: SpacingConsts.s),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: SpacingConsts.s,
+                    vertical: SpacingConsts.xs,
+                  ),
+                  decoration: BoxDecoration(
+                    color: ColorConsts.success.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    'プレミアム会員',
+                    style: TextConsts.caption.copyWith(
+                      color: ColorConsts.success,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            // 子ウィジェット
-            ...children,
+          ),
+          
+          const Icon(
+            Icons.arrow_forward_ios,
+            size: 16,
+            color: ColorConsts.textTertiary,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNotificationSection() {
+    return _buildSection(
+      title: '通知設定',
+      children: [
+        SettingItem(
+          title: '通知を有効にする',
+          subtitle: '目標のリマインダーやお知らせを受け取る',
+          icon: Icons.notifications_outlined,
+          iconColor: ColorConsts.primary,
+          trailing: Switch(
+            value: _notificationsEnabled,
+            onChanged: (value) {
+              setState(() {
+                _notificationsEnabled = value;
+              });
+            },
+            activeColor: ColorConsts.primary,
+          ),
+        ),
+        SettingItem(
+          title: 'サウンド',
+          subtitle: '通知音を再生する',
+          icon: Icons.volume_up_outlined,
+          iconColor: ColorConsts.warning,
+          enabled: _notificationsEnabled,
+          trailing: Switch(
+            value: _soundEnabled && _notificationsEnabled,
+            onChanged: _notificationsEnabled
+                ? (value) {
+                    setState(() {
+                      _soundEnabled = value;
+                    });
+                  }
+                : null,
+            activeColor: ColorConsts.primary,
+          ),
+        ),
+        SettingItem(
+          title: 'バイブレーション',
+          subtitle: '通知時に振動する',
+          icon: Icons.vibration_outlined,
+          iconColor: ColorConsts.success,
+          enabled: _notificationsEnabled,
+          trailing: Switch(
+            value: _vibrationEnabled && _notificationsEnabled,
+            onChanged: _notificationsEnabled
+                ? (value) {
+                    setState(() {
+                      _vibrationEnabled = value;
+                    });
+                  }
+                : null,
+            activeColor: ColorConsts.primary,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAppSection() {
+    return _buildSection(
+      title: 'アプリ設定',
+      children: [
+        SettingItem(
+          title: 'テーマ',
+          subtitle: _getThemeSubtitle(),
+          icon: Icons.palette_outlined,
+          iconColor: ColorConsts.primary,
+          onTap: _showThemeSelector,
+        ),
+        SettingItem(
+          title: 'デフォルトタイマー時間',
+          subtitle: '新しい目標のデフォルト時間：25分',
+          icon: Icons.timer_outlined,
+          iconColor: ColorConsts.warning,
+          onTap: _showTimerSettings,
+        ),
+        SettingItem(
+          title: '週の開始日',
+          subtitle: '統計の週の開始日：月曜日',
+          icon: Icons.calendar_today_outlined,
+          iconColor: ColorConsts.success,
+          onTap: _showWeekStartSettings,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDataSection() {
+    return _buildSection(
+      title: 'データとプライバシー',
+      children: [
+        SettingItem(
+          title: 'データのエクスポート',
+          subtitle: '学習データをエクスポート',
+          icon: Icons.download_outlined,
+          iconColor: ColorConsts.primary,
+          onTap: _exportData,
+        ),
+        SettingItem(
+          title: 'データのバックアップ',
+          subtitle: 'クラウドにデータを同期',
+          icon: Icons.cloud_upload_outlined,
+          iconColor: ColorConsts.success,
+          onTap: _showBackupSettings,
+        ),
+        SettingItem(
+          title: 'プライバシーポリシー',
+          subtitle: 'データの取り扱いについて',
+          icon: Icons.privacy_tip_outlined,
+          iconColor: ColorConsts.textSecondary,
+          onTap: _showPrivacyPolicy,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSupportSection() {
+    return _buildSection(
+      title: 'サポート',
+      children: [
+        SettingItem(
+          title: 'ヘルプ・FAQ',
+          subtitle: 'よくある質問と使い方',
+          icon: Icons.help_outline,
+          iconColor: ColorConsts.primary,
+          onTap: _showHelp,
+        ),
+        SettingItem(
+          title: 'お問い合わせ',
+          subtitle: 'ご意見・ご要望をお聞かせください',
+          icon: Icons.email_outlined,
+          iconColor: ColorConsts.success,
+          onTap: _showContact,
+        ),
+        SettingItem(
+          title: 'アプリについて',
+          subtitle: 'バージョン 1.0.0',
+          icon: Icons.info_outline,
+          iconColor: ColorConsts.textSecondary,
+          onTap: _showAbout,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAccountSection() {
+    return _buildSection(
+      title: 'アカウント',
+      children: [
+        SettingItem(
+          title: 'サインアウト',
+          subtitle: 'アカウントからサインアウト',
+          icon: Icons.logout,
+          iconColor: ColorConsts.error,
+          onTap: _showSignOutDialog,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSection({
+    required String title,
+    required List<Widget> children,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(
+            left: SpacingConsts.s,
+            bottom: SpacingConsts.m,
+          ),
+          child: Text(
+            title,
+            style: TextConsts.h4.copyWith(
+              color: ColorConsts.textPrimary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        ...children,
+      ],
+    );
+  }
+
+  String _getThemeSubtitle() {
+    switch (_selectedTheme) {
+      case 'light':
+        return 'ライトテーマ';
+      case 'dark':
+        return 'ダークテーマ';
+      case 'system':
+      default:
+        return 'システム設定に従う';
+    }
+  }
+
+  // モーダル・ダイアログ表示メソッド
+  void _showProfileModal() {
+    // TODO: プロフィール編集モーダルの実装
+    _showComingSoonDialog('プロフィール編集');
+  }
+
+  void _showThemeSelector() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('テーマ選択'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            RadioListTile<String>(
+              title: const Text('システム設定に従う'),
+              value: 'system',
+              groupValue: _selectedTheme,
+              onChanged: (value) {
+                setState(() {
+                  _selectedTheme = value!;
+                });
+                Navigator.pop(context);
+              },
+            ),
+            RadioListTile<String>(
+              title: const Text('ライトテーマ'),
+              value: 'light',
+              groupValue: _selectedTheme,
+              onChanged: (value) {
+                setState(() {
+                  _selectedTheme = value!;
+                });
+                Navigator.pop(context);
+              },
+            ),
+            RadioListTile<String>(
+              title: const Text('ダークテーマ'),
+              value: 'dark',
+              groupValue: _selectedTheme,
+              onChanged: (value) {
+                setState(() {
+                  _selectedTheme = value!;
+                });
+                Navigator.pop(context);
+              },
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildThemeSelector(
-    BuildContext context,
-    WidgetRef ref,
-    Settings settings,
-  ) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: const Icon(Icons.palette_outlined, color: ColorConsts.primary),
-      title: const Text('テーマ'),
-      subtitle: Text(_getThemeText(settings.theme)),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-      onTap: () {
-        showDialog(
-          context: context,
-          builder:
-              (context) => AlertDialog(
-                title: const Text('テーマ選択'),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    RadioListTile<String>(
-                      title: const Text('システム設定に合わせる'),
-                      value: 'system',
-                      groupValue: settings.theme,
-                      onChanged: (value) {
-                        if (value != null) {
-                          ref
-                              .read(settingsProvider.notifier)
-                              .updateTheme(value);
-                          Navigator.of(context).pop();
-                        }
-                      },
-                    ),
-                    RadioListTile<String>(
-                      title: const Text('ライトモード'),
-                      value: 'light',
-                      groupValue: settings.theme,
-                      onChanged: (value) {
-                        if (value != null) {
-                          ref
-                              .read(settingsProvider.notifier)
-                              .updateTheme(value);
-                          Navigator.of(context).pop();
-                        }
-                      },
-                    ),
-                    RadioListTile<String>(
-                      title: const Text('ダークモード'),
-                      value: 'dark',
-                      groupValue: settings.theme,
-                      onChanged: (value) {
-                        if (value != null) {
-                          ref
-                              .read(settingsProvider.notifier)
-                              .updateTheme(value);
-                          Navigator.of(context).pop();
-                        }
-                      },
-                    ),
-                  ],
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('キャンセル'),
-                  ),
-                ],
-              ),
-        );
-      },
-    );
+  void _showTimerSettings() {
+    _showComingSoonDialog('タイマー設定');
   }
 
-  String _getThemeText(String theme) {
-    switch (theme) {
-      case 'system':
-        return 'システム設定に合わせる';
-      case 'light':
-        return 'ライトモード';
-      case 'dark':
-        return 'ダークモード';
-      default:
-        return 'システム設定に合わせる';
-    }
+  void _showWeekStartSettings() {
+    _showComingSoonDialog('週開始日設定');
   }
 
-  Widget _buildNotificationToggle(
-    BuildContext context,
-    WidgetRef ref,
-    Settings settings,
-  ) {
-    return SwitchListTile(
-      contentPadding: EdgeInsets.zero,
-      title: const Text('通知'),
-      subtitle: const Text('目標達成のリマインダーを通知する'),
-      value: settings.notificationsEnabled,
-      activeColor: ColorConsts.primary,
-      onChanged: (value) {
-        ref.read(settingsProvider.notifier).updateNotificationsEnabled(value);
-      },
-    );
+  void _exportData() {
+    _showComingSoonDialog('データエクスポート');
   }
 
-  Widget _buildReminderIntervalSelector(
-    BuildContext context,
-    WidgetRef ref,
-    Settings settings,
-  ) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: const Icon(Icons.timer_outlined, color: ColorConsts.primary),
-      title: const Text('リマインダー間隔'),
-      subtitle: Text('${settings.reminderInterval}分ごと'),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-      onTap: () {
-        showDialog(
-          context: context,
-          builder:
-              (context) => AlertDialog(
-                title: const Text('リマインダー間隔'),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children:
-                      [15, 30, 60, 120].map((interval) {
-                        return RadioListTile<int>(
-                          title: Text('$interval分ごと'),
-                          value: interval,
-                          groupValue: settings.reminderInterval,
-                          onChanged: (value) {
-                            if (value != null) {
-                              ref
-                                  .read(settingsProvider.notifier)
-                                  .updateReminderInterval(value);
-                              Navigator.of(context).pop();
-                            }
-                          },
-                        );
-                      }).toList(),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('キャンセル'),
-                  ),
-                ],
-              ),
-        );
-      },
-    );
+  void _showBackupSettings() {
+    _showComingSoonDialog('バックアップ設定');
   }
 
-  Widget _buildSoundToggle(
-    BuildContext context,
-    WidgetRef ref,
-    Settings settings,
-  ) {
-    return SwitchListTile(
-      contentPadding: EdgeInsets.zero,
-      title: const Text('効果音'),
-      subtitle: const Text('操作時に効果音を再生する'),
-      value: settings.soundEnabled,
-      activeColor: ColorConsts.primary,
-      onChanged: (value) {
-        ref.read(settingsProvider.notifier).updateSoundEnabled(value);
-      },
-    );
+  void _showPrivacyPolicy() {
+    _showComingSoonDialog('プライバシーポリシー');
   }
 
-  Widget _buildDefaultTimerDurationSelector(
-    BuildContext context,
-    WidgetRef ref,
-    Settings settings,
-  ) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: const Icon(Icons.av_timer, color: ColorConsts.primary),
-      title: const Text('デフォルトタイマー時間'),
-      subtitle: Text('${settings.defaultTimerDuration}分'),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-      onTap: () {
-        // タイマー時間設定ダイアログ
-        _showTimePickerDialog(context, ref, settings);
-      },
-    );
+  void _showHelp() {
+    _showComingSoonDialog('ヘルプ');
   }
 
-  // タイマー時間設定ダイアログ
-  void _showTimePickerDialog(
-    BuildContext context,
-    WidgetRef ref,
-    Settings settings,
-  ) {
+  void _showContact() {
+    _showComingSoonDialog('お問い合わせ');
+  }
+
+  void _showAbout() {
     showDialog(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('デフォルトタイマー時間'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children:
-                  [15, 25, 30, 45, 60].map((minutes) {
-                    return RadioListTile<int>(
-                      title: Text('$minutes分'),
-                      value: minutes,
-                      groupValue: settings.defaultTimerDuration,
-                      onChanged: (value) {
-                        if (value != null) {
-                          ref
-                              .read(settingsProvider.notifier)
-                              .updateDefaultTimerDuration(value);
-                          Navigator.of(context).pop();
-                        }
-                      },
-                    );
-                  }).toList(),
+      builder: (context) => AlertDialog(
+        title: const Text('Goal Timer について'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Goal Timer',
+              style: TextConsts.h3.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('キャンセル'),
-              ),
-            ],
-          ),
-    );
-  }
-
-  // 機能未実装ダイアログ
-  void _showFeatureNotAvailableDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('お知らせ'),
-            content: const Text('この機能は現在開発中です。今後のアップデートをお待ちください。'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('閉じる'),
-              ),
-            ],
-          ),
-    );
-  }
-
-  // データ削除確認ダイアログ
-  void _showDeleteConfirmationDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('すべてのデータを削除'),
-            content: const Text(
-              'この操作を実行すると、アプリ内のすべてのデータが削除されます。この操作は元に戻せません。\n\n本当に削除しますか？',
+            const SizedBox(height: SpacingConsts.s),
+            const Text('バージョン: 1.0.0'),
+            const SizedBox(height: SpacingConsts.m),
+            const Text(
+              '目標達成をサポートするタイマーアプリです。毎日の小さな積み重ねが、大きな成果につながります。',
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('キャンセル'),
-              ),
-              TextButton(
-                style: TextButton.styleFrom(foregroundColor: Colors.red),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  // データ削除機能（実装予定）
-                  _showFeatureNotAvailableDialog(context);
-                },
-                child: const Text('削除する'),
-              ),
-            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
           ),
+        ],
+      ),
     );
   }
 
-  // デバッグ用のセクションを追加
-  Widget _buildDebugSection(BuildContext context) {
-    return _buildSectionCard(
-      context,
-      title: 'デバッグ',
-      icon: Icons.bug_report,
-      children: [
-        ListTile(
-          leading: const Icon(Icons.sync, color: ColorConsts.primary),
-          title: const Text('同期デバッグ'),
-          subtitle: const Text('ローカルDBとSupabaseの同期状態を確認'),
-          onTap: () {
-            Navigator.of(context).pushNamed(RouteNames.syncDebug);
-          },
-        ),
-        const Divider(),
-        ListTile(
-          leading: const Icon(Icons.storage, color: ColorConsts.primary),
-          title: const Text('SQLiteデータビューア'),
-          subtitle: const Text('ローカルデータベースの内容確認'),
-          onTap: () {
-            Navigator.of(context).pushNamed(RouteNames.sqliteViewer);
-          },
-        ),
-      ],
+  void _showSignOutDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('サインアウト'),
+        content: const Text('サインアウトしますか？'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('キャンセル'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              try {
+                final authNotifier = ref.read(authViewModelProvider.notifier);
+                await authNotifier.signOut();
+                if (mounted) {
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('サインアウトに失敗しました: $e'),
+                      backgroundColor: ColorConsts.error,
+                    ),
+                  );
+                }
+              }
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: ColorConsts.error,
+            ),
+            child: const Text('サインアウト'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showComingSoonDialog(String feature) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(feature),
+        content: const Text('この機能は開発中です。\n今後のアップデートをお待ちください。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
     );
   }
 }

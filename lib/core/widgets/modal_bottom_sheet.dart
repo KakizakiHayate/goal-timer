@@ -6,14 +6,14 @@ import '../utils/animation_consts.dart';
 
 /// 改善されたモーダルボトムシート
 /// 目標作成・編集用
-class ModalBottomSheetV2 extends StatefulWidget {
+class ModalBottomSheet extends StatefulWidget {
   final String title;
   final Widget child;
   final List<Widget>? actions;
   final bool isScrollable;
   final double? height;
 
-  const ModalBottomSheetV2({
+  const ModalBottomSheet({
     super.key,
     required this.title,
     required this.child,
@@ -23,7 +23,7 @@ class ModalBottomSheetV2 extends StatefulWidget {
   });
 
   @override
-  State<ModalBottomSheetV2> createState() => _ModalBottomSheetV2State();
+  State<ModalBottomSheet> createState() => _ModalBottomSheetState();
 
   static Future<T?> show<T>({
     required BuildContext context,
@@ -37,7 +37,7 @@ class ModalBottomSheetV2 extends StatefulWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => ModalBottomSheetV2(
+      builder: (context) => ModalBottomSheet(
         title: title,
         actions: actions,
         isScrollable: isScrollable,
@@ -48,7 +48,7 @@ class ModalBottomSheetV2 extends StatefulWidget {
   }
 }
 
-class _ModalBottomSheetV2State extends State<ModalBottomSheetV2>
+class _ModalBottomSheetState extends State<ModalBottomSheet>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _slideAnimation;
@@ -113,13 +113,13 @@ class _ModalBottomSheetV2State extends State<ModalBottomSheetV2>
                   child: widget.isScrollable
                       ? SingleChildScrollView(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: SpacingConsts.xl,
+                            horizontal: SpacingConsts.l,
                           ),
                           child: widget.child,
                         )
                       : Padding(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: SpacingConsts.xl,
+                            horizontal: SpacingConsts.l,
                           ),
                           child: widget.child,
                         ),
@@ -156,7 +156,7 @@ class _ModalBottomSheetV2State extends State<ModalBottomSheetV2>
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: SpacingConsts.xl,
+        horizontal: SpacingConsts.l,
         vertical: SpacingConsts.m,
       ),
       decoration: const BoxDecoration(
@@ -200,7 +200,7 @@ class _ModalBottomSheetV2State extends State<ModalBottomSheetV2>
 
   Widget _buildActions() {
     return Container(
-      padding: const EdgeInsets.all(SpacingConsts.xl),
+      padding: const EdgeInsets.all(SpacingConsts.l),
       decoration: const BoxDecoration(
         border: Border(
           top: BorderSide(

@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/utils/color_consts.dart';
 import '../../../../core/utils/text_consts.dart';
 import '../../../../core/utils/spacing_consts.dart';
-import '../../../../core/widgets/custom_text_field_v2.dart';
-import '../../../../core/widgets/modal_bottom_sheet_v2.dart';
-import '../../../../features/auth/presentation/widgets/auth_button_v2.dart';
+import '../../../../core/widgets/custom_text_field.dart';
+import '../../../../core/widgets/modal_bottom_sheet.dart';
+import '../../../../features/auth/presentation/widgets/auth_button.dart';
 import '../../../../core/models/goals/goals_model.dart';
 
 /// 改善された目標作成モーダル
@@ -16,7 +16,7 @@ class GoalCreateModalV2 extends ConsumerStatefulWidget {
   ConsumerState<GoalCreateModalV2> createState() => _GoalCreateModalV2State();
 
   static Future<GoalsModel?> show(BuildContext context) {
-    return ModalBottomSheetV2.show<GoalsModel>(
+    return ModalBottomSheet.show<GoalsModel>(
       context: context,
       title: '新しい目標を作成',
       height: MediaQuery.of(context).size.height * 0.85,
@@ -46,17 +46,17 @@ class _GoalCreateModalV2State extends ConsumerState<GoalCreateModalV2> {
           // 説明テキスト
           _buildDescription(),
           
-          const SizedBox(height: SpacingConsts.xl),
+          const SizedBox(height: SpacingConsts.l),
           
           // フォーム
           _buildForm(),
           
-          const SizedBox(height: SpacingConsts.xxl),
+          const SizedBox(height: SpacingConsts.l),
           
           // 作成ボタン
           _buildCreateButton(),
           
-          const SizedBox(height: SpacingConsts.xl),
+          const SizedBox(height: SpacingConsts.l),
         ],
       ),
     );
@@ -126,7 +126,7 @@ class _GoalCreateModalV2State extends ConsumerState<GoalCreateModalV2> {
     return Column(
       children: [
         // 目標タイトル
-        CustomTextFieldV2(
+        CustomTextField(
           labelText: '目標タイトル',
           hintText: '例：英語の勉強',
           maxLength: 50,
@@ -144,7 +144,7 @@ class _GoalCreateModalV2State extends ConsumerState<GoalCreateModalV2> {
         const SizedBox(height: SpacingConsts.l),
         
         // 目標説明
-        CustomTextFieldV2(
+        CustomTextField(
           labelText: '目標の詳細（任意）',
           hintText: '例：TOEICで800点を取るために毎日英単語を覚える',
           maxLines: 3,
@@ -166,7 +166,7 @@ class _GoalCreateModalV2State extends ConsumerState<GoalCreateModalV2> {
         const SizedBox(height: SpacingConsts.l),
         
         // ネガティブ回避メッセージ
-        CustomTextFieldV2(
+        CustomTextField(
           labelText: 'やらないとどうなる？',
           hintText: '例：将来の仕事で困る、自分に失望する',
           maxLines: 2,
@@ -266,7 +266,7 @@ class _GoalCreateModalV2State extends ConsumerState<GoalCreateModalV2> {
   }
 
   Widget _buildCreateButton() {
-    return AuthButtonV2(
+    return AuthButton(
       type: AuthButtonType.email,
       text: '目標を作成',
       isLoading: _isLoading,
@@ -275,14 +275,14 @@ class _GoalCreateModalV2State extends ConsumerState<GoalCreateModalV2> {
   }
 
   // バリデーション
-  String? _validateTitle(String value) {
-    if (value.isEmpty) return 'タイトルを入力してください';
+  String? _validateTitle(String? value) {
+    if (value == null || value.isEmpty) return 'タイトルを入力してください';
     if (value.length < 2) return 'タイトルは2文字以上で入力してください';
     return null;
   }
 
-  String? _validateAvoidMessage(String value) {
-    if (value.isEmpty) return 'ネガティブ回避メッセージを入力してください';
+  String? _validateAvoidMessage(String? value) {
+    if (value == null || value.isEmpty) return 'ネガティブ回避メッセージを入力してください';
     if (value.length < 5) return '5文字以上で入力してください';
     return null;
   }

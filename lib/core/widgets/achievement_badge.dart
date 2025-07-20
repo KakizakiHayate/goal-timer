@@ -3,11 +3,10 @@ import '../utils/color_consts.dart';
 import '../utils/text_consts.dart';
 import '../utils/spacing_consts.dart';
 import '../utils/animation_consts.dart';
-import '../utils/v2_constants_adapter.dart';
 
 /// 改善された達成バッジウィジェット
 /// 達成感を演出するバッジ表示
-class AchievementBadgeV2 extends StatefulWidget {
+class AchievementBadge extends StatefulWidget {
   final String title;
   final String description;
   final IconData icon;
@@ -16,7 +15,7 @@ class AchievementBadgeV2 extends StatefulWidget {
   final DateTime? unlockedAt;
   final VoidCallback? onTap;
 
-  const AchievementBadgeV2({
+  const AchievementBadge({
     super.key,
     required this.title,
     required this.description,
@@ -28,10 +27,10 @@ class AchievementBadgeV2 extends StatefulWidget {
   });
 
   @override
-  State<AchievementBadgeV2> createState() => _AchievementBadgeV2State();
+  State<AchievementBadge> createState() => _AchievementBadgeState();
 }
 
-class _AchievementBadgeV2State extends State<AchievementBadgeV2>
+class _AchievementBadgeState extends State<AchievementBadge>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
@@ -71,7 +70,7 @@ class _AchievementBadgeV2State extends State<AchievementBadgeV2>
   }
 
   @override
-  void didUpdateWidget(AchievementBadgeV2 oldWidget) {
+  void didUpdateWidget(AchievementBadge oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.isUnlocked && !oldWidget.isUnlocked) {
       _animationController.forward();
@@ -94,7 +93,7 @@ class _AchievementBadgeV2State extends State<AchievementBadgeV2>
           return Transform.scale(
             scale: widget.isUnlocked ? _scaleAnimation.value : 1.0,
             child: Container(
-              padding: const EdgeInsets.all(SpacingConstsV2.l),
+              padding: const EdgeInsets.all(SpacingConsts.l),
               decoration: BoxDecoration(
                 color: widget.isUnlocked
                     ? ColorConsts.cardBackground
@@ -102,14 +101,14 @@ class _AchievementBadgeV2State extends State<AchievementBadgeV2>
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: widget.isUnlocked
-                      ? widget.color.withOpacity(0.3)
+                      ? widget.color.withValues(alpha: 0.3)
                       : ColorConsts.border,
                   width: widget.isUnlocked ? 2 : 1,
                 ),
                 boxShadow: widget.isUnlocked
                     ? [
                         BoxShadow(
-                          color: widget.color.withOpacity(0.3 * _glowAnimation.value),
+                          color: widget.color.withValues(alpha: 0.3 * _glowAnimation.value),
                           offset: const Offset(0, 4),
                           blurRadius: 16,
                           spreadRadius: 0,
@@ -122,12 +121,12 @@ class _AchievementBadgeV2State extends State<AchievementBadgeV2>
                   // バッジアイコン
                   _buildBadgeIcon(),
                   
-                  const SizedBox(height: SpacingConstsV2.m),
+                  const SizedBox(height: SpacingConsts.m),
                   
                   // タイトル
                   Text(
                     widget.title,
-                    style: TextConstsV2.body.copyWith(
+                    style: TextConsts.body.copyWith(
                       color: widget.isUnlocked
                           ? ColorConsts.textPrimary
                           : ColorConsts.textTertiary,
@@ -138,7 +137,7 @@ class _AchievementBadgeV2State extends State<AchievementBadgeV2>
                     overflow: TextOverflow.ellipsis,
                   ),
                   
-                  const SizedBox(height: SpacingConstsV2.s),
+                  const SizedBox(height: SpacingConsts.s),
                   
                   // 説明
                   Text(
@@ -156,7 +155,7 @@ class _AchievementBadgeV2State extends State<AchievementBadgeV2>
                   
                   // 解除日時
                   if (widget.isUnlocked && widget.unlockedAt != null) ...[
-                    const SizedBox(height: SpacingConstsV2.s),
+                    const SizedBox(height: SpacingConsts.s),
                     Text(
                       _formatUnlockedDate(widget.unlockedAt!),
                       style: TextConsts.caption.copyWith(
@@ -181,12 +180,12 @@ class _AchievementBadgeV2State extends State<AchievementBadgeV2>
       decoration: BoxDecoration(
         color: widget.isUnlocked
             ? widget.color
-            : ColorConsts.textTertiary.withOpacity(0.3),
+            : ColorConsts.textTertiary.withValues(alpha: 0.3),
         shape: BoxShape.circle,
         boxShadow: widget.isUnlocked
             ? [
                 BoxShadow(
-                  color: widget.color.withOpacity(0.3),
+                  color: widget.color.withValues(alpha: 0.3),
                   offset: const Offset(0, 4),
                   blurRadius: 12,
                 ),

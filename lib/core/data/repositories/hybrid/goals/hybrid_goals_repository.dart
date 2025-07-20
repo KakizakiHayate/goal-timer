@@ -29,6 +29,7 @@ class HybridGoalsRepository implements GoalsRepository {
        _syncMetadata = syncMetadata ?? SyncMetadataManager();
 
   /// 同期処理をスキップしてローカルデータのみを取得
+  @override
   Future<List<GoalsModel>> getLocalGoalsOnly() async {
     try {
       final localGoals = await _localDatasource.getGoals();

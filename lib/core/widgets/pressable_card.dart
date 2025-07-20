@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../utils/color_consts.dart';
-import '../utils/shadow_consts.dart';
 import '../utils/animation_consts.dart';
 
 /// タップ可能なカードウィジェット

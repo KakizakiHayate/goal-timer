@@ -1,11 +1,18 @@
 final class SpacingConsts {
   // === 基本スペーシング ===
+  static const double xxs = 2.0;  // 極極小
   static const double xs = 4.0;   // 極小
   static const double sm = 8.0;   // 小
   static const double md = 16.0;  // 中（基準）
   static const double lg = 24.0;  // 大
   static const double xl = 32.0;  // 特大
   static const double xxl = 48.0; // 超特大
+  
+  // === 短縮エイリアス（旧V2定数） ===
+  // これらは旧v2_constants_adapterで定義されていたもの
+  static const double s = sm;    // small
+  static const double m = md;    // medium  
+  static const double l = lg;    // large
   
   // === レイアウト専用 ===
   static const double sectionSpacing = 32.0;  // セクション間

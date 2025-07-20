@@ -9,7 +9,6 @@ import '../../../../core/utils/route_names.dart';
 import '../../../../core/utils/text_consts.dart';
 import '../../../../core/utils/spacing_consts.dart';
 import '../../../../core/utils/animation_consts.dart';
-import '../../../../core/utils/v2_constants_adapter.dart';
 import '../../../../core/utils/app_logger.dart';
 
 /// ログイン画面
@@ -81,69 +80,58 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       }
     });
 
-    final mediaQuery = MediaQuery.of(context);
-    final screenHeight = mediaQuery.size.height;
-    final keyboardHeight = mediaQuery.viewInsets.bottom;
-    final isSmallScreen = screenHeight < 700; // iPhone SE等の判定
-
     return Scaffold(
       backgroundColor: ColorConsts.backgroundPrimary,
-      resizeToAvoidBottomInset: false, // キーボード表示時のリサイズを無効化
+      resizeToAvoidBottomInset: true, // キーボード表示時のリサイズを有効化
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: SpacingConsts.xl),
-          child: FadeTransition(
-            opacity: _fadeAnimation,
-            child: SlideTransition(
-              position: _slideAnimation,
-              child: Form(
-                key: _formKey,
+        child: FadeTransition(
+          opacity: _fadeAnimation,
+          child: SlideTransition(
+            position: _slideAnimation,
+            child: Form(
+              key: _formKey,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.symmetric(
+                  horizontal: SpacingConsts.xl,
+                  vertical: SpacingConsts.xl,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // 上部の固定コンテンツ
-                    SizedBox(height: isSmallScreen ? SpacingConstsV2.s : SpacingConstsV2.l),
+                    // 上部余白
+                    SizedBox(height: SpacingConsts.xxl),
 
                     // ヘッダーセクション
                     _buildHeader(),
 
-                    SizedBox(height: isSmallScreen ? SpacingConstsV2.l : SpacingConsts.xl),
+                    SizedBox(height: SpacingConsts.xl),
 
-                    // 中央の可変コンテンツ
-                    Expanded(
-                      child: SingleChildScrollView(
-                        physics: isSmallScreen ? const ClampingScrollPhysics() : const NeverScrollableScrollPhysics(),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            // フォームセクション
-                            _buildForm(),
+                    // フォームセクション
+                    _buildForm(),
 
-                            SizedBox(height: isSmallScreen ? SpacingConstsV2.s : SpacingConstsV2.l),
+                    SizedBox(height: SpacingConsts.xl),
 
-                            // ログインボタン
-                            _buildLoginButton(authState, authNotifier),
+                    // ログインボタン
+                    _buildLoginButton(authState, authNotifier),
 
-                            SizedBox(height: isSmallScreen ? SpacingConstsV2.s : SpacingConstsV2.l),
+                    SizedBox(height: SpacingConsts.xl),
 
-                            // 区切り線
-                            _buildDivider(),
+                    // 区切り線
+                    _buildDivider(),
 
-                            SizedBox(height: isSmallScreen ? SpacingConstsV2.s : SpacingConstsV2.l),
+                    SizedBox(height: SpacingConsts.xl),
 
-                            // ソーシャルログインボタン
-                            _buildSocialLoginButtons(authState, authNotifier),
+                    // ソーシャルログインボタン
+                    _buildSocialLoginButtons(authState, authNotifier),
 
-                            SizedBox(height: isSmallScreen ? SpacingConstsV2.l : SpacingConsts.xl),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    // 下部の固定コンテンツ
+                    SizedBox(height: SpacingConsts.xxl),
+                    
                     // サインアップリンク
                     _buildSignUpLink(),
-                    SizedBox(height: isSmallScreen ? SpacingConstsV2.s : SpacingConstsV2.l),
+                    
+                    // 下部余白
+                    SizedBox(height: SpacingConsts.xl),
                   ],
                 ),
               ),
@@ -155,25 +143,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   }
 
   Widget _buildHeader() {
-    final isSmallScreen = MediaQuery.of(context).size.height < 700;
     return Column(
       children: [
         // アプリアイコン
         Container(
-          width: isSmallScreen ? 60 : 80,
-          height: isSmallScreen ? 60 : 80,
+          width: 80,
+          height: 80,
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [ColorConsts.primary, ColorConsts.primaryLight],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
-            borderRadius: BorderRadius.circular(isSmallScreen ? 16 : 20),
+            borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
                 color: ColorConsts.primary.withOpacity(0.3),
                 offset: const Offset(0, 4),
-                blurRadius: isSmallScreen ? 12 : 20,
+                blurRadius: 20,
                 spreadRadius: 0,
               ),
             ],
@@ -181,22 +168,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
           child: Icon(
             Icons.timer_outlined,
             color: Colors.white,
-            size: isSmallScreen ? 28 : 36,
+            size: 36,
           ),
         ),
-        SizedBox(height: isSmallScreen ? SpacingConstsV2.s : SpacingConstsV2.l),
+        SizedBox(height: SpacingConsts.l),
         Text(
           'おかえりなさい',
-          style: (isSmallScreen ? TextConsts.h2 : TextConsts.h1).copyWith(
+          style: TextConsts.h1.copyWith(
             color: ColorConsts.textPrimary,
             fontWeight: FontWeight.bold,
             letterSpacing: -1,
           ),
         ),
-        SizedBox(height: SpacingConstsV2.xs),
+        SizedBox(height: SpacingConsts.xs),
         Text(
           '今日も目標に向かって\n一歩ずつ前進しましょう',
-          style: (isSmallScreen ? TextConstsV2.caption : TextConstsV2.body).copyWith(
+          style: TextConsts.body.copyWith(
             color: ColorConsts.textSecondary,
             height: 1.4,
           ),
@@ -222,7 +209,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             });
           },
         ),
-        const SizedBox(height: SpacingConstsV2.l),
+        const SizedBox(height: SpacingConsts.l),
         AuthTextField(
           labelText: 'パスワード',
           obscureText: true,
@@ -245,7 +232,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   }
 
   Widget _buildLoginButton(AuthState authState, dynamic authNotifier) {
-    return AuthButtonV2(
+    return AuthButton(
       type: AuthButtonType.email,
       text: 'ログイン',
       isLoading: authState == AuthState.loading,
@@ -270,7 +257,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
           ),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: SpacingConstsV2.l),
+          padding: const EdgeInsets.symmetric(horizontal: SpacingConsts.l),
           child: Text(
             'または',
             style: TextConsts.caption.copyWith(
@@ -311,7 +298,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
         // AppleログインボタンはiOSのみ
         if (AuthButton.shouldShowAppleLogin()) ...[
-          const SizedBox(height: SpacingConstsV2.m),
+          const SizedBox(height: SpacingConsts.m),
           AuthButton(
             type: AuthButtonType.apple,
             text: 'Appleでログイン',
@@ -330,7 +317,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       children: [
         Text(
           'アカウントをお持ちでない方は ',
-          style: TextConstsV2.body.copyWith(
+          style: TextConsts.body.copyWith(
             color: ColorConsts.textSecondary,
           ),
         ),
@@ -340,7 +327,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
           },
           child: Text(
             'サインアップ',
-            style: TextConstsV2.body.copyWith(
+            style: TextConsts.body.copyWith(
               color: ColorConsts.primary,
               fontWeight: FontWeight.w700,
               decoration: TextDecoration.underline,
@@ -417,7 +404,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
         ),
         backgroundColor: ColorConsts.error,
         behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(SpacingConstsV2.l),
+        margin: const EdgeInsets.all(SpacingConsts.l),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),

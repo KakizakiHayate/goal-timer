@@ -7,7 +7,7 @@ import 'pressable_card.dart';
 
 /// 改善されたメトリクスカードウィジェット
 /// 数値指標をビジュアルに表示
-class MetricCardV2 extends StatefulWidget {
+class MetricCard extends StatefulWidget {
   final String title;
   final String value;
   final String? unit;
@@ -19,7 +19,7 @@ class MetricCardV2 extends StatefulWidget {
   final Color? changeColor;
   final VoidCallback? onTap;
 
-  const MetricCardV2({
+  const MetricCard({
     super.key,
     required this.title,
     required this.value,
@@ -34,10 +34,10 @@ class MetricCardV2 extends StatefulWidget {
   });
 
   @override
-  State<MetricCardV2> createState() => _MetricCardV2State();
+  State<MetricCard> createState() => _MetricCardState();
 }
 
-class _MetricCardV2State extends State<MetricCardV2>
+class _MetricCardState extends State<MetricCard>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;

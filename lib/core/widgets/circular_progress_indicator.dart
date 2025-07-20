@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' as material;
 import '../utils/color_consts.dart';
 import '../utils/animation_consts.dart';
 
 /// 改善されたサーキュラープログレスインジケーター
 /// 達成感を演出するデザインに強化
-class CircularProgressIndicatorV2 extends StatefulWidget {
+class CircularProgressIndicator extends StatefulWidget {
   final double progress; // 0.0 - 1.0
   final double size;
   final double strokeWidth;
@@ -13,7 +14,7 @@ class CircularProgressIndicatorV2 extends StatefulWidget {
   final Widget? centerWidget;
   final bool showAnimation;
 
-  const CircularProgressIndicatorV2({
+  const CircularProgressIndicator({
     super.key,
     required this.progress,
     this.size = 120.0,
@@ -25,10 +26,10 @@ class CircularProgressIndicatorV2 extends StatefulWidget {
   });
 
   @override
-  State<CircularProgressIndicatorV2> createState() => _CircularProgressIndicatorV2State();
+  State<CircularProgressIndicator> createState() => _CircularProgressIndicatorState();
 }
 
-class _CircularProgressIndicatorV2State extends State<CircularProgressIndicatorV2>
+class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _progressAnimation;
@@ -55,7 +56,7 @@ class _CircularProgressIndicatorV2State extends State<CircularProgressIndicatorV
   }
 
   @override
-  void didUpdateWidget(CircularProgressIndicatorV2 oldWidget) {
+  void didUpdateWidget(CircularProgressIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.progress != oldWidget.progress) {
       _progressAnimation = Tween<double>(
@@ -106,7 +107,7 @@ class _CircularProgressIndicatorV2State extends State<CircularProgressIndicatorV
               SizedBox(
                 width: widget.size,
                 height: widget.size,
-                child: CircularProgressIndicator(
+                child: material.CircularProgressIndicator(
                   value: 1.0,
                   strokeWidth: widget.strokeWidth,
                   valueColor: AlwaysStoppedAnimation<Color>(
@@ -118,7 +119,7 @@ class _CircularProgressIndicatorV2State extends State<CircularProgressIndicatorV
               SizedBox(
                 width: widget.size,
                 height: widget.size,
-                child: CircularProgressIndicator(
+                child: material.CircularProgressIndicator(
                   value: progressValue,
                   strokeWidth: widget.strokeWidth,
                   strokeCap: StrokeCap.round,

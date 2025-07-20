@@ -3,13 +3,12 @@ import '../utils/color_consts.dart';
 import '../utils/text_consts.dart';
 import '../utils/spacing_consts.dart';
 import '../utils/animation_consts.dart';
-import '../utils/shadow_consts.dart';
 import 'pressable_card.dart';
 import 'streak_indicator.dart';
 
 /// 改善された目標カードウィジェット
 /// カード型レイアウトで視覚的階層を強化
-class GoalCardV2 extends StatelessWidget {
+class GoalCard extends StatelessWidget {
   final String title;
   final String? description;
   final double progress; // 0.0 - 1.0
@@ -20,7 +19,7 @@ class GoalCardV2 extends StatelessWidget {
   final VoidCallback? onEditTap;
   final bool isActive;
 
-  const GoalCardV2({
+  const GoalCard({
     super.key,
     required this.title,
     this.description,
