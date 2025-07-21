@@ -245,7 +245,22 @@ class _HomeTabContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final homeState = ref.watch(homeViewModelProvider);
     final homeViewModel = ref.read(homeViewModelProvider.notifier);
+    
+    // ローディング中の表示
+    if (homeState.isLoading) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('データを読み込み中...'),
+          ],
+        ),
+      );
+    }
 
     return CustomScrollView(
       slivers: [
@@ -282,7 +297,7 @@ class _HomeTabContent extends ConsumerWidget {
         ),
         
         // 目標リスト
-        _buildGoalList(homeViewModel),
+        _buildGoalList(homeState, homeViewModel),
       ],
     );
   }
@@ -317,14 +332,18 @@ class _HomeTabContent extends ConsumerWidget {
     );
   }
 
-  Widget _buildGoalList(HomeViewModel viewModel) {
+  Widget _buildGoalList(HomeState homeState, HomeViewModel viewModel) {
     final goals = viewModel.filteredGoals;
 
     if (goals.isEmpty) {
-      return SliverFillRemaining(
-        child: Center(
+      return SliverToBoxAdapter(
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: SpacingConsts.l,
+            vertical: SpacingConsts.xxl,
+          ),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
                 Icons.flag_outlined,
