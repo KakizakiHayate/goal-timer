@@ -204,12 +204,22 @@ class TimerViewModel extends StateNotifier<TimerState> {
       final repository = _ref.read(hybridDailyStudyLogsRepositoryProvider);
       await repository.upsertDailyLog(dailyLog);
 
-      // 目標の累計時間も更新
-      final updateSpentTime = _ref.read(updateGoalSpentTimeProvider);
-      await updateSpentTime(state.goalId!, studyMinutes);
+      // 目標の累計時間も更新 - 一時的に無効化（HybridRepository対応が必要）
+      // TODO: updateGoalUseCaseProviderを使用して目標の累計時間を更新する必要がある
+      try {
+        final goalsRepository = _ref.read(hybridGoalsRepositoryProvider);
+        final currentGoal = await goalsRepository.getGoalById(state.goalId!);
+        if (currentGoal != null) {
+          final updatedGoal = currentGoal.copyWith(
+            spentMinutes: currentGoal.spentMinutes + studyMinutes,
+          );
+          await goalsRepository.updateGoal(updatedGoal);
+        }
+      } catch (e) {
+        AppLogger.instance.w('目標の累計時間更新に失敗しました（記録は保存済み）: $e');
+      }
 
       // 目標データのキャッシュをクリアして最新状態を反映
-      _ref.invalidate(goalsListProvider);
       _ref.invalidate(goalDetailListProvider);
 
       AppLogger.instance.i('学習時間の記録が完了しました: $studyMinutes分');

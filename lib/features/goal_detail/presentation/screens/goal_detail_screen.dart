@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/provider/providers.dart';
 import '../../../../core/utils/color_consts.dart';
 import '../../../../core/utils/text_consts.dart';
 import '../../../../core/utils/spacing_consts.dart';
@@ -16,10 +17,7 @@ import 'goal_edit_modal.dart';
 class GoalDetailScreen extends ConsumerStatefulWidget {
   final String goalId;
 
-  const GoalDetailScreen({
-    super.key,
-    required this.goalId,
-  });
+  const GoalDetailScreen({super.key, required this.goalId});
 
   @override
   ConsumerState<GoalDetailScreen> createState() => _GoalDetailScreenState();
@@ -38,17 +36,14 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen>
       duration: AnimationConsts.medium,
       vsync: this,
     );
-    
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
         curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
       ),
     );
-    
+
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.1),
       end: Offset.zero,
@@ -58,7 +53,7 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen>
         curve: const Interval(0.2, 1.0, curve: Curves.easeOutCubic),
       ),
     );
-    
+
     _animationController.forward();
   }
 
@@ -70,8 +65,18 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen>
 
   @override
   Widget build(BuildContext context) {
-    final goalAsync = ref.watch(goalDetailProvider(widget.goalId));
-    
+    // 一時的にHybridRepositoryから直接取得（個別目標プロバイダーが必要）
+    final goalAsync = ref.watch(
+      FutureProvider<GoalsModel?>((ref) async {
+        try {
+          final repository = ref.watch(hybridGoalsRepositoryProvider);
+          return await repository.getGoalById(widget.goalId);
+        } catch (e) {
+          return null;
+        }
+      }),
+    );
+
     return goalAsync.when(
       data: (goal) {
         if (goal == null) {
@@ -81,37 +86,33 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen>
               backgroundColor: ColorConsts.primary,
               foregroundColor: Colors.white,
             ),
-            body: const Center(
-              child: Text('目標が見つかりません'),
-            ),
+            body: const Center(child: Text('目標が見つかりません')),
           );
         }
-        
+
         return _buildGoalDetail(context, goal);
       },
-      loading: () => Scaffold(
-        appBar: AppBar(
-          title: const Text('目標詳細'),
-          backgroundColor: ColorConsts.primary,
-          foregroundColor: Colors.white,
-        ),
-        body: const Center(
-          child: CircularProgressIndicator(),
-        ),
-      ),
-      error: (error, stack) => Scaffold(
-        appBar: AppBar(
-          title: const Text('目標詳細'),
-          backgroundColor: ColorConsts.primary,
-          foregroundColor: Colors.white,
-        ),
-        body: Center(
-          child: Text('エラーが発生しました: $error'),
-        ),
-      ),
+      loading:
+          () => Scaffold(
+            appBar: AppBar(
+              title: const Text('目標詳細'),
+              backgroundColor: ColorConsts.primary,
+              foregroundColor: Colors.white,
+            ),
+            body: const Center(child: CircularProgressIndicator()),
+          ),
+      error:
+          (error, stack) => Scaffold(
+            appBar: AppBar(
+              title: const Text('目標詳細'),
+              backgroundColor: ColorConsts.primary,
+              foregroundColor: Colors.white,
+            ),
+            body: Center(child: Text('エラーが発生しました: $error')),
+          ),
     );
   }
-  
+
   Widget _buildGoalDetail(BuildContext context, GoalsModel goal) {
     return Scaffold(
       backgroundColor: ColorConsts.backgroundPrimary,
@@ -123,7 +124,7 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen>
             slivers: [
               // アプリバー
               _buildSliverAppBar(goal),
-              
+
               // コンテンツ
               SliverToBoxAdapter(
                 child: Padding(
@@ -132,22 +133,22 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen>
                     children: [
                       // 進捗概要カード
                       _buildProgressOverviewCard(goal),
-                      
+
                       const SizedBox(height: SpacingConsts.l),
-                      
+
                       // 統計カード
                       _buildStatsCard(goal),
-                      
+
                       const SizedBox(height: SpacingConsts.l),
-                      
+
                       // ネガティブ回避カード
                       _buildAvoidanceCard(goal),
-                      
+
                       const SizedBox(height: SpacingConsts.l),
-                      
+
                       // アクションカード
                       _buildActionCard(goal),
-                      
+
                       const SizedBox(height: SpacingConsts.l),
                     ],
                   ),
@@ -210,7 +211,7 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen>
 
   Widget _buildProgressOverviewCard(GoalsModel goal) {
     final progress = goal.getProgressRate();
-    
+
     return PressableCard(
       margin: EdgeInsets.zero,
       padding: const EdgeInsets.all(SpacingConsts.l),
@@ -226,9 +227,9 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen>
               fontWeight: FontWeight.bold,
             ),
           ),
-          
+
           const SizedBox(height: SpacingConsts.l),
-          
+
           Row(
             children: [
               // プログレスサークル
@@ -238,9 +239,9 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen>
                 strokeWidth: 10.0,
                 showAnimation: true,
               ),
-              
+
               const SizedBox(width: SpacingConsts.l),
-              
+
               // 詳細情報
               Expanded(
                 child: Column(
@@ -249,7 +250,10 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen>
                     _buildProgressDetail(
                       label: '達成率',
                       value: '${(progress * 100).toInt()}%',
-                      color: progress >= 0.8 ? ColorConsts.success : ColorConsts.primary,
+                      color:
+                          progress >= 0.8
+                              ? ColorConsts.success
+                              : ColorConsts.primary,
                     ),
                     const SizedBox(height: SpacingConsts.m),
                     _buildProgressDetail(
@@ -317,9 +321,9 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen>
               fontWeight: FontWeight.bold,
             ),
           ),
-          
+
           const SizedBox(height: SpacingConsts.l),
-          
+
           Row(
             children: [
               Expanded(
@@ -330,11 +334,7 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen>
                   color: ColorConsts.primary,
                 ),
               ),
-              Container(
-                width: 1,
-                height: 50,
-                color: ColorConsts.border,
-              ),
+              Container(width: 1, height: 50, color: ColorConsts.border),
               Expanded(
                 child: _buildStatItem(
                   icon: Icons.calendar_today_outlined,
@@ -343,11 +343,7 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen>
                   color: ColorConsts.success,
                 ),
               ),
-              Container(
-                width: 1,
-                height: 50,
-                color: ColorConsts.border,
-              ),
+              Container(width: 1, height: 50, color: ColorConsts.border),
               Expanded(
                 child: _buildStatItem(
                   icon: Icons.trending_up_outlined,
@@ -371,11 +367,7 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen>
   }) {
     return Column(
       children: [
-        Icon(
-          icon,
-          color: color,
-          size: 24,
-        ),
+        Icon(icon, color: color, size: 24),
         const SizedBox(height: SpacingConsts.s),
         Text(
           value,
@@ -386,9 +378,7 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen>
         ),
         Text(
           label,
-          style: TextConsts.caption.copyWith(
-            color: ColorConsts.textSecondary,
-          ),
+          style: TextConsts.caption.copyWith(color: ColorConsts.textSecondary),
           textAlign: TextAlign.center,
         ),
       ],
@@ -397,7 +387,7 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen>
 
   Widget _buildAvoidanceCard(GoalsModel goal) {
     if (goal.avoidMessage.isEmpty) return const SizedBox.shrink();
-    
+
     return PressableCard(
       margin: EdgeInsets.zero,
       padding: const EdgeInsets.all(SpacingConsts.l),
@@ -431,9 +421,9 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen>
               ),
             ],
           ),
-          
+
           const SizedBox(height: SpacingConsts.m),
-          
+
           Text(
             goal.avoidMessage,
             style: TextConsts.body.copyWith(
@@ -464,9 +454,9 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen>
               fontWeight: FontWeight.bold,
             ),
           ),
-          
+
           const SizedBox(height: SpacingConsts.l),
-          
+
           // タイマー開始ボタン
           SizedBox(
             width: double.infinity,
@@ -476,9 +466,7 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen>
               icon: const Icon(Icons.timer_outlined),
               label: Text(
                 'タイマーを開始',
-                style: TextConsts.body.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextConsts.body.copyWith(fontWeight: FontWeight.w600),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: ColorConsts.primary,
@@ -490,9 +478,9 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen>
               ),
             ),
           ),
-          
+
           const SizedBox(height: SpacingConsts.m),
-          
+
           // その他のアクション
           Row(
             children: [
@@ -535,9 +523,7 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen>
   void _startTimer(GoalsModel goal) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => TimerScreen(goalId: goal.id),
-      ),
+      MaterialPageRoute(builder: (context) => TimerScreen(goalId: goal.id)),
     );
   }
 
@@ -558,9 +544,7 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen>
         content: const Text('共有機能は実装中です'),
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.all(SpacingConsts.l),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }

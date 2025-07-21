@@ -1,63 +1,51 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:goal_timer/core/models/goals/goals_model.dart';
-import 'package:goal_timer/core/provider/supabase/goals/goals_provider.dart';
+import 'package:goal_timer/core/provider/providers.dart';
 import 'package:goal_timer/core/utils/app_logger.dart';
 
-// 目標詳細リストプロバイダー - Supabaseのデータを使用
+// 目標詳細リストプロバイダー - HybridRepositoryのデータを使用
 final goalDetailListProvider = FutureProvider<List<GoalsModel>>((ref) async {
-  final goalsAsync = ref.watch(goalsListProvider);
-  return goalsAsync.when(
-    data: (goals) => goals,
-    error: (_, __) => [],
-    loading: () => [],
-  );
+  try {
+    // HybridGoalsRepositoryを使用してローカル優先でデータを取得
+    final fetchGoalsUseCase = ref.watch(fetchGoalsUseCaseProvider);
+    final goals = await fetchGoalsUseCase.call();
+    return goals;
+  } catch (e) {
+    AppLogger.instance.e('目標リスト取得に失敗しました', e);
+    return [];
+  }
 });
 
-// 特定目標詳細プロバイダー - Supabaseのデータを使用
+// 特定目標詳細プロバイダー - 一時的にコメントアウト（HybridRepository版のプロバイダーが必要）
+/*
 final goalDetailProvider = FutureProvider.family<GoalsModel?, String>((
   ref,
   id,
 ) async {
-  final goalAsync = ref.watch(goalByIdProvider(id));
-  return goalAsync.when(
-    data: (goal) => goal,
-    error: (_, __) => null,
-    loading: () => null,
-  );
+  // TODO: HybridRepository版の個別目標取得プロバイダーを実装する必要がある
+  return null;
 });
+*/
 
-// 目標時間更新関数プロバイダー
+// 目標時間更新関数プロバイダー - 一時的にコメントアウト（HybridRepository対応が必要）
+/*
 final updateGoalSpentTimeProvider =
     Provider<Future<void> Function(String, int)>((ref) {
-      final goalsNotifier = ref.watch(goalsNotifierProvider.notifier);
-
+      // TODO: HybridRepository版のupdateGoalUseCaseProviderを使用する必要がある
       return (String id, int additionalMinutes) async {
-        try {
-          // 現在の目標を取得
-          final goalAsync = await ref.read(goalByIdProvider(id).future);
-          if (goalAsync == null) {
-            throw Exception('目標が見つかりませんでした');
-          }
-
-          // 学習時間を追加して更新
-          final newSpentMinutes = goalAsync.spentMinutes + additionalMinutes;
-          final updatedGoal = goalAsync.copyWith(spentMinutes: newSpentMinutes);
-
-          await goalsNotifier.updateGoal(updatedGoal);
-        } catch (e) {
-          AppLogger.instance.e('目標の学習時間更新に失敗しました: $e');
-          rethrow;
-        }
+        // 実装は後で追加
       };
     });
+*/
 
-// 目標詳細ビューモデルプロバイダー
+// 目標詳細ビューモデルプロバイダー - 一時的にコメントアウト
+/*
 final goalDetailViewModelProvider =
     StateNotifierProvider<GoalDetailViewModel, void>((ref) {
       return GoalDetailViewModel(ref);
     });
 
-// 目標詳細を操作するビューモデル
+// 目標詳細を操作するビューモデル - 一時的にコメントアウト
 class GoalDetailViewModel extends StateNotifier<void> {
   final Ref _ref;
 
@@ -66,18 +54,12 @@ class GoalDetailViewModel extends StateNotifier<void> {
   // 目標の学習時間を追加する
   Future<void> addStudyTime(String goalId, int minutes) async {
     try {
-      // 学習時間の更新
-      final updateSpentTime = _ref.read(updateGoalSpentTimeProvider);
-      await updateSpentTime(goalId, minutes);
-
-      // 更新後に目標詳細を再取得するためにキャッシュを無効化
-      _ref.invalidate(goalByIdProvider(goalId));
-      _ref.invalidate(goalsListProvider);
-      _ref.invalidate(goalDetailProvider(goalId));
-      _ref.invalidate(goalDetailListProvider);
+      // TODO: HybridRepository対応の実装が必要
+      AppLogger.instance.i('学習時間追加機能は一時的に無効化されています');
     } catch (e) {
       // エラー処理
       AppLogger.instance.e('目標の学習時間更新に失敗しました: $e');
     }
   }
 }
+*/
