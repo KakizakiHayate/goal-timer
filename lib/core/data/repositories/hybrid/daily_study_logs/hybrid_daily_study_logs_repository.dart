@@ -176,8 +176,7 @@ class HybridDailyStudyLogsRepository implements DailyStudyLogsRepository {
           // 同期済みとしてマーク
           await _localDatasource.markAsSynced(remoteLog.id);
 
-          // 同期成功を通知
-          _syncNotifier.setSynced();
+          // setSynced() 削除: 個別操作では同期状態を通知しない
 
           return remoteLog;
         } catch (e) {
@@ -214,8 +213,7 @@ class HybridDailyStudyLogsRepository implements DailyStudyLogsRepository {
           // リモートから削除
           await _remoteDatasource.deleteDailyLog(id);
 
-          // 同期成功を通知
-          _syncNotifier.setSynced();
+          // setSynced() 削除: 個別操作では同期状態を通知しない
         } catch (e) {
           // リモート削除に失敗しても、ローカル削除は成功しているのでエラーにはしない
           AppLogger.instance.e('リモートでの学習記録削除に失敗しました', e);
@@ -297,8 +295,8 @@ class HybridDailyStudyLogsRepository implements DailyStudyLogsRepository {
         }
       }
 
-      // 同期完了を通知
-      _syncNotifier.setSynced();
+      // setSynced() 削除: SyncCheckerが一元管理するため
+      AppLogger.instance.i('学習ログの差分同期が完了しました');
     } catch (e) {
       AppLogger.instance.e('同期処理に失敗しました', e);
       _syncNotifier.setError(e.toString());

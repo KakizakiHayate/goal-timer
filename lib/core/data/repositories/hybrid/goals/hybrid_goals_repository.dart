@@ -72,7 +72,7 @@ class HybridGoalsRepository implements GoalsRepository {
           _performDifferentialSync();
         } else {
           AppLogger.instance.i('差分同期は不要です（データに変更なし）');
-          _syncNotifier.setSynced();
+          // setSynced() 削除: 個別操作では同期状態を通知しない
         }
       } else {
         // オフラインモードを通知
@@ -139,8 +139,7 @@ class HybridGoalsRepository implements GoalsRepository {
           // 同期済みとしてマーク
           await _localDatasource.markAsSynced(remoteGoal.id);
 
-          // 同期成功を通知
-          _syncNotifier.setSynced();
+          // setSynced() 削除: 個別操作では同期状態を通知しない
 
           return remoteGoal;
         } catch (e) {
@@ -178,8 +177,7 @@ class HybridGoalsRepository implements GoalsRepository {
           // 同期済みとしてマーク
           await _localDatasource.markAsSynced(updatedRemoteGoal.id);
 
-          // 同期成功を通知
-          _syncNotifier.setSynced();
+          // setSynced() 削除: 個別操作では同期状態を通知しない
 
           return updatedRemoteGoal;
         } catch (e) {
@@ -212,8 +210,7 @@ class HybridGoalsRepository implements GoalsRepository {
           // リモートから削除
           await _remoteDatasource.deleteGoal(id);
 
-          // 同期成功を通知
-          _syncNotifier.setSynced();
+          // setSynced() 削除: 個別操作では同期状態を通知しない
         } catch (e) {
           // リモート削除に失敗しても、ローカル削除は成功しているのでエラーにはしない
           AppLogger.instance.e('リモートでの目標削除に失敗しました', e);
@@ -256,9 +253,8 @@ class HybridGoalsRepository implements GoalsRepository {
         );
       }
 
-      _syncNotifier.setSynced();
-
-      AppLogger.instance.i('差分同期が完了しました');
+      // setSynced() 削除: SyncCheckerが一元管理するため
+      AppLogger.instance.i('目標の差分同期が完了しました');
     } catch (e) {
       AppLogger.instance.e('差分同期に失敗しました', e);
       _syncNotifier.setError(e.toString());
@@ -446,7 +442,7 @@ class HybridGoalsRepository implements GoalsRepository {
         );
       }
 
-      _syncNotifier.setSynced();
+      // setSynced() 削除: 強制同期は手動実行時のみ通知（SyncCheckerで管理）
 
       AppLogger.instance.i('強制全件同期が完了しました');
     } catch (e) {

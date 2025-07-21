@@ -122,6 +122,7 @@ final authViewModelProvider = StateNotifierProvider<AuthViewModel, AuthState>((
   final signOutUseCase = ref.watch(signOutUseCaseProvider);
   final getCurrentUserUseCase = ref.watch(getCurrentUserUseCaseProvider);
   final createUserProfileUseCase = ref.watch(createUserProfileUseCaseProvider);
+  final syncChecker = ref.watch(syncCheckerProvider);
 
   return AuthViewModel(
     signInWithEmailUseCase: signInWithEmailUseCase,
@@ -131,6 +132,7 @@ final authViewModelProvider = StateNotifierProvider<AuthViewModel, AuthState>((
     signOutUseCase: signOutUseCase,
     getCurrentUserUseCase: getCurrentUserUseCase,
     createUserProfileUseCase: createUserProfileUseCase,
+    syncChecker: syncChecker,
   );
 });
 

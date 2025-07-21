@@ -4,28 +4,123 @@ import '../../../../core/utils/color_consts.dart';
 import '../../../../core/utils/text_consts.dart';
 import '../../../../core/utils/spacing_consts.dart';
 import '../../../../core/widgets/custom_text_field.dart';
-import '../../../../core/widgets/modal_bottom_sheet.dart';
 import '../../../../features/auth/presentation/widgets/auth_button.dart';
 import '../../../../core/models/goals/goals_model.dart';
+import '../../../../core/provider/providers.dart';
+import '../../../../features/auth/provider/auth_provider.dart';
 
 /// 改善された目標作成モーダル
-class GoalCreateModal extends ConsumerStatefulWidget {
+class GoalCreateModal extends StatelessWidget {
   const GoalCreateModal({super.key});
 
   @override
-  ConsumerState<GoalCreateModal> createState() => _GoalCreateModalState();
+  Widget build(BuildContext context) {
+    // このクラスは直接使用されず、show()メソッドのみが使用される
+    return const SizedBox.shrink();
+  }
 
   static Future<GoalsModel?> show(BuildContext context) {
-    return ModalBottomSheet.show<GoalsModel>(
+    return showModalBottomSheet<GoalsModel>(
       context: context,
-      title: '新しい目標を作成',
-      height: MediaQuery.of(context).size.height * 0.85,
-      child: const GoalCreateModal(),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      enableDrag: true,
+      isDismissible: true,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.85,
+        decoration: const BoxDecoration(
+          color: ColorConsts.cardBackground,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
+          ),
+        ),
+        child: Column(
+          children: [
+            // ハンドル
+            Container(
+              margin: const EdgeInsets.only(
+                top: SpacingConsts.m,
+                bottom: SpacingConsts.s,
+              ),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: ColorConsts.textTertiary,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            
+            // ヘッダー
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: SpacingConsts.l,
+                vertical: SpacingConsts.m,
+              ),
+              decoration: const BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: ColorConsts.border,
+                    width: 1,
+                  ),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      '新しい目標を作成',
+                      style: TextConsts.h3.copyWith(
+                        color: ColorConsts.textPrimary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: const BoxDecoration(
+                        color: ColorConsts.backgroundSecondary,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.close,
+                        size: 20,
+                        color: ColorConsts.textSecondary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+            // コンテンツ（スクロール対応）
+            const Expanded(
+              child: _GoalCreateModalContent(),
+            ),
+            
+            // Safe Area padding
+            SafeArea(
+              top: false,
+              child: SizedBox(height: MediaQuery.of(context).padding.bottom),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
 
-class _GoalCreateModalState extends ConsumerState<GoalCreateModal> {
+// スクロールコントローラーを受け取る内部ウィジェット
+class _GoalCreateModalContent extends ConsumerStatefulWidget {
+  const _GoalCreateModalContent();
+
+  @override
+  ConsumerState<_GoalCreateModalContent> createState() => _GoalCreateModalContentState();
+}
+
+class _GoalCreateModalContentState extends ConsumerState<_GoalCreateModalContent> {
   final _formKey = GlobalKey<FormState>();
   
   String _title = '';
@@ -39,25 +134,30 @@ class _GoalCreateModalState extends ConsumerState<GoalCreateModal> {
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        children: [
-          // 説明テキスト
-          _buildDescription(),
-          
-          const SizedBox(height: SpacingConsts.l),
-          
-          // フォーム
-          _buildForm(),
-          
-          const SizedBox(height: SpacingConsts.l),
-          
-          // 作成ボタン
-          _buildCreateButton(),
-          
-          const SizedBox(height: SpacingConsts.l),
-        ],
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(
+        horizontal: SpacingConsts.l,
+      ),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          children: [
+            // 説明テキスト
+            _buildDescription(),
+            
+            const SizedBox(height: SpacingConsts.l),
+            
+            // フォーム
+            _buildForm(),
+            
+            const SizedBox(height: SpacingConsts.l),
+            
+            // 作成ボタン
+            _buildCreateButton(),
+            
+            const SizedBox(height: SpacingConsts.l),
+          ],
+        ),
       ),
     );
   }
@@ -68,15 +168,15 @@ class _GoalCreateModalState extends ConsumerState<GoalCreateModal> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            ColorConsts.primary.withOpacity(0.1),
-            ColorConsts.primaryLight.withOpacity(0.05),
+            ColorConsts.primary.withValues(alpha: 0.1),
+            ColorConsts.primaryLight.withValues(alpha: 0.05),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: ColorConsts.primary.withOpacity(0.2),
+          color: ColorConsts.primary.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -212,7 +312,7 @@ class _GoalCreateModalState extends ConsumerState<GoalCreateModal> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.schedule_outlined,
                     color: ColorConsts.primary,
                     size: 24,
@@ -302,20 +402,25 @@ class _GoalCreateModalState extends ConsumerState<GoalCreateModal> {
     });
 
     try {
-      // TODO: 実際の目標作成処理を実装
-      await Future.delayed(const Duration(seconds: 1)); // 仮の処理
+      // CreateGoalUseCaseを使用
+      final createGoalUseCase = ref.read(createGoalUseCaseProvider);
       
-      final newGoal = GoalsModel(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        userId: 'current_user_id', // TODO: 実際のユーザーIDに置き換え
+      // 現在のユーザーIDを取得
+      final authViewModel = ref.read(authViewModelProvider.notifier);
+      final currentUserId = authViewModel.currentUser?.id;
+      
+      if (currentUserId == null) {
+        throw Exception('ユーザーが認証されていません');
+      }
+
+      // 目標を作成
+      final newGoal = await createGoalUseCase(
+        userId: currentUserId,
         title: _title,
         description: _description,
-        deadline: DateTime.now().add(const Duration(days: 30)), // 30日後に設定
-        isCompleted: false,
         avoidMessage: _avoidMessage,
-        totalTargetHours: (_targetMinutes / 60).round(),
-        spentMinutes: 0,
-        updatedAt: DateTime.now(),
+        targetMinutes: _targetMinutes,
+        deadline: DateTime.now().add(const Duration(days: 30)),
       );
 
       if (mounted) {
@@ -342,7 +447,7 @@ class _GoalCreateModalState extends ConsumerState<GoalCreateModal> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              '目標の作成に失敗しました',
+              '目標の作成に失敗しました: ${e.toString()}',
               style: const TextStyle(fontWeight: FontWeight.w500),
             ),
             backgroundColor: ColorConsts.error,

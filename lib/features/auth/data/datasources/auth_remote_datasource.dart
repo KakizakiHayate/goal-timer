@@ -261,14 +261,28 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     try {
       // Supabaseからサインアウト
       await _supabase.auth.signOut();
+      AppLogger.instance.d('Supabaseサインアウト完了');
       
-      // Googleセッションもクリア（追加/強化）
-      await _googleSignIn.signOut();
-      await _googleSignIn.disconnect(); // 完全切断
+      // Googleセッションもクリア
+      try {
+        await _googleSignIn.signOut();
+        AppLogger.instance.d('Googleサインアウト完了');
+        
+        // disconnect()は失敗する可能性があるため個別にハンドリング
+        try {
+          await _googleSignIn.disconnect();
+          AppLogger.instance.d('Google完全切断完了');
+        } catch (disconnectError) {
+          // disconnect失敗は既知の問題のため、ログのみ出力
+          AppLogger.instance.w('Google disconnect失敗（既知の問題）: $disconnectError');
+        }
+      } catch (googleError) {
+        AppLogger.instance.w('Googleサインアウト失敗: $googleError');
+      }
       
-      AppLogger.instance.i('サインアウト完了（Google含む）');
+      AppLogger.instance.i('サインアウト完了');
     } catch (e) {
-      AppLogger.instance.e('サインアウトエラー', e);
+      AppLogger.instance.e('サインアウトエラー: ${e.toString()}');
       rethrow;
     }
   }

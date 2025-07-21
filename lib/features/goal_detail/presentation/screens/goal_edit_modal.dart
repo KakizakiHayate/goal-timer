@@ -7,6 +7,7 @@ import '../../../../core/widgets/custom_text_field.dart';
 import '../../../../core/widgets/modal_bottom_sheet.dart';
 import '../../../../features/auth/presentation/widgets/auth_button.dart';
 import '../../../../core/models/goals/goals_model.dart';
+import '../../../../core/provider/providers.dart';
 
 /// 改善された目標編集モーダル
 class GoalEditModal extends ConsumerStatefulWidget {
@@ -354,15 +355,16 @@ class _GoalEditModalState extends ConsumerState<GoalEditModal> {
     });
 
     try {
-      // TODO: 実際の目標更新処理を実装
-      await Future.delayed(const Duration(seconds: 1)); // 仮の処理
+      // UpdateGoalUseCaseを使用
+      final updateGoalUseCase = ref.read(updateGoalUseCaseProvider);
       
-      final updatedGoal = widget.goal.copyWith(
+      // 目標を更新
+      final updatedGoal = await updateGoalUseCase(
+        originalGoal: widget.goal,
         title: _title,
         description: _description,
         avoidMessage: _avoidMessage,
         totalTargetHours: _totalTargetHours,
-        updatedAt: DateTime.now(),
       );
 
       if (mounted) {
@@ -389,7 +391,7 @@ class _GoalEditModalState extends ConsumerState<GoalEditModal> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              '目標の更新に失敗しました',
+              '目標の更新に失敗しました: ${e.toString()}',
               style: const TextStyle(fontWeight: FontWeight.w500),
             ),
             backgroundColor: ColorConsts.error,
@@ -447,8 +449,14 @@ class _GoalEditModalState extends ConsumerState<GoalEditModal> {
     });
 
     try {
-      // TODO: 実際の目標削除処理を実装
-      await Future.delayed(const Duration(seconds: 1)); // 仮の処理
+      // DeleteGoalUseCaseを使用
+      final deleteGoalUseCase = ref.read(deleteGoalUseCaseProvider);
+      
+      // 目標を削除
+      await deleteGoalUseCase(
+        goalId: widget.goal.id,
+        goalTitle: widget.goal.title,
+      );
 
       if (mounted) {
         Navigator.of(context).pop('deleted');
@@ -474,7 +482,7 @@ class _GoalEditModalState extends ConsumerState<GoalEditModal> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              '目標の削除に失敗しました',
+              '目標の削除に失敗しました: ${e.toString()}',
               style: const TextStyle(fontWeight: FontWeight.w500),
             ),
             backgroundColor: ColorConsts.error,

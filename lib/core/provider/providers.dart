@@ -21,6 +21,12 @@ import 'package:goal_timer/core/data/repositories/hybrid/daily_study_logs/hybrid
 // UseCaseのインポート
 import 'package:goal_timer/core/usecases/goals/fetch_goals_usecase.dart';
 import 'package:goal_timer/core/usecases/goals/sync_goals_usecase.dart';
+import 'package:goal_timer/core/usecases/goals/create_goal_usecase.dart';
+import 'package:goal_timer/core/usecases/goals/update_goal_usecase.dart';
+import 'package:goal_timer/core/usecases/goals/delete_goal_usecase.dart';
+
+// SyncCheckerのインポート
+import 'package:goal_timer/core/services/sync_checker.dart';
 
 // 認証関連のインポートを追加
 import 'package:goal_timer/features/auth/domain/entities/app_user.dart';
@@ -178,6 +184,41 @@ final fetchGoalsUseCaseProvider = Provider<FetchGoalsUseCase>((ref) {
 final syncGoalsUseCaseProvider = Provider<SyncGoalsUseCase>((ref) {
   final repository = ref.watch(hybridGoalsRepositoryProvider);
   return SyncGoalsUseCase(repository);
+});
+
+/// 目標作成UseCaseプロバイダー
+final createGoalUseCaseProvider = Provider<CreateGoalUseCase>((ref) {
+  final repository = ref.watch(hybridGoalsRepositoryProvider);
+  return CreateGoalUseCase(repository);
+});
+
+/// 目標更新UseCaseプロバイダー
+final updateGoalUseCaseProvider = Provider<UpdateGoalUseCase>((ref) {
+  final repository = ref.watch(hybridGoalsRepositoryProvider);
+  return UpdateGoalUseCase(repository);
+});
+
+/// 目標削除UseCaseプロバイダー
+final deleteGoalUseCaseProvider = Provider<DeleteGoalUseCase>((ref) {
+  final repository = ref.watch(hybridGoalsRepositoryProvider);
+  return DeleteGoalUseCase(repository);
+});
+
+// ===== SyncCheckerプロバイダー =====
+
+/// 同期チェッカープロバイダー
+final syncCheckerProvider = Provider<SyncChecker>((ref) {
+  final goalsRepository = ref.watch(hybridGoalsRepositoryProvider);
+  final usersRepository = ref.watch(hybridUsersRepositoryProvider);
+  final dailyStudyLogsRepository = ref.watch(hybridDailyStudyLogsRepositoryProvider);
+  final syncNotifier = ref.watch(syncStateProvider.notifier);
+
+  return SyncChecker(
+    goalsRepository: goalsRepository,
+    usersRepository: usersRepository,
+    dailyStudyLogsRepository: dailyStudyLogsRepository,
+    syncNotifier: syncNotifier,
+  );
 });
 
 // ===== 認証統合プロバイダー =====

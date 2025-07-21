@@ -211,26 +211,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 
   void _showAddGoalModal(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return FractionallySizedBox(
-          heightFactor: 0.95,
-          child: Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(20),
-                topRight: Radius.circular(20),
-              ),
-            ),
-            child: const GoalCreateModal(),
-          ),
-        );
-      },
-    ).then((_) {
+    GoalCreateModal.show(context).then((_) {
       if (context.mounted) {
         // 目標リストを再読み込み
         ref.invalidate(goalDetailListProvider);
@@ -255,12 +236,12 @@ class _HomeTabContent extends ConsumerWidget {
         // 今日の進捗
         SliverToBoxAdapter(
           child: TodayProgressWidget(
-            todayProgress: 0.7, // TODO: 実際の進捗データに置き換え
-            totalMinutes: 180,
-            targetMinutes: 240,
-            currentStreak: 5,
-            totalGoals: 3,
-            completedGoals: 2,
+            todayProgress: homeViewModel.statistics.todayProgress,
+            totalMinutes: homeViewModel.statistics.totalMinutes,
+            targetMinutes: homeViewModel.statistics.targetMinutes,
+            currentStreak: homeViewModel.statistics.currentStreak,
+            totalGoals: homeViewModel.statistics.totalGoals,
+            completedGoals: homeViewModel.statistics.completedGoals,
           ),
         ),
         
@@ -397,11 +378,13 @@ class _HomeTabContent extends ConsumerWidget {
       delegate: SliverChildBuilderDelegate(
         (context, index) {
           final goal = goals[index];
+          final streakDays = viewModel.getGoalStreakFromCache(goal.id) ?? 0;
+          
           return GoalCard(
             title: goal.title,
             description: goal.description.isNotEmpty ? goal.description : null,
             progress: goal.getProgressRate(),
-            streakDays: 3, // TODO: 実際のストリークデータに置き換え
+            streakDays: streakDays,
             avoidMessage: goal.avoidMessage.isNotEmpty ? goal.avoidMessage : null,
             onTap: () {
               // TODO: 目標詳細画面に遷移
@@ -642,26 +625,7 @@ class _TimerPage extends ConsumerWidget {
   }
 
   void _showAddGoalModal(BuildContext context, WidgetRef ref) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return FractionallySizedBox(
-          heightFactor: 0.95,
-          child: Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(20),
-                topRight: Radius.circular(20),
-              ),
-            ),
-            child: const GoalCreateModal(),
-          ),
-        );
-      },
-    ).then((_) {
+    GoalCreateModal.show(context).then((_) {
       if (context.mounted) {
         // 目標リストを再読み込み
         ref.invalidate(goalDetailListProvider);

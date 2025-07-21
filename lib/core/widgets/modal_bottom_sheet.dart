@@ -12,6 +12,8 @@ class ModalBottomSheet extends StatefulWidget {
   final List<Widget>? actions;
   final bool isScrollable;
   final double? height;
+  final bool enableDrag;
+  final bool isDismissible;
 
   const ModalBottomSheet({
     super.key,
@@ -20,6 +22,8 @@ class ModalBottomSheet extends StatefulWidget {
     this.actions,
     this.isScrollable = true,
     this.height,
+    this.enableDrag = true,
+    this.isDismissible = true,
   });
 
   @override
@@ -32,16 +36,22 @@ class ModalBottomSheet extends StatefulWidget {
     List<Widget>? actions,
     bool isScrollable = true,
     double? height,
+    bool enableDrag = true,
+    bool isDismissible = true,
   }) {
     return showModalBottomSheet<T>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
+      enableDrag: enableDrag,
+      isDismissible: isDismissible,
       builder: (context) => ModalBottomSheet(
         title: title,
         actions: actions,
         isScrollable: isScrollable,
         height: height,
+        enableDrag: enableDrag,
+        isDismissible: isDismissible,
         child: child,
       ),
     );
@@ -84,54 +94,65 @@ class _ModalBottomSheetState extends State<ModalBottomSheet>
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     final maxHeight = mediaQuery.size.height * 0.9;
-    final minHeight = mediaQuery.size.height * 0.5;
+    final minHeight = mediaQuery.size.height * 0.3;
     
+    // DraggableScrollableSheetを使用してスワイプ機能を実装
     return AnimatedBuilder(
       animation: _slideAnimation,
       builder: (context, child) {
         return Transform.translate(
           offset: Offset(0, _slideAnimation.value * mediaQuery.size.height * 0.1),
-          child: Container(
-            height: widget.height ?? maxHeight,
-            decoration: const BoxDecoration(
-              color: ColorConsts.cardBackground,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(24),
-                topRight: Radius.circular(24),
-              ),
-            ),
-            child: Column(
-              children: [
-                // ハンドル
-                _buildHandle(),
-                
-                // ヘッダー
-                _buildHeader(),
-                
-                // コンテンツ
-                Expanded(
-                  child: widget.isScrollable
-                      ? SingleChildScrollView(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: SpacingConsts.l,
-                          ),
-                          child: widget.child,
-                        )
-                      : Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: SpacingConsts.l,
-                          ),
-                          child: widget.child,
-                        ),
+          child: DraggableScrollableSheet(
+            initialChildSize: widget.height != null 
+                ? (widget.height! / mediaQuery.size.height).clamp(0.3, 0.9)
+                : 0.85,
+            minChildSize: (minHeight / mediaQuery.size.height).clamp(0.3, 0.9),
+            maxChildSize: (maxHeight / mediaQuery.size.height).clamp(0.3, 0.9),
+            expand: false,
+            builder: (context, scrollController) {
+              return Container(
+                decoration: const BoxDecoration(
+                  color: ColorConsts.cardBackground,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(24),
+                    topRight: Radius.circular(24),
+                  ),
                 ),
-                
-                // アクション
-                if (widget.actions != null) _buildActions(),
-                
-                // Safe Area padding
-                SizedBox(height: mediaQuery.padding.bottom),
-              ],
-            ),
+                child: Column(
+                  children: [
+                    // ハンドル（ドラッグ用）
+                    _buildHandle(),
+                    
+                    // ヘッダー
+                    _buildHeader(),
+                    
+                    // コンテンツ
+                    Expanded(
+                      child: widget.isScrollable
+                          ? SingleChildScrollView(
+                              controller: scrollController,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: SpacingConsts.l,
+                              ),
+                              child: widget.child,
+                            )
+                          : Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: SpacingConsts.l,
+                              ),
+                              child: widget.child,
+                            ),
+                    ),
+                    
+                    // アクション
+                    if (widget.actions != null) _buildActions(),
+                    
+                    // Safe Area padding
+                    SizedBox(height: mediaQuery.padding.bottom),
+                  ],
+                ),
+              );
+            },
           ),
         );
       },
@@ -139,16 +160,19 @@ class _ModalBottomSheetState extends State<ModalBottomSheet>
   }
 
   Widget _buildHandle() {
-    return Container(
-      margin: const EdgeInsets.only(
-        top: SpacingConsts.m,
-        bottom: SpacingConsts.s,
-      ),
-      width: 40,
-      height: 4,
-      decoration: BoxDecoration(
-        color: ColorConsts.textTertiary,
-        borderRadius: BorderRadius.circular(2),
+    return GestureDetector(
+      onTap: () {}, // ハンドルタップの無効化
+      child: Container(
+        margin: const EdgeInsets.only(
+          top: SpacingConsts.m,
+          bottom: SpacingConsts.s,
+        ),
+        width: 40,
+        height: 4,
+        decoration: BoxDecoration(
+          color: ColorConsts.textTertiary,
+          borderRadius: BorderRadius.circular(2),
+        ),
       ),
     );
   }
@@ -182,7 +206,7 @@ class _ModalBottomSheetState extends State<ModalBottomSheet>
             onTap: () => Navigator.of(context).pop(),
             child: Container(
               padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: ColorConsts.backgroundSecondary,
                 shape: BoxShape.circle,
               ),

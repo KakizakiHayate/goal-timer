@@ -134,8 +134,7 @@ class HybridUsersRepository implements UsersRepository {
           // 同期済みとしてマーク
           await _localDatasource.markAsSynced(remoteUser.id);
 
-          // 同期成功を通知
-          _syncNotifier.setSynced();
+          // setSynced() 削除: 個別操作では同期状態を通知しない
 
           return remoteUser;
         } catch (e) {
@@ -172,8 +171,7 @@ class HybridUsersRepository implements UsersRepository {
           // 同期済みとしてマーク
           await _localDatasource.markAsSynced(remoteUser.id);
 
-          // 同期成功を通知
-          _syncNotifier.setSynced();
+          // setSynced() 削除: 個別操作では同期状態を通知しない
 
           return remoteUser;
         } catch (e) {
@@ -210,8 +208,7 @@ class HybridUsersRepository implements UsersRepository {
           // 同期済みとしてマーク
           await _localDatasource.markAsSynced(remoteUser.id);
 
-          // 同期成功を通知
-          _syncNotifier.setSynced();
+          // setSynced() 削除: 個別操作では同期状態を通知しない
 
           return remoteUser;
         } catch (e) {
@@ -298,8 +295,8 @@ class HybridUsersRepository implements UsersRepository {
         }
       }
 
-      // 同期完了を通知
-      _syncNotifier.setSynced();
+      // setSynced() 削除: SyncCheckerが一元管理するため
+      AppLogger.instance.i('ユーザーの差分同期が完了しました');
     } catch (e) {
       AppLogger.instance.e('同期処理に失敗しました', e);
       _syncNotifier.setError(e.toString());
