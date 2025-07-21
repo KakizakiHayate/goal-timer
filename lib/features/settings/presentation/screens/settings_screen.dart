@@ -7,6 +7,7 @@ import '../../../../core/utils/animation_consts.dart';
 import '../../../../core/widgets/setting_item.dart';
 import '../../../../core/widgets/pressable_card.dart';
 import '../../../auth/provider/auth_provider.dart';
+import '../../../shared/widgets/sync_status_indicator.dart';
 
 /// 改善された設定画面
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -20,7 +21,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
-  
+
   bool _notificationsEnabled = true;
   bool _soundEnabled = true;
   bool _vibrationEnabled = true;
@@ -33,17 +34,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
       duration: AnimationConsts.medium,
       vsync: this,
     );
-    
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeOut,
-      ),
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
     );
-    
+
     _animationController.forward();
   }
 
@@ -81,32 +76,32 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
             children: [
               // プロフィールセクション
               _buildProfileSection(),
-              
+
               const SizedBox(height: SpacingConsts.l),
-              
+
               // 通知設定
               _buildNotificationSection(),
-              
+
               const SizedBox(height: SpacingConsts.l),
-              
+
               // アプリ設定
               _buildAppSection(),
-              
+
               const SizedBox(height: SpacingConsts.l),
-              
+
               // データとプライバシー
               _buildDataSection(),
-              
+
               const SizedBox(height: SpacingConsts.l),
-              
+
               // サポート
               _buildSupportSection(),
-              
+
               const SizedBox(height: SpacingConsts.l),
-              
+
               // アカウント
               _buildAccountSection(),
-              
+
               const SizedBox(height: SpacingConsts.l),
             ],
           ),
@@ -137,15 +132,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
               ),
               shape: BoxShape.circle,
             ),
-            child: const Icon(
-              Icons.person,
-              color: Colors.white,
-              size: 32,
-            ),
+            child: const Icon(Icons.person, color: Colors.white, size: 32),
           ),
-          
+
           const SizedBox(width: SpacingConsts.l),
-          
+
           // ユーザー情報
           Expanded(
             child: Column(
@@ -186,7 +177,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
               ],
             ),
           ),
-          
+
           const Icon(
             Icons.arrow_forward_ios,
             size: 16,
@@ -224,13 +215,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
           enabled: _notificationsEnabled,
           trailing: Switch(
             value: _soundEnabled && _notificationsEnabled,
-            onChanged: _notificationsEnabled
-                ? (value) {
-                    setState(() {
-                      _soundEnabled = value;
-                    });
-                  }
-                : null,
+            onChanged:
+                _notificationsEnabled
+                    ? (value) {
+                      setState(() {
+                        _soundEnabled = value;
+                      });
+                    }
+                    : null,
             activeColor: ColorConsts.primary,
           ),
         ),
@@ -242,13 +234,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
           enabled: _notificationsEnabled,
           trailing: Switch(
             value: _vibrationEnabled && _notificationsEnabled,
-            onChanged: _notificationsEnabled
-                ? (value) {
-                    setState(() {
-                      _vibrationEnabled = value;
-                    });
-                  }
-                : null,
+            onChanged:
+                _notificationsEnabled
+                    ? (value) {
+                      setState(() {
+                        _vibrationEnabled = value;
+                      });
+                    }
+                    : null,
             activeColor: ColorConsts.primary,
           ),
         ),
@@ -289,6 +282,55 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     return _buildSection(
       title: 'データとプライバシー',
       children: [
+        // 手動同期ボタン
+        Container(
+          margin: const EdgeInsets.only(bottom: SpacingConsts.s),
+          child: PressableCard(
+            margin: EdgeInsets.zero,
+            padding: const EdgeInsets.all(SpacingConsts.l),
+            backgroundColor: ColorConsts.cardBackground,
+            borderRadius: 20.0,
+            elevation: 2.0,
+            onTap: null, // SyncStatusIndicatorが独自のタップ処理を持つ
+            child: Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: ColorConsts.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(Icons.sync, color: ColorConsts.primary, size: 24),
+                ),
+                const SizedBox(width: SpacingConsts.l),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '手動同期',
+                        style: TextConsts.body.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: ColorConsts.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: SpacingConsts.xs),
+                      Text(
+                        'データをクラウドと同期する',
+                        style: TextConsts.caption.copyWith(
+                          color: ColorConsts.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SyncStatusIndicator(),
+              ],
+            ),
+          ),
+        ),
+
         SettingItem(
           title: 'データのエクスポート',
           subtitle: '学習データをエクスポート',
@@ -404,47 +446,48 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
   void _showThemeSelector() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('テーマ選択'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            RadioListTile<String>(
-              title: const Text('システム設定に従う'),
-              value: 'system',
-              groupValue: _selectedTheme,
-              onChanged: (value) {
-                setState(() {
-                  _selectedTheme = value!;
-                });
-                Navigator.pop(context);
-              },
+      builder:
+          (context) => AlertDialog(
+            title: const Text('テーマ選択'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                RadioListTile<String>(
+                  title: const Text('システム設定に従う'),
+                  value: 'system',
+                  groupValue: _selectedTheme,
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedTheme = value!;
+                    });
+                    Navigator.pop(context);
+                  },
+                ),
+                RadioListTile<String>(
+                  title: const Text('ライトテーマ'),
+                  value: 'light',
+                  groupValue: _selectedTheme,
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedTheme = value!;
+                    });
+                    Navigator.pop(context);
+                  },
+                ),
+                RadioListTile<String>(
+                  title: const Text('ダークテーマ'),
+                  value: 'dark',
+                  groupValue: _selectedTheme,
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedTheme = value!;
+                    });
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
             ),
-            RadioListTile<String>(
-              title: const Text('ライトテーマ'),
-              value: 'light',
-              groupValue: _selectedTheme,
-              onChanged: (value) {
-                setState(() {
-                  _selectedTheme = value!;
-                });
-                Navigator.pop(context);
-              },
-            ),
-            RadioListTile<String>(
-              title: const Text('ダークテーマ'),
-              value: 'dark',
-              groupValue: _selectedTheme,
-              onChanged: (value) {
-                setState(() {
-                  _selectedTheme = value!;
-                });
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
@@ -479,90 +522,89 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
   void _showAbout() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Goal Timer について'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Goal Timer',
-              style: TextConsts.h3.copyWith(
-                fontWeight: FontWeight.bold,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Goal Timer について'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Goal Timer',
+                  style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: SpacingConsts.s),
+                const Text('バージョン: 1.0.0'),
+                const SizedBox(height: SpacingConsts.m),
+                const Text('目標達成をサポートするタイマーアプリです。毎日の小さな積み重ねが、大きな成果につながります。'),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
               ),
-            ),
-            const SizedBox(height: SpacingConsts.s),
-            const Text('バージョン: 1.0.0'),
-            const SizedBox(height: SpacingConsts.m),
-            const Text(
-              '目標達成をサポートするタイマーアプリです。毎日の小さな積み重ねが、大きな成果につながります。',
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   void _showSignOutDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('サインアウト'),
-        content: const Text('サインアウトしますか？'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('キャンセル'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('サインアウト'),
+            content: const Text('サインアウトしますか？'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('キャンセル'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  try {
+                    final authNotifier = ref.read(
+                      authViewModelProvider.notifier,
+                    );
+                    await authNotifier.signOut();
+                    if (mounted) {
+                      Navigator.of(context).popUntil((route) => route.isFirst);
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('サインアウトに失敗しました: $e'),
+                          backgroundColor: ColorConsts.error,
+                        ),
+                      );
+                    }
+                  }
+                },
+                style: TextButton.styleFrom(foregroundColor: ColorConsts.error),
+                child: const Text('サインアウト'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              try {
-                final authNotifier = ref.read(authViewModelProvider.notifier);
-                await authNotifier.signOut();
-                if (mounted) {
-                  Navigator.of(context).popUntil((route) => route.isFirst);
-                }
-              } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('サインアウトに失敗しました: $e'),
-                      backgroundColor: ColorConsts.error,
-                    ),
-                  );
-                }
-              }
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: ColorConsts.error,
-            ),
-            child: const Text('サインアウト'),
-          ),
-        ],
-      ),
     );
   }
 
   void _showComingSoonDialog(String feature) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(feature),
-        content: const Text('この機能は開発中です。\n今後のアップデートをお待ちください。'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+      builder:
+          (context) => AlertDialog(
+            title: Text(feature),
+            content: const Text('この機能は開発中です。\n今後のアップデートをお待ちください。'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 }

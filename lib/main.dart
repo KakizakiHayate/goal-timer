@@ -5,7 +5,7 @@ import 'package:goal_timer/core/config/env_config.dart';
 import 'package:goal_timer/core/utils/app_logger.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:goal_timer/routes.dart';
-import 'package:goal_timer/core/services/sync_service.dart';
+// import 'package:goal_timer/core/services/sync_service.dart'; // 削除: 定期同期サービス無効化
 import 'package:goal_timer/core/data/local/database/app_database.dart';
 
 void main() async {
@@ -39,8 +39,8 @@ void main() async {
   runApp(
     ProviderScope(
       overrides: [
-        // 同期サービスの初期化
-        syncServiceInitializerProvider,
+        // 同期サービスの初期化を削除: 定期同期を無効化
+        // syncServiceInitializerProvider,
       ],
       child: const MyApp(),
     ),

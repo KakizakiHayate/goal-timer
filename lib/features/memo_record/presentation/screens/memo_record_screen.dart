@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:goal_timer/core/utils/color_consts.dart';
+import 'package:goal_timer/core/utils/text_consts.dart';
 import 'package:goal_timer/core/models/goals/goals_model.dart';
 import 'package:goal_timer/features/memo_record/presentation/viewmodels/memo_view_model.dart';
 import 'package:goal_timer/features/goal_detail/presentation/viewmodels/goal_detail_view_model.dart';
@@ -55,9 +56,19 @@ class _MemoRecordScreenState extends ConsumerState<MemoRecordScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('メモ記録'),
+        title: Text(
+          'メモ記録',
+          style: TextConsts.h3.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         backgroundColor: ColorConsts.primary,
-        foregroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       body: goalListAsync.when(
         data: (goals) {

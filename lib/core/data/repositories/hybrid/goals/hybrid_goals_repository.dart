@@ -44,38 +44,13 @@ class HybridGoalsRepository implements GoalsRepository {
   @override
   Future<List<GoalsModel>> getGoals() async {
     try {
-      // まずローカルDBからデータを取得
+      // ローカルDBからデータを取得のみ（自動同期は削除）
       final localGoals = await _localDatasource.getGoals();
       AppLogger.instance.i('ローカルから${localGoals.length}件の目標を取得しました');
 
-      // ネットワーク接続がある場合は差分同期を試みる
+      // ネットワーク接続状態のみ確認（同期は実行しない）
       final connectivityResult = await _connectivity.checkConnectivity();
-      if (connectivityResult != ConnectivityResult.none) {
-        // ローカルとリモートの最終更新時刻を取得
-        final localLastModified = await _syncMetadata.getLocalLastModified(
-          _tableName,
-        );
-        final remoteLastModified = await _remoteDatasource.getLastModified();
-
-        // 差分同期が必要かチェック
-        final needsSync = await _syncMetadata.needsSync(
-          _tableName,
-          localLastModified,
-          remoteLastModified,
-        );
-
-        if (needsSync) {
-          AppLogger.instance.i(
-            '差分同期を開始します (ローカル: $localLastModified, リモート: $remoteLastModified)',
-          );
-          // バックグラウンドで差分同期を開始
-          _performDifferentialSync();
-        } else {
-          AppLogger.instance.i('差分同期は不要です（データに変更なし）');
-          // setSynced() 削除: 個別操作では同期状態を通知しない
-        }
-      } else {
-        // オフラインモードを通知
+      if (connectivityResult == ConnectivityResult.none) {
         _syncNotifier.setOffline();
       }
 
@@ -126,31 +101,18 @@ class HybridGoalsRepository implements GoalsRepository {
   @override
   Future<GoalsModel> createGoal(GoalsModel goal) async {
     try {
-      // まずローカルDBに保存
+      // ローカルDBのみに保存（リアルタイム同期は削除）
       final localGoal = await _localDatasource.createGoal(goal);
 
-      // ネットワーク接続がある場合はリモートにも保存
+      // ネットワーク接続状態を確認して未同期状態を設定
       final connectivityResult = await _connectivity.checkConnectivity();
-      if (connectivityResult != ConnectivityResult.none) {
-        try {
-          // リモートに保存
-          final remoteGoal = await _remoteDatasource.createGoal(localGoal);
-
-          // 同期済みとしてマーク
-          await _localDatasource.markAsSynced(remoteGoal.id);
-
-          // setSynced() 削除: 個別操作では同期状態を通知しない
-
-          return remoteGoal;
-        } catch (e) {
-          // リモート保存に失敗しても、ローカル保存は成功しているのでエラーにはしない
-          AppLogger.instance.e('リモートへの目標保存に失敗しました', e);
-          _syncNotifier.setUnsynced();
-        }
-      } else {
+      if (connectivityResult == ConnectivityResult.none) {
         _syncNotifier.setOffline();
+      } else {
+        _syncNotifier.setUnsynced(); // 未同期データありとして記録
       }
 
+      AppLogger.instance.i('目標をローカルに作成しました（手動同期が必要）: ${localGoal.title}');
       return localGoal;
     } catch (e) {
       AppLogger.instance.e('目標の作成に失敗しました', e);
@@ -162,33 +124,20 @@ class HybridGoalsRepository implements GoalsRepository {
   @override
   Future<GoalsModel> updateGoal(GoalsModel goal) async {
     try {
-      // まずローカルDBを更新
+      // ローカルDBのみを更新（リアルタイム同期は削除）
       final updatedLocalGoal = await _localDatasource.updateGoal(goal);
 
-      // ネットワーク接続がある場合はリモートも更新
+      // ネットワーク接続状態を確認して未同期状態を設定
       final connectivityResult = await _connectivity.checkConnectivity();
-      if (connectivityResult != ConnectivityResult.none) {
-        try {
-          // リモートを更新
-          final updatedRemoteGoal = await _remoteDatasource.updateGoal(
-            updatedLocalGoal,
-          );
-
-          // 同期済みとしてマーク
-          await _localDatasource.markAsSynced(updatedRemoteGoal.id);
-
-          // setSynced() 削除: 個別操作では同期状態を通知しない
-
-          return updatedRemoteGoal;
-        } catch (e) {
-          // リモート更新に失敗しても、ローカル更新は成功しているのでエラーにはしない
-          AppLogger.instance.e('リモートでの目標更新に失敗しました', e);
-          _syncNotifier.setUnsynced();
-        }
-      } else {
+      if (connectivityResult == ConnectivityResult.none) {
         _syncNotifier.setOffline();
+      } else {
+        _syncNotifier.setUnsynced(); // 未同期データありとして記録
       }
 
+      AppLogger.instance.i(
+        '目標をローカルで更新しました（手動同期が必要）: ${updatedLocalGoal.title}',
+      );
       return updatedLocalGoal;
     } catch (e) {
       AppLogger.instance.e('目標の更新に失敗しました', e);
@@ -200,25 +149,18 @@ class HybridGoalsRepository implements GoalsRepository {
   @override
   Future<void> deleteGoal(String id) async {
     try {
-      // まずローカルDBから削除
+      // ローカルDBからのみ削除（リアルタイム同期は削除）
       await _localDatasource.deleteGoal(id);
 
-      // ネットワーク接続がある場合はリモートからも削除
+      // ネットワーク接続状態を確認して未同期状態を設定
       final connectivityResult = await _connectivity.checkConnectivity();
-      if (connectivityResult != ConnectivityResult.none) {
-        try {
-          // リモートから削除
-          await _remoteDatasource.deleteGoal(id);
-
-          // setSynced() 削除: 個別操作では同期状態を通知しない
-        } catch (e) {
-          // リモート削除に失敗しても、ローカル削除は成功しているのでエラーにはしない
-          AppLogger.instance.e('リモートでの目標削除に失敗しました', e);
-          _syncNotifier.setUnsynced();
-        }
-      } else {
+      if (connectivityResult == ConnectivityResult.none) {
         _syncNotifier.setOffline();
+      } else {
+        _syncNotifier.setUnsynced(); // 未同期データありとして記録
       }
+
+      AppLogger.instance.i('目標をローカルから削除しました（手動同期が必要）: $id');
     } catch (e) {
       AppLogger.instance.e('目標の削除に失敗しました', e);
       _syncNotifier.setError(e.toString());

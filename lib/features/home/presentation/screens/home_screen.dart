@@ -11,8 +11,6 @@ import '../../provider/home_provider.dart';
 import '../../../goal_timer/presentation/screens/timer_screen.dart';
 import '../../../statistics/presentation/screens/statistics_screen.dart';
 import '../../../settings/presentation/screens/settings_screen.dart';
-import '../../../memo_record/presentation/screens/memo_record_screen.dart';
-import '../../../shared/widgets/sync_status_indicator.dart';
 import '../../../../core/provider/providers.dart';
 import '../../../auth/domain/entities/auth_state.dart' as app_auth;
 import '../../../auth/provider/auth_provider.dart';
@@ -33,6 +31,13 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen>
     with TickerProviderStateMixin {
+  // タブインデックス定数（BottomNavigationBarのアイテム順序に合わせる）
+  static const int _homeTabIndex = 0;
+  static const int _timerTabIndex = 1;
+  static const int _addButtonTabIndex = 2; // BottomNavigationBarでの追加ボタン位置
+  static const int _statisticsTabIndex = 3;
+  static const int _settingsTabIndex = 4;
+
   late TabController _tabController;
   late AnimationController _fabAnimationController;
   late Animation<double> _fabScaleAnimation;
@@ -41,22 +46,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 5, vsync: this);
-    
+
     _fabAnimationController = AnimationController(
       duration: AnimationConsts.medium,
       vsync: this,
     );
-    
-    _fabScaleAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(
+
+    _fabScaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _fabAnimationController,
         curve: AnimationConsts.bounceCurve,
       ),
     );
-    
+
     _fabAnimationController.forward();
   }
 
@@ -96,11 +98,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     }
 
     final pages = [
-      const _HomeTabContent(),
-      const _TimerPage(),
-      const SizedBox.shrink(), // 中央（プラスボタン用の空スペース）
-      const MemoRecordScreen(),
-      const SettingsScreen(),
+      const _HomeTabContent(), // 0: ホーム
+      const _TimerPage(), // 1: タイマー
+      const SizedBox.shrink(), // 2: 追加ボタン用空スペース
+      const StatisticsScreen(), // 3: 統計
+      const SettingsScreen(), // 4: 設定
     ];
 
     return Scaffold(
@@ -135,14 +137,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           child: BottomNavigationBar(
             currentIndex: _tabController.index,
             onTap: (index) {
-              // 中央タブ（index: 2）がタップされた場合は目標作成モーダルを表示
-              if (index == 2) {
+              // 中央の追加ボタンがタップされた場合
+              if (index == _addButtonTabIndex) {
                 _showAddGoalModal(context);
                 return;
               }
-              // 中央タブより後のタブの場合はインデックスを調整
-              final adjustedIndex = index > 2 ? index : index;
-              _tabController.animateTo(adjustedIndex);
+
+              // pages配列と直接対応するため、インデックス調整は不要
+              _tabController.animateTo(index);
               setState(() {});
             },
             type: BottomNavigationBarType.fixed,
@@ -170,9 +172,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 label: '',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.edit_note_outlined),
-                activeIcon: Icon(Icons.edit_note),
-                label: 'メモ',
+                icon: Icon(Icons.bar_chart_outlined),
+                activeIcon: Icon(Icons.bar_chart),
+                label: '統計',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.settings_outlined),
@@ -185,7 +187,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       },
     );
   }
-
 
   Widget _buildFloatingActionButton() {
     return AnimatedBuilder(
@@ -217,11 +218,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               },
               backgroundColor: Colors.transparent,
               elevation: 0,
-              child: const Icon(
-                Icons.add,
-                color: Colors.white,
-                size: 32,
-              ),
+              child: const Icon(Icons.add, color: Colors.white, size: 32),
             ),
           ),
         );
@@ -247,7 +244,7 @@ class _HomeTabContent extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final homeState = ref.watch(homeViewModelProvider);
     final homeViewModel = ref.read(homeViewModelProvider.notifier);
-    
+
     // ローディング中の表示
     if (homeState.isLoading) {
       return const Center(
@@ -264,9 +261,9 @@ class _HomeTabContent extends ConsumerWidget {
 
     return CustomScrollView(
       slivers: [
-        // アプリバー
-        _buildSliverAppBar(context, ref),
-        
+        // ユーザー挨拶
+        _buildUserGreeting(context, ref),
+
         // 今日の進捗
         SliverToBoxAdapter(
           child: TodayProgressWidget(
@@ -278,7 +275,7 @@ class _HomeTabContent extends ConsumerWidget {
             completedGoals: homeViewModel.statistics.completedGoals,
           ),
         ),
-        
+
         // セクションヘッダー
         SliverToBoxAdapter(
           child: Padding(
@@ -295,41 +292,71 @@ class _HomeTabContent extends ConsumerWidget {
             ),
           ),
         ),
-        
+
         // 目標リスト
         _buildGoalList(homeState, homeViewModel),
       ],
     );
   }
 
-  Widget _buildSliverAppBar(BuildContext context, WidgetRef ref) {
-    return SliverAppBar(
-      expandedHeight: 120.0,
-      floating: false,
-      pinned: true,
-      backgroundColor: ColorConsts.primary,
-      flexibleSpace: FlexibleSpaceBar(
-        title: Text(
-          'Goal Timer',
-          style: TextConsts.h3.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
+  Widget _buildUserGreeting(BuildContext context, WidgetRef ref) {
+    final currentUserAsync = ref.watch(currentUserProvider);
+
+    return SliverToBoxAdapter(
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            SpacingConsts.l,
+            SpacingConsts.m,
+            SpacingConsts.l,
+            SpacingConsts.s,
           ),
-        ),
-        background: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [ColorConsts.primary, ColorConsts.primaryLight],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
+          child: currentUserAsync.when(
+            data: (user) {
+              final greeting = _getGreeting();
+              final userName =
+                  user?.displayName ?? user?.email.split('@')[0] ?? 'ゲスト';
+
+              return Text(
+                '$greeting、$userName さん',
+                style: TextConsts.h3.copyWith(
+                  color: ColorConsts.textPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
+              );
+            },
+            loading:
+                () => Text(
+                  '${_getGreeting()}！',
+                  style: TextConsts.h3.copyWith(
+                    color: ColorConsts.textPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+            error:
+                (error, stack) => Text(
+                  '${_getGreeting()}！',
+                  style: TextConsts.h3.copyWith(
+                    color: ColorConsts.textPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
           ),
         ),
       ),
-      actions: [
-        const SyncStatusIndicator(),
-      ],
     );
+  }
+
+  String _getGreeting() {
+    final hour = DateTime.now().hour;
+
+    if (hour < 12) {
+      return 'おはよう';
+    } else if (hour < 18) {
+      return 'こんにちは';
+    } else {
+      return 'こんばんは';
+    }
   }
 
   Widget _buildGoalList(HomeState homeState, HomeViewModel viewModel) {
@@ -374,38 +401,34 @@ class _HomeTabContent extends ConsumerWidget {
     }
 
     return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          final goal = goals[index];
-          final streakDays = viewModel.getGoalStreakFromCache(goal.id) ?? 0;
-          
-          return GoalCard(
-            title: goal.title,
-            description: goal.description.isNotEmpty ? goal.description : null,
-            progress: goal.getProgressRate(),
-            streakDays: streakDays,
-            avoidMessage: goal.avoidMessage.isNotEmpty ? goal.avoidMessage : null,
-            onTap: () {
-              // TODO: 目標詳細画面に遷移
-            },
-            onTimerTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => TimerScreen(goalId: goal.id),
-                ),
-              );
-            },
-            onEditTap: () {
-              // TODO: 目標編集画面に遷移
-            },
-          );
-        },
-        childCount: goals.length,
-      ),
+      delegate: SliverChildBuilderDelegate((context, index) {
+        final goal = goals[index];
+        final streakDays = viewModel.getGoalStreakFromCache(goal.id) ?? 0;
+
+        return GoalCard(
+          title: goal.title,
+          description: goal.description.isNotEmpty ? goal.description : null,
+          progress: goal.getProgressRate(),
+          streakDays: streakDays,
+          avoidMessage: goal.avoidMessage.isNotEmpty ? goal.avoidMessage : null,
+          onTap: () {
+            // TODO: 目標詳細画面に遷移
+          },
+          onTimerTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => TimerScreen(goalId: goal.id),
+              ),
+            );
+          },
+          onEditTap: () {
+            // TODO: 目標編集画面に遷移
+          },
+        );
+      }, childCount: goals.length),
     );
   }
-
 }
 
 class _TimerPage extends ConsumerWidget {
@@ -481,8 +504,9 @@ class _TimerPage extends ConsumerWidget {
                 Expanded(
                   child: ListView.separated(
                     itemCount: goals.length,
-                    separatorBuilder: (context, index) =>
-                        const SizedBox(height: SpacingConsts.m),
+                    separatorBuilder:
+                        (context, index) =>
+                            const SizedBox(height: SpacingConsts.m),
                     itemBuilder: (context, index) {
                       final goal = goals[index];
                       return _buildGoalTimerCard(context, goal);
@@ -494,26 +518,24 @@ class _TimerPage extends ConsumerWidget {
           ),
         );
       },
-      loading: () => Scaffold(
-        appBar: AppBar(
-          title: const Text('タイマー'),
-          backgroundColor: ColorConsts.primary,
-          foregroundColor: Colors.white,
-        ),
-        body: const Center(
-          child: CircularProgressIndicator(),
-        ),
-      ),
-      error: (error, stack) => Scaffold(
-        appBar: AppBar(
-          title: const Text('タイマー'),
-          backgroundColor: ColorConsts.primary,
-          foregroundColor: Colors.white,
-        ),
-        body: Center(
-          child: Text('エラーが発生しました: $error'),
-        ),
-      ),
+      loading:
+          () => Scaffold(
+            appBar: AppBar(
+              title: const Text('タイマー'),
+              backgroundColor: ColorConsts.primary,
+              foregroundColor: Colors.white,
+            ),
+            body: const Center(child: CircularProgressIndicator()),
+          ),
+      error:
+          (error, stack) => Scaffold(
+            appBar: AppBar(
+              title: const Text('タイマー'),
+              backgroundColor: ColorConsts.primary,
+              foregroundColor: Colors.white,
+            ),
+            body: Center(child: Text('エラーが発生しました: $error')),
+          ),
     );
   }
 
@@ -523,9 +545,7 @@ class _TimerPage extends ConsumerWidget {
         // タイマー画面に遷移
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (context) => TimerScreen(goalId: goal.id),
-          ),
+          MaterialPageRoute(builder: (context) => TimerScreen(goalId: goal.id)),
         );
       },
       child: Padding(
@@ -555,9 +575,7 @@ class _TimerPage extends ConsumerWidget {
                 children: [
                   Text(
                     goal.title,
-                    style: TextConsts.h4.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextConsts.h4.copyWith(fontWeight: FontWeight.bold),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),

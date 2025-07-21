@@ -26,23 +26,18 @@ class HybridUsersRepository implements UsersRepository {
   @override
   Future<List<UsersModel>> getUsers() async {
     try {
-      // まずローカルDBからデータを取得
+      // ローカルDBからデータを取得のみ（自動同期は削除）
       final localUsers = await _localDatasource.getUsers();
 
-      // ネットワーク接続がある場合は同期を試みる
+      // ネットワーク接続状態のみ確認（同期は実行しない）
       final connectivityResult = await _connectivity.checkConnectivity();
-      if (connectivityResult != ConnectivityResult.none) {
-        // バックグラウンドで同期を開始
-        syncWithRemote();
-      } else {
-        // オフラインモードを通知
+      if (connectivityResult == ConnectivityResult.none) {
         _syncNotifier.setOffline();
       }
 
       return localUsers;
     } catch (e) {
       AppLogger.instance.e('ユーザーデータの取得に失敗しました', e);
-      // エラー通知
       _syncNotifier.setError(e.toString());
       return [];
     }
@@ -121,31 +116,18 @@ class HybridUsersRepository implements UsersRepository {
   @override
   Future<UsersModel> createUser(UsersModel user) async {
     try {
-      // まずローカルDBに保存
+      // ローカルDBのみに保存（リアルタイム同期は削除）
       final localUser = await _localDatasource.upsertUser(user);
 
-      // ネットワーク接続がある場合はリモートにも保存
+      // ネットワーク接続状態を確認して未同期状態を設定
       final connectivityResult = await _connectivity.checkConnectivity();
-      if (connectivityResult != ConnectivityResult.none) {
-        try {
-          // リモートに保存
-          final remoteUser = await _remoteDatasource.createUser(localUser);
-
-          // 同期済みとしてマーク
-          await _localDatasource.markAsSynced(remoteUser.id);
-
-          // setSynced() 削除: 個別操作では同期状態を通知しない
-
-          return remoteUser;
-        } catch (e) {
-          // リモート保存に失敗しても、ローカル保存は成功しているのでエラーにはしない
-          AppLogger.instance.e('リモートへのユーザー作成に失敗しました', e);
-          _syncNotifier.setUnsynced();
-        }
-      } else {
+      if (connectivityResult == ConnectivityResult.none) {
         _syncNotifier.setOffline();
+      } else {
+        _syncNotifier.setUnsynced(); // 未同期データありとして記録
       }
 
+      AppLogger.instance.i('ユーザーをローカルに作成しました（手動同期が必要）');
       return localUser;
     } catch (e) {
       AppLogger.instance.e('ユーザーの作成に失敗しました', e);
@@ -158,31 +140,18 @@ class HybridUsersRepository implements UsersRepository {
   @override
   Future<UsersModel> updateUser(UsersModel user) async {
     try {
-      // まずローカルDBに保存
+      // ローカルDBのみに保存（リアルタイム同期は削除）
       final localUser = await _localDatasource.upsertUser(user);
 
-      // ネットワーク接続がある場合はリモートにも保存
+      // ネットワーク接続状態を確認して未同期状態を設定
       final connectivityResult = await _connectivity.checkConnectivity();
-      if (connectivityResult != ConnectivityResult.none) {
-        try {
-          // リモートに保存
-          final remoteUser = await _remoteDatasource.updateUser(localUser);
-
-          // 同期済みとしてマーク
-          await _localDatasource.markAsSynced(remoteUser.id);
-
-          // setSynced() 削除: 個別操作では同期状態を通知しない
-
-          return remoteUser;
-        } catch (e) {
-          // リモート保存に失敗しても、ローカル保存は成功しているのでエラーにはしない
-          AppLogger.instance.e('リモートへのユーザー情報保存に失敗しました', e);
-          _syncNotifier.setUnsynced();
-        }
-      } else {
+      if (connectivityResult == ConnectivityResult.none) {
         _syncNotifier.setOffline();
+      } else {
+        _syncNotifier.setUnsynced(); // 未同期データありとして記録
       }
 
+      AppLogger.instance.i('ユーザー情報をローカルで更新しました（手動同期が必要）');
       return localUser;
     } catch (e) {
       AppLogger.instance.e('ユーザー情報の更新に失敗しました', e);
@@ -195,31 +164,18 @@ class HybridUsersRepository implements UsersRepository {
   @override
   Future<UsersModel> upsertUser(UsersModel user) async {
     try {
-      // まずローカルDBに保存
+      // ローカルDBのみに保存（リアルタイム同期は削除）
       final localUser = await _localDatasource.upsertUser(user);
 
-      // ネットワーク接続がある場合はリモートにも保存
+      // ネットワーク接続状態を確認して未同期状態を設定
       final connectivityResult = await _connectivity.checkConnectivity();
-      if (connectivityResult != ConnectivityResult.none) {
-        try {
-          // リモートに保存
-          final remoteUser = await _remoteDatasource.upsertUser(localUser);
-
-          // 同期済みとしてマーク
-          await _localDatasource.markAsSynced(remoteUser.id);
-
-          // setSynced() 削除: 個別操作では同期状態を通知しない
-
-          return remoteUser;
-        } catch (e) {
-          // リモート保存に失敗しても、ローカル保存は成功しているのでエラーにはしない
-          AppLogger.instance.e('リモートへのユーザー保存に失敗しました', e);
-          _syncNotifier.setUnsynced();
-        }
-      } else {
+      if (connectivityResult == ConnectivityResult.none) {
         _syncNotifier.setOffline();
+      } else {
+        _syncNotifier.setUnsynced(); // 未同期データありとして記録
       }
 
+      AppLogger.instance.i('ユーザーをローカルでupsertしました（手動同期が必要）');
       return localUser;
     } catch (e) {
       AppLogger.instance.e('ユーザーのupsertに失敗しました', e);
@@ -302,5 +258,4 @@ class HybridUsersRepository implements UsersRepository {
       _syncNotifier.setError(e.toString());
     }
   }
-
 }

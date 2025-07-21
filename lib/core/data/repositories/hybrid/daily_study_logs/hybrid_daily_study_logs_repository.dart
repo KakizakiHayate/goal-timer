@@ -25,23 +25,18 @@ class HybridDailyStudyLogsRepository implements DailyStudyLogsRepository {
   @override
   Future<List<DailyStudyLogModel>> getAllLogs() async {
     try {
-      // まずローカルDBからデータを取得
+      // ローカルDBからデータを取得のみ（自動同期は削除）
       final localLogs = await _localDatasource.getAllLogs();
 
-      // ネットワーク接続がある場合は同期を試みる
+      // ネットワーク接続状態のみ確認（同期は実行しない）
       final connectivityResult = await _connectivity.checkConnectivity();
-      if (connectivityResult != ConnectivityResult.none) {
-        // バックグラウンドで同期を開始
-        syncWithRemote();
-      } else {
-        // オフラインモードを通知
+      if (connectivityResult == ConnectivityResult.none) {
         _syncNotifier.setOffline();
       }
 
       return localLogs;
     } catch (e) {
       AppLogger.instance.e('学習記録データの取得に失敗しました', e);
-      // エラー通知
       _syncNotifier.setError(e.toString());
       return [];
     }
@@ -50,16 +45,12 @@ class HybridDailyStudyLogsRepository implements DailyStudyLogsRepository {
   @override
   Future<List<DailyStudyLogModel>> getDailyLogs(DateTime date) async {
     try {
-      // まずローカルDBからデータを取得
+      // ローカルDBからデータを取得のみ（自動同期は削除）
       final localLogs = await _localDatasource.getDailyLogs(date);
 
-      // ネットワーク接続がある場合は同期を試みる
+      // ネットワーク接続状態のみ確認（同期は実行しない）
       final connectivityResult = await _connectivity.checkConnectivity();
-      if (connectivityResult != ConnectivityResult.none) {
-        // バックグラウンドで同期を開始
-        syncWithRemote();
-      } else {
-        // オフラインモードを通知
+      if (connectivityResult == ConnectivityResult.none) {
         _syncNotifier.setOffline();
       }
 
@@ -77,19 +68,15 @@ class HybridDailyStudyLogsRepository implements DailyStudyLogsRepository {
     DateTime endDate,
   ) async {
     try {
-      // まずローカルDBからデータを取得
+      // ローカルDBからデータを取得のみ（自動同期は削除）
       final localLogs = await _localDatasource.getLogsByDateRange(
         startDate,
         endDate,
       );
 
-      // ネットワーク接続がある場合は同期を試みる
+      // ネットワーク接続状態のみ確認（同期は実行しない）
       final connectivityResult = await _connectivity.checkConnectivity();
-      if (connectivityResult != ConnectivityResult.none) {
-        // バックグラウンドで同期を開始
-        syncWithRemote();
-      } else {
-        // オフラインモードを通知
+      if (connectivityResult == ConnectivityResult.none) {
         _syncNotifier.setOffline();
       }
 
@@ -104,16 +91,12 @@ class HybridDailyStudyLogsRepository implements DailyStudyLogsRepository {
   @override
   Future<List<DailyStudyLogModel>> getLogsByGoalId(String goalId) async {
     try {
-      // まずローカルDBからデータを取得
+      // ローカルDBからデータを取得のみ（自動同期は削除）
       final localLogs = await _localDatasource.getLogsByGoalId(goalId);
 
-      // ネットワーク接続がある場合は同期を試みる
+      // ネットワーク接続状態のみ確認（同期は実行しない）
       final connectivityResult = await _connectivity.checkConnectivity();
-      if (connectivityResult != ConnectivityResult.none) {
-        // バックグラウンドで同期を開始
-        syncWithRemote();
-      } else {
-        // オフラインモードを通知
+      if (connectivityResult == ConnectivityResult.none) {
         _syncNotifier.setOffline();
       }
 
@@ -163,31 +146,18 @@ class HybridDailyStudyLogsRepository implements DailyStudyLogsRepository {
   @override
   Future<DailyStudyLogModel> upsertDailyLog(DailyStudyLogModel log) async {
     try {
-      // まずローカルDBに保存
+      // ローカルDBのみに保存（リアルタイム同期は削除）
       final localLog = await _localDatasource.upsertDailyLog(log);
 
-      // ネットワーク接続がある場合はリモートにも保存
+      // ネットワーク接続状態を確認して未同期状態を設定
       final connectivityResult = await _connectivity.checkConnectivity();
-      if (connectivityResult != ConnectivityResult.none) {
-        try {
-          // リモートに保存
-          final remoteLog = await _remoteDatasource.upsertDailyLog(localLog);
-
-          // 同期済みとしてマーク
-          await _localDatasource.markAsSynced(remoteLog.id);
-
-          // setSynced() 削除: 個別操作では同期状態を通知しない
-
-          return remoteLog;
-        } catch (e) {
-          // リモート保存に失敗しても、ローカル保存は成功しているのでエラーにはしない
-          AppLogger.instance.e('リモートへの学習記録保存に失敗しました', e);
-          _syncNotifier.setUnsynced();
-        }
-      } else {
+      if (connectivityResult == ConnectivityResult.none) {
         _syncNotifier.setOffline();
+      } else {
+        _syncNotifier.setUnsynced(); // 未同期データありとして記録
       }
 
+      AppLogger.instance.i('学習記録をローカルに保存しました（手動同期が必要）');
       return localLog;
     } catch (e) {
       AppLogger.instance.e('学習記録の作成に失敗しました', e);
@@ -199,30 +169,22 @@ class HybridDailyStudyLogsRepository implements DailyStudyLogsRepository {
   @override
   Future<bool> deleteDailyLog(String id) async {
     try {
-      // まずローカルDBから削除
+      // ローカルDBからのみ削除（リアルタイム同期は削除）
       final success = await _localDatasource.deleteDailyLog(id);
 
       if (!success) {
         return false;
       }
 
-      // ネットワーク接続がある場合はリモートからも削除
+      // ネットワーク接続状態を確認して未同期状態を設定
       final connectivityResult = await _connectivity.checkConnectivity();
-      if (connectivityResult != ConnectivityResult.none) {
-        try {
-          // リモートから削除
-          await _remoteDatasource.deleteDailyLog(id);
-
-          // setSynced() 削除: 個別操作では同期状態を通知しない
-        } catch (e) {
-          // リモート削除に失敗しても、ローカル削除は成功しているのでエラーにはしない
-          AppLogger.instance.e('リモートでの学習記録削除に失敗しました', e);
-          _syncNotifier.setUnsynced();
-        }
-      } else {
+      if (connectivityResult == ConnectivityResult.none) {
         _syncNotifier.setOffline();
+      } else {
+        _syncNotifier.setUnsynced(); // 未同期データありとして記録
       }
 
+      AppLogger.instance.i('学習記録をローカルから削除しました（手動同期が必要）: $id');
       return true;
     } catch (e) {
       AppLogger.instance.e('学習記録の削除に失敗しました: $id', e);
