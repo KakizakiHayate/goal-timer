@@ -1,11 +1,21 @@
 import 'package:goal_timer/core/data/repositories/goals/goals_repository.dart';
 import 'package:goal_timer/core/models/goals/goals_model.dart';
 import 'package:goal_timer/core/utils/app_logger.dart';
+import 'package:uuid/uuid.dart';
 
 /// 目標作成のユースケース
 /// クリーンアーキテクチャに従い、ViewModelとRepositoryの間の橋渡しを行う
 class CreateGoalUseCase {
   final GoalsRepository _repository;
+  
+  // 目標時間の制約
+  static const int minTargetMinutes = 1;
+  static const int maxTargetMinutes = 1439; // 23時間59分
+  
+  // バリデーションの制約
+  static const int minTitleLength = 2;
+  static const int minAvoidMessageLength = 5;
+  static const int defaultDeadlineDays = 30;
 
   CreateGoalUseCase(this._repository);
 
@@ -25,29 +35,29 @@ class CreateGoalUseCase {
       if (title.trim().isEmpty) {
         throw ArgumentError('タイトルは必須です');
       }
-      if (title.trim().length < 2) {
-        throw ArgumentError('タイトルは2文字以上である必要があります');
+      if (title.trim().length < minTitleLength) {
+        throw ArgumentError('タイトルは$minTitleLength文字以上である必要があります');
       }
       if (avoidMessage.trim().isEmpty) {
         throw ArgumentError('ネガティブ回避メッセージは必須です');
       }
-      if (avoidMessage.trim().length < 5) {
-        throw ArgumentError('ネガティブ回避メッセージは5文字以上である必要があります');
+      if (avoidMessage.trim().length < minAvoidMessageLength) {
+        throw ArgumentError('ネガティブ回避メッセージは$minAvoidMessageLength文字以上である必要があります');
       }
-      if (targetMinutes < 15 || targetMinutes > 180) {
-        throw ArgumentError('目標時間は15分から180分の範囲で設定してください');
+      if (targetMinutes < minTargetMinutes || targetMinutes > maxTargetMinutes) {
+        throw ArgumentError('目標時間は$minTargetMinutes分から$maxTargetMinutes分（23時間59分）の範囲で設定してください');
       }
 
       // 目標モデルを作成
       final goal = GoalsModel(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        id: const Uuid().v4(),
         userId: userId,
         title: title.trim(),
         description: description.trim(),
-        deadline: deadline ?? DateTime.now().add(const Duration(days: 30)),
+        deadline: deadline ?? DateTime.now().add(const Duration(days: defaultDeadlineDays)),
         isCompleted: false,
         avoidMessage: avoidMessage.trim(),
-        totalTargetHours: (targetMinutes / 60).round(),
+        targetMinutes: targetMinutes,
         spentMinutes: 0,
         updatedAt: DateTime.now(),
       );

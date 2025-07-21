@@ -581,7 +581,7 @@ class _TimerPage extends ConsumerWidget {
                   ),
                   const SizedBox(height: SpacingConsts.xs),
                   Text(
-                    '${goal.spentMinutes}分 / ${goal.totalTargetHours * 60}分',
+                    '${goal.spentMinutes}分 / ${goal.targetMinutes}分',
                     style: TextConsts.body.copyWith(
                       color: ColorConsts.textSecondary,
                     ),
@@ -592,7 +592,7 @@ class _TimerPage extends ConsumerWidget {
 
             // 進捗率
             Text(
-              '${((goal.spentMinutes / (goal.totalTargetHours * 60)) * 100).toInt()}%',
+              '${(goal.getProgressRate() * 100).toInt()}%',
               style: TextConsts.body.copyWith(
                 color: ColorConsts.primary,
                 fontWeight: FontWeight.bold,

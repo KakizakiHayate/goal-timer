@@ -28,8 +28,8 @@ class GoalsModel with _$GoalsModel {
     /// 目標達成しなかったら自分に課すこと
     required String avoidMessage,
 
-    /// 目標達成に必要な総時間（時間単位）
-    required int totalTargetHours,
+    /// 目標達成に必要な時間（分単位）
+    required int targetMinutes,
 
     /// 実際に使った時間（分単位）
     required int spentMinutes,
@@ -72,14 +72,26 @@ class GoalsModel with _$GoalsModel {
     }
 
     // 整数値の安全な変換
-    int parsedTotalTargetHours;
-    final totalTargetValue = map['total_target_hours'];
-    if (totalTargetValue is int) {
-      parsedTotalTargetHours = totalTargetValue;
-    } else if (totalTargetValue is String) {
-      parsedTotalTargetHours = int.tryParse(totalTargetValue) ?? 0;
+    int parsedTargetMinutes;
+    // 互換性のため、両方のフィールド名をサポート
+    final targetValue = map['target_minutes'] ?? map['total_target_hours'];
+    if (targetValue is int) {
+      // total_target_hoursの場合は時間から分に変換
+      if (map['total_target_hours'] != null && map['target_minutes'] == null) {
+        parsedTargetMinutes = targetValue * 60;
+      } else {
+        parsedTargetMinutes = targetValue;
+      }
+    } else if (targetValue is String) {
+      final parsed = int.tryParse(targetValue) ?? 0;
+      // total_target_hoursの場合は時間から分に変換
+      if (map['total_target_hours'] != null && map['target_minutes'] == null) {
+        parsedTargetMinutes = parsed * 60;
+      } else {
+        parsedTargetMinutes = parsed;
+      }
     } else {
-      parsedTotalTargetHours = 0;
+      parsedTargetMinutes = 0;
     }
 
     int parsedSpentMinutes;
@@ -132,7 +144,7 @@ class GoalsModel with _$GoalsModel {
       deadline: parsedDeadline,
       isCompleted: parsedIsCompleted,
       avoidMessage: map['avoid_message'] ?? '',
-      totalTargetHours: parsedTotalTargetHours,
+      targetMinutes: parsedTargetMinutes,
       spentMinutes: parsedSpentMinutes,
       updatedAt: parsedUpdatedAt,
       syncUpdatedAt: parsedSyncUpdatedAt,
@@ -152,7 +164,7 @@ extension GoalsModelExtension on GoalsModel {
       'deadline': deadline.toIso8601String(),
       'is_completed': isCompleted,
       'avoid_message': avoidMessage,
-      'total_target_hours': totalTargetHours,
+      'target_minutes': targetMinutes,
       'spent_minutes': spentMinutes,
     };
 
@@ -166,16 +178,16 @@ extension GoalsModelExtension on GoalsModel {
 
   /// 残り時間を文字列で取得
   String getRemainingTimeText() {
-    return TimeUtils.calculateRemainingTime(totalTargetHours, spentMinutes);
+    return TimeUtils.calculateRemainingTimeFromMinutes(targetMinutes, spentMinutes);
   }
 
   /// 残り時間（分）を取得
   int getRemainingMinutes() {
-    return TimeUtils.calculateRemainingMinutes(totalTargetHours, spentMinutes);
+    return TimeUtils.calculateRemainingMinutesFromTotal(targetMinutes, spentMinutes);
   }
 
   /// 進捗率を取得（0.0〜1.0）
   double getProgressRate() {
-    return TimeUtils.calculateProgressRate(totalTargetHours, spentMinutes);
+    return TimeUtils.calculateProgressRateFromMinutes(targetMinutes, spentMinutes);
   }
 }

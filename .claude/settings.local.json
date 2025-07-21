@@ -39,7 +39,12 @@
       "Bash(PROJECT_DIR=\"/Users/a8810/Documents/my-app/goal_timer/ios\" /Users/a8810/Documents/my-app/goal_timer/ios/Scripts/generate_secrets.sh)",
       "Bash(xcodebuild:*)",
       "mcp__supabase__search_docs",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(sed:*)",
+      "mcp__supabase__list_projects",
+      "mcp__supabase__list_tables",
+      "mcp__supabase__apply_migration",
+      "mcp__supabase__execute_sql"
     ],
     "deny": []
   },

@@ -6,6 +6,14 @@ import 'package:goal_timer/core/utils/app_logger.dart';
 /// クリーンアーキテクチャに従い、ViewModelとRepositoryの間の橋渡しを行う
 class UpdateGoalUseCase {
   final GoalsRepository _repository;
+  
+  // 目標時間の制約
+  static const int minTargetMinutes = 1;
+  static const int maxTargetMinutes = 1439; // 23時間59分
+  
+  // バリデーションの制約
+  static const int minTitleLength = 2;
+  static const int minAvoidMessageLength = 5;
 
   UpdateGoalUseCase(this._repository);
 
@@ -15,7 +23,7 @@ class UpdateGoalUseCase {
     String? title,
     String? description,
     String? avoidMessage,
-    int? totalTargetHours,
+    int? targetMinutes,
     bool? isCompleted,
     DateTime? deadline,
   }) async {
@@ -26,7 +34,7 @@ class UpdateGoalUseCase {
       final updatedTitle = title?.trim() ?? originalGoal.title;
       final updatedDescription = description?.trim() ?? originalGoal.description;
       final updatedAvoidMessage = avoidMessage?.trim() ?? originalGoal.avoidMessage;
-      final updatedTargetHours = totalTargetHours ?? originalGoal.totalTargetHours;
+      final updatedTargetMinutes = targetMinutes ?? originalGoal.targetMinutes;
       final updatedIsCompleted = isCompleted ?? originalGoal.isCompleted;
       final updatedDeadline = deadline ?? originalGoal.deadline;
 
@@ -34,17 +42,17 @@ class UpdateGoalUseCase {
       if (updatedTitle.isEmpty) {
         throw ArgumentError('タイトルは必須です');
       }
-      if (updatedTitle.length < 2) {
-        throw ArgumentError('タイトルは2文字以上である必要があります');
+      if (updatedTitle.length < minTitleLength) {
+        throw ArgumentError('タイトルは$minTitleLength文字以上である必要があります');
       }
       if (updatedAvoidMessage.isEmpty) {
         throw ArgumentError('ネガティブ回避メッセージは必須です');
       }
-      if (updatedAvoidMessage.length < 5) {
-        throw ArgumentError('ネガティブ回避メッセージは5文字以上である必要があります');
+      if (updatedAvoidMessage.length < minAvoidMessageLength) {
+        throw ArgumentError('ネガティブ回避メッセージは$minAvoidMessageLength文字以上である必要があります');
       }
-      if (updatedTargetHours < 1 || updatedTargetHours > 8) {
-        throw ArgumentError('目標時間は1時間から8時間の範囲で設定してください');
+      if (updatedTargetMinutes < minTargetMinutes || updatedTargetMinutes > maxTargetMinutes) {
+        throw ArgumentError('目標時間は$minTargetMinutes分から$maxTargetMinutes分（23時間59分）の範囲で設定してください');
       }
 
       // 更新された目標モデルを作成
@@ -52,7 +60,7 @@ class UpdateGoalUseCase {
         title: updatedTitle,
         description: updatedDescription,
         avoidMessage: updatedAvoidMessage,
-        totalTargetHours: updatedTargetHours,
+        targetMinutes: updatedTargetMinutes,
         isCompleted: updatedIsCompleted,
         deadline: updatedDeadline,
         updatedAt: DateTime.now(),

@@ -105,7 +105,7 @@ void main() {
           deadline: now,
           isCompleted: false,
           avoidMessage: 'Test avoid message',
-          totalTargetHours: 10,
+          targetMinutes: 600,
           spentMinutes: 120,
           syncUpdatedAt: now,
           isSynced: true,
@@ -223,7 +223,7 @@ void main() {
           deadline: baseTime,
           isCompleted: false,
           avoidMessage: '',
-          totalTargetHours: 10,
+          targetMinutes: 600,
           spentMinutes: 0,
           syncUpdatedAt: localTime,
         );
@@ -236,7 +236,7 @@ void main() {
           deadline: baseTime,
           isCompleted: false,
           avoidMessage: '',
-          totalTargetHours: 10,
+          targetMinutes: 600,
           spentMinutes: 0,
           syncUpdatedAt: remoteTime,
         );
@@ -262,7 +262,7 @@ void main() {
           deadline: baseTime,
           isCompleted: false,
           avoidMessage: '',
-          totalTargetHours: 10,
+          targetMinutes: 600,
           spentMinutes: 0,
           syncUpdatedAt: localTime,
         );
@@ -275,7 +275,7 @@ void main() {
           deadline: baseTime,
           isCompleted: false,
           avoidMessage: '',
-          totalTargetHours: 10,
+          targetMinutes: 600,
           spentMinutes: 0,
           syncUpdatedAt: remoteTime,
         );

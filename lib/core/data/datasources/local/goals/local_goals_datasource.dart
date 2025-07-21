@@ -130,7 +130,7 @@ class LocalGoalsDatasource {
       'deadline': goal.deadline.toIso8601String(),
       'is_completed': goal.isCompleted ? 1 : 0,
       'avoid_message': goal.avoidMessage,
-      'total_target_hours': goal.totalTargetHours,
+      'target_minutes': goal.targetMinutes,
       'spent_minutes': goal.spentMinutes,
       'updated_at':
           goal.updatedAt?.toIso8601String() ?? DateTime.now().toIso8601String(),
@@ -184,7 +184,7 @@ class LocalGoalsDatasource {
       'deadline': goal.deadline.toIso8601String(),
       'is_completed': goal.isCompleted ? 1 : 0,
       'avoid_message': goal.avoidMessage,
-      'total_target_hours': goal.totalTargetHours,
+      'target_minutes': goal.targetMinutes,
       'spent_minutes': goal.spentMinutes,
       'updated_at': goal.updatedAt?.toIso8601String() ?? now,
       'sync_updated_at': now, // 同期管理用の更新時刻
@@ -204,7 +204,13 @@ class LocalGoalsDatasource {
               : (map['deadline'] as DateTime),
       isCompleted: (map['is_completed'] as int) == 1,
       avoidMessage: map['avoid_message'] as String,
-      totalTargetHours: map['total_target_hours'] as int,
+      targetMinutes: () {
+        final targetMins = map['target_minutes'] as int?;
+        if (targetMins != null) return targetMins;
+        
+        final targetHours = map['total_target_hours'] as int?;
+        return targetHours != null ? targetHours * 60 : 0;
+      }(),
       spentMinutes: map['spent_minutes'] as int,
       updatedAt:
           map['updated_at'] != null

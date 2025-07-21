@@ -11,7 +11,7 @@ import '../../../../core/widgets/pressable_card.dart';
 import '../../../../core/models/goals/goals_model.dart';
 import '../../../goal_timer/presentation/screens/timer_screen.dart';
 import '../viewmodels/goal_detail_view_model.dart';
-import 'goal_edit_modal.dart';
+import 'goal_create_modal.dart';
 
 /// 改善された目標詳細画面
 class GoalDetailScreen extends ConsumerStatefulWidget {
@@ -264,7 +264,7 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen>
                     const SizedBox(height: SpacingConsts.m),
                     _buildProgressDetail(
                       label: '目標時間',
-                      value: '${goal.totalTargetHours}時間',
+                      value: '${(goal.targetMinutes ~/ 60)}時間${(goal.targetMinutes % 60)}分',
                       color: ColorConsts.textSecondary,
                     ),
                   ],
@@ -528,9 +528,9 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen>
   }
 
   void _showEditModal(GoalsModel goal) async {
-    final result = await GoalEditModal.show(context, goal);
+    final result = await GoalCreateModal.show(context, existingGoal: goal);
     if (result != null && mounted) {
-      // TODO: 目標の更新処理
+      // 目標が更新された場合、画面を再描画
       setState(() {
         // UI更新
       });

@@ -111,8 +111,8 @@ class StudyStatisticsService {
         final remainingDays = goal.deadline.difference(DateTime.now()).inDays;
         if (remainingDays <= 0) return sum;
         
-        final dailyTargetHours = goal.totalTargetHours.toDouble() / remainingDays;
-        final dailyMinutes = (dailyTargetHours * 60).toInt();
+        final dailyTargetMinutes = goal.targetMinutes.toDouble() / remainingDays;
+        final dailyMinutes = dailyTargetMinutes.toInt();
         return (sum + dailyMinutes) as int;
       });
 

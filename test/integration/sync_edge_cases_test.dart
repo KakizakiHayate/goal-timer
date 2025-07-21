@@ -91,7 +91,7 @@ void main() {
           deadline: baseTime,
           isCompleted: false,
           avoidMessage: '',
-          totalTargetHours: 10,
+          targetMinutes: 600,
           spentMinutes: 60,
           syncUpdatedAt: localTime,
         );
@@ -104,7 +104,7 @@ void main() {
           deadline: baseTime,
           isCompleted: true,
           avoidMessage: 'Remote avoid message',
-          totalTargetHours: 20,
+          targetMinutes: 1200, // 20時間 * 60分
           spentMinutes: 120,
           syncUpdatedAt: remoteTime,
         );
@@ -130,7 +130,7 @@ void main() {
           deadline: DateTime.now(),
           isCompleted: false,
           avoidMessage: '',
-          totalTargetHours: 10,
+          targetMinutes: 600,
           spentMinutes: 0,
           syncUpdatedAt: null, // null
         );
@@ -143,7 +143,7 @@ void main() {
           deadline: DateTime.now(),
           isCompleted: false,
           avoidMessage: '',
-          totalTargetHours: 10,
+          targetMinutes: 600,
           spentMinutes: 0,
           syncUpdatedAt: DateTime.now(),
         );
@@ -176,7 +176,7 @@ void main() {
           deadline: baseTime,
           isCompleted: false,
           avoidMessage: '',
-          totalTargetHours: 10,
+          targetMinutes: 600,
           spentMinutes: 0,
           syncUpdatedAt: baseTime.add(Duration(seconds: index)),
         ));

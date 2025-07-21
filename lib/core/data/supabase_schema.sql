@@ -64,8 +64,8 @@ CREATE TABLE IF NOT EXISTS public.goals (
     -- ネガティブ回避メッセージ
     avoid_message TEXT NOT NULL DEFAULT '',
     
-    -- 目標達成に必要な総時間（時間単位）
-    total_target_hours INTEGER NOT NULL DEFAULT 0,
+    -- 目標達成に必要な時間（分単位）
+    target_minutes INTEGER NOT NULL DEFAULT 0,
     
     -- 実際に使った時間（分単位）
     spent_minutes INTEGER NOT NULL DEFAULT 0,

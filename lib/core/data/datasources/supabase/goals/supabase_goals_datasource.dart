@@ -36,11 +36,17 @@ class SupabaseGoalsDatasource implements SupabaseGoalsRepository {
   @override
   Future<GoalsModel> createGoal(GoalsModel goal) async {
     try {
+      final goalMap = goal.toMap();
+      AppLogger.instance.i('Supabase保存データ: $goalMap');
+      
       final data =
-          await _client.from(_tableName).insert(goal.toMap()).select().single();
+          await _client.from(_tableName).insert(goalMap).select().single();
+      
+      AppLogger.instance.i('Supabase保存成功: $data');
       return GoalsModel.fromMap(data);
     } catch (e) {
-      AppLogger.instance.e('目標の作成に失敗しました', e);
+      AppLogger.instance.e('Supabase目標作成エラー詳細: $e');
+      AppLogger.instance.e('送信データ: ${goal.toMap()}');
       rethrow;
     }
   }

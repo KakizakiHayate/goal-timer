@@ -101,19 +101,37 @@ class HybridGoalsRepository implements GoalsRepository {
   @override
   Future<GoalsModel> createGoal(GoalsModel goal) async {
     try {
-      // ローカルDBのみに保存（リアルタイム同期は削除）
+      // まずローカルDBに保存
       final localGoal = await _localDatasource.createGoal(goal);
 
-      // ネットワーク接続状態を確認して未同期状態を設定
+      // ネットワーク接続状態を確認
       final connectivityResult = await _connectivity.checkConnectivity();
       if (connectivityResult == ConnectivityResult.none) {
+        // オフライン時：ローカルのみ保存、未同期状態
         _syncNotifier.setOffline();
+        AppLogger.instance.i('オフライン：目標をローカルに作成しました（同期待ち）: ${localGoal.title}');
+        return localGoal;
       } else {
-        _syncNotifier.setUnsynced(); // 未同期データありとして記録
+        // オンライン時：Supabaseにも即座に保存を試行
+        AppLogger.instance.i('オンライン状態を検出、Supabase保存を試行します: ${localGoal.title}');
+        try {
+          final remoteGoal = await _remoteDatasource.createGoal(localGoal);
+          
+          // Supabase保存成功：ローカルも同期済み状態に更新
+          final syncedGoal = localGoal.copyWith(isSynced: true);
+          await _localDatasource.updateGoal(syncedGoal);
+          
+          _syncNotifier.setSynced();
+          AppLogger.instance.i('✅ オンライン：目標をローカル＆Supabaseに保存しました: ${remoteGoal.title}');
+          return syncedGoal;
+        } catch (remoteError) {
+          // Supabase保存失敗：ローカル保存は成功として扱い、未同期状態にする
+          _syncNotifier.setUnsynced();
+          AppLogger.instance.w('❌ Supabase保存に失敗、ローカルのみ保存されました: ${localGoal.title}');
+          AppLogger.instance.w('Supabaseエラー詳細: $remoteError');
+          return localGoal;
+        }
       }
-
-      AppLogger.instance.i('目標をローカルに作成しました（手動同期が必要）: ${localGoal.title}');
-      return localGoal;
     } catch (e) {
       AppLogger.instance.e('目標の作成に失敗しました', e);
       _syncNotifier.setError(e.toString());
@@ -124,21 +142,35 @@ class HybridGoalsRepository implements GoalsRepository {
   @override
   Future<GoalsModel> updateGoal(GoalsModel goal) async {
     try {
-      // ローカルDBのみを更新（リアルタイム同期は削除）
+      // まずローカルDBを更新
       final updatedLocalGoal = await _localDatasource.updateGoal(goal);
 
-      // ネットワーク接続状態を確認して未同期状態を設定
+      // ネットワーク接続状態を確認
       final connectivityResult = await _connectivity.checkConnectivity();
       if (connectivityResult == ConnectivityResult.none) {
+        // オフライン時：ローカルのみ更新、未同期状態
         _syncNotifier.setOffline();
+        AppLogger.instance.i('オフライン：目標をローカルで更新しました（同期待ち）: ${updatedLocalGoal.title}');
+        return updatedLocalGoal;
       } else {
-        _syncNotifier.setUnsynced(); // 未同期データありとして記録
+        // オンライン時：Supabaseにも即座に更新を試行
+        try {
+          final remoteGoal = await _remoteDatasource.updateGoal(updatedLocalGoal);
+          
+          // Supabase更新成功：ローカルも同期済み状態に更新
+          final syncedGoal = updatedLocalGoal.copyWith(isSynced: true);
+          await _localDatasource.updateGoal(syncedGoal);
+          
+          _syncNotifier.setSynced();
+          AppLogger.instance.i('オンライン：目標をローカル＆Supabaseで更新しました: ${remoteGoal.title}');
+          return syncedGoal;
+        } catch (remoteError) {
+          // Supabase更新失敗：ローカル更新は成功として扱い、未同期状態にする
+          _syncNotifier.setUnsynced();
+          AppLogger.instance.w('Supabase更新に失敗、ローカルのみ更新されました: ${updatedLocalGoal.title} - $remoteError');
+          return updatedLocalGoal;
+        }
       }
-
-      AppLogger.instance.i(
-        '目標をローカルで更新しました（手動同期が必要）: ${updatedLocalGoal.title}',
-      );
-      return updatedLocalGoal;
     } catch (e) {
       AppLogger.instance.e('目標の更新に失敗しました', e);
       _syncNotifier.setError(e.toString());
