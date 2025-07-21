@@ -11,6 +11,7 @@ import '../../provider/home_provider.dart';
 import '../../../goal_timer/presentation/screens/timer_screen.dart';
 import '../../../statistics/presentation/screens/statistics_screen.dart';
 import '../../../settings/presentation/screens/settings_screen.dart';
+import '../../../memo_record/presentation/screens/memo_record_screen.dart';
 import '../../../shared/widgets/sync_status_indicator.dart';
 import '../../../../core/provider/providers.dart';
 import '../../../auth/domain/entities/auth_state.dart' as app_auth;
@@ -39,7 +40,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
     
     _fabAnimationController = AnimationController(
       duration: AnimationConsts.medium,
@@ -97,7 +98,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final pages = [
       const _HomeTabContent(),
       const _TimerPage(),
-      const StatisticsScreen(),
+      const SizedBox.shrink(), // 中央（プラスボタン用の空スペース）
+      const MemoRecordScreen(),
+      const SettingsScreen(),
     ];
 
     return Scaffold(
@@ -132,7 +135,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           child: BottomNavigationBar(
             currentIndex: _tabController.index,
             onTap: (index) {
-              _tabController.animateTo(index);
+              // 中央タブ（index: 2）がタップされた場合は目標作成モーダルを表示
+              if (index == 2) {
+                _showAddGoalModal(context);
+                return;
+              }
+              // 中央タブより後のタブの場合はインデックスを調整
+              final adjustedIndex = index > 2 ? index : index;
+              _tabController.animateTo(adjustedIndex);
               setState(() {});
             },
             type: BottomNavigationBarType.fixed,
@@ -156,9 +166,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 label: 'タイマー',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.bar_chart_outlined),
-                activeIcon: Icon(Icons.bar_chart),
-                label: '統計',
+                icon: Icon(Icons.add, color: Colors.transparent),
+                label: '',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.edit_note_outlined),
+                activeIcon: Icon(Icons.edit_note),
+                label: 'メモ',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.settings_outlined),
+                activeIcon: Icon(Icons.settings),
+                label: '設定',
               ),
             ],
           ),
@@ -294,45 +313,6 @@ class _HomeTabContent extends ConsumerWidget {
       ),
       actions: [
         const SyncStatusIndicator(),
-        PopupMenuButton<String>(
-          icon: const Icon(Icons.more_vert, color: Colors.white),
-          onSelected: (value) {
-            switch (value) {
-              case 'settings':
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const SettingsScreen(),
-                  ),
-                );
-                break;
-              case 'signout':
-                _showSignOutDialog(context, ref);
-                break;
-            }
-          },
-          itemBuilder: (BuildContext context) => [
-            const PopupMenuItem<String>(
-              value: 'settings',
-              child: ListTile(
-                leading: Icon(Icons.settings),
-                title: Text('設定'),
-                dense: true,
-              ),
-            ),
-            const PopupMenuItem<String>(
-              value: 'signout',
-              child: ListTile(
-                leading: Icon(Icons.logout, color: Colors.red),
-                title: Text(
-                  'サインアウト',
-                  style: TextStyle(color: Colors.red),
-                ),
-                dense: true,
-              ),
-            ),
-          ],
-        ),
       ],
     );
   }
@@ -407,43 +387,6 @@ class _HomeTabContent extends ConsumerWidget {
     );
   }
 
-  void _showSignOutDialog(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('サインアウト'),
-          content: const Text('サインアウトしますか？'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('キャンセル'),
-            ),
-            TextButton(
-              onPressed: () async {
-                Navigator.of(context).pop();
-                try {
-                  final authNotifier = ref.read(authViewModelProvider.notifier);
-                  await authNotifier.signOut();
-                } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('サインアウトに失敗しました: $e'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                }
-              },
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: const Text('サインアウト'),
-            ),
-          ],
-        );
-      },
-    );
-  }
 }
 
 class _TimerPage extends ConsumerWidget {
