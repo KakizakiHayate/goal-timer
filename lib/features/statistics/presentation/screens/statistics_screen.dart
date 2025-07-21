@@ -180,55 +180,90 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
   }
 
   Widget _buildMetricsGrid() {
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: SpacingConsts.m,
-      mainAxisSpacing: SpacingConsts.m,
-      childAspectRatio: 1.3,
-      children: [
-        MetricCard(
-          title: '総勉強時間',
-          value: '24',
-          unit: 'h',
-          icon: Icons.schedule_outlined,
-          iconColor: ColorConsts.primary,
-          changeText: '+2.5h',
-          changeColor: ColorConsts.success,
-          subtitle: '先週比',
-        ),
-        MetricCard(
-          title: '継続日数',
-          value: '12',
-          unit: '日',
-          icon: Icons.whatshot_outlined,
-          iconColor: ColorConsts.warning,
-          changeText: '+3日',
-          changeColor: ColorConsts.success,
-          subtitle: '現在のストリーク',
-        ),
-        MetricCard(
-          title: '達成率',
-          value: '85',
-          unit: '%',
-          icon: Icons.trending_up_outlined,
-          iconColor: ColorConsts.success,
-          changeText: '+5%',
-          changeColor: ColorConsts.success,
-          subtitle: '目標達成率',
-        ),
-        MetricCard(
-          title: '平均集中時間',
-          value: '42',
-          unit: '分',
-          icon: Icons.timer_outlined,
-          iconColor: ColorConsts.primary,
-          changeText: '+7分',
-          changeColor: ColorConsts.success,
-          subtitle: '1セッション平均',
-        ),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // 画面幅に応じて2列のレイアウトを動的に調整
+        final availableWidth = constraints.maxWidth;
+        final cardWidth = (availableWidth - SpacingConsts.m) / 2;
+        
+        return Column(
+          children: [
+            // 1行目
+            Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    width: cardWidth,
+                    child: MetricCard(
+                      title: '総勉強時間',
+                      value: '24',
+                      unit: 'h',
+                      icon: Icons.schedule_outlined,
+                      iconColor: ColorConsts.primary,
+                      changeText: '+2.5h',
+                      changeColor: ColorConsts.success,
+                      subtitle: '先週比',
+                    ),
+                  ),
+                ),
+                const SizedBox(width: SpacingConsts.m),
+                Expanded(
+                  child: SizedBox(
+                    width: cardWidth,
+                    child: MetricCard(
+                      title: '継続日数',
+                      value: '12',
+                      unit: '日',
+                      icon: Icons.whatshot_outlined,
+                      iconColor: ColorConsts.warning,
+                      changeText: '+3日',
+                      changeColor: ColorConsts.success,
+                      subtitle: '現在のストリーク',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: SpacingConsts.m),
+            // 2行目
+            Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    width: cardWidth,
+                    child: MetricCard(
+                      title: '達成率',
+                      value: '85',
+                      unit: '%',
+                      icon: Icons.trending_up_outlined,
+                      iconColor: ColorConsts.success,
+                      changeText: '+5%',
+                      changeColor: ColorConsts.success,
+                      subtitle: '目標達成率',
+                    ),
+                  ),
+                ),
+                const SizedBox(width: SpacingConsts.m),
+                Expanded(
+                  child: SizedBox(
+                    width: cardWidth,
+                    child: MetricCard(
+                      title: '平均集中時間',
+                      value: '42',
+                      unit: '分',
+                      icon: Icons.timer_outlined,
+                      iconColor: ColorConsts.primary,
+                      changeText: '+7分',
+                      changeColor: ColorConsts.success,
+                      subtitle: '1セッション平均',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -326,59 +361,106 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
         
         const SizedBox(height: SpacingConsts.l),
         
-        GridView.count(
-          crossAxisCount: 3,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          crossAxisSpacing: SpacingConsts.m,
-          mainAxisSpacing: SpacingConsts.m,
-          childAspectRatio: 0.8,
-          children: [
-            AchievementBadge(
-              title: '初回達成',
-              description: '初めて目標を達成',
-              icon: Icons.flag_outlined,
-              color: ColorConsts.success,
-              isUnlocked: true,
-              unlockedAt: DateTime.now().subtract(const Duration(days: 5)),
-            ),
-            AchievementBadge(
-              title: '3日継続',
-              description: '3日間連続で目標達成',
-              icon: Icons.local_fire_department,
-              color: ColorConsts.warning,
-              isUnlocked: true,
-              unlockedAt: DateTime.now().subtract(const Duration(days: 2)),
-            ),
-            AchievementBadge(
-              title: '1週間継続',
-              description: '7日間連続で目標達成',
-              icon: Icons.calendar_view_week,
-              color: ColorConsts.primary,
-              isUnlocked: false,
-            ),
-            AchievementBadge(
-              title: '早起き習慣',
-              description: '朝6時前に勉強開始',
-              icon: Icons.wb_sunny_outlined,
-              color: ColorConsts.warning,
-              isUnlocked: false,
-            ),
-            AchievementBadge(
-              title: '集中マスター',
-              description: '2時間連続で集中',
-              icon: Icons.psychology_outlined,
-              color: ColorConsts.primary,
-              isUnlocked: false,
-            ),
-            AchievementBadge(
-              title: '目標達成王',
-              description: '月間目標を100%達成',
-              icon: Icons.emoji_events_outlined,
-              color: const Color(0xFFFFD700),
-              isUnlocked: false,
-            ),
-          ],
+        LayoutBuilder(
+          builder: (context, constraints) {
+            // 画面幅に応じて3列のレイアウトを動的に調整
+            final availableWidth = constraints.maxWidth;
+            final cardWidth = (availableWidth - (SpacingConsts.m * 2)) / 3;
+            
+            return Column(
+              children: [
+                // 1行目
+                Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        width: cardWidth,
+                        child: AchievementBadge(
+                          title: '初回達成',
+                          description: '初めて目標を達成',
+                          icon: Icons.flag_outlined,
+                          color: ColorConsts.success,
+                          isUnlocked: true,
+                          unlockedAt: DateTime.now().subtract(const Duration(days: 5)),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: SpacingConsts.m),
+                    Expanded(
+                      child: SizedBox(
+                        width: cardWidth,
+                        child: AchievementBadge(
+                          title: '3日継続',
+                          description: '3日間連続で目標達成',
+                          icon: Icons.local_fire_department,
+                          color: ColorConsts.warning,
+                          isUnlocked: true,
+                          unlockedAt: DateTime.now().subtract(const Duration(days: 2)),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: SpacingConsts.m),
+                    Expanded(
+                      child: SizedBox(
+                        width: cardWidth,
+                        child: AchievementBadge(
+                          title: '1週間継続',
+                          description: '7日間連続で目標達成',
+                          icon: Icons.calendar_view_week,
+                          color: ColorConsts.primary,
+                          isUnlocked: false,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: SpacingConsts.m),
+                // 2行目
+                Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        width: cardWidth,
+                        child: AchievementBadge(
+                          title: '早起き習慣',
+                          description: '朝6時前に勉強開始',
+                          icon: Icons.wb_sunny_outlined,
+                          color: ColorConsts.warning,
+                          isUnlocked: false,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: SpacingConsts.m),
+                    Expanded(
+                      child: SizedBox(
+                        width: cardWidth,
+                        child: AchievementBadge(
+                          title: '集中マスター',
+                          description: '2時間連続で集中',
+                          icon: Icons.psychology_outlined,
+                          color: ColorConsts.primary,
+                          isUnlocked: false,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: SpacingConsts.m),
+                    Expanded(
+                      child: SizedBox(
+                        width: cardWidth,
+                        child: AchievementBadge(
+                          title: '目標達成王',
+                          description: '月間目標を100%達成',
+                          icon: Icons.emoji_events_outlined,
+                          color: const Color(0xFFFFD700),
+                          isUnlocked: false,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            );
+          },
         ),
       ],
     );
