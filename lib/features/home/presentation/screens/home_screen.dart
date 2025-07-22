@@ -20,6 +20,7 @@ import '../../../goal_detail/presentation/screens/goal_create_modal.dart';
 import '../../../../core/widgets/common_button.dart';
 import '../../../../core/widgets/pressable_card.dart';
 import '../../../goal_detail/presentation/viewmodels/goal_detail_view_model.dart';
+import '../../../../core/utils/app_logger.dart';
 
 /// 改善されたホーム画面
 class HomeScreen extends ConsumerStatefulWidget {
@@ -294,7 +295,7 @@ class _HomeTabContent extends ConsumerWidget {
         ),
 
         // 目標リスト
-        _buildGoalList(homeState, homeViewModel),
+        _buildGoalList(homeState, homeViewModel, ref),
       ],
     );
   }
@@ -359,7 +360,7 @@ class _HomeTabContent extends ConsumerWidget {
     }
   }
 
-  Widget _buildGoalList(HomeState homeState, HomeViewModel viewModel) {
+  Widget _buildGoalList(HomeState homeState, HomeViewModel viewModel, WidgetRef ref) {
     final goals = viewModel.filteredGoals;
 
     if (goals.isEmpty) {
@@ -422,8 +423,29 @@ class _HomeTabContent extends ConsumerWidget {
               ),
             );
           },
-          onEditTap: () {
-            // TODO: 目標編集画面に遷移
+          onEditTap: () async {
+            AppLogger.instance.i('🎯 [HomeScreen] 編集ボタンがタップされました');
+            AppLogger.instance.i('🎯 [HomeScreen] 編集対象目標: ${goal.title} (ID: ${goal.id})');
+            
+            final updatedGoal = await GoalCreateModal.show(
+              context, 
+              existingGoal: goal,
+            );
+            
+            AppLogger.instance.i('🔙 [HomeScreen] モーダルから戻りました');
+            
+            if (updatedGoal != null) {
+              AppLogger.instance.i('✅ [HomeScreen] 更新された目標を受け取りました: ${updatedGoal.title}');
+              AppLogger.instance.i('🔄 [HomeScreen] UI更新処理を開始します...');
+              
+              // プロバイダーを無効化してデータを再読み込み
+              ref.invalidate(goalDetailListProvider);
+              ref.read(homeViewModelProvider.notifier).reloadGoals();
+              
+              AppLogger.instance.i('✅ [HomeScreen] プロバイダー無効化とViewModelリロード完了');
+            } else {
+              AppLogger.instance.i('ℹ️ [HomeScreen] 更新がキャンセルされました（null が返されました）');
+            }
           },
         );
       }, childCount: goals.length),

@@ -302,7 +302,7 @@ INSERT INTO public.users (id, email, display_name, created_at, updated_at) VALUE
 ) ON CONFLICT (id) DO NOTHING;
 
 -- サンプル目標
-INSERT INTO public.goals (id, user_id, title, description, deadline, avoid_message, total_target_hours) VALUES
+INSERT INTO public.goals (id, user_id, title, description, deadline, avoid_message, target_minutes) VALUES
 (
     uuid_generate_v4(),
     '550e8400-e29b-41d4-a716-446655440000'::UUID,
@@ -310,7 +310,7 @@ INSERT INTO public.goals (id, user_id, title, description, deadline, avoid_messa
     '毎日コーディング練習をして、アプリ開発能力を高める',
     CURRENT_DATE + INTERVAL '30 days',
     'スキルアップが遅れて転職活動で不利になる',
-    30
+    1800
 ) ON CONFLICT DO NOTHING;
 */
 
@@ -328,17 +328,17 @@ SELECT
     g.deadline,
     g.is_completed,
     g.avoid_message,
-    g.total_target_hours,
+    g.target_minutes,
     g.spent_minutes,
     g.updated_at,
-    -- 進捗率の計算（分を時間に変換して計算）
+    -- 進捗率の計算（分単位で計算）
     CASE 
-        WHEN g.total_target_hours > 0 
-        THEN ROUND((g.spent_minutes::NUMERIC / 60.0 / g.total_target_hours) * 100, 2)
+        WHEN g.target_minutes > 0 
+        THEN ROUND((g.spent_minutes::NUMERIC / g.target_minutes) * 100, 2)
         ELSE 0 
     END AS progress_percentage,
     -- 残り時間（分単位）
-    GREATEST(0, (g.total_target_hours * 60) - g.spent_minutes) AS remaining_minutes,
+    GREATEST(0, g.target_minutes - g.spent_minutes) AS remaining_minutes,
     -- 今日の学習時間
     COALESCE(today_logs.today_minutes, 0) AS today_minutes,
     -- 継続日数

@@ -8,6 +8,7 @@ import '../../../../features/auth/presentation/widgets/auth_button.dart';
 import '../../../../core/models/goals/goals_model.dart';
 import '../../../../core/provider/providers.dart';
 import '../../../../features/auth/provider/auth_provider.dart';
+import '../../../../core/utils/app_logger.dart';
 
 /// 改善された目標作成モーダル
 class GoalCreateModal extends StatelessWidget {
@@ -520,10 +521,16 @@ class _GoalCreateModalContentState extends ConsumerState<_GoalCreateModalContent
     });
 
     try {
+      AppLogger.instance.i('🔄 目標更新処理を開始します');
+      AppLogger.instance.i('📝 更新対象目標: ${widget.existingGoal!.title} (ID: ${widget.existingGoal!.id})');
+      AppLogger.instance.i('📝 更新内容: タイトル=$_title, 説明=$_description, 回避メッセージ=$_avoidMessage, 目標時間=$_targetMinutes分');
+
       // UpdateGoalUseCaseを使用
       final updateGoalUseCase = ref.read(updateGoalUseCaseProvider);
+      AppLogger.instance.i('✅ UpdateGoalUseCaseを取得しました');
       
       // 目標を更新
+      AppLogger.instance.i('🚀 UseCase.call()を呼び出します...');
       final updatedGoal = await updateGoalUseCase(
         originalGoal: widget.existingGoal!,
         title: _title,
@@ -532,7 +539,12 @@ class _GoalCreateModalContentState extends ConsumerState<_GoalCreateModalContent
         targetMinutes: _targetMinutes,
       );
 
+      AppLogger.instance.i('✅ UseCase.call()が完了しました');
+      AppLogger.instance.i('📊 更新結果: ${updatedGoal.title} (ID: ${updatedGoal.id})');
+      AppLogger.instance.i('📊 更新後の目標時間: ${updatedGoal.targetMinutes}分');
+
       if (mounted) {
+        AppLogger.instance.i('🔙 モーダルを閉じて更新された目標を返します');
         Navigator.of(context).pop(updatedGoal);
         
         // 成功メッセージ
@@ -550,8 +562,13 @@ class _GoalCreateModalContentState extends ConsumerState<_GoalCreateModalContent
             ),
           ),
         );
+        AppLogger.instance.i('✅ 成功メッセージを表示しました');
       }
     } catch (e) {
+      AppLogger.instance.e('❌ 目標更新処理でエラーが発生しました', e);
+      AppLogger.instance.e('❌ エラー詳細: ${e.toString()}');
+      AppLogger.instance.e('❌ エラータイプ: ${e.runtimeType}');
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -567,12 +584,14 @@ class _GoalCreateModalContentState extends ConsumerState<_GoalCreateModalContent
             ),
           ),
         );
+        AppLogger.instance.i('❌ エラーメッセージを表示しました');
       }
     } finally {
       if (mounted) {
         setState(() {
           _isLoading = false;
         });
+        AppLogger.instance.i('🏁 目標更新処理が終了しました');
       }
     }
   }

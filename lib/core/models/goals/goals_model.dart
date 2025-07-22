@@ -166,6 +166,7 @@ extension GoalsModelExtension on GoalsModel {
       'avoid_message': avoidMessage,
       'target_minutes': targetMinutes,
       'spent_minutes': spentMinutes,
+      // version フィールドを削除：Supabaseテーブルに存在しないため
     };
 
     // 同期関連フィールドを追加
