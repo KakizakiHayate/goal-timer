@@ -210,7 +210,9 @@ final deleteGoalUseCaseProvider = Provider<DeleteGoalUseCase>((ref) {
 final syncCheckerProvider = Provider<SyncChecker>((ref) {
   final goalsRepository = ref.watch(hybridGoalsRepositoryProvider);
   final usersRepository = ref.watch(hybridUsersRepositoryProvider);
-  final dailyStudyLogsRepository = ref.watch(hybridDailyStudyLogsRepositoryProvider);
+  final dailyStudyLogsRepository = ref.watch(
+    hybridDailyStudyLogsRepositoryProvider,
+  );
   final syncNotifier = ref.watch(syncStateProvider.notifier);
 
   return SyncChecker(
@@ -261,6 +263,27 @@ final authReadyProvider = StateProvider<bool>((ref) {
     loading: () => false,
     error: (_, __) => false,
   );
+});
+
+/// アプリ起動時の同期チェッククロバイダー（認証初期化完了後に実行）
+final startupSyncProvider = FutureProvider<void>((ref) async {
+  // 認証初期化の完了を待つ
+  await ref.watch(authInitializationProvider.future);
+
+  // 認証状態を確認
+  final authState = ref.read(globalAuthStateProvider);
+
+  if (authState == app_auth.AuthState.authenticated) {
+    AppLogger.instance.i('アプリ起動時の同期チェックを実行します');
+
+    // SyncCheckerを通じて同期チェック実行
+    final syncChecker = ref.read(syncCheckerProvider);
+    await syncChecker.checkAndSyncIfNeeded();
+
+    AppLogger.instance.i('アプリ起動時の同期チェックが完了しました');
+  } else {
+    AppLogger.instance.i('未認証のためアプリ起動時の同期チェックをスキップします');
+  }
 });
 
 // SharedPreferencesのプロバイダー

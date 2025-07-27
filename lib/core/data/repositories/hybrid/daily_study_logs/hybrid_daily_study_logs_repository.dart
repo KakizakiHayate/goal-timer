@@ -264,4 +264,15 @@ class HybridDailyStudyLogsRepository implements DailyStudyLogsRepository {
       _syncNotifier.setError(e.toString());
     }
   }
+
+  /// 未同期データの有無をチェック（SyncChecker用）
+  Future<bool> hasUnsyncedData() async {
+    try {
+      final unsyncedLogs = await _localDatasource.getUnsyncedLogs();
+      return unsyncedLogs.isNotEmpty;
+    } catch (e) {
+      AppLogger.instance.e('未同期データチェックエラー', e);
+      return false;
+    }
+  }
 }

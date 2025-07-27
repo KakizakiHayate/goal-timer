@@ -104,6 +104,21 @@ class SplashViewModel extends StateNotifier<SplashState> {
       // authInitializationProviderから認証初期化を実行
       await _ref.read(authInitializationProvider.future);
 
+      // アプリ起動時の同期チェックを実行
+      if (!_isDisposed) {
+        AppLogger.instance.i('SplashViewModel: アプリ起動時の同期チェックを実行します');
+        try {
+          await _ref.read(startupSyncProvider.future);
+          AppLogger.instance.i('SplashViewModel: アプリ起動時の同期チェックが完了しました');
+        } catch (syncError) {
+          AppLogger.instance.w(
+            'SplashViewModel: アプリ起動時の同期チェックでエラーが発生しましたが、処理を続行します',
+          );
+          AppLogger.instance.e('同期エラー詳細', syncError);
+          // 同期エラーでもアプリの初期化は完了させる
+        }
+      }
+
       _safeUpdateState(
         (state) => state.copyWith(isAuthReady: true, isLoading: false),
       );

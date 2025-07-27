@@ -5,6 +5,8 @@ import 'package:goal_timer/core/provider/providers.dart';
 import 'package:goal_timer/core/provider/sync_state_provider.dart';
 import 'package:goal_timer/core/services/study_statistics_service.dart';
 import 'package:goal_timer/core/utils/app_logger.dart';
+import 'package:goal_timer/features/auth/domain/entities/auth_state.dart'
+    as app_auth;
 
 class HomeState {
   final List<GoalsModel> goals;
@@ -60,6 +62,29 @@ class HomeViewModel extends StateNotifier<HomeState> {
     _loadStatistics();
     // 同期状態の監視
     _listenToSyncState();
+    // アプリ起動時の同期チェック実行
+    _performStartupSyncCheck();
+  }
+
+  /// アプリ起動時の同期チェック（認証済みユーザー用）
+  void _performStartupSyncCheck() async {
+    try {
+      AppLogger.instance.i('ホーム画面初期化時の同期チェックを開始します');
+
+      // 認証状態を確認
+      final authState = _ref.read(globalAuthStateProvider);
+      if (authState == app_auth.AuthState.authenticated) {
+        // SyncCheckerを通じて同期チェック実行
+        final syncChecker = _ref.read(syncCheckerProvider);
+        await syncChecker.checkAndSyncIfNeeded();
+        AppLogger.instance.i('ホーム画面初期化時の同期チェックが完了しました');
+      } else {
+        AppLogger.instance.i('未認証のためホーム画面での同期チェックをスキップします');
+      }
+    } catch (e) {
+      AppLogger.instance.e('ホーム画面初期化時の同期チェックでエラーが発生しました', e);
+      // エラーでもアプリの動作を止めない
+    }
   }
 
   // 目標データの読み込み（ローカル優先）
@@ -73,7 +98,7 @@ class HomeViewModel extends StateNotifier<HomeState> {
       state = state.copyWith(goals: goals, isLoading: false);
 
       AppLogger.instance.i('ホーム画面に${goals.length}件の目標を表示しました');
-      
+
       // ストリーク情報も読み込む
       _loadGoalStreaks();
     } catch (e) {
@@ -105,13 +130,13 @@ class HomeViewModel extends StateNotifier<HomeState> {
     try {
       // 同期後の再読み込みでは同期を避けるため、直接ローカルから取得
       final repository = _ref.read(goalsRepositoryProvider);
-      
+
       // ローカルデータのみを取得（同期処理をスキップ）
       final goals = await repository.getLocalGoalsOnly();
 
       state = state.copyWith(goals: goals);
       AppLogger.instance.i('同期後のデータ再読み込みが完了しました: ${goals.length}件');
-      
+
       // ストリーク情報も再読み込み
       _loadGoalStreaks();
     } catch (e) {
@@ -172,7 +197,7 @@ class HomeViewModel extends StateNotifier<HomeState> {
 
     try {
       final statistics = await _statisticsService.getCurrentUserStatistics();
-      
+
       state = state.copyWith(
         statistics: statistics,
         isStatisticsLoading: false,
@@ -226,7 +251,7 @@ class HomeViewModel extends StateNotifier<HomeState> {
   // 同期状態の取得
   bool get isSyncing => state.isSyncing;
   SyncStatus get syncStatus => state.syncStatus;
-  
+
   // 統計データの取得
   StudyStatistics get statistics => state.statistics;
   bool get isStatisticsLoading => state.isStatisticsLoading;

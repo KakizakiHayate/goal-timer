@@ -427,22 +427,35 @@ class _HomeTabContent extends ConsumerWidget {
             AppLogger.instance.i('🎯 [HomeScreen] 編集ボタンがタップされました');
             AppLogger.instance.i('🎯 [HomeScreen] 編集対象目標: ${goal.title} (ID: ${goal.id})');
             
-            final updatedGoal = await GoalCreateModal.show(
+            final result = await GoalCreateModal.show(
               context, 
               existingGoal: goal,
             );
             
             AppLogger.instance.i('🔙 [HomeScreen] モーダルから戻りました');
             
-            if (updatedGoal != null) {
-              AppLogger.instance.i('✅ [HomeScreen] 更新された目標を受け取りました: ${updatedGoal.title}');
-              AppLogger.instance.i('🔄 [HomeScreen] UI更新処理を開始します...');
-              
-              // プロバイダーを無効化してデータを再読み込み
-              ref.invalidate(goalDetailListProvider);
-              ref.read(homeViewModelProvider.notifier).reloadGoals();
-              
-              AppLogger.instance.i('✅ [HomeScreen] プロバイダー無効化とViewModelリロード完了');
+            if (result != null) {
+              if (result == 'deleted') {
+                // 削除された場合
+                AppLogger.instance.i('🗑️ [HomeScreen] 目標が削除されました');
+                AppLogger.instance.i('🔄 [HomeScreen] UI更新処理を開始します...');
+                
+                // プロバイダーを無効化してデータを再読み込み
+                ref.invalidate(goalDetailListProvider);
+                ref.read(homeViewModelProvider.notifier).reloadGoals();
+                
+                AppLogger.instance.i('✅ [HomeScreen] 削除後のUI更新完了');
+              } else if (result is GoalsModel) {
+                // 更新された場合
+                AppLogger.instance.i('✅ [HomeScreen] 更新された目標を受け取りました: ${result.title}');
+                AppLogger.instance.i('🔄 [HomeScreen] UI更新処理を開始します...');
+                
+                // プロバイダーを無効化してデータを再読み込み
+                ref.invalidate(goalDetailListProvider);
+                ref.read(homeViewModelProvider.notifier).reloadGoals();
+                
+                AppLogger.instance.i('✅ [HomeScreen] プロバイダー無効化とViewModelリロード完了');
+              }
             } else {
               AppLogger.instance.i('ℹ️ [HomeScreen] 更新がキャンセルされました（null が返されました）');
             }

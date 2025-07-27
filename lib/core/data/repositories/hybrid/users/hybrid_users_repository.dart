@@ -258,4 +258,15 @@ class HybridUsersRepository implements UsersRepository {
       _syncNotifier.setError(e.toString());
     }
   }
+
+  /// 未同期データの有無をチェック（SyncChecker用）
+  Future<bool> hasUnsyncedData() async {
+    try {
+      final unsyncedUsers = await _localDatasource.getUnsyncedUsers();
+      return unsyncedUsers.isNotEmpty;
+    } catch (e) {
+      AppLogger.instance.e('未同期データチェックエラー', e);
+      return false;
+    }
+  }
 }

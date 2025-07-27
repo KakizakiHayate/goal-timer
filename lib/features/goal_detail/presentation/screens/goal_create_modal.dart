@@ -20,95 +20,98 @@ class GoalCreateModal extends StatelessWidget {
     return const SizedBox.shrink();
   }
 
-  static Future<GoalsModel?> show(BuildContext context, {GoalsModel? existingGoal}) {
-    return showModalBottomSheet<GoalsModel>(
+  static Future<dynamic> show(
+    BuildContext context, {
+    GoalsModel? existingGoal,
+  }) {
+    return showModalBottomSheet<dynamic>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       enableDrag: true,
       isDismissible: true,
-      builder: (context) => Container(
-        height: MediaQuery.of(context).size.height * 0.85,
-        decoration: const BoxDecoration(
-          color: ColorConsts.cardBackground,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(24),
-            topRight: Radius.circular(24),
-          ),
-        ),
-        child: Column(
-          children: [
-            // ハンドル
-            Container(
-              margin: const EdgeInsets.only(
-                top: SpacingConsts.m,
-                bottom: SpacingConsts.s,
-              ),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: ColorConsts.textTertiary,
-                borderRadius: BorderRadius.circular(2),
+      builder:
+          (context) => Container(
+            height: MediaQuery.of(context).size.height * 0.85,
+            decoration: const BoxDecoration(
+              color: ColorConsts.cardBackground,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(24),
+                topRight: Radius.circular(24),
               ),
             ),
-            
-            // ヘッダー
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: SpacingConsts.l,
-                vertical: SpacingConsts.m,
-              ),
-              decoration: const BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: ColorConsts.border,
-                    width: 1,
+            child: Column(
+              children: [
+                // ハンドル
+                Container(
+                  margin: const EdgeInsets.only(
+                    top: SpacingConsts.m,
+                    bottom: SpacingConsts.s,
+                  ),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: ColorConsts.textTertiary,
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      existingGoal != null ? '目標を編集' : '新しい目標を作成',
-                      style: TextConsts.h3.copyWith(
-                        color: ColorConsts.textPrimary,
-                        fontWeight: FontWeight.bold,
-                      ),
+
+                // ヘッダー
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: SpacingConsts.l,
+                    vertical: SpacingConsts.m,
+                  ),
+                  decoration: const BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(color: ColorConsts.border, width: 1),
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () => Navigator.of(context).pop(),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: const BoxDecoration(
-                        color: ColorConsts.backgroundSecondary,
-                        shape: BoxShape.circle,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          existingGoal != null ? '目標を編集' : '新しい目標を作成',
+                          style: TextConsts.h3.copyWith(
+                            color: ColorConsts.textPrimary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
-                      child: const Icon(
-                        Icons.close,
-                        size: 20,
-                        color: ColorConsts.textSecondary,
+                      GestureDetector(
+                        onTap: () => Navigator.of(context).pop(),
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: const BoxDecoration(
+                            color: ColorConsts.backgroundSecondary,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.close,
+                            size: 20,
+                            color: ColorConsts.textSecondary,
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+
+                // コンテンツ（スクロール対応）
+                Expanded(
+                  child: _GoalCreateModalContent(existingGoal: existingGoal),
+                ),
+
+                // Safe Area padding
+                SafeArea(
+                  top: false,
+                  child: SizedBox(
+                    height: MediaQuery.of(context).padding.bottom,
+                  ),
+                ),
+              ],
             ),
-            
-            // コンテンツ（スクロール対応）
-            Expanded(
-              child: _GoalCreateModalContent(existingGoal: existingGoal),
-            ),
-            
-            // Safe Area padding
-            SafeArea(
-              top: false,
-              child: SizedBox(height: MediaQuery.of(context).padding.bottom),
-            ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 }
@@ -116,16 +119,18 @@ class GoalCreateModal extends StatelessWidget {
 // スクロールコントローラーを受け取る内部ウィジェット
 class _GoalCreateModalContent extends ConsumerStatefulWidget {
   final GoalsModel? existingGoal;
-  
+
   const _GoalCreateModalContent({this.existingGoal});
 
   @override
-  ConsumerState<_GoalCreateModalContent> createState() => _GoalCreateModalContentState();
+  ConsumerState<_GoalCreateModalContent> createState() =>
+      _GoalCreateModalContentState();
 }
 
-class _GoalCreateModalContentState extends ConsumerState<_GoalCreateModalContent> {
+class _GoalCreateModalContentState
+    extends ConsumerState<_GoalCreateModalContent> {
   final _formKey = GlobalKey<FormState>();
-  
+
   String _title = '';
   String _description = '';
   String _avoidMessage = '';
@@ -134,7 +139,7 @@ class _GoalCreateModalContentState extends ConsumerState<_GoalCreateModalContent
 
   String? _titleError;
   String? _avoidMessageError;
-  
+
   @override
   void initState() {
     super.initState();
@@ -150,26 +155,24 @@ class _GoalCreateModalContentState extends ConsumerState<_GoalCreateModalContent
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(
-        horizontal: SpacingConsts.l,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: SpacingConsts.l),
       child: Form(
         key: _formKey,
         child: Column(
           children: [
             // 説明テキスト
             _buildDescription(),
-            
+
             const SizedBox(height: SpacingConsts.l),
-            
+
             // フォーム
             _buildForm(),
-            
+
             const SizedBox(height: SpacingConsts.l),
-            
+
             // 作成ボタン
             _buildCreateButton(),
-            
+
             const SizedBox(height: SpacingConsts.l),
           ],
         ),
@@ -256,9 +259,9 @@ class _GoalCreateModalContentState extends ConsumerState<_GoalCreateModalContent
           validator: _validateTitle,
           textInputAction: TextInputAction.next,
         ),
-        
+
         const SizedBox(height: SpacingConsts.l),
-        
+
         // 目標説明
         CustomTextField(
           labelText: '目標の詳細（任意）',
@@ -274,14 +277,14 @@ class _GoalCreateModalContentState extends ConsumerState<_GoalCreateModalContent
           },
           textInputAction: TextInputAction.next,
         ),
-        
+
         const SizedBox(height: SpacingConsts.l),
-        
+
         // 目標時間設定
         _buildTargetTimeSelector(),
-        
+
         const SizedBox(height: SpacingConsts.l),
-        
+
         // ネガティブ回避メッセージ
         CustomTextField(
           labelText: 'やらないとどうなる？',
@@ -320,10 +323,7 @@ class _GoalCreateModalContentState extends ConsumerState<_GoalCreateModalContent
           decoration: BoxDecoration(
             color: ColorConsts.backgroundSecondary,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: ColorConsts.border,
-              width: 1.5,
-            ),
+            border: Border.all(color: ColorConsts.border, width: 1.5),
           ),
           child: Column(
             children: [
@@ -370,10 +370,7 @@ class _GoalCreateModalContentState extends ConsumerState<_GoalCreateModalContent
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: ColorConsts.primary,
-                      width: 1.5,
-                    ),
+                    border: Border.all(color: ColorConsts.primary, width: 1.5),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -403,11 +400,31 @@ class _GoalCreateModalContentState extends ConsumerState<_GoalCreateModalContent
   }
 
   Widget _buildCreateButton() {
-    return AuthButton(
-      type: AuthButtonType.email,
-      text: widget.existingGoal != null ? '変更を保存' : '目標を作成',
-      isLoading: _isLoading,
-      onPressed: _isFormValid() ? _handleSubmit : null,
+    return Column(
+      children: [
+        AuthButton(
+          type: AuthButtonType.email,
+          text: widget.existingGoal != null ? '変更を保存' : '目標を作成',
+          isLoading: _isLoading,
+          onPressed: _isFormValid() ? _handleSubmit : null,
+        ),
+
+        // 編集モード時のみ削除ボタンを表示
+        if (widget.existingGoal != null) ...[
+          const SizedBox(height: SpacingConsts.m),
+          TextButton.icon(
+            icon: Icon(Icons.delete_outline, color: ColorConsts.error),
+            label: Text(
+              'この目標を削除',
+              style: TextConsts.body.copyWith(
+                color: ColorConsts.error,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            onPressed: _isLoading ? null : _handleDeleteGoal,
+          ),
+        ],
+      ],
     );
   }
 
@@ -449,11 +466,11 @@ class _GoalCreateModalContentState extends ConsumerState<_GoalCreateModalContent
     try {
       // CreateGoalUseCaseを使用
       final createGoalUseCase = ref.read(createGoalUseCaseProvider);
-      
+
       // 現在のユーザーIDを取得
       final authViewModel = ref.read(authViewModelProvider.notifier);
       final currentUserId = authViewModel.currentUser?.id;
-      
+
       if (currentUserId == null) {
         throw Exception('ユーザーが認証されていません');
       }
@@ -470,7 +487,7 @@ class _GoalCreateModalContentState extends ConsumerState<_GoalCreateModalContent
 
       if (mounted) {
         Navigator.of(context).pop(newGoal);
-        
+
         // 成功メッセージ
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -522,13 +539,17 @@ class _GoalCreateModalContentState extends ConsumerState<_GoalCreateModalContent
 
     try {
       AppLogger.instance.i('🔄 目標更新処理を開始します');
-      AppLogger.instance.i('📝 更新対象目標: ${widget.existingGoal!.title} (ID: ${widget.existingGoal!.id})');
-      AppLogger.instance.i('📝 更新内容: タイトル=$_title, 説明=$_description, 回避メッセージ=$_avoidMessage, 目標時間=$_targetMinutes分');
+      AppLogger.instance.i(
+        '📝 更新対象目標: ${widget.existingGoal!.title} (ID: ${widget.existingGoal!.id})',
+      );
+      AppLogger.instance.i(
+        '📝 更新内容: タイトル=$_title, 説明=$_description, 回避メッセージ=$_avoidMessage, 目標時間=$_targetMinutes分',
+      );
 
       // UpdateGoalUseCaseを使用
       final updateGoalUseCase = ref.read(updateGoalUseCaseProvider);
       AppLogger.instance.i('✅ UpdateGoalUseCaseを取得しました');
-      
+
       // 目標を更新
       AppLogger.instance.i('🚀 UseCase.call()を呼び出します...');
       final updatedGoal = await updateGoalUseCase(
@@ -540,13 +561,15 @@ class _GoalCreateModalContentState extends ConsumerState<_GoalCreateModalContent
       );
 
       AppLogger.instance.i('✅ UseCase.call()が完了しました');
-      AppLogger.instance.i('📊 更新結果: ${updatedGoal.title} (ID: ${updatedGoal.id})');
+      AppLogger.instance.i(
+        '📊 更新結果: ${updatedGoal.title} (ID: ${updatedGoal.id})',
+      );
       AppLogger.instance.i('📊 更新後の目標時間: ${updatedGoal.targetMinutes}分');
 
       if (mounted) {
         AppLogger.instance.i('🔙 モーダルを閉じて更新された目標を返します');
         Navigator.of(context).pop(updatedGoal);
-        
+
         // 成功メッセージ
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -568,7 +591,7 @@ class _GoalCreateModalContentState extends ConsumerState<_GoalCreateModalContent
       AppLogger.instance.e('❌ 目標更新処理でエラーが発生しました', e);
       AppLogger.instance.e('❌ エラー詳細: ${e.toString()}');
       AppLogger.instance.e('❌ エラータイプ: ${e.runtimeType}');
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -592,6 +615,117 @@ class _GoalCreateModalContentState extends ConsumerState<_GoalCreateModalContent
           _isLoading = false;
         });
         AppLogger.instance.i('🏁 目標更新処理が終了しました');
+      }
+    }
+  }
+
+  Future<void> _handleDeleteGoal() async {
+    // 削除確認ダイアログを表示
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('目標を削除しますか？'),
+        content: Text(
+          '「${widget.existingGoal!.title}」を削除すると、'
+          '関連する学習記録も全て削除されます。\n'
+          'この操作は取り消せません。',
+        ),
+        actions: [
+          TextButton(
+            child: Text(
+              'キャンセル',
+              style: TextConsts.body.copyWith(
+                color: ColorConsts.textSecondary,
+              ),
+            ),
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+          TextButton(
+            child: Text(
+              '削除',
+              style: TextConsts.body.copyWith(
+                color: ColorConsts.error,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            onPressed: () => Navigator.of(context).pop(true),
+          ),
+        ],
+      ),
+    ) ?? false;
+
+    if (!confirmed) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      AppLogger.instance.i('🗑️ 目標削除処理を開始します');
+      AppLogger.instance.i('🎯 削除対象目標: ${widget.existingGoal!.title} (ID: ${widget.existingGoal!.id})');
+
+      // DeleteGoalUseCaseを使用
+      final deleteGoalUseCase = ref.read(deleteGoalUseCaseProvider);
+      AppLogger.instance.i('✅ DeleteGoalUseCaseを取得しました');
+      
+      // 目標を削除
+      AppLogger.instance.i('🚀 削除処理を実行します...');
+      await deleteGoalUseCase(
+        goalId: widget.existingGoal!.id,
+        goalTitle: widget.existingGoal!.title,
+      );
+
+      AppLogger.instance.i('✅ 削除処理が完了しました');
+
+      if (mounted) {
+        AppLogger.instance.i('🔙 モーダルを閉じて削除完了を通知します');
+        // 削除が成功したことを示すために特別な値を返す
+        Navigator.of(context).pop('deleted');
+        
+        // 成功メッセージ
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '目標「${widget.existingGoal!.title}」を削除しました',
+              style: const TextStyle(fontWeight: FontWeight.w500),
+            ),
+            backgroundColor: ColorConsts.success,
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(SpacingConsts.l),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+        AppLogger.instance.i('✅ 成功メッセージを表示しました');
+      }
+    } catch (e) {
+      AppLogger.instance.e('❌ 目標削除処理でエラーが発生しました', e);
+      AppLogger.instance.e('❌ エラー詳細: ${e.toString()}');
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '目標の削除に失敗しました: ${e.toString()}',
+              style: const TextStyle(fontWeight: FontWeight.w500),
+            ),
+            backgroundColor: ColorConsts.error,
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(SpacingConsts.l),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+        AppLogger.instance.i('❌ エラーメッセージを表示しました');
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        AppLogger.instance.i('🏁 目標削除処理が終了しました');
       }
     }
   }
@@ -623,7 +757,9 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
     _selectedHours = widget.initialMinutes ~/ 60;
     _selectedMinutes = widget.initialMinutes % 60;
     _hoursController = FixedExtentScrollController(initialItem: _selectedHours);
-    _minutesController = FixedExtentScrollController(initialItem: _selectedMinutes);
+    _minutesController = FixedExtentScrollController(
+      initialItem: _selectedMinutes,
+    );
   }
 
   @override
@@ -636,9 +772,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Container(
         padding: const EdgeInsets.all(SpacingConsts.l),
         child: Column(
@@ -646,9 +780,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
           children: [
             Text(
               '目標時間を設定',
-              style: TextConsts.h3.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: SpacingConsts.l),
             Container(
@@ -675,12 +807,14 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
                             child: Text(
                               '$index',
                               style: TextConsts.h3.copyWith(
-                                color: _selectedHours == index
-                                    ? ColorConsts.primary
-                                    : ColorConsts.textTertiary,
-                                fontWeight: _selectedHours == index
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
+                                color:
+                                    _selectedHours == index
+                                        ? ColorConsts.primary
+                                        : ColorConsts.textTertiary,
+                                fontWeight:
+                                    _selectedHours == index
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
                               ),
                             ),
                           );
@@ -714,12 +848,14 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
                             child: Text(
                               '$index',
                               style: TextConsts.h3.copyWith(
-                                color: _selectedMinutes == index
-                                    ? ColorConsts.primary
-                                    : ColorConsts.textTertiary,
-                                fontWeight: _selectedMinutes == index
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
+                                color:
+                                    _selectedMinutes == index
+                                        ? ColorConsts.primary
+                                        : ColorConsts.textTertiary,
+                                fontWeight:
+                                    _selectedMinutes == index
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
                               ),
                             ),
                           );
@@ -754,7 +890,8 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
-                      final totalMinutes = _selectedHours * 60 + _selectedMinutes;
+                      final totalMinutes =
+                          _selectedHours * 60 + _selectedMinutes;
                       if (totalMinutes > 0) {
                         widget.onTimeSelected(totalMinutes);
                         Navigator.of(context).pop();
@@ -772,9 +909,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
                     ),
                     child: const Text(
                       '決定',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: TextStyle(fontWeight: FontWeight.w600),
                     ),
                   ),
                 ),
