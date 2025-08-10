@@ -50,3 +50,13 @@ pubspec.lock
 .env
 .env.local
 .env.production
+
+# MCP設定ファイル（機密情報を含む）
+.mcp.json
+
+# iOS
+ios/Runner/GoogleService-Info.plist
+ios/build/*
+ios/Flutter/Debug.xcconfig
+ios/Flutter/Release.xcconfig
+ios/Flutter/Profile.xcconfig

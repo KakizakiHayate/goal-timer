@@ -36,11 +36,20 @@ class SupabaseGoalsDatasource implements SupabaseGoalsRepository {
   @override
   Future<GoalsModel> createGoal(GoalsModel goal) async {
     try {
+      final goalMap = goal.toMap();
+      AppLogger.instance.i('🚀 [SupabaseGoalsDatasource] CREATE: Supabase作成データ: $goalMap');
+      AppLogger.instance.i('🚀 [SupabaseGoalsDatasource] CREATE: 作成対象ID: ${goal.id}');
+      
       final data =
-          await _client.from(_tableName).insert(goal.toMap()).select().single();
+          await _client.from(_tableName).insert(goalMap).select().single();
+      
+      AppLogger.instance.i('✅ [SupabaseGoalsDatasource] CREATE: Supabase作成成功: $data');
       return GoalsModel.fromMap(data);
     } catch (e) {
-      AppLogger.instance.e('目標の作成に失敗しました', e);
+      AppLogger.instance.e('❌ [SupabaseGoalsDatasource] CREATE: 目標の作成に失敗しました: ${goal.id}', e);
+      AppLogger.instance.e('❌ [SupabaseGoalsDatasource] CREATE: 送信データ: ${goal.toMap()}');
+      AppLogger.instance.e('❌ [SupabaseGoalsDatasource] CREATE: エラー詳細: ${e.toString()}');
+      AppLogger.instance.e('❌ [SupabaseGoalsDatasource] CREATE: エラータイプ: ${e.runtimeType}');
       rethrow;
     }
   }
@@ -48,16 +57,25 @@ class SupabaseGoalsDatasource implements SupabaseGoalsRepository {
   @override
   Future<GoalsModel> updateGoal(GoalsModel goal) async {
     try {
+      final updateData = goal.toMap();
+      AppLogger.instance.i('🚀 [SupabaseGoalsDatasource] Supabase更新データ: $updateData');
+      AppLogger.instance.i('🚀 [SupabaseGoalsDatasource] 更新対象ID: ${goal.id}');
+      
       final data =
           await _client
               .from(_tableName)
-              .update(goal.toMap())
+              .update(updateData)
               .eq('id', goal.id)
               .select()
               .single();
+      
+      AppLogger.instance.i('✅ [SupabaseGoalsDatasource] Supabase更新成功: $data');
       return GoalsModel.fromMap(data);
     } catch (e) {
-      AppLogger.instance.e('目標の更新に失敗しました: ${goal.id}', e);
+      AppLogger.instance.e('❌ [SupabaseGoalsDatasource] 目標の更新に失敗しました: ${goal.id}', e);
+      AppLogger.instance.e('❌ [SupabaseGoalsDatasource] 送信データ: ${goal.toMap()}');
+      AppLogger.instance.e('❌ [SupabaseGoalsDatasource] エラー詳細: ${e.toString()}');
+      AppLogger.instance.e('❌ [SupabaseGoalsDatasource] エラータイプ: ${e.runtimeType}');
       rethrow;
     }
   }

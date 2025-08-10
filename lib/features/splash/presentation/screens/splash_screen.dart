@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:goal_timer/core/config/env_config.dart';
-import 'package:goal_timer/features/home/presentation/screens/home_screen.dart';
+
 import 'package:goal_timer/features/splash/provider/splash_provider.dart';
+import 'package:goal_timer/features/auth/domain/entities/auth_state.dart'
+    as app_auth;
+import 'package:goal_timer/core/provider/providers.dart';
+import 'package:goal_timer/core/utils/route_names.dart';
 
 class SplashScreen extends ConsumerWidget {
   const SplashScreen({super.key});
@@ -11,15 +15,34 @@ class SplashScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final splashState = ref.watch(splashViewModelProvider);
 
-    // 接続に成功した場合、ホーム画面に移動
-    if (!splashState.isLoading && splashState.isConnectionOk) {
+    // 初期化が完了した場合、認証状態に基づいて画面遷移
+    if (!splashState.isLoading && splashState.isReady) {
       // 画面遷移を遅延実行（すぐに遷移するとスプラッシュが見えない）
-      Future.delayed(Duration.zero, () {
+      Future.delayed(Duration.zero, () async {
         if (context.mounted) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
-          );
+          // 認証状態を確認
+          final authState = ref.read(globalAuthStateProvider);
+
+          switch (authState) {
+            case app_auth.AuthState.authenticated:
+              // 認証済みの場合はホーム画面へ
+              Navigator.pushReplacementNamed(context, RouteNames.home);
+              break;
+            case app_auth.AuthState.unauthenticated:
+            case app_auth.AuthState.initial:
+            case app_auth.AuthState.error:
+              // 未認証の場合はログイン画面へ
+              Navigator.pushReplacementNamed(context, RouteNames.login);
+              break;
+            case app_auth.AuthState.loading:
+              // まだ認証状態が確定していない場合は少し待つ
+              Future.delayed(const Duration(milliseconds: 500), () {
+                if (context.mounted) {
+                  Navigator.pushReplacementNamed(context, RouteNames.login);
+                }
+              });
+              break;
+          }
         }
       });
     }
@@ -56,11 +79,30 @@ class SplashScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 32),
-            if (splashState.isLoading) const CircularProgressIndicator(),
+            if (splashState.isLoading) ...[
+              const CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              Text(
+                _getLoadingMessage(splashState),
+                style: Theme.of(context).textTheme.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
+            ],
           ],
         ),
       ),
     );
+  }
+
+  // ローディング状態に応じたメッセージを返す
+  String _getLoadingMessage(splashState) {
+    if (!splashState.isConnectionOk) {
+      return 'サーバーに接続しています...';
+    } else if (!splashState.isAuthReady) {
+      return '認証システムを初期化しています...';
+    } else {
+      return '準備中...';
+    }
   }
 
   // ネットワークエラーダイアログを表示

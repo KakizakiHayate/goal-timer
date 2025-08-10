@@ -21,6 +21,19 @@ import 'package:goal_timer/core/data/repositories/hybrid/daily_study_logs/hybrid
 // UseCaseのインポート
 import 'package:goal_timer/core/usecases/goals/fetch_goals_usecase.dart';
 import 'package:goal_timer/core/usecases/goals/sync_goals_usecase.dart';
+import 'package:goal_timer/core/usecases/goals/create_goal_usecase.dart';
+import 'package:goal_timer/core/usecases/goals/update_goal_usecase.dart';
+import 'package:goal_timer/core/usecases/goals/delete_goal_usecase.dart';
+
+// SyncCheckerのインポート
+import 'package:goal_timer/core/services/sync_checker.dart';
+
+// 認証関連のインポートを追加
+import 'package:goal_timer/features/auth/domain/entities/app_user.dart';
+import 'package:goal_timer/features/auth/domain/entities/auth_state.dart'
+    as app_auth;
+import 'package:goal_timer/features/auth/provider/auth_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // ProviderScopeでアプリをラップするために使用するプロバイダーコンテナ
 final counterStateProvider = StateProvider<int>((ref) => 0);
@@ -171,4 +184,121 @@ final fetchGoalsUseCaseProvider = Provider<FetchGoalsUseCase>((ref) {
 final syncGoalsUseCaseProvider = Provider<SyncGoalsUseCase>((ref) {
   final repository = ref.watch(hybridGoalsRepositoryProvider);
   return SyncGoalsUseCase(repository);
+});
+
+/// 目標作成UseCaseプロバイダー
+final createGoalUseCaseProvider = Provider<CreateGoalUseCase>((ref) {
+  final repository = ref.watch(hybridGoalsRepositoryProvider);
+  return CreateGoalUseCase(repository);
+});
+
+/// 目標更新UseCaseプロバイダー
+final updateGoalUseCaseProvider = Provider<UpdateGoalUseCase>((ref) {
+  final repository = ref.watch(hybridGoalsRepositoryProvider);
+  return UpdateGoalUseCase(repository);
+});
+
+/// 目標削除UseCaseプロバイダー
+final deleteGoalUseCaseProvider = Provider<DeleteGoalUseCase>((ref) {
+  final repository = ref.watch(hybridGoalsRepositoryProvider);
+  return DeleteGoalUseCase(repository);
+});
+
+// ===== SyncCheckerプロバイダー =====
+
+/// 同期チェッカープロバイダー
+final syncCheckerProvider = Provider<SyncChecker>((ref) {
+  final goalsRepository = ref.watch(hybridGoalsRepositoryProvider);
+  final usersRepository = ref.watch(hybridUsersRepositoryProvider);
+  final dailyStudyLogsRepository = ref.watch(
+    hybridDailyStudyLogsRepositoryProvider,
+  );
+  final syncNotifier = ref.watch(syncStateProvider.notifier);
+
+  return SyncChecker(
+    goalsRepository: goalsRepository,
+    usersRepository: usersRepository,
+    dailyStudyLogsRepository: dailyStudyLogsRepository,
+    syncNotifier: syncNotifier,
+  );
+});
+
+// ===== 認証統合プロバイダー =====
+
+/// グローバル認証状態プロバイダー（他のmoduleから参照する用）
+final globalAuthStateProvider = Provider<app_auth.AuthState>((ref) {
+  return ref.watch(authViewModelProvider);
+});
+
+/// グローバル現在ユーザープロバイダー（他のmoduleから参照する用）
+final globalCurrentUserProvider = Provider<AppUser?>((ref) {
+  final authViewModel = ref.watch(authViewModelProvider.notifier);
+  return authViewModel.currentUser;
+});
+
+/// 認証状態の変更ストリームプロバイダー
+final authStateStreamProvider = StreamProvider<AppUser?>((ref) {
+  final authRemoteDataSource = ref.watch(authRemoteDataSourceProvider);
+  return authRemoteDataSource.authStateChanges;
+});
+
+/// 認証初期化プロバイダー（Supabase + SharedPreferences両方の初期化を待つ）
+final authInitializationProvider = FutureProvider<void>((ref) async {
+  // Supabaseの初期化を待つ
+  await ref.watch(supabaseInitProvider.future);
+
+  // SharedPreferencesの初期化を待つ
+  await ref.watch(sharedPreferencesProvider.future);
+
+  // 認証ViewModelの初期化
+  final authViewModel = ref.watch(authViewModelProvider.notifier);
+  await authViewModel.initialize();
+});
+
+/// 認証が完全に初期化されているかの状態プロバイダー
+final authReadyProvider = StateProvider<bool>((ref) {
+  final initAsyncValue = ref.watch(authInitializationProvider);
+  return initAsyncValue.when(
+    data: (_) => true,
+    loading: () => false,
+    error: (_, __) => false,
+  );
+});
+
+/// アプリ起動時の同期チェッククロバイダー（認証初期化完了後に実行）
+final startupSyncProvider = FutureProvider<void>((ref) async {
+  // 認証初期化の完了を待つ
+  await ref.watch(authInitializationProvider.future);
+
+  // 認証状態を確認
+  final authState = ref.read(globalAuthStateProvider);
+
+  if (authState == app_auth.AuthState.authenticated) {
+    AppLogger.instance.i('アプリ起動時の同期チェックを実行します');
+
+    // SyncCheckerを通じて同期チェック実行
+    final syncChecker = ref.read(syncCheckerProvider);
+    await syncChecker.checkAndSyncIfNeeded();
+
+    AppLogger.instance.i('アプリ起動時の同期チェックが完了しました');
+  } else {
+    AppLogger.instance.i('未認証のためアプリ起動時の同期チェックをスキップします');
+  }
+});
+
+// SharedPreferencesのプロバイダー
+final sharedPreferencesProvider = FutureProvider<SharedPreferences>((
+  ref,
+) async {
+  return await SharedPreferences.getInstance();
+});
+
+// SharedPreferencesの初期化状態プロバイダー
+final sharedPreferencesInitializedProvider = StateProvider<bool>((ref) {
+  final asyncValue = ref.watch(sharedPreferencesProvider);
+  return asyncValue.when(
+    data: (_) => true,
+    loading: () => false,
+    error: (_, __) => false,
+  );
 });

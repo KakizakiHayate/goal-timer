@@ -1,345 +1,468 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../viewmodels/statistics_view_model.dart';
-import '../../domain/entities/statistics.dart';
-import '../../domain/entities/daily_stats.dart';
-import 'package:intl/intl.dart';
+import '../../../../core/utils/color_consts.dart';
+import '../../../../core/utils/text_consts.dart';
+import '../../../../core/utils/spacing_consts.dart';
+import '../../../../core/utils/animation_consts.dart';
+import '../../../../core/widgets/metric_card.dart';
+import '../../../../core/widgets/chart_card.dart';
+import '../../../../core/widgets/achievement_badge.dart';
 
-class StatisticsScreen extends ConsumerWidget {
+/// 改善された統計画面
+/// データビジュアライゼーションと達成感を重視
+class StatisticsScreen extends ConsumerStatefulWidget {
   const StatisticsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('統計'),
-          bottom: const TabBar(tabs: [Tab(text: '今日の統計'), Tab(text: '期間統計')]),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.calendar_month),
-              onPressed: () => _selectDate(context, ref),
+  ConsumerState<StatisticsScreen> createState() => _StatisticsScreenState();
+}
+
+class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
+    with TickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  int _selectedPeriod = 0; // 0: 週間, 1: 月間, 2: 年間
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: AnimationConsts.slow,
+      vsync: this,
+    );
+    
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeOut,
+      ),
+    );
+    
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: ColorConsts.backgroundPrimary,
+      body: FadeTransition(
+        opacity: _fadeAnimation,
+        child: CustomScrollView(
+          slivers: [
+            // アプリバー
+            _buildSliverAppBar(),
+            
+            // コンテンツ
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(SpacingConsts.l),
+                child: Column(
+                  children: [
+                    // 期間選択
+                    _buildPeriodSelector(),
+                    
+                    const SizedBox(height: SpacingConsts.l),
+                    
+                    // メトリクスグリッド
+                    _buildMetricsGrid(),
+                    
+                    const SizedBox(height: SpacingConsts.l),
+                    
+                    // チャート
+                    _buildChartsSection(),
+                    
+                    const SizedBox(height: SpacingConsts.l),
+                    
+                    // 達成バッジ
+                    _buildAchievementsSection(),
+                    
+                    const SizedBox(height: SpacingConsts.l),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
-        body: TabBarView(children: [_DailyStatsTab(), _PeriodStatsTab()]),
       ),
     );
   }
 
-  Future<void> _selectDate(BuildContext context, WidgetRef ref) async {
-    final currentDate = ref.read(selectedDateProvider);
-
-    final pickedDate = await showDatePicker(
-      context: context,
-      initialDate: currentDate,
-      firstDate: DateTime(2020),
-      lastDate: DateTime.now(),
-    );
-
-    if (pickedDate != null) {
-      ref.read(selectedDateProvider.notifier).state = pickedDate;
-    }
-  }
-}
-
-class _DailyStatsTab extends ConsumerWidget {
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final selectedDate = ref.watch(selectedDateProvider);
-    final dailyStatsAsync = ref.watch(dailyStatsProvider);
-
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-            '${DateFormat('yyyy年MM月dd日').format(selectedDate)}の記録',
-            style: Theme.of(context).textTheme.titleLarge,
+  Widget _buildSliverAppBar() {
+    return SliverAppBar(
+      expandedHeight: 120.0,
+      floating: false,
+      pinned: true,
+      backgroundColor: ColorConsts.primary,
+      flexibleSpace: FlexibleSpaceBar(
+        title: Text(
+          '統計',
+          style: TextConsts.h3.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
           ),
         ),
-        Expanded(
-          child: dailyStatsAsync.when(
-            data: (stats) {
-              if (stats.totalMinutes == 0) {
-                return const Center(child: Text('この日の記録はありません'));
-              }
+        background: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [ColorConsts.primary, ColorConsts.primaryLight],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
-              return SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildDailySummaryCard(context, stats),
-                      const SizedBox(height: 16),
-                      _buildGoalBreakdownCard(context, stats),
-                    ],
-                  ),
+  Widget _buildPeriodSelector() {
+    final periods = ['週間', '月間', '年間'];
+    
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: ColorConsts.backgroundSecondary,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: periods.asMap().entries.map((entry) {
+          final index = entry.key;
+          final period = entry.value;
+          final isSelected = _selectedPeriod == index;
+          
+          return Expanded(
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _selectedPeriod = index;
+                });
+              },
+              child: AnimatedContainer(
+                duration: AnimationConsts.fast,
+                padding: const EdgeInsets.symmetric(
+                  vertical: SpacingConsts.m,
                 ),
-              );
-            },
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, stack) => Center(child: Text('エラーが発生しました: $error')),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDailySummaryCard(BuildContext context, DailyStats stats) {
-    return Card(
-      elevation: 4,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('学習サマリー', style: Theme.of(context).textTheme.titleLarge),
-            const Divider(),
-            const SizedBox(height: 8),
-            _buildSummaryItem(context, '総学習時間', stats.formattedTotalTime),
-            _buildSummaryItem(context, '学習した目標数', '${stats.goalCount}個'),
-          ],
-        ),
+                decoration: BoxDecoration(
+                  color: isSelected ? ColorConsts.cardBackground : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: ColorConsts.shadowLight,
+                            offset: const Offset(0, 2),
+                            blurRadius: 4,
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Text(
+                  period,
+                  style: TextConsts.body.copyWith(
+                    color: isSelected ? ColorConsts.primary : ColorConsts.textSecondary,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }
 
-  Widget _buildGoalBreakdownCard(BuildContext context, DailyStats stats) {
-    return Card(
-      elevation: 4,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildMetricsGrid() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // 画面幅に応じて2列のレイアウトを動的に調整
+        final availableWidth = constraints.maxWidth;
+        final cardWidth = (availableWidth - SpacingConsts.m) / 2;
+        
+        return Column(
           children: [
-            Text('目標別内訳', style: Theme.of(context).textTheme.titleLarge),
-            const Divider(),
-            const SizedBox(height: 8),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: stats.goalMinutes.length,
-              itemBuilder: (context, index) {
-                final goalId = stats.goalMinutes.keys.elementAt(index);
-                final minutes = stats.goalMinutes[goalId] ?? 0;
-                final title = stats.goalTitles[goalId] ?? 'Unknown Goal';
-
-                final hours = minutes ~/ 60;
-                final mins = minutes % 60;
-                final timeText =
-                    hours > 0
-                        ? '$hours時間${mins > 0 ? '$mins分' : ''}'
-                        : '$mins分';
-
-                return ListTile(
-                  title: Text(title),
-                  subtitle: Text('学習時間: $timeText'),
-                  trailing: CircleAvatar(
-                    backgroundColor: Theme.of(context).primaryColor,
-                    child: Text(
-                      '${(minutes / stats.totalMinutes * 100).round()}%',
-                      style: const TextStyle(color: Colors.white, fontSize: 12),
+            // 1行目
+            Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    width: cardWidth,
+                    child: MetricCard(
+                      title: '総勉強時間',
+                      value: '24',
+                      unit: 'h',
+                      icon: Icons.schedule_outlined,
+                      iconColor: ColorConsts.primary,
+                      changeText: '+2.5h',
+                      changeColor: ColorConsts.success,
+                      subtitle: '先週比',
                     ),
                   ),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSummaryItem(BuildContext context, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: Theme.of(context).textTheme.titleMedium),
-          Text(value, style: Theme.of(context).textTheme.bodyLarge),
-        ],
-      ),
-    );
-  }
-}
-
-class _PeriodStatsTab extends ConsumerWidget {
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final dateRange = ref.watch(dateRangeProvider);
-    final statisticsAsync = ref.watch(filteredStatisticsProvider);
-
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '期間: ${DateFormat('yyyy/MM/dd').format(dateRange.startDate)} - '
-                '${DateFormat('yyyy/MM/dd').format(dateRange.endDate)}',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              TextButton(
-                onPressed: () => _selectDateRange(context, ref),
-                child: const Text('期間変更'),
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: statisticsAsync.when(
-            data: (statistics) {
-              if (statistics.isEmpty) {
-                return const Center(child: Text('この期間のデータはありません'));
-              }
-
-              int totalMinutes = 0;
-              int totalGoals = 0;
-
-              for (var stat in statistics) {
-                totalMinutes += stat.totalMinutes;
-                totalGoals += stat.goalCount;
-              }
-
-              return SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      _buildSummaryCard(
-                        context,
-                        totalMinutes,
-                        totalGoals,
-                        statistics.length,
-                      ),
-                      const SizedBox(height: 16),
-                      _buildDailyStatsList(context, statistics, ref),
-                    ],
+                ),
+                const SizedBox(width: SpacingConsts.m),
+                Expanded(
+                  child: SizedBox(
+                    width: cardWidth,
+                    child: MetricCard(
+                      title: '継続日数',
+                      value: '12',
+                      unit: '日',
+                      icon: Icons.whatshot_outlined,
+                      iconColor: ColorConsts.warning,
+                      changeText: '+3日',
+                      changeColor: ColorConsts.success,
+                      subtitle: '現在のストリーク',
+                    ),
                   ),
                 ),
-              );
-            },
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, stack) => Center(child: Text('エラーが発生しました: $error')),
-          ),
+              ],
+            ),
+            const SizedBox(height: SpacingConsts.m),
+            // 2行目
+            Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    width: cardWidth,
+                    child: MetricCard(
+                      title: '達成率',
+                      value: '85',
+                      unit: '%',
+                      icon: Icons.trending_up_outlined,
+                      iconColor: ColorConsts.success,
+                      changeText: '+5%',
+                      changeColor: ColorConsts.success,
+                      subtitle: '目標達成率',
+                    ),
+                  ),
+                ),
+                const SizedBox(width: SpacingConsts.m),
+                Expanded(
+                  child: SizedBox(
+                    width: cardWidth,
+                    child: MetricCard(
+                      title: '平均集中時間',
+                      value: '42',
+                      unit: '分',
+                      icon: Icons.timer_outlined,
+                      iconColor: ColorConsts.primary,
+                      changeText: '+7分',
+                      changeColor: ColorConsts.success,
+                      subtitle: '1セッション平均',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildChartsSection() {
+    return Column(
+      children: [
+        // 勉強時間チャート
+        ChartCard(
+          title: '勉強時間の推移',
+          subtitle: '過去7日間の勉強時間',
+          chart: _buildTimeChart(),
+          legendItems: [
+            ChartLegendItem(label: '実績', color: ColorConsts.primary),
+            ChartLegendItem(label: '目標', color: ColorConsts.textTertiary),
+          ],
+        ),
+        
+        const SizedBox(height: SpacingConsts.l),
+        
+        // 目標別時間分布チャート
+        ChartCard(
+          title: '目標別時間分布',
+          subtitle: '今週の目標別勉強時間',
+          chart: _buildDistributionChart(),
+          legendItems: [
+            ChartLegendItem(label: '英語', color: ColorConsts.primary),
+            ChartLegendItem(label: 'プログラミング', color: ColorConsts.success),
+            ChartLegendItem(label: '資格勉強', color: ColorConsts.warning),
+          ],
         ),
       ],
     );
   }
 
-  Widget _buildSummaryCard(
-    BuildContext context,
-    int totalMinutes,
-    int totalGoals,
-    int days,
-  ) {
-    final hours = totalMinutes ~/ 60;
-    final minutes = totalMinutes % 60;
-    final totalTimeText =
-        hours > 0 ? '$hours時間${minutes > 0 ? '$minutes分' : ''}' : '$minutes分';
-
-    return Card(
-      elevation: 4,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('期間統計', style: Theme.of(context).textTheme.titleLarge),
-            const Divider(),
-            const SizedBox(height: 8),
-            _buildSummaryItem(context, '合計時間', totalTimeText),
-            _buildSummaryItem(context, '合計目標達成数', '$totalGoals 個'),
-            _buildSummaryItem(
-              context,
-              '1日平均時間',
-              '${(totalMinutes / days).round()} 分/日',
-            ),
-          ],
+  Widget _buildTimeChart() {
+    // TODO: 実際のチャートライブラリを使用して実装
+    return Container(
+      decoration: BoxDecoration(
+        color: ColorConsts.backgroundSecondary,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: const Center(
+        child: Text(
+          '時間推移チャート\n（実装予定）',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: ColorConsts.textSecondary,
+            fontSize: 16,
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildSummaryItem(BuildContext context, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: Theme.of(context).textTheme.titleMedium),
-          Text(value, style: Theme.of(context).textTheme.bodyLarge),
-        ],
+  Widget _buildDistributionChart() {
+    // TODO: 実際のチャートライブラリを使用して実装
+    return Container(
+      decoration: BoxDecoration(
+        color: ColorConsts.backgroundSecondary,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: const Center(
+        child: Text(
+          '分布チャート\n（実装予定）',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: ColorConsts.textSecondary,
+            fontSize: 16,
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildDailyStatsList(
-    BuildContext context,
-    List<Statistics> statistics,
-    WidgetRef ref,
-  ) {
+  Widget _buildAchievementsSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('日別の記録', style: Theme.of(context).textTheme.titleLarge),
-        const SizedBox(height: 8),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: statistics.length,
-          itemBuilder: (context, index) {
-            final stat = statistics[index];
-
-            final hours = stat.totalMinutes ~/ 60;
-            final minutes = stat.totalMinutes % 60;
-            final timeText =
-                hours > 0
-                    ? '$hours時間${minutes > 0 ? '$minutes分' : ''}'
-                    : '$minutes分';
-
-            return Card(
-              child: ListTile(
-                title: Text(DateFormat('yyyy/MM/dd').format(stat.date)),
-                subtitle: Text('$timeText / ${stat.goalCount}個の目標'),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                onTap: () {
-                  // 選択された日付を設定してタブを切り替え
-                  ref.read(selectedDateProvider.notifier).state = stat.date;
-                  DefaultTabController.of(context).animateTo(0);
-                },
-              ),
+        Text(
+          '達成バッジ',
+          style: TextConsts.h3.copyWith(
+            color: ColorConsts.textPrimary,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        
+        const SizedBox(height: SpacingConsts.m),
+        
+        Text(
+          '継続的な努力で獲得できるバッジです',
+          style: TextConsts.body.copyWith(
+            color: ColorConsts.textSecondary,
+          ),
+        ),
+        
+        const SizedBox(height: SpacingConsts.l),
+        
+        LayoutBuilder(
+          builder: (context, constraints) {
+            // 画面幅に応じて3列のレイアウトを動的に調整
+            final availableWidth = constraints.maxWidth;
+            final cardWidth = (availableWidth - (SpacingConsts.m * 2)) / 3;
+            
+            return Column(
+              children: [
+                // 1行目
+                Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        width: cardWidth,
+                        child: AchievementBadge(
+                          title: '初回達成',
+                          description: '初めて目標を達成',
+                          icon: Icons.flag_outlined,
+                          color: ColorConsts.success,
+                          isUnlocked: true,
+                          unlockedAt: DateTime.now().subtract(const Duration(days: 5)),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: SpacingConsts.m),
+                    Expanded(
+                      child: SizedBox(
+                        width: cardWidth,
+                        child: AchievementBadge(
+                          title: '3日継続',
+                          description: '3日間連続で目標達成',
+                          icon: Icons.local_fire_department,
+                          color: ColorConsts.warning,
+                          isUnlocked: true,
+                          unlockedAt: DateTime.now().subtract(const Duration(days: 2)),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: SpacingConsts.m),
+                    Expanded(
+                      child: SizedBox(
+                        width: cardWidth,
+                        child: AchievementBadge(
+                          title: '1週間継続',
+                          description: '7日間連続で目標達成',
+                          icon: Icons.calendar_view_week,
+                          color: ColorConsts.primary,
+                          isUnlocked: false,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: SpacingConsts.m),
+                // 2行目
+                Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        width: cardWidth,
+                        child: AchievementBadge(
+                          title: '早起き習慣',
+                          description: '朝6時前に勉強開始',
+                          icon: Icons.wb_sunny_outlined,
+                          color: ColorConsts.warning,
+                          isUnlocked: false,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: SpacingConsts.m),
+                    Expanded(
+                      child: SizedBox(
+                        width: cardWidth,
+                        child: AchievementBadge(
+                          title: '集中マスター',
+                          description: '2時間連続で集中',
+                          icon: Icons.psychology_outlined,
+                          color: ColorConsts.primary,
+                          isUnlocked: false,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: SpacingConsts.m),
+                    Expanded(
+                      child: SizedBox(
+                        width: cardWidth,
+                        child: AchievementBadge(
+                          title: '目標達成王',
+                          description: '月間目標を100%達成',
+                          icon: Icons.emoji_events_outlined,
+                          color: const Color(0xFFFFD700),
+                          isUnlocked: false,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             );
           },
         ),
       ],
     );
-  }
-
-  Future<void> _selectDateRange(BuildContext context, WidgetRef ref) async {
-    final initialDateRange = ref.read(dateRangeProvider);
-
-    final pickedDateRange = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime(2020),
-      lastDate: DateTime.now(),
-      initialDateRange: DateTimeRange(
-        start: initialDateRange.startDate,
-        end: initialDateRange.endDate,
-      ),
-    );
-
-    if (pickedDateRange != null) {
-      ref.read(dateRangeProvider.notifier).state = DateRange(
-        startDate: pickedDateRange.start,
-        endDate: pickedDateRange.end,
-      );
-    }
   }
 }

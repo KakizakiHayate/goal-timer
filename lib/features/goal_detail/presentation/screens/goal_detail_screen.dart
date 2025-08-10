@@ -1,1043 +1,550 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
-import 'package:goal_timer/core/utils/color_consts.dart';
-import 'package:goal_timer/core/models/goals/goals_model.dart';
-import 'package:goal_timer/features/goal_detail/presentation/viewmodels/goal_detail_view_model.dart';
-import 'package:fl_chart/fl_chart.dart';
-import 'package:goal_timer/features/goal_detail/presentation/screens/goal_edit_modal.dart';
-import 'package:goal_timer/core/utils/route_names.dart';
-import 'package:goal_timer/core/utils/app_logger.dart';
-import 'package:goal_timer/features/goal_timer/presentation/screens/timer_screen.dart';
+import '../../../../core/provider/providers.dart';
+import '../../../../core/utils/color_consts.dart';
+import '../../../../core/utils/text_consts.dart';
+import '../../../../core/utils/spacing_consts.dart';
+import '../../../../core/utils/animation_consts.dart';
+import '../../../../core/widgets/circular_progress_indicator.dart' as custom;
+import '../../../../core/widgets/streak_indicator.dart';
+import '../../../../core/widgets/pressable_card.dart';
+import '../../../../core/models/goals/goals_model.dart';
+import '../../../goal_timer/presentation/screens/timer_screen.dart';
+import '../viewmodels/goal_detail_view_model.dart';
+import 'goal_create_modal.dart';
 
-/// 目標IDを使用して詳細データを取得する画面
-class GoalDetailScreen extends ConsumerWidget {
+/// 改善された目標詳細画面
+class GoalDetailScreen extends ConsumerStatefulWidget {
   final String goalId;
 
   const GoalDetailScreen({super.key, required this.goalId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final goalDetailAsync = ref.watch(goalDetailProvider(goalId));
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('目標詳細'),
-        backgroundColor: ColorConsts.primary,
-        foregroundColor: Colors.white,
-      ),
-      body: goalDetailAsync.when(
-        data: (goalDetail) {
-          if (goalDetail == null) {
-            return const Center(child: Text('目標が見つかりませんでした'));
-          }
-          return _buildGoalDetailContent(context, goalDetail, ref);
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(child: Text('エラーが発生しました: $error')),
-      ),
-    );
-  }
-
-  Widget _buildGoalDetailContent(
-    BuildContext context,
-    GoalsModel goalDetail,
-    WidgetRef ref,
-  ) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ① 目標名
-          Text(
-            goalDetail.title,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: ColorConsts.textDark,
-            ),
-          ),
-          const SizedBox(height: 24),
-
-          // ② 回避したい未来
-          _buildAvoidFutureSection(goalDetail),
-          const SizedBox(height: 24),
-
-          // ③ 1日目標時間 と ④ 累計学習時間
-          _buildTimeInfoSection(goalDetail),
-          const SizedBox(height: 24),
-
-          // ⑤ 達成率（グラフ）
-          _buildProgressSection(goalDetail),
-          const SizedBox(height: 32),
-
-          // ⑥ 編集ボタン と ⑦ 削除ボタン
-          _buildActionButtons(context, goalDetail, ref),
-        ],
-      ),
-    );
-  }
-
-  // 回避したい未来セクション
-  Widget _buildAvoidFutureSection(GoalsModel goalDetail) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.red.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.red.shade200),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Row(
-            children: [
-              Icon(Icons.warning_amber, color: Colors.red),
-              SizedBox(width: 8),
-              Text(
-                '回避したい未来',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.red,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            goalDetail.avoidMessage,
-            style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // 時間情報セクション
-  Widget _buildTimeInfoSection(GoalsModel goalDetail) {
-    // 残り日数を計算
-    final remainingDays = goalDetail.deadline
-        .difference(DateTime.now())
-        .inDays
-        .clamp(1, 1000);
-
-    final dailyMinutesTarget =
-        (goalDetail.totalTargetHours * 60) ~/ remainingDays;
-
-    // 残り時間を計算
-    final remainingTimeText = goalDetail.getRemainingTimeText();
-    final isAlmostOutOfTime =
-        goalDetail.getRemainingMinutes() < 60; // 残り1時間未満は警告色
-
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              '時間目標',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: ColorConsts.textDark,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                _buildTimeInfoItem(
-                  icon: Icons.timer,
-                  title: '1日目標',
-                  value:
-                      '${dailyMinutesTarget ~/ 60}時間${dailyMinutesTarget % 60}分',
-                  color: ColorConsts.primary,
-                ),
-                const SizedBox(width: 24),
-                _buildTimeInfoItem(
-                  icon: Icons.hourglass_full,
-                  title: '累計時間',
-                  value:
-                      '${(goalDetail.spentMinutes ~/ 60)}時間${goalDetail.spentMinutes % 60}分',
-                  color: Colors.green,
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                _buildTimeInfoItem(
-                  icon: Icons.calendar_today,
-                  title: '目標日',
-                  value: DateFormat('yyyy/MM/dd').format(goalDetail.deadline),
-                  color: Colors.orange,
-                ),
-                const SizedBox(width: 24),
-                _buildTimeInfoItem(
-                  icon: Icons.timelapse,
-                  title: '残り時間',
-                  value: remainingTimeText,
-                  color: isAlmostOutOfTime ? Colors.red : Colors.blue,
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // 時間情報アイテム
-  Widget _buildTimeInfoItem({
-    required IconData icon,
-    required String title,
-    required String value,
-    required Color color,
-  }) {
-    return Expanded(
-      child: Row(
-        children: [
-          Icon(icon, color: color, size: 20),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-                ),
-                Text(
-                  value,
-                  style: TextStyle(fontWeight: FontWeight.bold, color: color),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // 進捗セクション
-  Widget _buildProgressSection(GoalsModel goalDetail) {
-    // 進捗率を計算
-    final progressRate = goalDetail.getProgressRate();
-    final progressColor = _getProgressColor(progressRate);
-
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              '目標達成状況',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: ColorConsts.textDark,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '進捗率: ${(progressRate * 100).toStringAsFixed(1)}%',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: progressColor,
-                    fontSize: 16,
-                  ),
-                ),
-                Text(
-                  '目標: ${goalDetail.totalTargetHours}時間',
-                  style: const TextStyle(color: Colors.grey),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            LinearProgressIndicator(
-              value: progressRate,
-              backgroundColor: Colors.grey.shade200,
-              valueColor: AlwaysStoppedAnimation<Color>(progressColor),
-              minHeight: 12,
-              borderRadius: BorderRadius.circular(6),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(height: 200, child: _buildStudyTimeChart(goalDetail)),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // 学習時間チャート（仮のデータ）
-  Widget _buildStudyTimeChart(GoalsModel goalDetail) {
-    // 仮のデータ - 将来的には実際の日々の記録を表示する
-    final spots = [
-      const FlSpot(0, 1.5), // 1日目: 1.5時間
-      const FlSpot(1, 2.0), // 2日目: 2.0時間
-      const FlSpot(2, 0.5), // 3日目: 0.5時間
-      const FlSpot(3, 3.0), // 4日目: 3.0時間
-      const FlSpot(4, 2.5), // 5日目: 2.5時間
-      const FlSpot(5, 1.0), // 6日目: 1.0時間
-      const FlSpot(6, 2.2), // 7日目: 2.2時間
-    ];
-
-    return LineChart(
-      LineChartData(
-        gridData: const FlGridData(
-          show: true,
-          drawVerticalLine: false, // 垂直線を非表示にして描画負荷を軽減
-        ),
-        lineTouchData: const LineTouchData(enabled: false), // タッチ機能を無効化して負荷を軽減
-        titlesData: FlTitlesData(
-          leftTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              getTitlesWidget: (value, meta) {
-                return Text(
-                  '${value.toInt()}h',
-                  style: const TextStyle(fontSize: 10), // フォントサイズを小さくして最適化
-                );
-              },
-              reservedSize: 24, // サイズを固定
-            ),
-          ),
-          bottomTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              getTitlesWidget: (value, meta) {
-                final weekdays = ['月', '火', '水', '木', '金', '土', '日'];
-                if (value >= 0 && value < 7) {
-                  return Text(
-                    weekdays[value.toInt()],
-                    style: const TextStyle(fontSize: 10), // フォントサイズを小さくして最適化
-                  );
-                }
-                return const Text('');
-              },
-              reservedSize: 18, // サイズを固定
-            ),
-          ),
-          rightTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          topTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-        ),
-        borderData: FlBorderData(show: false), // 境界線を表示しない
-        lineBarsData: [
-          LineChartBarData(
-            spots: spots,
-            isCurved: false, // 曲線をオフにして描画を高速化
-            color: ColorConsts.primary,
-            barWidth: 2, // 線を細くして描画負荷を軽減
-            belowBarData: BarAreaData(
-              show: true,
-              color: ColorConsts.primary.withAlpha(
-                50,
-              ), // withOpacityの代わりにwithAlphaを使用
-            ),
-            dotData: const FlDotData(show: false), // ドットを非表示にして描画負荷を軽減
-          ),
-        ],
-        minY: 0,
-      ),
-    );
-  }
-
-  // アクションボタン
-  Widget _buildActionButtons(
-    BuildContext context,
-    GoalsModel goalDetail,
-    WidgetRef ref,
-  ) {
-    return Column(
-      children: [
-        // タイマー開始ボタン
-        ElevatedButton.icon(
-          onPressed: () {
-            AppLogger.instance.i('タイマー開始ボタンが押されました。目標ID: ${goalDetail.id}');
-            // ルート名による遷移の代わりに、直接画面遷移を行う
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => TimerScreen(goalId: goalDetail.id),
-              ),
-            );
-          },
-          icon: const Icon(Icons.timer, color: Colors.white),
-          label: const Text('タイマーを開始', style: TextStyle(color: Colors.white)),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: ColorConsts.primary,
-            minimumSize: const Size(double.infinity, 50),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-        ),
-        const SizedBox(height: 20),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _buildActionButton(
-              context: context,
-              icon: Icons.edit,
-              label: '編集',
-              color: Colors.blue,
-              onTap: () {
-                _showEditGoalModal(context, goalDetail, ref);
-              },
-            ),
-            _buildActionButton(
-              context: context,
-              icon: Icons.note_alt,
-              label: 'メモを見る',
-              color: Colors.green,
-              onTap: () {
-                Navigator.pushNamed(
-                  context,
-                  RouteNames.memoRecordWithGoal,
-                  arguments: goalDetail.id,
-                );
-              },
-            ),
-            _buildActionButton(
-              context: context,
-              icon: Icons.delete,
-              label: '削除',
-              color: Colors.red,
-              onTap: () {
-                _showDeleteConfirmation(context, goalDetail, ref);
-              },
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  // 削除確認ダイアログ
-  void _showDeleteConfirmation(
-    BuildContext context,
-    GoalsModel goalDetail,
-    WidgetRef ref,
-  ) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('目標の削除'),
-            content: Text('「${goalDetail.title}」を削除してよろしいですか？このアクションは元に戻せません。'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('キャンセル'),
-              ),
-              TextButton(
-                onPressed: () {
-                  // TODO: 目標を削除する処理を実装
-                  // モックリポジトリなので、ディープリンクと表示のリフレッシュだけ行う
-                  Navigator.pop(context); // ダイアログを閉じる
-                  Navigator.pop(context); // 詳細画面を閉じる
-
-                  // リストを更新するためにプロバイダーを更新
-                  final _ = ref.refresh(goalDetailListProvider);
-
-                  // 成功メッセージを表示
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('目標が削除されました'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                },
-                style: TextButton.styleFrom(foregroundColor: Colors.red),
-                child: const Text('削除する'),
-              ),
-            ],
-          ),
-    );
-  }
-
-  // 目標編集モーダル
-  void _showEditGoalModal(
-    BuildContext context,
-    GoalsModel goalDetail,
-    WidgetRef ref,
-  ) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return FractionallySizedBox(
-          heightFactor: 0.95,
-          child: Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(20),
-                topRight: Radius.circular(20),
-              ),
-            ),
-            child: GoalEditModal(title: '目標を編集', goalDetail: goalDetail),
-          ),
-        );
-      },
-    );
-  }
-
-  // 進捗に応じた色を取得
-  Color _getProgressColor(double progress) {
-    if (progress < 0.3) {
-      return Colors.red;
-    } else if (progress < 0.7) {
-      return Colors.orange;
-    } else {
-      return Colors.green;
-    }
-  }
-
-  // アクションボタンを構築するヘルパーメソッド
-  Widget _buildActionButton({
-    required BuildContext context,
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return Expanded(
-      child: ElevatedButton.icon(
-        onPressed: onTap,
-        icon: Icon(icon),
-        label: Text(label),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: color,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 12),
-        ),
-      ),
-    );
-  }
+  ConsumerState<GoalDetailScreen> createState() => _GoalDetailScreenState();
 }
 
-/// 目標データを直接受け取る詳細画面
-class GoalDetailScreenWithData extends ConsumerWidget {
-  final GoalsModel goal;
-
-  const GoalDetailScreenWithData({super.key, required this.goal});
+class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('目標詳細'),
-        backgroundColor: ColorConsts.primary,
-        foregroundColor: Colors.white,
-      ),
-      body: _buildGoalDetailContent(context, goal, ref),
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: AnimationConsts.medium,
+      vsync: this,
     );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
+      ),
+    );
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.1),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.2, 1.0, curve: Curves.easeOutCubic),
+      ),
+    );
+
+    _animationController.forward();
   }
 
-  Widget _buildGoalDetailContent(
-    BuildContext context,
-    GoalsModel goalDetail,
-    WidgetRef ref,
-  ) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ① 目標名
-          Text(
-            goalDetail.title,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: ColorConsts.textDark,
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // 一時的にHybridRepositoryから直接取得（個別目標プロバイダーが必要）
+    final goalAsync = ref.watch(
+      FutureProvider<GoalsModel?>((ref) async {
+        try {
+          final repository = ref.watch(hybridGoalsRepositoryProvider);
+          return await repository.getGoalById(widget.goalId);
+        } catch (e) {
+          return null;
+        }
+      }),
+    );
+
+    return goalAsync.when(
+      data: (goal) {
+        if (goal == null) {
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('目標詳細'),
+              backgroundColor: ColorConsts.primary,
+              foregroundColor: Colors.white,
             ),
+            body: const Center(child: Text('目標が見つかりません')),
+          );
+        }
+
+        return _buildGoalDetail(context, goal);
+      },
+      loading:
+          () => Scaffold(
+            appBar: AppBar(
+              title: const Text('目標詳細'),
+              backgroundColor: ColorConsts.primary,
+              foregroundColor: Colors.white,
+            ),
+            body: const Center(child: CircularProgressIndicator()),
           ),
-          const SizedBox(height: 24),
-
-          // ② 回避したい未来
-          _buildAvoidFutureSection(goalDetail),
-          const SizedBox(height: 24),
-
-          // ③ 1日目標時間 と ④ 累計学習時間
-          _buildTimeInfoSection(goalDetail),
-          const SizedBox(height: 24),
-
-          // ⑤ 達成率（グラフ）
-          _buildProgressSection(goalDetail),
-          const SizedBox(height: 32),
-
-          // ⑥ 編集ボタン と ⑦ 削除ボタン
-          _buildActionButtons(context, goalDetail, ref),
-        ],
-      ),
+      error:
+          (error, stack) => Scaffold(
+            appBar: AppBar(
+              title: const Text('目標詳細'),
+              backgroundColor: ColorConsts.primary,
+              foregroundColor: Colors.white,
+            ),
+            body: Center(child: Text('エラーが発生しました: $error')),
+          ),
     );
   }
 
-  // 回避したい未来セクション
-  Widget _buildAvoidFutureSection(GoalsModel goalDetail) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.red.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.red.shade200),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Row(
-            children: [
-              Icon(Icons.warning_amber, color: Colors.red),
-              SizedBox(width: 8),
-              Text(
-                '回避したい未来',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.red,
+  Widget _buildGoalDetail(BuildContext context, GoalsModel goal) {
+    return Scaffold(
+      backgroundColor: ColorConsts.backgroundPrimary,
+      body: FadeTransition(
+        opacity: _fadeAnimation,
+        child: SlideTransition(
+          position: _slideAnimation,
+          child: CustomScrollView(
+            slivers: [
+              // アプリバー
+              _buildSliverAppBar(goal),
+
+              // コンテンツ
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(SpacingConsts.l),
+                  child: Column(
+                    children: [
+                      // 進捗概要カード
+                      _buildProgressOverviewCard(goal),
+
+                      const SizedBox(height: SpacingConsts.l),
+
+                      // 統計カード
+                      _buildStatsCard(goal),
+
+                      const SizedBox(height: SpacingConsts.l),
+
+                      // ネガティブ回避カード
+                      _buildAvoidanceCard(goal),
+
+                      const SizedBox(height: SpacingConsts.l),
+
+                      // アクションカード
+                      _buildActionCard(goal),
+
+                      const SizedBox(height: SpacingConsts.l),
+                    ],
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          Text(
-            goalDetail.avoidMessage,
-            style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  // 時間情報セクション
-  Widget _buildTimeInfoSection(GoalsModel goalDetail) {
-    // 残り日数を計算
-    final remainingDays = goalDetail.deadline
-        .difference(DateTime.now())
-        .inDays
-        .clamp(1, 1000);
-
-    final dailyMinutesTarget =
-        (goalDetail.totalTargetHours * 60) ~/ remainingDays;
-
-    // 残り時間を計算
-    final remainingTimeText = goalDetail.getRemainingTimeText();
-    final isAlmostOutOfTime =
-        goalDetail.getRemainingMinutes() < 60; // 残り1時間未満は警告色
-
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              '時間目標',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: ColorConsts.textDark,
+  Widget _buildSliverAppBar(GoalsModel goal) {
+    return SliverAppBar(
+      expandedHeight: 200.0,
+      floating: false,
+      pinned: true,
+      backgroundColor: ColorConsts.primary,
+      flexibleSpace: FlexibleSpaceBar(
+        title: Text(
+          goal.title,
+          style: TextConsts.h3.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+        background: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [ColorConsts.primary, ColorConsts.primaryLight],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+          child: Stack(
+            children: [
+              Positioned(
+                right: SpacingConsts.l,
+                bottom: SpacingConsts.l,
+                child: StreakIndicator(
+                  streakDays: 5, // TODO: 実際のデータに置き換え
+                  showAnimation: true,
+                  size: 48.0,
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                _buildTimeInfoItem(
-                  icon: Icons.timer,
-                  title: '1日目標',
-                  value:
-                      '${dailyMinutesTarget ~/ 60}時間${dailyMinutesTarget % 60}分',
-                  color: ColorConsts.primary,
-                ),
-                const SizedBox(width: 24),
-                _buildTimeInfoItem(
-                  icon: Icons.hourglass_full,
-                  title: '累計時間',
-                  value:
-                      '${(goalDetail.spentMinutes ~/ 60)}時間${goalDetail.spentMinutes % 60}分',
-                  color: Colors.green,
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                _buildTimeInfoItem(
-                  icon: Icons.calendar_today,
-                  title: '目標日',
-                  value: DateFormat('yyyy/MM/dd').format(goalDetail.deadline),
-                  color: Colors.orange,
-                ),
-                const SizedBox(width: 24),
-                _buildTimeInfoItem(
-                  icon: Icons.timelapse,
-                  title: '残り時間',
-                  value: remainingTimeText,
-                  color: isAlmostOutOfTime ? Colors.red : Colors.blue,
-                ),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    );
-  }
-
-  // 時間情報アイテム
-  Widget _buildTimeInfoItem({
-    required IconData icon,
-    required String title,
-    required String value,
-    required Color color,
-  }) {
-    return Expanded(
-      child: Row(
-        children: [
-          Icon(icon, color: color, size: 20),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-                ),
-                Text(
-                  value,
-                  style: TextStyle(fontWeight: FontWeight.bold, color: color),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // 進捗セクション
-  Widget _buildProgressSection(GoalsModel goalDetail) {
-    // 進捗率を計算
-    final progressRate = goalDetail.getProgressRate();
-    final progressColor = _getProgressColor(progressRate);
-
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              '目標達成状況',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: ColorConsts.textDark,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '進捗率: ${(progressRate * 100).toStringAsFixed(1)}%',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: progressColor,
-                    fontSize: 16,
-                  ),
-                ),
-                Text(
-                  '目標: ${goalDetail.totalTargetHours}時間',
-                  style: const TextStyle(color: Colors.grey),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            LinearProgressIndicator(
-              value: progressRate,
-              backgroundColor: Colors.grey.shade200,
-              valueColor: AlwaysStoppedAnimation<Color>(progressColor),
-              minHeight: 12,
-              borderRadius: BorderRadius.circular(6),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(height: 200, child: _buildStudyTimeChart(goalDetail)),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // 学習時間チャート（仮のデータ）
-  Widget _buildStudyTimeChart(GoalsModel goalDetail) {
-    // 仮のデータ - 将来的には実際の日々の記録を表示する
-    final spots = [
-      const FlSpot(0, 1.5), // 1日目: 1.5時間
-      const FlSpot(1, 2.0), // 2日目: 2.0時間
-      const FlSpot(2, 0.5), // 3日目: 0.5時間
-      const FlSpot(3, 3.0), // 4日目: 3.0時間
-      const FlSpot(4, 2.5), // 5日目: 2.5時間
-      const FlSpot(5, 1.0), // 6日目: 1.0時間
-      const FlSpot(6, 2.2), // 7日目: 2.2時間
-    ];
-
-    return LineChart(
-      LineChartData(
-        gridData: const FlGridData(
-          show: true,
-          drawVerticalLine: false, // 垂直線を非表示にして描画負荷を軽減
-        ),
-        lineTouchData: const LineTouchData(enabled: false), // タッチ機能を無効化して負荷を軽減
-        titlesData: FlTitlesData(
-          leftTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              getTitlesWidget: (value, meta) {
-                return Text(
-                  '${value.toInt()}h',
-                  style: const TextStyle(fontSize: 10), // フォントサイズを小さくして最適化
-                );
-              },
-              reservedSize: 24, // サイズを固定
-            ),
-          ),
-          bottomTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              getTitlesWidget: (value, meta) {
-                final weekdays = ['月', '火', '水', '木', '金', '土', '日'];
-                if (value >= 0 && value < 7) {
-                  return Text(
-                    weekdays[value.toInt()],
-                    style: const TextStyle(fontSize: 10), // フォントサイズを小さくして最適化
-                  );
-                }
-                return const Text('');
-              },
-              reservedSize: 18, // サイズを固定
-            ),
-          ),
-          rightTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          topTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-        ),
-        borderData: FlBorderData(show: false), // 境界線を表示しない
-        lineBarsData: [
-          LineChartBarData(
-            spots: spots,
-            isCurved: false, // 曲線をオフにして描画を高速化
-            color: ColorConsts.primary,
-            barWidth: 2, // 線を細くして描画負荷を軽減
-            belowBarData: BarAreaData(
-              show: true,
-              color: ColorConsts.primary.withAlpha(
-                50,
-              ), // withOpacityの代わりにwithAlphaを使用
-            ),
-            dotData: const FlDotData(show: false), // ドットを非表示にして描画負荷を軽減
-          ),
-        ],
-        minY: 0,
-      ),
-    );
-  }
-
-  // アクションボタン
-  Widget _buildActionButtons(
-    BuildContext context,
-    GoalsModel goalDetail,
-    WidgetRef ref,
-  ) {
-    return Column(
-      children: [
-        // タイマー開始ボタン
-        ElevatedButton.icon(
-          onPressed: () {
-            AppLogger.instance.i('タイマー開始ボタンが押されました。目標ID: ${goalDetail.id}');
-            // ルート名による遷移の代わりに、直接画面遷移を行う
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => TimerScreen(goalId: goalDetail.id),
-              ),
-            );
-          },
-          icon: const Icon(Icons.timer, color: Colors.white),
-          label: const Text('タイマーを開始', style: TextStyle(color: Colors.white)),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: ColorConsts.primary,
-            minimumSize: const Size(double.infinity, 50),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-        ),
-        const SizedBox(height: 20),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _buildActionButton(
-              context: context,
-              icon: Icons.edit,
-              label: '編集',
-              color: Colors.blue,
-              onTap: () {
-                _showEditGoalModal(context, goalDetail, ref);
-              },
-            ),
-            _buildActionButton(
-              context: context,
-              icon: Icons.note_alt,
-              label: 'メモを見る',
-              color: Colors.green,
-              onTap: () {
-                Navigator.pushNamed(
-                  context,
-                  RouteNames.memoRecordWithGoal,
-                  arguments: goalDetail.id,
-                );
-              },
-            ),
-            _buildActionButton(
-              context: context,
-              icon: Icons.delete,
-              label: '削除',
-              color: Colors.red,
-              onTap: () {
-                _showDeleteConfirmation(context, goalDetail, ref);
-              },
-            ),
-          ],
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.edit_outlined, color: Colors.white),
+          onPressed: () => _showEditModal(goal),
         ),
       ],
     );
   }
 
-  // 削除確認ダイアログ
-  void _showDeleteConfirmation(
-    BuildContext context,
-    GoalsModel goalDetail,
-    WidgetRef ref,
-  ) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('目標の削除'),
-            content: Text('「${goalDetail.title}」を削除してよろしいですか？このアクションは元に戻せません。'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('キャンセル'),
+  Widget _buildProgressOverviewCard(GoalsModel goal) {
+    final progress = goal.getProgressRate();
+
+    return PressableCard(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.all(SpacingConsts.l),
+      backgroundColor: ColorConsts.cardBackground,
+      borderRadius: 20.0,
+      elevation: 2.0,
+      child: Column(
+        children: [
+          Text(
+            '今日の進捗',
+            style: TextConsts.h3.copyWith(
+              color: ColorConsts.textPrimary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+
+          const SizedBox(height: SpacingConsts.l),
+
+          Row(
+            children: [
+              // プログレスサークル
+              custom.CircularProgressIndicator(
+                progress: progress,
+                size: 120.0,
+                strokeWidth: 10.0,
+                showAnimation: true,
               ),
-              TextButton(
-                onPressed: () {
-                  // TODO: 目標を削除する処理を実装
-                  // モックリポジトリなので、ディープリンクと表示のリフレッシュだけ行う
-                  Navigator.pop(context); // ダイアログを閉じる
-                  Navigator.pop(context); // 詳細画面を閉じる
 
-                  // リストを更新するためにプロバイダーを更新
-                  final _ = ref.refresh(goalDetailListProvider);
+              const SizedBox(width: SpacingConsts.l),
 
-                  // 成功メッセージを表示
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('目標が削除されました'),
-                      backgroundColor: Colors.red,
+              // 詳細情報
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildProgressDetail(
+                      label: '達成率',
+                      value: '${(progress * 100).toInt()}%',
+                      color:
+                          progress >= 0.8
+                              ? ColorConsts.success
+                              : ColorConsts.primary,
                     ),
-                  );
-                },
-                style: TextButton.styleFrom(foregroundColor: Colors.red),
-                child: const Text('削除する'),
+                    const SizedBox(height: SpacingConsts.m),
+                    _buildProgressDetail(
+                      label: '今日の時間',
+                      value: '45分', // TODO: 実際のデータに置き換え
+                      color: ColorConsts.textPrimary,
+                    ),
+                    const SizedBox(height: SpacingConsts.m),
+                    _buildProgressDetail(
+                      label: '目標時間',
+                      value: '${(goal.targetMinutes ~/ 60)}時間${(goal.targetMinutes % 60)}分',
+                      color: ColorConsts.textSecondary,
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
+        ],
+      ),
     );
   }
 
-  // 目標編集モーダル
-  void _showEditGoalModal(
-    BuildContext context,
-    GoalsModel goalDetail,
-    WidgetRef ref,
-  ) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return FractionallySizedBox(
-          heightFactor: 0.95,
-          child: Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(20),
-                topRight: Radius.circular(20),
+  Widget _buildProgressDetail({
+    required String label,
+    required String value,
+    required Color color,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextConsts.caption.copyWith(
+            color: ColorConsts.textSecondary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: SpacingConsts.xs),
+        Text(
+          value,
+          style: TextConsts.h4.copyWith(
+            color: color,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatsCard(GoalsModel goal) {
+    return PressableCard(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.all(SpacingConsts.l),
+      backgroundColor: ColorConsts.cardBackground,
+      borderRadius: 20.0,
+      elevation: 2.0,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '統計情報',
+            style: TextConsts.h4.copyWith(
+              color: ColorConsts.textPrimary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+
+          const SizedBox(height: SpacingConsts.l),
+
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatItem(
+                  icon: Icons.schedule_outlined,
+                  label: '累計時間',
+                  value: '15時間',
+                  color: ColorConsts.primary,
+                ),
+              ),
+              Container(width: 1, height: 50, color: ColorConsts.border),
+              Expanded(
+                child: _buildStatItem(
+                  icon: Icons.calendar_today_outlined,
+                  label: '実行日数',
+                  value: '12日',
+                  color: ColorConsts.success,
+                ),
+              ),
+              Container(width: 1, height: 50, color: ColorConsts.border),
+              Expanded(
+                child: _buildStatItem(
+                  icon: Icons.trending_up_outlined,
+                  label: '平均時間',
+                  value: '38分',
+                  color: ColorConsts.warning,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatItem({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+  }) {
+    return Column(
+      children: [
+        Icon(icon, color: color, size: 24),
+        const SizedBox(height: SpacingConsts.s),
+        Text(
+          value,
+          style: TextConsts.h4.copyWith(
+            color: ColorConsts.textPrimary,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Text(
+          label,
+          style: TextConsts.caption.copyWith(color: ColorConsts.textSecondary),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAvoidanceCard(GoalsModel goal) {
+    if (goal.avoidMessage.isEmpty) return const SizedBox.shrink();
+
+    return PressableCard(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.all(SpacingConsts.l),
+      backgroundColor: ColorConsts.error.withOpacity(0.05),
+      borderRadius: 20.0,
+      elevation: 1.0,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: ColorConsts.error,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.warning_amber_outlined,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: SpacingConsts.m),
+              Text(
+                'やらないとどうなる？',
+                style: TextConsts.h4.copyWith(
+                  color: ColorConsts.error,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: SpacingConsts.m),
+
+          Text(
+            goal.avoidMessage,
+            style: TextConsts.body.copyWith(
+              color: ColorConsts.textPrimary,
+              height: 1.5,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionCard(GoalsModel goal) {
+    return PressableCard(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.all(SpacingConsts.l),
+      backgroundColor: ColorConsts.cardBackground,
+      borderRadius: 20.0,
+      elevation: 2.0,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'アクション',
+            style: TextConsts.h4.copyWith(
+              color: ColorConsts.textPrimary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+
+          const SizedBox(height: SpacingConsts.l),
+
+          // タイマー開始ボタン
+          SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: ElevatedButton.icon(
+              onPressed: () => _startTimer(goal),
+              icon: const Icon(Icons.timer_outlined),
+              label: Text(
+                'タイマーを開始',
+                style: TextConsts.body.copyWith(fontWeight: FontWeight.w600),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: ColorConsts.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                elevation: 0,
               ),
             ),
-            child: GoalEditModal(title: '目標を編集', goalDetail: goalDetail),
           ),
-        );
-      },
+
+          const SizedBox(height: SpacingConsts.m),
+
+          // その他のアクション
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => _showEditModal(goal),
+                  icon: const Icon(Icons.edit_outlined, size: 18),
+                  label: const Text('編集'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: ColorConsts.textSecondary,
+                    side: const BorderSide(color: ColorConsts.border),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: SpacingConsts.m),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: _shareGoal,
+                  icon: const Icon(Icons.share_outlined, size: 18),
+                  label: const Text('共有'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: ColorConsts.textSecondary,
+                    side: const BorderSide(color: ColorConsts.border),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
-  // 進捗に応じた色を取得
-  Color _getProgressColor(double progress) {
-    if (progress < 0.3) {
-      return Colors.red;
-    } else if (progress < 0.7) {
-      return Colors.orange;
-    } else {
-      return Colors.green;
+  void _startTimer(GoalsModel goal) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => TimerScreen(goalId: goal.id)),
+    );
+  }
+
+  void _showEditModal(GoalsModel goal) async {
+    final result = await GoalCreateModal.show(context, existingGoal: goal);
+    if (result != null && mounted) {
+      // 目標が更新された場合、画面を再描画
+      setState(() {
+        // UI更新
+      });
     }
   }
 
-  // アクションボタンを構築するヘルパーメソッド
-  Widget _buildActionButton({
-    required BuildContext context,
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return Expanded(
-      child: ElevatedButton.icon(
-        onPressed: onTap,
-        icon: Icon(icon),
-        label: Text(label),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: color,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 12),
-        ),
+  void _shareGoal() {
+    // TODO: 目標共有機能の実装
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('共有機能は実装中です'),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(SpacingConsts.l),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }

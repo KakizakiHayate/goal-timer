@@ -37,7 +37,7 @@ class AppDatabase {
 
       return await openDatabase(
         path,
-        version: 3,
+        version: 4,
         onCreate: _createDB,
         onUpgrade: _upgradeDB,
       );
@@ -119,7 +119,7 @@ class AppDatabase {
         deadline TEXT,
         is_completed INTEGER NOT NULL,
         avoid_message TEXT NOT NULL,
-        total_target_hours INTEGER NOT NULL,
+        target_minutes INTEGER NOT NULL,
         spent_minutes INTEGER NOT NULL,
         updated_at TEXT NOT NULL,
         sync_updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -214,6 +214,78 @@ class AppDatabase {
 
         // 必要な新しいテーブルや設定の追加など
         AppLogger.instance.i('バージョン3へのマイグレーションが完了しました');
+      }
+
+      if (oldVersion < 4) {
+        // バージョン4へのマイグレーション: total_target_hours -> target_minutes
+        AppLogger.instance.i('total_target_hours から target_minutes への移行を開始します...');
+        
+        // まず既存のカラムが存在するか確認
+        final result = await db.rawQuery("PRAGMA table_info(goals)");
+        final columns = result.map((row) => row['name']).toSet();
+        
+        if (columns.contains('total_target_hours') && !columns.contains('target_minutes')) {
+          AppLogger.instance.i('total_target_hours カラムが見つかりました。target_minutes に変換します...');
+          
+          // 1. target_minutes カラムを追加
+          await db.execute('ALTER TABLE goals ADD COLUMN target_minutes INTEGER NOT NULL DEFAULT 0');
+          
+          // 2. 既存データを変換（時間 → 分）
+          await db.execute('''
+            UPDATE goals 
+            SET target_minutes = total_target_hours * 60
+            WHERE total_target_hours IS NOT NULL
+          ''');
+          
+          // 3. 既存のtotal_target_hoursカラムを削除するため、テーブルを再作成
+          await db.execute('ALTER TABLE goals RENAME TO goals_old');
+          
+          // 4. 新しい構造でgoalsテーブルを再作成
+          await db.execute('''
+            CREATE TABLE goals (
+              id TEXT PRIMARY KEY,
+              user_id TEXT NOT NULL,
+              title TEXT NOT NULL,
+              description TEXT,
+              deadline TEXT,
+              is_completed INTEGER NOT NULL,
+              avoid_message TEXT NOT NULL,
+              target_minutes INTEGER NOT NULL,
+              spent_minutes INTEGER NOT NULL,
+              updated_at TEXT NOT NULL,
+              sync_updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              is_synced INTEGER DEFAULT 0,
+              FOREIGN KEY (user_id) REFERENCES users (id)
+            )
+          ''');
+          
+          // 5. データを新しいテーブルにコピー
+          await db.execute('''
+            INSERT INTO goals (
+              id, user_id, title, description, deadline, is_completed,
+              avoid_message, target_minutes, spent_minutes, updated_at,
+              sync_updated_at, is_synced
+            )
+            SELECT 
+              id, user_id, title, description, deadline, is_completed,
+              avoid_message, target_minutes, spent_minutes, updated_at,
+              sync_updated_at, COALESCE(is_synced, 0)
+            FROM goals_old
+          ''');
+          
+          // 6. 古いテーブルを削除
+          await db.execute('DROP TABLE goals_old');
+          
+          AppLogger.instance.i('total_target_hours から target_minutes への変換が完了しました');
+        } else if (!columns.contains('target_minutes')) {
+          // target_minutes カラムが存在しない場合のみ追加
+          AppLogger.instance.i('target_minutes カラムを追加します...');
+          await db.execute('ALTER TABLE goals ADD COLUMN target_minutes INTEGER NOT NULL DEFAULT 0');
+        } else {
+          AppLogger.instance.i('target_minutes カラムは既に存在します');
+        }
+        
+        AppLogger.instance.i('バージョン4へのマイグレーションが完了しました');
       }
     } catch (e) {
       AppLogger.instance.e('データベースアップグレードエラー: $e');

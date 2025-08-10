@@ -5,7 +5,7 @@ publish_to: 'none'
 version: 0.0.18+1
 
 environment:
-  sdk: '3.7.0'
+  sdk: '>=3.7.0 <4.0.0'
   flutter: '3.29.0'
 
 dependencies:
@@ -45,6 +45,21 @@ dependencies:
   
   # 接続状態管理
   connectivity_plus: '5.0.2'
+  
+  # 認証関連パッケージ
+  google_sign_in: ^6.2.1
+  sign_in_with_apple: ^6.1.0
+  crypto: ^3.0.3
+  
+  # フォームバリデーション
+  formz: ^0.7.0
+  
+  # 共有設定
+  shared_preferences: ^2.2.2
+  
+  # 生体認証（オプション）
+  local_auth: ^2.1.8
+  firebase_core: ^3.14.0
 
 dev_dependencies:
   flutter_test:

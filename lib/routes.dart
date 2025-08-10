@@ -11,6 +11,9 @@ import 'package:goal_timer/features/memo_record/presentation/screens/memo_record
 import 'package:goal_timer/features/statistics/presentation/screens/statistics_screen.dart';
 import 'package:goal_timer/features/settings/presentation/screens/settings_screen.dart';
 import 'package:goal_timer/features/splash/presentation/screens/splash_screen.dart';
+import 'package:goal_timer/features/auth/presentation/screens/login_screen.dart';
+import 'package:goal_timer/features/auth/presentation/screens/signup_screen.dart';
+import 'package:goal_timer/features/home/presentation/screens/home_screen.dart';
 import 'package:goal_timer/core/utils/app_logger.dart';
 
 // TODO: 中規模・大規模になってきたら疎結合にすることを考える
@@ -20,9 +23,12 @@ Route<dynamic> generateRoute(RouteSettings settings) {
   AppLogger.instance.i('ルート要求: ${settings.name}, 引数: ${settings.arguments}');
 
   switch (settings.name) {
-    case RouteNames.home:
-      // 初期ルートはSplashScreenに設定
+    case RouteNames.splash:
+      // スプラッシュ画面（初期ルート）
       return platformPageRoute(builder: (context) => const SplashScreen());
+    case RouteNames.home:
+      // ホーム画面
+      return platformPageRoute(builder: (context) => const HomeScreen());
     case RouteNames.goalDetailSetting:
       return platformPageRoute(
         builder: (context) => const GoalDetailSettingScreen(),
@@ -54,6 +60,11 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     // 設定画面
     case RouteNames.settings:
       return platformPageRoute(builder: (context) => const SettingsScreen());
+    // 認証画面
+    case RouteNames.login:
+      return platformPageRoute(builder: (context) => const LoginScreen());
+    case RouteNames.signup:
+      return platformPageRoute(builder: (context) => const SignupScreen());
     // デバッグ画面
     case RouteNames.syncDebug:
       return platformPageRoute(builder: (context) => const SyncDebugView());

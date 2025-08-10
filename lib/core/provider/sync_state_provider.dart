@@ -17,7 +17,7 @@ class SyncState {
 }
 
 class SyncStateNotifier extends StateNotifier<SyncState> {
-  SyncStateNotifier() : super(SyncState(status: SyncStatus.unsynced));
+  SyncStateNotifier() : super(SyncState(status: SyncStatus.synced));
 
   void setSyncing() {
     state = SyncState(status: SyncStatus.syncing);

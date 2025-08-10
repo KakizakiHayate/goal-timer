@@ -15,11 +15,14 @@ _$GoalsModelImpl _$$GoalsModelImplFromJson(Map<String, dynamic> json) =>
       deadline: DateTime.parse(json['deadline'] as String),
       isCompleted: json['isCompleted'] as bool,
       avoidMessage: json['avoidMessage'] as String,
-      totalTargetHours: json['totalTargetHours'] as int,
+      targetMinutes: json['targetMinutes'] as int,
       spentMinutes: json['spentMinutes'] as int,
       updatedAt: json['updatedAt'] == null
           ? null
           : DateTime.parse(json['updatedAt'] as String),
+      syncUpdatedAt: json['syncUpdatedAt'] == null
+          ? null
+          : DateTime.parse(json['syncUpdatedAt'] as String),
       isSynced: json['isSynced'] as bool? ?? false,
     );
 
@@ -32,8 +35,9 @@ Map<String, dynamic> _$$GoalsModelImplToJson(_$GoalsModelImpl instance) =>
       'deadline': instance.deadline.toIso8601String(),
       'isCompleted': instance.isCompleted,
       'avoidMessage': instance.avoidMessage,
-      'totalTargetHours': instance.totalTargetHours,
+      'targetMinutes': instance.targetMinutes,
       'spentMinutes': instance.spentMinutes,
       'updatedAt': instance.updatedAt?.toIso8601String(),
+      'syncUpdatedAt': instance.syncUpdatedAt?.toIso8601String(),
       'isSynced': instance.isSynced,
     };

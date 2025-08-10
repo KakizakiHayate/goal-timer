@@ -41,14 +41,17 @@ mixin _$GoalsModel {
   /// 目標達成しなかったら自分に課すこと
   String get avoidMessage => throw _privateConstructorUsedError;
 
-  /// 目標達成に必要な総時間（時間単位）
-  int get totalTargetHours => throw _privateConstructorUsedError;
+  /// 目標達成に必要な時間（分単位）
+  int get targetMinutes => throw _privateConstructorUsedError;
 
   /// 実際に使った時間（分単位）
   int get spentMinutes => throw _privateConstructorUsedError;
 
   /// 最終更新日時
   DateTime? get updatedAt => throw _privateConstructorUsedError;
+
+  /// 同期時の最終更新日時（同期処理で使用）
+  DateTime? get syncUpdatedAt => throw _privateConstructorUsedError;
 
   /// 同期状態（ローカルDBのみで使用）
   bool get isSynced => throw _privateConstructorUsedError;
@@ -73,9 +76,10 @@ abstract class $GoalsModelCopyWith<$Res> {
       DateTime deadline,
       bool isCompleted,
       String avoidMessage,
-      int totalTargetHours,
+      int targetMinutes,
       int spentMinutes,
       DateTime? updatedAt,
+      DateTime? syncUpdatedAt,
       bool isSynced});
 }
 
@@ -99,9 +103,10 @@ class _$GoalsModelCopyWithImpl<$Res, $Val extends GoalsModel>
     Object? deadline = null,
     Object? isCompleted = null,
     Object? avoidMessage = null,
-    Object? totalTargetHours = null,
+    Object? targetMinutes = null,
     Object? spentMinutes = null,
     Object? updatedAt = freezed,
+    Object? syncUpdatedAt = freezed,
     Object? isSynced = null,
   }) {
     return _then(_value.copyWith(
@@ -133,9 +138,9 @@ class _$GoalsModelCopyWithImpl<$Res, $Val extends GoalsModel>
           ? _value.avoidMessage
           : avoidMessage // ignore: cast_nullable_to_non_nullable
               as String,
-      totalTargetHours: null == totalTargetHours
-          ? _value.totalTargetHours
-          : totalTargetHours // ignore: cast_nullable_to_non_nullable
+      targetMinutes: null == targetMinutes
+          ? _value.targetMinutes
+          : targetMinutes // ignore: cast_nullable_to_non_nullable
               as int,
       spentMinutes: null == spentMinutes
           ? _value.spentMinutes
@@ -144,6 +149,10 @@ class _$GoalsModelCopyWithImpl<$Res, $Val extends GoalsModel>
       updatedAt: freezed == updatedAt
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      syncUpdatedAt: freezed == syncUpdatedAt
+          ? _value.syncUpdatedAt
+          : syncUpdatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime?,
       isSynced: null == isSynced
           ? _value.isSynced
@@ -169,9 +178,10 @@ abstract class _$$GoalsModelImplCopyWith<$Res>
       DateTime deadline,
       bool isCompleted,
       String avoidMessage,
-      int totalTargetHours,
+      int targetMinutes,
       int spentMinutes,
       DateTime? updatedAt,
+      DateTime? syncUpdatedAt,
       bool isSynced});
 }
 
@@ -193,9 +203,10 @@ class __$$GoalsModelImplCopyWithImpl<$Res>
     Object? deadline = null,
     Object? isCompleted = null,
     Object? avoidMessage = null,
-    Object? totalTargetHours = null,
+    Object? targetMinutes = null,
     Object? spentMinutes = null,
     Object? updatedAt = freezed,
+    Object? syncUpdatedAt = freezed,
     Object? isSynced = null,
   }) {
     return _then(_$GoalsModelImpl(
@@ -227,9 +238,9 @@ class __$$GoalsModelImplCopyWithImpl<$Res>
           ? _value.avoidMessage
           : avoidMessage // ignore: cast_nullable_to_non_nullable
               as String,
-      totalTargetHours: null == totalTargetHours
-          ? _value.totalTargetHours
-          : totalTargetHours // ignore: cast_nullable_to_non_nullable
+      targetMinutes: null == targetMinutes
+          ? _value.targetMinutes
+          : targetMinutes // ignore: cast_nullable_to_non_nullable
               as int,
       spentMinutes: null == spentMinutes
           ? _value.spentMinutes
@@ -238,6 +249,10 @@ class __$$GoalsModelImplCopyWithImpl<$Res>
       updatedAt: freezed == updatedAt
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      syncUpdatedAt: freezed == syncUpdatedAt
+          ? _value.syncUpdatedAt
+          : syncUpdatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime?,
       isSynced: null == isSynced
           ? _value.isSynced
@@ -258,9 +273,10 @@ class _$GoalsModelImpl implements _GoalsModel {
       required this.deadline,
       required this.isCompleted,
       required this.avoidMessage,
-      required this.totalTargetHours,
+      required this.targetMinutes,
       required this.spentMinutes,
       this.updatedAt = null,
+      this.syncUpdatedAt = null,
       this.isSynced = false});
 
   factory _$GoalsModelImpl.fromJson(Map<String, dynamic> json) =>
@@ -294,9 +310,9 @@ class _$GoalsModelImpl implements _GoalsModel {
   @override
   final String avoidMessage;
 
-  /// 目標達成に必要な総時間（時間単位）
+  /// 目標達成に必要な時間（分単位）
   @override
-  final int totalTargetHours;
+  final int targetMinutes;
 
   /// 実際に使った時間（分単位）
   @override
@@ -307,6 +323,11 @@ class _$GoalsModelImpl implements _GoalsModel {
   @JsonKey()
   final DateTime? updatedAt;
 
+  /// 同期時の最終更新日時（同期処理で使用）
+  @override
+  @JsonKey()
+  final DateTime? syncUpdatedAt;
+
   /// 同期状態（ローカルDBのみで使用）
   @override
   @JsonKey()
@@ -314,7 +335,7 @@ class _$GoalsModelImpl implements _GoalsModel {
 
   @override
   String toString() {
-    return 'GoalsModel(id: $id, userId: $userId, title: $title, description: $description, deadline: $deadline, isCompleted: $isCompleted, avoidMessage: $avoidMessage, totalTargetHours: $totalTargetHours, spentMinutes: $spentMinutes, updatedAt: $updatedAt, isSynced: $isSynced)';
+    return 'GoalsModel(id: $id, userId: $userId, title: $title, description: $description, deadline: $deadline, isCompleted: $isCompleted, avoidMessage: $avoidMessage, targetMinutes: $targetMinutes, spentMinutes: $spentMinutes, updatedAt: $updatedAt, syncUpdatedAt: $syncUpdatedAt, isSynced: $isSynced)';
   }
 
   @override
@@ -333,12 +354,14 @@ class _$GoalsModelImpl implements _GoalsModel {
                 other.isCompleted == isCompleted) &&
             (identical(other.avoidMessage, avoidMessage) ||
                 other.avoidMessage == avoidMessage) &&
-            (identical(other.totalTargetHours, totalTargetHours) ||
-                other.totalTargetHours == totalTargetHours) &&
+            (identical(other.targetMinutes, targetMinutes) ||
+                other.targetMinutes == targetMinutes) &&
             (identical(other.spentMinutes, spentMinutes) ||
                 other.spentMinutes == spentMinutes) &&
             (identical(other.updatedAt, updatedAt) ||
                 other.updatedAt == updatedAt) &&
+            (identical(other.syncUpdatedAt, syncUpdatedAt) ||
+                other.syncUpdatedAt == syncUpdatedAt) &&
             (identical(other.isSynced, isSynced) ||
                 other.isSynced == isSynced));
   }
@@ -354,9 +377,10 @@ class _$GoalsModelImpl implements _GoalsModel {
       deadline,
       isCompleted,
       avoidMessage,
-      totalTargetHours,
+      targetMinutes,
       spentMinutes,
       updatedAt,
+      syncUpdatedAt,
       isSynced);
 
   @JsonKey(ignore: true)
@@ -382,9 +406,10 @@ abstract class _GoalsModel implements GoalsModel {
       required final DateTime deadline,
       required final bool isCompleted,
       required final String avoidMessage,
-      required final int totalTargetHours,
+      required final int targetMinutes,
       required final int spentMinutes,
       final DateTime? updatedAt,
+      final DateTime? syncUpdatedAt,
       final bool isSynced}) = _$GoalsModelImpl;
 
   factory _GoalsModel.fromJson(Map<String, dynamic> json) =
@@ -420,8 +445,8 @@ abstract class _GoalsModel implements GoalsModel {
   String get avoidMessage;
   @override
 
-  /// 目標達成に必要な総時間（時間単位）
-  int get totalTargetHours;
+  /// 目標達成に必要な時間（分単位）
+  int get targetMinutes;
   @override
 
   /// 実際に使った時間（分単位）
@@ -430,6 +455,10 @@ abstract class _GoalsModel implements GoalsModel {
 
   /// 最終更新日時
   DateTime? get updatedAt;
+  @override
+
+  /// 同期時の最終更新日時（同期処理で使用）
+  DateTime? get syncUpdatedAt;
   @override
 
   /// 同期状態（ローカルDBのみで使用）

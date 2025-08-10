@@ -45,21 +45,25 @@ class SyncMetadataManager {
   /// ローカルとリモートの最終更新時刻を比較して同期が必要かどうかを判定
   Future<bool> needsSync(
     String tableName,
-    DateTime? localLastModified,
-    DateTime? remoteLastModified,
+    DateTime? localSyncUpdatedAt,
+    DateTime? remoteSyncUpdatedAt,
   ) async {
-    // 初回同期の場合
-    if (await isFirstSync(tableName)) {
+    // ✅ 両方nullなら同期不要（データなし状態）
+    if (localSyncUpdatedAt == null && remoteSyncUpdatedAt == null) {
+      AppLogger.instance.i('両方にデータなし - 同期不要');
+      return false;
+    }
+    
+    // ✅ 片方だけnullなら同期必要（全件同期）
+    if (localSyncUpdatedAt == null || remoteSyncUpdatedAt == null) {
+      AppLogger.instance.i('片方にデータなし - 全件同期が必要');
       return true;
     }
-
-    // ローカルまたはリモートの最終更新時刻が不明な場合は同期が必要
-    if (localLastModified == null || remoteLastModified == null) {
-      return true;
-    }
-
-    // リモートの方が新しい場合は同期が必要
-    return remoteLastModified.isAfter(localLastModified);
+    
+    // ✅ 両方存在する場合は時刻比較（差分同期）
+    final needsSync = remoteSyncUpdatedAt.isAfter(localSyncUpdatedAt);
+    AppLogger.instance.i('時刻比較結果: $needsSync (local: $localSyncUpdatedAt, remote: $remoteSyncUpdatedAt)');
+    return needsSync;
   }
 
   /// 初回同期かどうかを判定

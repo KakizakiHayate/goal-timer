@@ -1,7 +1,11 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:goal_timer/features/goal_detail/presentation/viewmodels/goal_detail_view_model.dart';
 import 'package:goal_timer/core/utils/app_logger.dart';
+import 'package:goal_timer/core/provider/providers.dart';
+import 'package:goal_timer/core/models/daily_study_logs/daily_study_log_model.dart';
+import 'package:goal_timer/core/provider/supabase/goals/goals_provider.dart';
+import 'package:goal_timer/features/goal_detail/presentation/viewmodels/goal_detail_view_model.dart';
+import 'package:uuid/uuid.dart';
 
 // タイマーの状態を管理するプロバイダー
 final timerViewModelProvider =
@@ -148,18 +152,23 @@ class TimerViewModel extends StateNotifier<TimerState> {
     _timer?.cancel();
     state = state.copyWith(status: TimerStatus.completed);
 
-    // 目標IDが設定されている場合のみ学習時間を更新
+    // 完了を知らせるフィードバック（ここではログのみ、実装時にバイブレーションや音を追加）
+    AppLogger.instance.i(
+      'タイマー完了！ 目標ID: ${state.goalId}, 実行時間: ${_elapsedSeconds}秒',
+    );
+
+    // 目標IDが設定されている場合のみ学習時間を記録
     if (state.hasGoal) {
-      _updateGoalStudyTime();
+      _recordStudyTime();
     } else {
       AppLogger.instance.e('目標IDが設定されていないため、学習時間を記録できません');
     }
   }
 
-  // 目標の学習時間を更新
-  void _updateGoalStudyTime() {
+  // 学習時間を記録する
+  Future<void> _recordStudyTime() async {
     if (!state.hasGoal) {
-      AppLogger.instance.e('目標IDが設定されていないため、学習時間を更新できません');
+      AppLogger.instance.e('目標IDが設定されていないため、学習時間を記録できません');
       return;
     }
 
@@ -170,25 +179,52 @@ class TimerViewModel extends StateNotifier<TimerState> {
                 60 // 設定した時間（分）
             : _elapsedSeconds ~/ 60; // 経過した時間（分）
 
-    if (studyMinutes > 0) {
-      AppLogger.instance.i(
-        'タイマー完了: 目標ID ${state.goalId} に $studyMinutes 分を追加します',
-      );
-
-      // 目標の学習時間を更新
-      _ref
-          .read(goalDetailViewModelProvider.notifier)
-          .addStudyTime(state.goalId!, studyMinutes)
-          .then((_) {
-            AppLogger.instance.i('学習時間の更新が完了しました');
-          })
-          .catchError((error) {
-            AppLogger.instance.e('学習時間の更新に失敗しました: $error');
-          });
-    } else {
+    if (studyMinutes <= 0) {
       AppLogger.instance.w(
         '学習時間が0分のため記録しません: 学習時間=$studyMinutes分, 目標ID=${state.goalId}',
       );
+      return;
+    }
+
+    try {
+      AppLogger.instance.i(
+        'タイマー完了: 目標ID ${state.goalId} に $studyMinutes 分を記録します',
+      );
+
+      // 今日の日付で学習記録を作成
+      final today = DateTime.now();
+      final dailyLog = DailyStudyLogModel(
+        id: const Uuid().v4(),
+        goalId: state.goalId!,
+        date: DateTime(today.year, today.month, today.day), // 時間は0:00に正規化
+        minutes: studyMinutes,
+      );
+
+      // 学習記録リポジトリに記録
+      final repository = _ref.read(hybridDailyStudyLogsRepositoryProvider);
+      await repository.upsertDailyLog(dailyLog);
+
+      // 目標の累計時間も更新 - 一時的に無効化（HybridRepository対応が必要）
+      // TODO: updateGoalUseCaseProviderを使用して目標の累計時間を更新する必要がある
+      try {
+        final goalsRepository = _ref.read(hybridGoalsRepositoryProvider);
+        final currentGoal = await goalsRepository.getGoalById(state.goalId!);
+        if (currentGoal != null) {
+          final updatedGoal = currentGoal.copyWith(
+            spentMinutes: currentGoal.spentMinutes + studyMinutes,
+          );
+          await goalsRepository.updateGoal(updatedGoal);
+        }
+      } catch (e) {
+        AppLogger.instance.w('目標の累計時間更新に失敗しました（記録は保存済み）: $e');
+      }
+
+      // 目標データのキャッシュをクリアして最新状態を反映
+      _ref.invalidate(goalDetailListProvider);
+
+      AppLogger.instance.i('学習時間の記録が完了しました: $studyMinutes分');
+    } catch (error) {
+      AppLogger.instance.e('学習時間の記録に失敗しました: $error');
     }
   }
 

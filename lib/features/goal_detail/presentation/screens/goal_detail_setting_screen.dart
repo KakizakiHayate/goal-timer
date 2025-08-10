@@ -153,7 +153,7 @@ class GoalDetailSettingScreen extends ConsumerWidget {
                     ),
                   ),
                   Text(
-                    '目標: ${goal.totalTargetHours}時間（${(goal.spentMinutes / 60).toStringAsFixed(1)}時間経過）',
+                    '目標: ${(goal.targetMinutes ~/ 60)}時間${(goal.targetMinutes % 60)}分（${(goal.spentMinutes / 60).toStringAsFixed(1)}時間経過）',
                     style: const TextStyle(fontSize: 12),
                   ),
                 ],

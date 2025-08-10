@@ -14,6 +14,12 @@ class GoalsRepositoryImpl implements GoalsRepository {
   }
 
   @override
+  Future<List<GoalsModel>> getLocalGoalsOnly() async {
+    // Supabase実装では、通常のgetGoalsと同じ動作
+    return await _datasource.getGoals();
+  }
+
+  @override
   Future<GoalsModel?> getGoalById(String id) async {
     return await _datasource.getGoalById(id);
   }

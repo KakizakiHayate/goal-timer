@@ -23,6 +23,12 @@ class UsersModel with _$UsersModel {
 
     /// 最終ログイン日時
     DateTime? lastLogin,
+
+    /// 同期時の最終更新日時（同期処理で使用）
+    @Default(null) DateTime? syncUpdatedAt,
+
+    /// 同期状態（ローカルDBのみで使用）
+    @Default(false) bool isSynced,
   }) = _UsersModel;
 
   /// Supabaseからのデータを元にUsersModelを生成
@@ -61,6 +67,28 @@ class UsersModel with _$UsersModel {
       }
     }
 
+    // syncUpdatedAtの変換
+    DateTime? parsedSyncUpdatedAt;
+    if (map['sync_updated_at'] != null) {
+      if (map['sync_updated_at'] is String) {
+        parsedSyncUpdatedAt = DateTime.parse(map['sync_updated_at']);
+      } else if (map['sync_updated_at'] is DateTime) {
+        parsedSyncUpdatedAt = map['sync_updated_at'];
+      }
+    }
+
+    // 同期状態の変換
+    bool parsedIsSynced = false;
+    if (map['is_synced'] != null) {
+      if (map['is_synced'] is bool) {
+        parsedIsSynced = map['is_synced'];
+      } else if (map['is_synced'] is int) {
+        parsedIsSynced = map['is_synced'] == 1;
+      } else if (map['is_synced'] is String) {
+        parsedIsSynced = map['is_synced'] == 'true' || map['is_synced'] == '1';
+      }
+    }
+
     return UsersModel(
       id: map['id'] ?? '',
       email: map['email'] ?? '',
@@ -68,6 +96,8 @@ class UsersModel with _$UsersModel {
       createdAt: parsedCreatedAt,
       updatedAt: parsedUpdatedAt,
       lastLogin: parsedLastLogin,
+      syncUpdatedAt: parsedSyncUpdatedAt,
+      isSynced: parsedIsSynced,
     );
   }
 }

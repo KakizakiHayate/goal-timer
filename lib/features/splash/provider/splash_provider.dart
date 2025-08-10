@@ -6,5 +6,5 @@ final splashViewModelProvider =
     StateNotifierProvider<SplashViewModel, SplashState>((ref) {
       // supabaseInitProviderに依存させることで、Supabaseの初期化を待つ
       ref.watch(supabaseInitProvider);
-      return SplashViewModel();
+      return SplashViewModel(ref);
     });
