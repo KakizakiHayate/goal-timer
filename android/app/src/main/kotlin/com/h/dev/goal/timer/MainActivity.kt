@@ -1,4 +1,4 @@
-package com.goal.timer
+package com.h.dev.goal.timer
 
 import io.flutter.embedding.android.FlutterActivity
 

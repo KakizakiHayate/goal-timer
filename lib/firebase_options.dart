@@ -51,7 +51,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyDP_Vvrt89kHciKgGHWG83cp77Y2troe2k',
-    appId: '1:817605522713:android:8c470807928f452f9a4188',
+    appId: '1:817605522713:android:e045d95bfb2fa1069a4188',
     messagingSenderId: '817605522713',
     projectId: 'goal-timer-43a41',
     storageBucket: 'goal-timer-43a41.firebasestorage.app',
@@ -59,13 +59,13 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyDujLVNqo7VsJ7h52JaiENPskL-lxJ60jo',
-    appId: '1:817605522713:ios:b2065632a5d5f6709a4188',
+    appId: '1:817605522713:ios:61a65425e01b2ed69a4188',
     messagingSenderId: '817605522713',
     projectId: 'goal-timer-43a41',
     storageBucket: 'goal-timer-43a41.firebasestorage.app',
     androidClientId: '817605522713-037cipbqtfbj2k9aslf37354th773o4k.apps.googleusercontent.com',
-    iosClientId: '817605522713-jdqagc6p9g4mhs27q5osmu3rol87ac31.apps.googleusercontent.com',
-    iosBundleId: 'com.goal.timer.20250704',
+    iosClientId: '817605522713-vuikookd27ubs5jbvbk2nevbing8ff6q.apps.googleusercontent.com',
+    iosBundleId: 'com.h.dev.goal.timer',
   );
 
 }
