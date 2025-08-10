@@ -60,3 +60,7 @@ ios/build/*
 ios/Flutter/Debug.xcconfig
 ios/Flutter/Release.xcconfig
 ios/Flutter/Profile.xcconfig
+
+android/app/google-services.json
+
+docs/
