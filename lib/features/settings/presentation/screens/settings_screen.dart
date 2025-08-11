@@ -8,6 +8,7 @@ import '../../../../core/widgets/setting_item.dart';
 import '../../../../core/widgets/pressable_card.dart';
 import '../../../auth/provider/auth_provider.dart';
 import '../../../shared/widgets/sync_status_indicator.dart';
+import '../../../billing/presentation/screens/upgrade_screen.dart';
 
 /// 改善された設定画面
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -76,6 +77,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
             children: [
               // プロフィールセクション
               _buildProfileSection(),
+
+              const SizedBox(height: SpacingConsts.l),
+
+              // プレミアムプラン
+              _buildPremiumSection(),
 
               const SizedBox(height: SpacingConsts.l),
 
@@ -588,6 +594,92 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
               ),
             ],
           ),
+    );
+  }
+
+  Widget _buildPremiumSection() {
+    return _buildSection(
+      title: 'プレミアムプラン',
+      children: [
+        PressableCard(
+          margin: EdgeInsets.zero,
+          padding: const EdgeInsets.all(SpacingConsts.lg),
+          backgroundColor: ColorConsts.cardBackground,
+          borderRadius: 20.0,
+          elevation: 2.0,
+          onTap: _showUpgradeScreen,
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [ColorConsts.primary, ColorConsts.primaryLight],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.star, color: Colors.white, size: 24),
+              ),
+              const SizedBox(width: SpacingConsts.lg),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'プレミアムにアップグレード',
+                      style: TextConsts.bodyMedium.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: ColorConsts.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: SpacingConsts.xs),
+                    Text(
+                      '無制限の目標・ポモドーロタイマー・CSVエクスポート',
+                      style: TextConsts.caption.copyWith(
+                        color: ColorConsts.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: SpacingConsts.sm),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: SpacingConsts.sm,
+                        vertical: SpacingConsts.xs,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF10B981).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        '7日間無料トライアル',
+                        style: TextConsts.caption.copyWith(
+                          color: const Color(0xFF10B981),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: ColorConsts.textTertiary,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showUpgradeScreen() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const UpgradeScreen(),
+      ),
     );
   }
 
