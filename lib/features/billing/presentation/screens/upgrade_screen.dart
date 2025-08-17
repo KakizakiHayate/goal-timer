@@ -7,6 +7,8 @@ import '../../../../core/utils/animation_consts.dart';
 import '../../../../core/widgets/common_button.dart';
 import '../../../../core/widgets/pressable_card.dart';
 import '../../constants/billing_text_consts.dart';
+import '../../domain/entities/entities.dart';
+import '../view_models/billing_view_model.dart';
 
 /// アップグレード画面
 class UpgradeScreen extends ConsumerStatefulWidget {
@@ -51,6 +53,9 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
 
   @override
   Widget build(BuildContext context) {
+    final billingState = ref.watch(billingViewModelProvider);
+    final isProcessing = billingState.isPurchasing || billingState.isLoading;
+    
     return Scaffold(
       backgroundColor: ColorConsts.backgroundPrimary,
       appBar: AppBar(
@@ -609,17 +614,22 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
   }
 
   Widget _buildActionButtons() {
+    final billingState = ref.watch(billingViewModelProvider);
+    final isProcessing = billingState.isPurchasing || billingState.isLoading;
+    
     return Column(
       children: [
         SizedBox(
           width: double.infinity,
           child: CommonButton(
-            text: _isYearlyPlan 
-                ? BillingTextConsts.startYearlyButton 
-                : BillingTextConsts.startTrialButton,
+            text: isProcessing 
+                ? BillingTextConsts.loading
+                : (_isYearlyPlan 
+                    ? BillingTextConsts.startYearlyButton 
+                    : BillingTextConsts.startTrialButton),
             variant: ButtonVariant.primary,
             size: ButtonSize.large,
-            onPressed: _handlePurchase,
+            onPressed: isProcessing ? null : _handlePurchase,
             isExpanded: true,
           ),
         ),
@@ -632,7 +642,7 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
             text: BillingTextConsts.restorePurchaseButton,
             variant: ButtonVariant.ghost,
             size: ButtonSize.medium,
-            onPressed: _handleRestorePurchase,
+            onPressed: isProcessing ? null : _handleRestorePurchase,
             isExpanded: true,
           ),
         ),
@@ -690,24 +700,94 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
     );
   }
 
-  void _handlePurchase() {
-    // TODO: RevenueCat購入処理を実装
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(BillingTextConsts.purchaseComingSoon),
-        backgroundColor: Colors.blue,
-      ),
-    );
+  void _handlePurchase() async {
+    final billingViewModel = ref.read(billingViewModelProvider.notifier);
+    
+    // 商品IDを決定（月額 or 年額）
+    final productId = _isYearlyPlan 
+        ? 'goal_timer_premium_1_year' 
+        : 'goal_timer_premium_1_month';
+    
+    // 購入処理を実行
+    await billingViewModel.purchaseProduct(productId);
+    
+    // 購入結果を確認
+    final state = ref.read(billingViewModelProvider);
+    
+    if (state.lastPurchaseResult != null) {
+      switch (state.lastPurchaseResult!.type) {
+        case PurchaseResultType.success:
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(BillingTextConsts.purchaseSuccess),
+                backgroundColor: Colors.green,
+              ),
+            );
+            Navigator.of(context).pop();
+          }
+          break;
+        case PurchaseResultType.cancelled:
+          // キャンセルされた場合は何もしない
+          break;
+        case PurchaseResultType.error:
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.errorMessage ?? BillingTextConsts.purchaseError),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+          break;
+        default:
+          break;
+      }
+    }
   }
 
-  void _handleRestorePurchase() {
-    // TODO: 購入復元処理を実装
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(BillingTextConsts.restoreComingSoon),
-        backgroundColor: Colors.green,
-      ),
-    );
+  void _handleRestorePurchase() async {
+    final billingViewModel = ref.read(billingViewModelProvider.notifier);
+    
+    // 購入復元処理を実行
+    await billingViewModel.restorePurchases();
+    
+    // 復元結果を確認
+    final state = ref.read(billingViewModelProvider);
+    
+    if (state.lastRestoreResult != null) {
+      if (state.lastRestoreResult!.success) {
+        if (state.lastRestoreResult!.restoredCount > 0) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(BillingTextConsts.restoreSuccess),
+                backgroundColor: Colors.green,
+              ),
+            );
+            Navigator.of(context).pop();
+          }
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text('復元可能な購入が見つかりませんでした'),
+                backgroundColor: Colors.orange,
+              ),
+            );
+          }
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.errorMessage ?? BillingTextConsts.restoreError),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
   }
 
   void _showTermsOfService() {
