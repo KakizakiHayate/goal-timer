@@ -1,0 +1,138 @@
+{
+  "identifier" : "FE8E6E40",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+    "_applicationInternalID" : "0",
+    "_developerTeamID" : "N28L9FHHL4",
+    "_failTransactionsEnabled" : false,
+    "_lastSynchronizedDate" : 0,
+    "_locale" : "ja",
+    "_storefront" : "JPN",
+    "_storeKitErrors" : [
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Load Products"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Purchase"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Verification"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Store Sync"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Subscription Status"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Transaction"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Manage Subscriptions Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Refund Request Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Offer Code Redeem Sheet"
+      }
+    ]
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "21494147",
+      "localizations" : [
+        {
+          "description" : "Goal Timerプレミアムプラン",
+          "displayName" : "プレミアムプラン",
+          "locale" : "ja"
+        }
+      ],
+      "name" : "Goal Timer Premium",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "500",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "6738826321",
+          "introductoryOffer" : {
+            "internalID" : "7DAY_FREE_TRIAL",
+            "numberOfPeriods" : 1,
+            "paymentMode" : "free",
+            "subscriptionPeriod" : "P1W"
+          },
+          "localizations" : [
+            {
+              "description" : "月額プラン - 全機能アンロック",
+              "displayName" : "月額プラン",
+              "locale" : "ja"
+            }
+          ],
+          "productID" : "goal_timer_premium_1_month",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Goal Timer Monthly",
+          "subscriptionGroupID" : "21494147",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "6000",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "6738826322",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "年額プラン - 17%お得",
+              "displayName" : "年額プラン",
+              "locale" : "ja"
+            }
+          ],
+          "productID" : "goal_timer_premium_1_year",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Goal Timer Yearly",
+          "subscriptionGroupID" : "21494147",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

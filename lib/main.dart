@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +8,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:goal_timer/routes.dart';
 // import 'package:goal_timer/core/services/sync_service.dart'; // 削除: 定期同期サービス無効化
 import 'package:goal_timer/core/data/local/database/app_database.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,6 +29,30 @@ void main() async {
   AppLogger.instance.i('SQLiteデータベースパス: $dbPath');
 
   // Supabaseの初期化はSplashScreenとprovidersで行うため、ここでは行わない
+
+  // RevenueCat初期化
+  try {
+    await Purchases.setLogLevel(LogLevel.debug);
+
+    // Platform別のキー設定
+    String apiKey = '';
+    if (Platform.isIOS) {
+      apiKey = EnvConfig.revenueCatApplePublicApiKey;
+    } else if (Platform.isAndroid) {
+      apiKey = 'your_android_public_sdk_key_here';  // Android用 Public SDK Key
+    }
+    
+    if (apiKey.isNotEmpty && !apiKey.contains('your_')) {
+      final configuration = PurchasesConfiguration(apiKey);
+      await Purchases.configure(configuration);
+      AppLogger.instance.i('RevenueCat initialized successfully for ${Platform.operatingSystem}');
+    } else {
+      AppLogger.instance.w('RevenueCat API key not configured for ${Platform.operatingSystem}');
+    }
+  } catch (e) {
+    AppLogger.instance.w('RevenueCat initialization failed: $e');
+    // ビルドエラーを避けるため、エラーは無視して継続
+  }
 
   // アプリ起動ログ
   AppLogger.instance.i('アプリケーションを起動します');
