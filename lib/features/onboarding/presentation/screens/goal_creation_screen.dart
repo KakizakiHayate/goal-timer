@@ -28,7 +28,7 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
   String _title = '';
   String _description = '';
   String _avoidMessage = '';
-  int _targetMinutes = 120; // デフォルト2時間
+  int _targetMinutes = 30; // デフォルト30分
   bool _isLoading = false;
 
   String? _titleError;
@@ -207,7 +207,7 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
         // 目標の詳細説明
         CustomTextField(
           labelText: '目標の詳細（任意）',
-          hintText: '例：毎日30分英語を勉強する、Webサイトを作る',
+          hintText: '例：TOEICで800点を取るために毎日英単語を覚える',
           initialValue: _description,
           maxLength: 200,
           maxLines: 3,
@@ -222,10 +222,15 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
 
         const SizedBox(height: SpacingConsts.l),
 
-        // 回避したいこと
+        // 目標時間設定
+        _buildTargetTimeSelector(),
+
+        const SizedBox(height: SpacingConsts.l),
+
+        // やらないとどうなる？
         CustomTextField(
-          labelText: '回避したいこと',
-          hintText: '例：英語ができずに海外で困る、技術についていけない',
+          labelText: 'やらないとどうなる？',
+          hintText: '例：将来の仕事で困る、自分に失望する',
           initialValue: _avoidMessage,
           maxLength: 100,
           maxLines: 2,
@@ -239,63 +244,100 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
           validator: _validateAvoidMessage,
           textInputAction: TextInputAction.done,
         ),
-
-        const SizedBox(height: SpacingConsts.l),
-
-        // 目標時間
-        _buildTimeSelector(),
       ],
     );
   }
 
-  Widget _buildTimeSelector() {
-    return Container(
-      padding: const EdgeInsets.all(SpacingConsts.l),
-      decoration: BoxDecoration(
-        color: ColorConsts.backgroundSecondary,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: ColorConsts.border,
-          width: 1,
+  Widget _buildTargetTimeSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '1日の目標時間',
+          style: TextConsts.body.copyWith(
+            color: ColorConsts.textSecondary,
+            fontWeight: FontWeight.w600,
+          ),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+        const SizedBox(height: SpacingConsts.s),
+        Container(
+          padding: const EdgeInsets.all(SpacingConsts.l),
+          decoration: BoxDecoration(
+            color: ColorConsts.backgroundSecondary,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: ColorConsts.border, width: 1.5),
+          ),
+          child: Column(
             children: [
-              const Icon(
-                Icons.schedule_outlined,
-                color: ColorConsts.textSecondary,
-                size: 20,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.schedule_outlined,
+                    color: ColorConsts.primary,
+                    size: 24,
+                  ),
+                  const SizedBox(width: SpacingConsts.s),
+                  Text(
+                    '${_targetMinutes ~/ 60}時間${_targetMinutes % 60}分',
+                    style: TextConsts.h3.copyWith(
+                      color: ColorConsts.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: SpacingConsts.s),
-              Text(
-                '目標時間',
-                style: TextConsts.labelMedium.copyWith(
-                  color: ColorConsts.textPrimary,
-                  fontWeight: FontWeight.w600,
+              const SizedBox(height: SpacingConsts.m),
+              GestureDetector(
+                onTap: () async {
+                  await showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return _TimePickerDialog(
+                        initialMinutes: _targetMinutes,
+                        onTimeSelected: (minutes) {
+                          setState(() {
+                            _targetMinutes = minutes;
+                          });
+                        },
+                      );
+                    },
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: SpacingConsts.l,
+                    vertical: SpacingConsts.m,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: ColorConsts.primary, width: 1.5),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.access_time,
+                        color: ColorConsts.primary,
+                        size: 20,
+                      ),
+                      const SizedBox(width: SpacingConsts.s),
+                      Text(
+                        '時間を変更',
+                        style: TextConsts.body.copyWith(
+                          color: ColorConsts.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: SpacingConsts.m),
-          Text(
-            '${_targetMinutes}分',
-            style: TextConsts.h3.copyWith(
-              color: ColorConsts.primary,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: SpacingConsts.s),
-          Text(
-            'チュートリアル用に2時間（120分）が設定されています',
-            style: TextConsts.caption.copyWith(
-              color: ColorConsts.textSecondary,
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -372,8 +414,8 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
       final createGoalUseCase = ref.read(createGoalUseCaseProvider);
       final onboardingState = ref.read(onboardingViewModelProvider);
       
-      // オンボーディングでは目標時間を2時間（120分）に設定
-      const int defaultTargetMinutes = 120;
+      // オンボーディングではユーザーが選択した目標時間を使用
+      final int targetMinutes = _targetMinutes;
       
       // デフォルトの締切（30日後）
       final deadline = DateTime.now().add(const Duration(days: 30));
@@ -383,7 +425,7 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
         title: _title,
         description: _description,
         avoidMessage: _avoidMessage,
-        targetMinutes: defaultTargetMinutes,
+        targetMinutes: targetMinutes,
         deadline: deadline,
       );
 
@@ -392,5 +434,196 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
       AppLogger.instance.e('オンボーディング目標の作成に失敗しました', e);
       rethrow;
     }
+  }
+}
+
+// タイムピッカーダイアログ
+class _TimePickerDialog extends StatefulWidget {
+  final int initialMinutes;
+  final Function(int) onTimeSelected;
+
+  const _TimePickerDialog({
+    required this.initialMinutes,
+    required this.onTimeSelected,
+  });
+
+  @override
+  State<_TimePickerDialog> createState() => _TimePickerDialogState();
+}
+
+class _TimePickerDialogState extends State<_TimePickerDialog> {
+  late int _selectedHours;
+  late int _selectedMinutes;
+  late FixedExtentScrollController _hoursController;
+  late FixedExtentScrollController _minutesController;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedHours = widget.initialMinutes ~/ 60;
+    _selectedMinutes = widget.initialMinutes % 60;
+    _hoursController = FixedExtentScrollController(initialItem: _selectedHours);
+    _minutesController = FixedExtentScrollController(
+      initialItem: _selectedMinutes,
+    );
+  }
+
+  @override
+  void dispose() {
+    _hoursController.dispose();
+    _minutesController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: Container(
+        padding: const EdgeInsets.all(SpacingConsts.l),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '目標時間を設定',
+              style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: SpacingConsts.l),
+            Container(
+              height: 200,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // 時間ピッカー
+                  Container(
+                    width: 80,
+                    child: ListWheelScrollView.useDelegate(
+                      controller: _hoursController,
+                      itemExtent: 40,
+                      physics: const FixedExtentScrollPhysics(),
+                      onSelectedItemChanged: (index) {
+                        setState(() {
+                          _selectedHours = index;
+                        });
+                      },
+                      childDelegate: ListWheelChildBuilderDelegate(
+                        childCount: 24,
+                        builder: (context, index) {
+                          return Center(
+                            child: Text(
+                              '$index',
+                              style: TextConsts.h3.copyWith(
+                                color:
+                                    _selectedHours == index
+                                        ? ColorConsts.primary
+                                        : ColorConsts.textTertiary,
+                                fontWeight:
+                                    _selectedHours == index
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  Text(
+                    '時間',
+                    style: TextConsts.body.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: SpacingConsts.l),
+                  // 分ピッカー
+                  Container(
+                    width: 80,
+                    child: ListWheelScrollView.useDelegate(
+                      controller: _minutesController,
+                      itemExtent: 40,
+                      physics: const FixedExtentScrollPhysics(),
+                      onSelectedItemChanged: (index) {
+                        setState(() {
+                          _selectedMinutes = index;
+                        });
+                      },
+                      childDelegate: ListWheelChildBuilderDelegate(
+                        childCount: 60,
+                        builder: (context, index) {
+                          return Center(
+                            child: Text(
+                              '$index',
+                              style: TextConsts.h3.copyWith(
+                                color:
+                                    _selectedMinutes == index
+                                        ? ColorConsts.primary
+                                        : ColorConsts.textTertiary,
+                                fontWeight:
+                                    _selectedMinutes == index
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  Text(
+                    '分',
+                    style: TextConsts.body.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: SpacingConsts.l),
+            Row(
+              children: [
+                Expanded(
+                  child: TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text(
+                      'キャンセル',
+                      style: TextConsts.body.copyWith(
+                        color: ColorConsts.textSecondary,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: SpacingConsts.m),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      final totalMinutes =
+                          _selectedHours * 60 + _selectedMinutes;
+                      if (totalMinutes > 0) {
+                        widget.onTimeSelected(totalMinutes);
+                        Navigator.of(context).pop();
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: ColorConsts.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: SpacingConsts.m,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      '決定',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

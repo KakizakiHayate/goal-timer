@@ -74,10 +74,30 @@ class _TutorialOverlayState extends State<TutorialOverlay>
     // パルスアニメーションをループ
     _startPulseLoop();
 
-    // ボタンの位置を取得
+    // ボタンの位置を取得（少し遅らせる）
+    _scheduleButtonPositionUpdate();
+  }
+
+  @override
+  void didUpdateWidget(covariant TutorialOverlay oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // ウィジェットが更新されたときも位置を再取得
+    if (widget.targetButtonKey != oldWidget.targetButtonKey) {
+      _scheduleButtonPositionUpdate();
+    }
+  }
+
+  void _scheduleButtonPositionUpdate() {
     if (widget.targetButtonKey != null) {
+      // 複数回のコールバックで確実に取得
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _getButtonPosition();
+      });
+      // さらに少し遅らせて再取得
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) {
+          _getButtonPosition();
+        }
       });
     }
   }
@@ -94,14 +114,33 @@ class _TutorialOverlayState extends State<TutorialOverlay>
 
   void _getButtonPosition() {
     if (widget.targetButtonKey?.currentContext != null) {
-      final RenderBox renderBox = 
-          widget.targetButtonKey!.currentContext!.findRenderObject() as RenderBox;
-      final position = renderBox.localToGlobal(Offset.zero);
-      final size = renderBox.size;
-      
-      setState(() {
-        _buttonRect = Rect.fromLTWH(position.dx, position.dy, size.width, size.height);
-      });
+      try {
+        final RenderBox? renderBox = 
+            widget.targetButtonKey!.currentContext!.findRenderObject() as RenderBox?;
+        if (renderBox != null && renderBox.hasSize) {
+          final position = renderBox.localToGlobal(Offset.zero);
+          final size = renderBox.size;
+          
+          // デバッグ用のログ
+          print('Button position found: $position, size: $size');
+          
+          if (mounted) {
+            setState(() {
+              _buttonRect = Rect.fromLTWH(position.dx, position.dy, size.width, size.height);
+            });
+          }
+        } else {
+          print('RenderBox not ready, retrying...');
+          // RenderBoxがまだ準備できていない場合は少し待ってから再試行
+          Future.delayed(const Duration(milliseconds: 50), () {
+            if (mounted) {
+              _getButtonPosition();
+            }
+          });
+        }
+      } catch (e) {
+        print('Error getting button position: $e');
+      }
     }
   }
 
@@ -327,9 +366,12 @@ class _TutorialOverlayState extends State<TutorialOverlay>
   Widget _buildButtonHighlight() {
     if (_buttonRect == null) return const SizedBox.shrink();
 
+    // 緑色のハイライト色を定義
+    const highlightColor = Color(0xFF10B981); // 緑色
+
     return Positioned(
-      left: _buttonRect!.left - 8,
-      top: _buttonRect!.top - 8,
+      left: _buttonRect!.left - 12,
+      top: _buttonRect!.top - 12,
       child: FadeTransition(
         opacity: _fadeAnimation,
         child: AnimatedBuilder(
@@ -338,24 +380,30 @@ class _TutorialOverlayState extends State<TutorialOverlay>
             return Transform.scale(
               scale: widget.showPulseEffect ? _pulseAnimation.value : 1.0,
               child: Container(
-                width: _buttonRect!.width + 16,
-                height: _buttonRect!.height + 16,
+                width: _buttonRect!.width + 24,
+                height: _buttonRect!.height + 24,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: ColorConsts.primary,
-                    width: 3,
+                    color: highlightColor,
+                    width: 4,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: ColorConsts.primary.withValues(alpha: 0.4),
-                      blurRadius: 15,
-                      spreadRadius: 3,
+                      color: highlightColor.withValues(alpha: 0.6),
+                      blurRadius: 20,
+                      spreadRadius: 4,
                     ),
                     BoxShadow(
-                      color: ColorConsts.primary.withValues(alpha: 0.2),
-                      blurRadius: 25,
-                      spreadRadius: 6,
+                      color: highlightColor.withValues(alpha: 0.3),
+                      blurRadius: 35,
+                      spreadRadius: 8,
+                    ),
+                    // より強いグロー効果
+                    BoxShadow(
+                      color: highlightColor.withValues(alpha: 0.8),
+                      blurRadius: 10,
+                      spreadRadius: 2,
                     ),
                   ],
                 ),

@@ -11,7 +11,9 @@ import '../../../../core/widgets/animated_check_icon.dart';
 import '../../../../core/widgets/pressable_card.dart';
 import '../../../onboarding/presentation/view_models/tutorial_view_model.dart';
 import '../../../onboarding/presentation/widgets/tutorial_overlay.dart';
+import '../../../onboarding/presentation/widgets/tutorial_completion_dialog.dart';
 import '../../../../core/utils/route_names.dart';
+import '../../../../core/provider/providers.dart';
 
 /// 改善されたタイマー画面
 /// 集中力向上とモチベーション維持に焦点を当てたデザイン
@@ -102,12 +104,8 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
         final tutorialViewModel = ref.read(tutorialViewModelProvider.notifier);
         tutorialViewModel.completeTutorial();
         
-        // アカウント登録画面に遷移
-        Future.delayed(const Duration(seconds: 2), () {
-          if (mounted) {
-            Navigator.pushReplacementNamed(context, RouteNames.onboardingAccountPromotion);
-          }
-        });
+        // 目標情報を取得
+        _showTutorialCompletionDialog();
       }
     });
 
@@ -834,5 +832,44 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
         Navigator.pushReplacementNamed(context, RouteNames.onboardingAccountPromotion);
       },
     );
+  }
+
+  /// チュートリアル完了ダイアログを表示
+  Future<void> _showTutorialCompletionDialog() async {
+    // 目標データを取得
+    try {
+      final goalsRepository = ref.read(hybridGoalsRepositoryProvider);
+      final goal = await goalsRepository.getGoalById(widget.goalId);
+      final goalTitle = goal?.title ?? '学習目標';
+
+      if (mounted) {
+        TutorialCompletionDialog.show(
+          context,
+          goalTitle: goalTitle,
+          onContinue: () {
+            Navigator.of(context).pop(); // ダイアログを閉じる
+            Navigator.pushReplacementNamed(
+              context, 
+              RouteNames.onboardingAccountPromotion,
+            );
+          },
+        );
+      }
+    } catch (e) {
+      // エラーの場合はデフォルトのタイトルで表示
+      if (mounted) {
+        TutorialCompletionDialog.show(
+          context,
+          goalTitle: '学習目標',
+          onContinue: () {
+            Navigator.of(context).pop(); // ダイアログを閉じる
+            Navigator.pushReplacementNamed(
+              context, 
+              RouteNames.onboardingAccountPromotion,
+            );
+          },
+        );
+      }
+    }
   }
 }
