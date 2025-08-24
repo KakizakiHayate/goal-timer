@@ -53,16 +53,18 @@ class SyncMetadataManager {
       AppLogger.instance.i('両方にデータなし - 同期不要');
       return false;
     }
-    
+
     // ✅ 片方だけnullなら同期必要（全件同期）
     if (localSyncUpdatedAt == null || remoteSyncUpdatedAt == null) {
       AppLogger.instance.i('片方にデータなし - 全件同期が必要');
       return true;
     }
-    
+
     // ✅ 両方存在する場合は時刻比較（差分同期）
     final needsSync = remoteSyncUpdatedAt.isAfter(localSyncUpdatedAt);
-    AppLogger.instance.i('時刻比較結果: $needsSync (local: $localSyncUpdatedAt, remote: $remoteSyncUpdatedAt)');
+    AppLogger.instance.i(
+      '時刻比較結果: $needsSync (local: $localSyncUpdatedAt, remote: $remoteSyncUpdatedAt)',
+    );
     return needsSync;
   }
 

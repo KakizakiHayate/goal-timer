@@ -14,11 +14,7 @@ enum ButtonVariant {
   error,
 }
 
-enum ButtonSize {
-  small,
-  medium,
-  large,
-}
+enum ButtonSize { small, medium, large }
 
 class CommonButton extends StatefulWidget {
   final String text;
@@ -30,7 +26,7 @@ class CommonButton extends StatefulWidget {
   final Widget? icon;
   final IconData? iconData;
   final bool iconRight;
-  
+
   const CommonButton({
     super.key,
     required this.text,
@@ -51,7 +47,7 @@ class CommonButton extends StatefulWidget {
 class _CommonButtonState extends State<CommonButton>
     with SingleTickerProviderStateMixin {
   bool _isPressed = false;
-  
+
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
 
@@ -62,13 +58,9 @@ class _CommonButtonState extends State<CommonButton>
       duration: const Duration(milliseconds: 150),
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.95,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
   }
 
   @override
@@ -103,7 +95,7 @@ class _CommonButtonState extends State<CommonButton>
     if (widget.onPressed == null) {
       return ColorConsts.textTertiary;
     }
-    
+
     switch (widget.variant) {
       case ButtonVariant.primary:
         return ColorConsts.primary;
@@ -126,7 +118,7 @@ class _CommonButtonState extends State<CommonButton>
     if (widget.onPressed == null) {
       return Colors.white;
     }
-    
+
     switch (widget.variant) {
       case ButtonVariant.primary:
       case ButtonVariant.success:
@@ -145,8 +137,8 @@ class _CommonButtonState extends State<CommonButton>
   Color _getBorderColor() {
     switch (widget.variant) {
       case ButtonVariant.outline:
-        return widget.onPressed == null 
-            ? ColorConsts.textTertiary 
+        return widget.onPressed == null
+            ? ColorConsts.textTertiary
             : ColorConsts.primary;
       default:
         return Colors.transparent;
@@ -154,13 +146,13 @@ class _CommonButtonState extends State<CommonButton>
   }
 
   List<BoxShadow>? _getShadow() {
-    if (widget.variant == ButtonVariant.ghost || 
+    if (widget.variant == ButtonVariant.ghost ||
         widget.variant == ButtonVariant.outline) {
       return null;
     }
-    
-    return _isPressed 
-        ? ShadowConsts.buttonPressed 
+
+    return _isPressed
+        ? ShadowConsts.buttonPressed
         : ShadowConsts.elevationSmall;
   }
 
@@ -198,13 +190,14 @@ class _CommonButtonState extends State<CommonButton>
       style: _getTextStyle().copyWith(color: _getTextColor()),
     );
 
-    final iconWidget = widget.icon ?? 
-        (widget.iconData != null 
+    final iconWidget =
+        widget.icon ??
+        (widget.iconData != null
             ? Icon(
-                widget.iconData, 
-                color: _getTextColor(),
-                size: widget.size == ButtonSize.small ? 16 : 20,
-              )
+              widget.iconData,
+              color: _getTextColor(),
+              size: widget.size == ButtonSize.small ? 16 : 20,
+            )
             : null);
 
     if (iconWidget == null) {
@@ -213,17 +206,18 @@ class _CommonButtonState extends State<CommonButton>
 
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: widget.iconRight
-          ? [
-              textWidget,
-              const SizedBox(width: SpacingConsts.sm),
-              iconWidget,
-            ]
-          : [
-              iconWidget,
-              const SizedBox(width: SpacingConsts.sm),
-              textWidget,
-            ],
+      children:
+          widget.iconRight
+              ? [
+                textWidget,
+                const SizedBox(width: SpacingConsts.sm),
+                iconWidget,
+              ]
+              : [
+                iconWidget,
+                const SizedBox(width: SpacingConsts.sm),
+                textWidget,
+              ],
     );
   }
 
@@ -235,9 +229,10 @@ class _CommonButtonState extends State<CommonButton>
         return Transform.scale(
           scale: _scaleAnimation.value,
           child: GestureDetector(
-            onTap: widget.onPressed != null && !widget.isLoading 
-                ? widget.onPressed 
-                : null,
+            onTap:
+                widget.onPressed != null && !widget.isLoading
+                    ? widget.onPressed
+                    : null,
             onTapDown: _handleTapDown,
             onTapUp: _handleTapUp,
             onTapCancel: _handleTapCancel,
@@ -256,9 +251,10 @@ class _CommonButtonState extends State<CommonButton>
               child: Center(
                 child: Padding(
                   padding: EdgeInsets.symmetric(
-                    horizontal: widget.size == ButtonSize.small 
-                        ? SpacingConsts.md 
-                        : SpacingConsts.lg,
+                    horizontal:
+                        widget.size == ButtonSize.small
+                            ? SpacingConsts.md
+                            : SpacingConsts.lg,
                   ),
                   child: _buildContent(),
                 ),

@@ -29,7 +29,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen>
   String? _emailError;
   String? _passwordError;
   String? _confirmPasswordError;
-  
+
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
@@ -41,17 +41,14 @@ class _SignupScreenState extends ConsumerState<SignupScreen>
       duration: AnimationConsts.slow,
       vsync: this,
     );
-    
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
         curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
       ),
     );
-    
+
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.1),
       end: Offset.zero,
@@ -61,7 +58,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen>
         curve: const Interval(0.2, 1.0, curve: Curves.easeOutCubic),
       ),
     );
-    
+
     _animationController.forward();
   }
 
@@ -90,7 +87,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen>
     final keyboardHeight = mediaQuery.viewInsets.bottom;
     final isSmallScreen = screenHeight < 700; // iPhone SE等の判定
     final isVerySmallScreen = screenHeight < 650; // iPhone SE 1st gen等
-    final availableHeight = screenHeight - mediaQuery.padding.top - mediaQuery.padding.bottom;
+    final availableHeight =
+        screenHeight - mediaQuery.padding.top - mediaQuery.padding.bottom;
 
     return Scaffold(
       backgroundColor: ColorConsts.backgroundPrimary,
@@ -103,17 +101,21 @@ class _SignupScreenState extends ConsumerState<SignupScreen>
             child: Form(
               key: _formKey,
               child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: availableHeight,
-                ),
+                constraints: BoxConstraints(minHeight: availableHeight),
                 child: SingleChildScrollView(
                   controller: _scrollController,
                   physics: const AlwaysScrollableScrollPhysics(),
                   padding: EdgeInsets.only(
                     left: SpacingConsts.xl,
                     right: SpacingConsts.xl,
-                    top: isVerySmallScreen ? SpacingConsts.xs : (isSmallScreen ? SpacingConsts.s : SpacingConsts.l),
-                    bottom: keyboardHeight > 0 ? SpacingConsts.s : SpacingConsts.xl,
+                    top:
+                        isVerySmallScreen
+                            ? SpacingConsts.xs
+                            : (isSmallScreen
+                                ? SpacingConsts.s
+                                : SpacingConsts.l),
+                    bottom:
+                        keyboardHeight > 0 ? SpacingConsts.s : SpacingConsts.xl,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -124,37 +126,84 @@ class _SignupScreenState extends ConsumerState<SignupScreen>
                         child: _buildBackButton(),
                       ),
 
-                      SizedBox(height: isVerySmallScreen ? SpacingConsts.s : (isSmallScreen ? SpacingConsts.l : SpacingConsts.xl)),
+                      SizedBox(
+                        height:
+                            isVerySmallScreen
+                                ? SpacingConsts.s
+                                : (isSmallScreen
+                                    ? SpacingConsts.l
+                                    : SpacingConsts.xl),
+                      ),
 
                       // ヘッダーセクション
                       _buildHeader(isVerySmallScreen),
 
-                      SizedBox(height: isVerySmallScreen ? SpacingConsts.s : (isSmallScreen ? SpacingConsts.l : SpacingConsts.xl)),
+                      SizedBox(
+                        height:
+                            isVerySmallScreen
+                                ? SpacingConsts.s
+                                : (isSmallScreen
+                                    ? SpacingConsts.l
+                                    : SpacingConsts.xl),
+                      ),
 
                       // フォームセクション
                       _buildForm(),
 
-                      SizedBox(height: isVerySmallScreen ? SpacingConsts.s : (isSmallScreen ? SpacingConsts.l : SpacingConsts.xl)),
+                      SizedBox(
+                        height:
+                            isVerySmallScreen
+                                ? SpacingConsts.s
+                                : (isSmallScreen
+                                    ? SpacingConsts.l
+                                    : SpacingConsts.xl),
+                      ),
 
                       // サインアップボタン
                       _buildSignupButton(authState, authNotifier),
 
-                      SizedBox(height: isVerySmallScreen ? SpacingConsts.s : (isSmallScreen ? SpacingConsts.l : SpacingConsts.xl)),
+                      SizedBox(
+                        height:
+                            isVerySmallScreen
+                                ? SpacingConsts.s
+                                : (isSmallScreen
+                                    ? SpacingConsts.l
+                                    : SpacingConsts.xl),
+                      ),
 
                       // 区切り線
                       _buildDivider(),
 
-                      SizedBox(height: isVerySmallScreen ? SpacingConsts.s : (isSmallScreen ? SpacingConsts.l : SpacingConsts.xl)),
+                      SizedBox(
+                        height:
+                            isVerySmallScreen
+                                ? SpacingConsts.s
+                                : (isSmallScreen
+                                    ? SpacingConsts.l
+                                    : SpacingConsts.xl),
+                      ),
 
                       // ソーシャルサインアップボタン
                       _buildSocialSignupButtons(authState, authNotifier),
 
-                      SizedBox(height: isVerySmallScreen ? SpacingConsts.s : (isSmallScreen ? SpacingConsts.l : SpacingConsts.xl)),
-                      
+                      SizedBox(
+                        height:
+                            isVerySmallScreen
+                                ? SpacingConsts.s
+                                : (isSmallScreen
+                                    ? SpacingConsts.l
+                                    : SpacingConsts.xl),
+                      ),
+
                       // ログインリンク
                       _buildLoginLink(),
-                      
-                      SizedBox(height: keyboardHeight > 0 ? SpacingConsts.s : SpacingConsts.xxl),
+
+                      SizedBox(
+                        height:
+                            keyboardHeight > 0
+                                ? SpacingConsts.s
+                                : SpacingConsts.xxl,
+                      ),
                     ],
                   ),
                 ),
@@ -200,25 +249,24 @@ class _SignupScreenState extends ConsumerState<SignupScreen>
       children: [
         Text(
           'アカウント作成',
-          style: (isVerySmallScreen 
-              ? TextConsts.h3 
-              : (isSmallScreen ? TextConsts.h2 : TextConsts.h1)
-          ).copyWith(
-            color: ColorConsts.textPrimary,
-            fontWeight: FontWeight.bold,
-            letterSpacing: -1,
-          ),
+          style: (isVerySmallScreen
+                  ? TextConsts.h3
+                  : (isSmallScreen ? TextConsts.h2 : TextConsts.h1))
+              .copyWith(
+                color: ColorConsts.textPrimary,
+                fontWeight: FontWeight.bold,
+                letterSpacing: -1,
+              ),
         ),
-        SizedBox(height: isVerySmallScreen ? SpacingConsts.xxs : SpacingConsts.xs),
+        SizedBox(
+          height: isVerySmallScreen ? SpacingConsts.xxs : SpacingConsts.xs,
+        ),
         Text(
           '目標達成への旅を\n今日から始めましょう',
-          style: (isVerySmallScreen 
-              ? TextConsts.caption 
-              : (isSmallScreen ? TextConsts.caption : TextConsts.body)
-          ).copyWith(
-            color: ColorConsts.textSecondary,
-            height: 1.4,
-          ),
+          style: (isVerySmallScreen
+                  ? TextConsts.caption
+                  : (isSmallScreen ? TextConsts.caption : TextConsts.body))
+              .copyWith(color: ColorConsts.textSecondary, height: 1.4),
           textAlign: TextAlign.center,
         ),
       ],
@@ -253,7 +301,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen>
               _passwordError = _validatePassword(value);
               // パスワード確認の再検証
               if (_confirmPassword.isNotEmpty) {
-                _confirmPasswordError = _validateConfirmPassword(_confirmPassword);
+                _confirmPasswordError = _validateConfirmPassword(
+                  _confirmPassword,
+                );
               }
             });
           },
@@ -320,10 +370,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen>
             height: 1,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  ColorConsts.border.withOpacity(0),
-                  ColorConsts.border,
-                ],
+                colors: [ColorConsts.border.withOpacity(0), ColorConsts.border],
               ),
             ),
           ),
@@ -343,10 +390,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen>
             height: 1,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  ColorConsts.border,
-                  ColorConsts.border.withOpacity(0),
-                ],
+                colors: [ColorConsts.border, ColorConsts.border.withOpacity(0)],
               ),
             ),
           ),
@@ -375,7 +419,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen>
             type: AuthButtonType.apple,
             text: 'Appleでサインアップ',
             isLoading: isLoading,
-            onPressed: isLoading ? null : () => _handleAppleSignup(authNotifier),
+            onPressed:
+                isLoading ? null : () => _handleAppleSignup(authNotifier),
           ),
         ],
       ],
@@ -389,9 +434,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen>
       children: [
         Text(
           'すでにアカウントをお持ちの方は ',
-          style: TextConsts.body.copyWith(
-            color: ColorConsts.textSecondary,
-          ),
+          style: TextConsts.body.copyWith(color: ColorConsts.textSecondary),
         ),
         GestureDetector(
           onTap: () {
@@ -481,16 +524,12 @@ class _SignupScreenState extends ConsumerState<SignupScreen>
       SnackBar(
         content: Text(
           message,
-          style: const TextStyle(
-            fontWeight: FontWeight.w500,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.w500),
         ),
         backgroundColor: ColorConsts.error,
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.all(SpacingConsts.l),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }

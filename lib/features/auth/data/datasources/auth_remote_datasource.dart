@@ -110,7 +110,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<AppUser> signInWithGoogle() async {
     AppLogger.instance.i('Googleログイン開始');
-    
+
     try {
       // ネットワーク状態チェック（追加）
       final hasNetwork = await _checkNetworkConnection();
@@ -125,7 +125,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       AppLogger.instance.d('Google Sign-In ダイアログを表示中...');
       final googleUser = await _googleSignIn.signIn();
-      
+
       if (googleUser == null) {
         AppLogger.instance.w('Googleログインがユーザーによってキャンセルされました');
         throw Exception('Googleログインがキャンセルされました');
@@ -133,7 +133,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       AppLogger.instance.d('Googleユーザー情報取得成功: ${googleUser.email}');
       AppLogger.instance.d('Google認証トークンを取得中...');
-      
+
       final googleAuth = await googleUser.authentication;
       final accessToken = googleAuth.accessToken;
       final idToken = googleAuth.idToken;
@@ -166,9 +166,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       }
 
       final appUser = _mapToAppUser(response.user!);
-      AppLogger.instance.i('Googleログイン成功: ユーザーID=${appUser.id}, Email=${appUser.email}');
+      AppLogger.instance.i(
+        'Googleログイン成功: ユーザーID=${appUser.id}, Email=${appUser.email}',
+      );
       return appUser;
-      
     } on Exception catch (e) {
       // エラーハンドリング改善（追加）
       if (e.toString().contains('ApiException: 7')) {
@@ -189,7 +190,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<AppUser> _retryGoogleSignIn() async {
     AppLogger.instance.d('Googleログイン リトライ実行');
     final googleUser = await _googleSignIn.signIn();
-    
+
     if (googleUser == null) {
       throw Exception('Googleログインがキャンセルされました');
     }
@@ -262,12 +263,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       // Supabaseからサインアウト
       await _supabase.auth.signOut();
       AppLogger.instance.d('Supabaseサインアウト完了');
-      
+
       // Googleセッションもクリア
       try {
         await _googleSignIn.signOut();
         AppLogger.instance.d('Googleサインアウト完了');
-        
+
         // disconnect()は失敗する可能性があるため個別にハンドリング
         try {
           await _googleSignIn.disconnect();
@@ -279,7 +280,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       } catch (googleError) {
         AppLogger.instance.w('Googleサインアウト失敗: $googleError');
       }
-      
+
       AppLogger.instance.i('サインアウト完了');
     } catch (e) {
       AppLogger.instance.e('サインアウトエラー: ${e.toString()}');

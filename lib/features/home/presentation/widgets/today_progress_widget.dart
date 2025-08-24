@@ -49,14 +49,14 @@ class TodayProgressWidget extends StatelessWidget {
         children: [
           // ヘッダー
           _buildHeader(),
-          
+
           const SizedBox(height: SpacingConsts.l),
-          
+
           // メインプログレス
           _buildMainProgress(),
-          
+
           const SizedBox(height: SpacingConsts.l),
-          
+
           // 統計情報
           _buildStats(),
         ],
@@ -81,9 +81,7 @@ class TodayProgressWidget extends StatelessWidget {
             const SizedBox(height: SpacingConsts.xs),
             Text(
               _getMotivationalMessage(),
-              style: TextConsts.body.copyWith(
-                color: ColorConsts.textSecondary,
-              ),
+              style: TextConsts.body.copyWith(color: ColorConsts.textSecondary),
             ),
           ],
         ),
@@ -125,9 +123,9 @@ class TodayProgressWidget extends StatelessWidget {
             ],
           ),
         ),
-        
+
         const SizedBox(width: SpacingConsts.l),
-        
+
         // 時間情報
         Expanded(
           child: Column(
@@ -149,7 +147,11 @@ class TodayProgressWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildTimeInfo(String label, String value, {bool isRemaining = false}) {
+  Widget _buildTimeInfo(
+    String label,
+    String value, {
+    bool isRemaining = false,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -183,16 +185,15 @@ class TodayProgressWidget extends StatelessWidget {
             color: ColorConsts.success,
           ),
         ),
-        Container(
-          width: 1,
-          height: 40,
-          color: ColorConsts.border,
-        ),
+        Container(width: 1, height: 40, color: ColorConsts.border),
         Expanded(
           child: _buildStatItem(
             icon: Icons.schedule_outlined,
             label: '平均集中時間',
-            value: totalGoals > 0 ? '${(totalMinutes / totalGoals).toInt()}分' : '0分',
+            value:
+                totalGoals > 0
+                    ? '${(totalMinutes / totalGoals).toInt()}分'
+                    : '0分',
             color: ColorConsts.primary,
           ),
         ),
@@ -208,11 +209,7 @@ class TodayProgressWidget extends StatelessWidget {
   }) {
     return Column(
       children: [
-        Icon(
-          icon,
-          color: color,
-          size: 24,
-        ),
+        Icon(icon, color: color, size: 24),
         const SizedBox(height: SpacingConsts.xs),
         Text(
           value,
@@ -223,9 +220,7 @@ class TodayProgressWidget extends StatelessWidget {
         ),
         Text(
           label,
-          style: TextConsts.caption.copyWith(
-            color: ColorConsts.textSecondary,
-          ),
+          style: TextConsts.caption.copyWith(color: ColorConsts.textSecondary),
           textAlign: TextAlign.center,
         ),
       ],

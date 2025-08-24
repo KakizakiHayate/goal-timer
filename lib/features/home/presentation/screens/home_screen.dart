@@ -21,6 +21,8 @@ import '../../../../core/widgets/common_button.dart';
 import '../../../../core/widgets/pressable_card.dart';
 import '../../../goal_detail/presentation/viewmodels/goal_detail_view_model.dart';
 import '../../../../core/utils/app_logger.dart';
+import '../../../onboarding/presentation/view_models/tutorial_view_model.dart';
+import '../../../onboarding/presentation/widgets/tutorial_overlay.dart';
 
 /// 改善されたホーム画面
 class HomeScreen extends ConsumerStatefulWidget {
@@ -74,24 +76,40 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   Widget build(BuildContext context) {
     // 認証状態をチェック
     final authState = ref.watch(globalAuthStateProvider);
+    final tutorialState = ref.watch(tutorialViewModelProvider);
 
-    // 認証状態監視：未認証の場合はログイン画面に戻る
+    // 認証状態監視：オンボーディングが必要な場合は適切な画面に戻る
     ref.listen(globalAuthStateProvider, (previous, next) {
-      if (next == app_auth.AuthState.unauthenticated) {
-        Navigator.of(context).pushReplacementNamed(RouteNames.login);
+      if (next.needsOnboarding) {
+        // 初回起動または未認証の場合
+        if (next == app_auth.AuthState.initial) {
+          Navigator.of(context).pushReplacementNamed(RouteNames.onboardingGoalCreation);
+        } else if (next == app_auth.AuthState.unauthenticated) {
+          Navigator.of(context).pushReplacementNamed(RouteNames.login);
+        }
       }
     });
 
-    // 認証されていない場合は読み込み画面を表示
-    if (authState != app_auth.AuthState.authenticated) {
-      return const Scaffold(
+    // アプリを使用できない状態の場合は読み込み画面を表示
+    if (!authState.canUseApp) {
+      String message = '読み込み中...';
+      if (authState == app_auth.AuthState.loading) {
+        message = '認証状態を確認中...';
+      } else if (authState == app_auth.AuthState.error) {
+        message = 'エラーが発生しました';
+      }
+      
+      return Scaffold(
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text('認証状態を確認中...'),
+              if (authState != app_auth.AuthState.error)
+                const CircularProgressIndicator(),
+              if (authState == app_auth.AuthState.error)
+                const Icon(Icons.error_outline, size: 48, color: Colors.red),
+              const SizedBox(height: 16),
+              Text(message),
             ],
           ),
         ),
@@ -106,13 +124,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       const SettingsScreen(), // 4: 設定
     ];
 
-    return Scaffold(
+    final mainScaffold = Scaffold(
       backgroundColor: ColorConsts.backgroundPrimary,
       body: pages[_tabController.index],
       bottomNavigationBar: _buildBottomNavigationBar(),
       floatingActionButton: _buildFloatingActionButton(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
+
+    // チュートリアルが有効な場合、オーバーレイを表示
+    if (tutorialState.isTutorialActive && 
+        _tabController.index == _homeTabIndex && 
+        tutorialState.currentStepId == 'home_goal_selection') {
+      return Stack(
+        children: [
+          mainScaffold,
+          _buildGoalSelectionTutorial(),
+        ],
+      );
+    }
+
+    return mainScaffold;
   }
 
   Widget _buildBottomNavigationBar() {
@@ -236,6 +268,92 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       }
     });
   }
+
+  /// チュートリアル：目標選択ガイド
+  Widget _buildGoalSelectionTutorial() {
+    final viewModel = ref.read(homeViewModelProvider.notifier);
+    final goals = viewModel.filteredGoals;
+
+    // 最初の目標がある場合、その実際のGoalCardをハイライト
+    if (goals.isEmpty) {
+      // 目標がない場合は従来通り
+      return TutorialOverlay(
+        targetWidget: Container(
+          width: 200,
+          height: 100,
+          decoration: BoxDecoration(
+            color: ColorConsts.cardBackground,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: const Center(
+            child: Text('目標カードをタップしてタイマーを開始'),
+          ),
+        ),
+        title: 'ゴールタイマーの使い方',
+        description: '作成した目標をタップすることで、専用のタイマー画面に移動できます。実際にタップしてタイマーを体験してみましょう！',
+        onNext: () {
+          final tutorialViewModel = ref.read(tutorialViewModelProvider.notifier);
+          tutorialViewModel.nextStep('timer_operation');
+        },
+        onSkip: () {
+          final tutorialViewModel = ref.read(tutorialViewModelProvider.notifier);
+          tutorialViewModel.skipTutorial();
+          Navigator.pushReplacementNamed(context, RouteNames.onboardingAccountPromotion);
+        },
+      );
+    }
+
+    // 実際の目標カードを複製してハイライト表示
+    final firstGoal = goals.first;
+    final streakDays = viewModel.getGoalStreakFromCache(firstGoal.id) ?? 0;
+    final timerButtonKey = GlobalKey(); // タイマーボタン用のKey
+    
+    return TutorialOverlay(
+      targetWidget: GoalCard(
+        title: firstGoal.title,
+        description: firstGoal.description.isNotEmpty ? firstGoal.description : null,
+        progress: firstGoal.getProgressRate(),
+        streakDays: streakDays,
+        avoidMessage: firstGoal.avoidMessage.isNotEmpty ? firstGoal.avoidMessage : null,
+        timerButtonKey: timerButtonKey, // タイマーボタンのKeyを設定
+        onTap: () {
+          // チュートリアル用：カード全体のタップでタイマー画面に遷移
+          _navigateToTimerScreen(context, firstGoal.id);
+        },
+        onTimerTap: () {
+          // チュートリアル用：タイマーボタンのタップでタイマー画面に遷移
+          _navigateToTimerScreen(context, firstGoal.id);
+        },
+      ),
+      targetButtonKey: timerButtonKey, // ボタンハイライト用のKeyを指定
+      title: 'この目標でタイマーを体験しましょう',
+      description: '作成した「${firstGoal.title}」の目標カードの「タイマー開始」ボタンをタップして、タイマー画面に移動しましょう！',
+      onNext: () {
+        final tutorialViewModel = ref.read(tutorialViewModelProvider.notifier);
+        tutorialViewModel.nextStep('timer_operation');
+      },
+      onSkip: () {
+        final tutorialViewModel = ref.read(tutorialViewModelProvider.notifier);
+        tutorialViewModel.skipTutorial();
+        Navigator.pushReplacementNamed(context, RouteNames.onboardingAccountPromotion);
+      },
+    );
+  }
+
+  // チュートリアル用のタイマー画面への遷移メソッド
+  void _navigateToTimerScreen(BuildContext context, String goalId) {
+    final tutorialState = ref.read(tutorialViewModelProvider);
+    
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TimerScreen(
+          goalId: goalId,
+          isTutorialMode: tutorialState.isTutorialActive,
+        ),
+      ),
+    );
+  }
 }
 
 class _HomeTabContent extends ConsumerWidget {
@@ -245,6 +363,7 @@ class _HomeTabContent extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final homeState = ref.watch(homeViewModelProvider);
     final homeViewModel = ref.read(homeViewModelProvider.notifier);
+    final tutorialState = ref.watch(tutorialViewModelProvider);
 
     // ローディング中の表示
     if (homeState.isLoading) {
@@ -295,7 +414,7 @@ class _HomeTabContent extends ConsumerWidget {
         ),
 
         // 目標リスト
-        _buildGoalList(homeState, homeViewModel, ref),
+        _buildGoalList(homeState, homeViewModel, ref, tutorialState),
       ],
     );
   }
@@ -360,7 +479,12 @@ class _HomeTabContent extends ConsumerWidget {
     }
   }
 
-  Widget _buildGoalList(HomeState homeState, HomeViewModel viewModel, WidgetRef ref) {
+  Widget _buildGoalList(
+    HomeState homeState,
+    HomeViewModel viewModel,
+    WidgetRef ref,
+    TutorialState tutorialState,
+  ) {
     final goals = viewModel.filteredGoals;
 
     if (goals.isEmpty) {
@@ -416,48 +540,66 @@ class _HomeTabContent extends ConsumerWidget {
             // TODO: 目標詳細画面に遷移
           },
           onTimerTap: () {
+            // チュートリアル中の場合、特別な処理
+            if (tutorialState.isTutorialActive && 
+                tutorialState.currentStepId == 'home_goal_selection') {
+              final tutorialViewModel = ref.read(tutorialViewModelProvider.notifier);
+              tutorialViewModel.startTimerOperationStep();
+            }
+            
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => TimerScreen(goalId: goal.id),
+                builder: (context) => TimerScreen(
+                  goalId: goal.id,
+                  isTutorialMode: tutorialState.isTutorialActive,
+                ),
               ),
             );
           },
           onEditTap: () async {
             AppLogger.instance.i('🎯 [HomeScreen] 編集ボタンがタップされました');
-            AppLogger.instance.i('🎯 [HomeScreen] 編集対象目標: ${goal.title} (ID: ${goal.id})');
-            
+            AppLogger.instance.i(
+              '🎯 [HomeScreen] 編集対象目標: ${goal.title} (ID: ${goal.id})',
+            );
+
             final result = await GoalCreateModal.show(
-              context, 
+              context,
               existingGoal: goal,
             );
-            
+
             AppLogger.instance.i('🔙 [HomeScreen] モーダルから戻りました');
-            
+
             if (result != null) {
               if (result == 'deleted') {
                 // 削除された場合
                 AppLogger.instance.i('🗑️ [HomeScreen] 目標が削除されました');
                 AppLogger.instance.i('🔄 [HomeScreen] UI更新処理を開始します...');
-                
+
                 // プロバイダーを無効化してデータを再読み込み
                 ref.invalidate(goalDetailListProvider);
                 ref.read(homeViewModelProvider.notifier).reloadGoals();
-                
+
                 AppLogger.instance.i('✅ [HomeScreen] 削除後のUI更新完了');
               } else if (result is GoalsModel) {
                 // 更新された場合
-                AppLogger.instance.i('✅ [HomeScreen] 更新された目標を受け取りました: ${result.title}');
+                AppLogger.instance.i(
+                  '✅ [HomeScreen] 更新された目標を受け取りました: ${result.title}',
+                );
                 AppLogger.instance.i('🔄 [HomeScreen] UI更新処理を開始します...');
-                
+
                 // プロバイダーを無効化してデータを再読み込み
                 ref.invalidate(goalDetailListProvider);
                 ref.read(homeViewModelProvider.notifier).reloadGoals();
-                
-                AppLogger.instance.i('✅ [HomeScreen] プロバイダー無効化とViewModelリロード完了');
+
+                AppLogger.instance.i(
+                  '✅ [HomeScreen] プロバイダー無効化とViewModelリロード完了',
+                );
               }
             } else {
-              AppLogger.instance.i('ℹ️ [HomeScreen] 更新がキャンセルされました（null が返されました）');
+              AppLogger.instance.i(
+                'ℹ️ [HomeScreen] 更新がキャンセルされました（null が返されました）',
+              );
             }
           },
         );

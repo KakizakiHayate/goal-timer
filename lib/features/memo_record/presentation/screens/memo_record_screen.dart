@@ -269,7 +269,10 @@ class _MemoRecordScreenState extends ConsumerState<MemoRecordScreen> {
             // メモ本文
             Text(
               memo.content,
-              style: const TextStyle(fontSize: 16, color: ColorConsts.textPrimary),
+              style: const TextStyle(
+                fontSize: 16,
+                color: ColorConsts.textPrimary,
+              ),
             ),
 
             const SizedBox(height: 8),

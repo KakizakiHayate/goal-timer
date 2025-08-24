@@ -621,38 +621,41 @@ class _GoalCreateModalContentState
 
   Future<void> _handleDeleteGoal() async {
     // 削除確認ダイアログを表示
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('目標を削除しますか？'),
-        content: Text(
-          '「${widget.existingGoal!.title}」を削除すると、'
-          '関連する学習記録も全て削除されます。\n'
-          'この操作は取り消せません。',
-        ),
-        actions: [
-          TextButton(
-            child: Text(
-              'キャンセル',
-              style: TextConsts.body.copyWith(
-                color: ColorConsts.textSecondary,
+    final confirmed =
+        await showDialog<bool>(
+          context: context,
+          builder:
+              (context) => AlertDialog(
+                title: const Text('目標を削除しますか？'),
+                content: Text(
+                  '「${widget.existingGoal!.title}」を削除すると、'
+                  '関連する学習記録も全て削除されます。\n'
+                  'この操作は取り消せません。',
+                ),
+                actions: [
+                  TextButton(
+                    child: Text(
+                      'キャンセル',
+                      style: TextConsts.body.copyWith(
+                        color: ColorConsts.textSecondary,
+                      ),
+                    ),
+                    onPressed: () => Navigator.of(context).pop(false),
+                  ),
+                  TextButton(
+                    child: Text(
+                      '削除',
+                      style: TextConsts.body.copyWith(
+                        color: ColorConsts.error,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    onPressed: () => Navigator.of(context).pop(true),
+                  ),
+                ],
               ),
-            ),
-            onPressed: () => Navigator.of(context).pop(false),
-          ),
-          TextButton(
-            child: Text(
-              '削除',
-              style: TextConsts.body.copyWith(
-                color: ColorConsts.error,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            onPressed: () => Navigator.of(context).pop(true),
-          ),
-        ],
-      ),
-    ) ?? false;
+        ) ??
+        false;
 
     if (!confirmed) return;
 
@@ -662,12 +665,14 @@ class _GoalCreateModalContentState
 
     try {
       AppLogger.instance.i('🗑️ 目標削除処理を開始します');
-      AppLogger.instance.i('🎯 削除対象目標: ${widget.existingGoal!.title} (ID: ${widget.existingGoal!.id})');
+      AppLogger.instance.i(
+        '🎯 削除対象目標: ${widget.existingGoal!.title} (ID: ${widget.existingGoal!.id})',
+      );
 
       // DeleteGoalUseCaseを使用
       final deleteGoalUseCase = ref.read(deleteGoalUseCaseProvider);
       AppLogger.instance.i('✅ DeleteGoalUseCaseを取得しました');
-      
+
       // 目標を削除
       AppLogger.instance.i('🚀 削除処理を実行します...');
       await deleteGoalUseCase(
@@ -681,7 +686,7 @@ class _GoalCreateModalContentState
         AppLogger.instance.i('🔙 モーダルを閉じて削除完了を通知します');
         // 削除が成功したことを示すために特別な値を返す
         Navigator.of(context).pop('deleted');
-        
+
         // 成功メッセージ
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -702,7 +707,7 @@ class _GoalCreateModalContentState
     } catch (e) {
       AppLogger.instance.e('❌ 目標削除処理でエラーが発生しました', e);
       AppLogger.instance.e('❌ エラー詳細: ${e.toString()}');
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

@@ -16,8 +16,10 @@ class CreateUserProfileUseCase {
   /// 認証されたユーザーのプロファイルを作成
   Future<UsersModel> execute(AppUser authUser) async {
     try {
-      AppLogger.instance.i('ユーザープロファイル作成を開始: ID=${authUser.id}, Email=${authUser.email}');
-      
+      AppLogger.instance.i(
+        'ユーザープロファイル作成を開始: ID=${authUser.id}, Email=${authUser.email}',
+      );
+
       final now = DateTime.now();
 
       final userProfile = UsersModel(
@@ -33,7 +35,7 @@ class CreateUserProfileUseCase {
 
       // Supabaseのusersテーブルにプロファイルを作成
       final result = await _usersRepository.createUser(userProfile);
-      
+
       AppLogger.instance.i('ユーザープロファイル作成完了: ID=${result.id}');
       return result;
     } catch (e, stackTrace) {
@@ -56,7 +58,7 @@ class CreateUserProfileUseCase {
   Future<UsersModel> getOrCreateProfile(AppUser authUser) async {
     try {
       AppLogger.instance.d('プロファイル存在チェック開始: ID=${authUser.id}');
-      
+
       // 既存のプロファイルを確認
       final existingProfile = await _usersRepository.getUserById(authUser.id);
       if (existingProfile != null) {
@@ -68,7 +70,11 @@ class CreateUserProfileUseCase {
       // プロファイルが存在しない場合は作成
       return await execute(authUser);
     } catch (e, stackTrace) {
-      AppLogger.instance.e('プロファイルの取得または作成に失敗: ID=${authUser.id}', e, stackTrace);
+      AppLogger.instance.e(
+        'プロファイルの取得または作成に失敗: ID=${authUser.id}',
+        e,
+        stackTrace,
+      );
       throw Exception('プロファイルの取得または作成に失敗しました: ${e.toString()}');
     }
   }

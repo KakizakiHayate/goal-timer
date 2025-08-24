@@ -3,11 +3,7 @@ import '../utils/color_consts.dart';
 import '../utils/spacing_consts.dart';
 import '../utils/shadow_consts.dart';
 
-enum CardVariant {
-  standard,
-  elevated,
-  outlined,
-}
+enum CardVariant { standard, elevated, outlined }
 
 class CommonCard extends StatefulWidget {
   final Widget child;
@@ -18,7 +14,7 @@ class CommonCard extends StatefulWidget {
   final bool isInteractive;
   final Color? backgroundColor;
   final double? borderRadius;
-  
+
   const CommonCard({
     super.key,
     required this.child,
@@ -38,7 +34,7 @@ class CommonCard extends StatefulWidget {
 class _CommonCardState extends State<CommonCard>
     with SingleTickerProviderStateMixin {
   bool _isPressed = false;
-  
+
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
 
@@ -49,13 +45,9 @@ class _CommonCardState extends State<CommonCard>
       duration: const Duration(milliseconds: 150),
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.98,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.98).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
   }
 
   @override
@@ -93,7 +85,8 @@ class _CommonCardState extends State<CommonCard>
           borderRadius: BorderRadius.circular(
             widget.borderRadius ?? SpacingConsts.radiusMd,
           ),
-          boxShadow: _isPressed ? ShadowConsts.buttonPressed : ShadowConsts.cardShadow,
+          boxShadow:
+              _isPressed ? ShadowConsts.buttonPressed : ShadowConsts.cardShadow,
         );
       case CardVariant.elevated:
         return BoxDecoration(
@@ -101,9 +94,10 @@ class _CommonCardState extends State<CommonCard>
           borderRadius: BorderRadius.circular(
             widget.borderRadius ?? SpacingConsts.radiusMd,
           ),
-          boxShadow: _isPressed 
-              ? ShadowConsts.elevationSmall 
-              : ShadowConsts.elevationMedium,
+          boxShadow:
+              _isPressed
+                  ? ShadowConsts.elevationSmall
+                  : ShadowConsts.elevationMedium,
         );
       case CardVariant.outlined:
         return BoxDecoration(
@@ -111,10 +105,7 @@ class _CommonCardState extends State<CommonCard>
           borderRadius: BorderRadius.circular(
             widget.borderRadius ?? SpacingConsts.radiusMd,
           ),
-          border: Border.all(
-            color: ColorConsts.border,
-            width: 1.0,
-          ),
+          border: Border.all(color: ColorConsts.border, width: 1.0),
         );
     }
   }
@@ -130,7 +121,8 @@ class _CommonCardState extends State<CommonCard>
             margin: widget.margin,
             decoration: _getDecoration(),
             child: Padding(
-              padding: widget.padding ?? 
+              padding:
+                  widget.padding ??
                   const EdgeInsets.all(SpacingConsts.cardPadding),
               child: widget.child,
             ),

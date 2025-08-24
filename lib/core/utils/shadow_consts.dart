@@ -17,7 +17,7 @@ final class ShadowConsts {
       spreadRadius: 0,
     ),
   ];
-  
+
   // === エレベーション別シャドウ ===
   static const List<BoxShadow> elevationSmall = [
     BoxShadow(
@@ -27,7 +27,7 @@ final class ShadowConsts {
       spreadRadius: 0,
     ),
   ];
-  
+
   static const List<BoxShadow> elevationMedium = [
     BoxShadow(
       color: ColorConsts.shadowMedium,
@@ -36,7 +36,7 @@ final class ShadowConsts {
       spreadRadius: 0,
     ),
   ];
-  
+
   static const List<BoxShadow> elevationLarge = [
     BoxShadow(
       color: ColorConsts.shadowMedium,
@@ -45,7 +45,7 @@ final class ShadowConsts {
       spreadRadius: 0,
     ),
   ];
-  
+
   // === 特殊シャドウ ===
   // ボタンプレス時
   static const List<BoxShadow> buttonPressed = [
@@ -56,7 +56,7 @@ final class ShadowConsts {
       spreadRadius: 0,
     ),
   ];
-  
+
   // フォーカス時のアウトライン
   static const List<BoxShadow> focusOutline = [
     BoxShadow(

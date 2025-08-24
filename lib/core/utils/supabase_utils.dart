@@ -35,7 +35,7 @@ class SupabaseUtils {
         return true;
       } catch (tableErr) {
         debugPrint('テーブル接続テストエラー: $tableErr');
-        
+
         // 接続テスト方法2: auth.getUser()を使用
         try {
           await client.auth.getUser();

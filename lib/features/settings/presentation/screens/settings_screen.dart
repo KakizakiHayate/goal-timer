@@ -6,9 +6,17 @@ import '../../../../core/utils/spacing_consts.dart';
 import '../../../../core/utils/animation_consts.dart';
 import '../../../../core/widgets/setting_item.dart';
 import '../../../../core/widgets/pressable_card.dart';
+import '../../../../core/services/timer_restriction_service.dart';
 import '../../../auth/provider/auth_provider.dart';
 import '../../../shared/widgets/sync_status_indicator.dart';
 import '../../../billing/presentation/screens/upgrade_screen.dart';
+
+// タイマー制限サービスのプロバイダー
+final timerRestrictionServiceProvider = Provider<TimerRestrictionService>((
+  ref,
+) {
+  return TimerRestrictionService();
+});
 
 /// 改善された設定画面
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -598,89 +606,276 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
   }
 
   Widget _buildPremiumSection() {
+    final restrictionService = ref.read(timerRestrictionServiceProvider);
+    final currentPlan = restrictionService.getCurrentPlan();
+    final limitations = restrictionService.getPlanLimitations();
+    final isPremium = currentPlan == 'Premium';
+
     return _buildSection(
-      title: 'プレミアムプラン',
+      title: 'プラン情報',
       children: [
+        // 現在のプラン表示
         PressableCard(
           margin: EdgeInsets.zero,
           padding: const EdgeInsets.all(SpacingConsts.lg),
-          backgroundColor: ColorConsts.cardBackground,
+          backgroundColor:
+              isPremium
+                  ? ColorConsts.primary.withValues(alpha: 0.1)
+                  : ColorConsts.cardBackground,
           borderRadius: 20.0,
           elevation: 2.0,
-          onTap: _showUpgradeScreen,
-          child: Row(
+          onTap: isPremium ? null : _showUpgradeScreen,
+          child: Column(
             children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [ColorConsts.primary, ColorConsts.primaryLight],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+              Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      gradient:
+                          isPremium
+                              ? const LinearGradient(
+                                colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              )
+                              : const LinearGradient(
+                                colors: [
+                                  ColorConsts.primary,
+                                  ColorConsts.primaryLight,
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      isPremium ? Icons.diamond : Icons.star,
+                      color: Colors.white,
+                      size: 24,
+                    ),
                   ),
+                  const SizedBox(width: SpacingConsts.lg),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              '現在のプラン: ',
+                              style: TextConsts.bodySmall.copyWith(
+                                color: ColorConsts.textSecondary,
+                              ),
+                            ),
+                            Text(
+                              currentPlan,
+                              style: TextConsts.bodyMedium.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color:
+                                    isPremium
+                                        ? ColorConsts.primary
+                                        : ColorConsts.textPrimary,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: SpacingConsts.xs),
+                        if (isPremium)
+                          Text(
+                            'すべての機能をご利用いただけます',
+                            style: TextConsts.caption.copyWith(
+                              color: ColorConsts.success,
+                            ),
+                          )
+                        else
+                          Text(
+                            'プレミアムで更多機能を解除',
+                            style: TextConsts.caption.copyWith(
+                              color: ColorConsts.textSecondary,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  if (!isPremium)
+                    const Icon(
+                      Icons.arrow_forward_ios,
+                      color: ColorConsts.textSecondary,
+                      size: 16,
+                    ),
+                ],
+              ),
+
+              const SizedBox(height: SpacingConsts.md),
+
+              // プラン制限表示
+              Container(
+                padding: const EdgeInsets.all(SpacingConsts.md),
+                decoration: BoxDecoration(
+                  color: ColorConsts.backgroundSecondary,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.star, color: Colors.white, size: 24),
-              ),
-              const SizedBox(width: SpacingConsts.lg),
-              Expanded(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'プレミアムにアップグレード',
-                      style: TextConsts.bodyMedium.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: ColorConsts.textPrimary,
-                      ),
+                    _buildPlanLimitationItem(
+                      icon: Icons.flag,
+                      title: '目標数',
+                      value:
+                          limitations['max_goals'] == -1
+                              ? '無制限'
+                              : '${limitations['max_goals']}個まで',
+                      isUnlimited: limitations['max_goals'] == -1,
                     ),
-                    const SizedBox(height: SpacingConsts.xs),
-                    Text(
-                      '無制限の目標・ポモドーロタイマー・CSVエクスポート',
-                      style: TextConsts.caption.copyWith(
-                        color: ColorConsts.textSecondary,
-                      ),
+                    _buildPlanLimitationItem(
+                      icon: Icons.timer,
+                      title: 'タイマーモード',
+                      value:
+                          '${(limitations['available_timers'] as List).length}種類',
+                      isUnlimited:
+                          (limitations['available_timers'] as List).length >= 4,
                     ),
-                    const SizedBox(height: SpacingConsts.sm),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: SpacingConsts.sm,
-                        vertical: SpacingConsts.xs,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF10B981).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        '7日間無料トライアル',
-                        style: TextConsts.caption.copyWith(
-                          color: const Color(0xFF10B981),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                    _buildPlanLimitationItem(
+                      icon: Icons.storage,
+                      title: 'データ保存期間',
+                      value:
+                          limitations['log_retention_days'] == -1
+                              ? '無制限'
+                              : '${limitations['log_retention_days']}日間',
+                      isUnlimited: limitations['log_retention_days'] == -1,
                     ),
                   ],
                 ),
               ),
-              const Icon(
-                Icons.arrow_forward_ios,
-                size: 16,
-                color: ColorConsts.textTertiary,
-              ),
             ],
           ),
         ),
+
+        // アップグレードボタン（非プレミアムユーザーのみ）
+        if (!isPremium) ...[
+          const SizedBox(height: SpacingConsts.md),
+          PressableCard(
+            margin: EdgeInsets.zero,
+            padding: const EdgeInsets.all(SpacingConsts.lg),
+            backgroundColor: ColorConsts.cardBackground,
+            borderRadius: 20.0,
+            elevation: 2.0,
+            onTap: _showUpgradeScreen,
+            child: Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.upgrade,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: SpacingConsts.lg),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'プレミアムにアップグレード',
+                        style: TextConsts.bodyMedium.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: ColorConsts.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: SpacingConsts.xs),
+                      Text(
+                        '無制限の目標・ポモドーロタイマー・データ永続保存',
+                        style: TextConsts.caption.copyWith(
+                          color: ColorConsts.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(height: SpacingConsts.sm),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: SpacingConsts.sm,
+                          vertical: SpacingConsts.xs,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF10B981).withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          '7日間無料トライアル',
+                          style: TextConsts.caption.copyWith(
+                            color: const Color(0xFF10B981),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  size: 16,
+                  color: ColorConsts.textTertiary,
+                ),
+              ],
+            ),
+          ),
+        ],
       ],
     );
   }
 
-  void _showUpgradeScreen() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const UpgradeScreen(),
+  Widget _buildPlanLimitationItem({
+    required IconData icon,
+    required String title,
+    required String value,
+    required bool isUnlimited,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: SpacingConsts.sm),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            size: 16,
+            color:
+                isUnlimited ? ColorConsts.success : ColorConsts.textSecondary,
+          ),
+          const SizedBox(width: SpacingConsts.sm),
+          Expanded(
+            child: Text(
+              title,
+              style: TextConsts.bodySmall.copyWith(
+                color: ColorConsts.textSecondary,
+              ),
+            ),
+          ),
+          Text(
+            value,
+            style: TextConsts.bodySmall.copyWith(
+              color:
+                  isUnlimited ? ColorConsts.success : ColorConsts.textPrimary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
+  }
+
+  void _showUpgradeScreen() {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (context) => const UpgradeScreen()));
   }
 
   void _showComingSoonDialog(String feature) {

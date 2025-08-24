@@ -26,7 +26,8 @@ class CircularProgressIndicator extends StatefulWidget {
   });
 
   @override
-  State<CircularProgressIndicator> createState() => _CircularProgressIndicatorState();
+  State<CircularProgressIndicator> createState() =>
+      _CircularProgressIndicatorState();
 }
 
 class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
@@ -41,7 +42,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
       duration: widget.showAnimation ? AnimationConsts.slow : Duration.zero,
       vsync: this,
     );
-    
+
     _progressAnimation = Tween<double>(
       begin: 0.0,
       end: widget.progress,
@@ -51,7 +52,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
         curve: AnimationConsts.smoothCurve,
       ),
     );
-    
+
     _animationController.forward();
   }
 
@@ -84,8 +85,9 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
       animation: _progressAnimation,
       builder: (context, child) {
         final progressValue = _progressAnimation.value;
-        final progressColor = widget.progressColor ?? _getProgressColor(progressValue);
-        
+        final progressColor =
+            widget.progressColor ?? _getProgressColor(progressValue);
+
         return Container(
           width: widget.size,
           height: widget.size,
@@ -140,7 +142,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
 
   Widget _buildDefaultCenterWidget(double progress) {
     final percentage = (progress * 100).toInt();
-    
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [

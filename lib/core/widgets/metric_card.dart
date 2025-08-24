@@ -50,17 +50,14 @@ class _MetricCardState extends State<MetricCard>
       duration: AnimationConsts.medium,
       vsync: this,
     );
-    
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
         curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
       ),
     );
-    
+
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.2),
       end: Offset.zero,
@@ -70,7 +67,7 @@ class _MetricCardState extends State<MetricCard>
         curve: const Interval(0.2, 1.0, curve: Curves.easeOutCubic),
       ),
     );
-    
+
     _animationController.forward();
   }
 
@@ -98,18 +95,18 @@ class _MetricCardState extends State<MetricCard>
             children: [
               // アイコンとタイトル
               _buildHeader(),
-              
+
               const SizedBox(height: SpacingConsts.m),
-              
+
               // 値表示
               _buildValue(),
-              
+
               // 変化量表示
               if (widget.changeText != null) ...[
                 const SizedBox(height: SpacingConsts.s),
                 _buildChange(),
               ],
-              
+
               // サブタイトル
               if (widget.subtitle != null) ...[
                 const SizedBox(height: SpacingConsts.s),
@@ -186,7 +183,7 @@ class _MetricCardState extends State<MetricCard>
   Widget _buildChange() {
     final isPositive = widget.changeText!.startsWith('+');
     final defaultColor = isPositive ? ColorConsts.success : ColorConsts.error;
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: SpacingConsts.s,

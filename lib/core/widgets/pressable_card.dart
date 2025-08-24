@@ -98,9 +98,10 @@ class _PressableCardState extends State<PressableCard>
                 boxShadow: [
                   if (widget.elevation > 0)
                     BoxShadow(
-                      color: _isPressed
-                          ? Colors.transparent
-                          : ColorConsts.shadowLight,
+                      color:
+                          _isPressed
+                              ? Colors.transparent
+                              : ColorConsts.shadowLight,
                       offset: const Offset(0, 2),
                       blurRadius: widget.elevation * 4,
                       spreadRadius: 0,
@@ -112,13 +113,15 @@ class _PressableCardState extends State<PressableCard>
                 child: Container(
                   padding: widget.padding,
                   decoration: BoxDecoration(
-                    color: _isPressed
-                        ? ColorConsts.pressedOverlay
-                        : Colors.transparent,
+                    color:
+                        _isPressed
+                            ? ColorConsts.pressedOverlay
+                            : Colors.transparent,
                   ),
                   child: AnimatedOpacity(
                     duration: AnimationConsts.fast,
-                    opacity: widget.enabled ? 1.0 : AnimationConsts.opacityDisabled,
+                    opacity:
+                        widget.enabled ? 1.0 : AnimationConsts.opacityDisabled,
                     child: widget.child,
                   ),
                 ),

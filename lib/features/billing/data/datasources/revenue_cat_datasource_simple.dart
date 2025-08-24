@@ -6,9 +6,9 @@ import '../../domain/entities/entities.dart';
 /// シンプルなRevenueCat SDKとの通信を担当するデータソース
 class RevenueCatDataSourceSimple {
   static RevenueCatDataSourceSimple? _instance;
-  
+
   RevenueCatDataSourceSimple._();
-  
+
   static RevenueCatDataSourceSimple get instance {
     _instance ??= RevenueCatDataSourceSimple._();
     return _instance!;
@@ -71,10 +71,11 @@ class RevenueCatDataSourceSimple {
     try {
       // TODO: 実装時にRevenueCat APIを使用
       AppLogger.instance.i('Purchase attempt for product: $productId');
-      
+
       // シミュレーション: 成功を返す
       return PurchaseResult.success(
-        transactionId: 'temp_transaction_${DateTime.now().millisecondsSinceEpoch}',
+        transactionId:
+            'temp_transaction_${DateTime.now().millisecondsSinceEpoch}',
         productId: productId,
         purchaseDate: DateTime.now(),
       );
@@ -93,12 +94,9 @@ class RevenueCatDataSourceSimple {
     try {
       // TODO: 実装時にRevenueCat APIを使用
       AppLogger.instance.i('Restore purchases attempt');
-      
+
       // シミュレーション: 復元なし
-      return RestoreResult.success(
-        restoredCount: 0,
-        restoredProductIds: [],
-      );
+      return RestoreResult.success(restoredCount: 0, restoredProductIds: []);
     } catch (e) {
       AppLogger.instance.e('Restore purchases failed: $e');
       return RestoreResult.failure('購入の復元に失敗しました: $e');
@@ -119,7 +117,10 @@ class RevenueCatDataSourceSimple {
   /// サブスクリプション状態の変更を監視
   Stream<SubscriptionStatus> subscriptionStatusStream() {
     // TODO: 実装時にRevenueCat APIを使用
-    return Stream.periodic(const Duration(seconds: 5), (_) => SubscriptionStatus.free);
+    return Stream.periodic(
+      const Duration(seconds: 5),
+      (_) => SubscriptionStatus.free,
+    );
   }
 
   /// 特定のエンタイトルメントが有効かどうかを確認

@@ -7,16 +7,22 @@ part 'subscription_status.g.dart';
 enum SubscriptionState {
   /// 未契約
   none,
+
   /// アクティブ
   active,
+
   /// トライアル中
   trial,
+
   /// 期限切れ
   expired,
+
   /// キャンセル済み（期間中）
   cancelled,
+
   /// 支払い問題
   billingIssue,
+
   /// 不明
   unknown,
 }
@@ -56,8 +62,8 @@ class SubscriptionStatus with _$SubscriptionStatus {
 /// 拡張メソッド
 extension SubscriptionStatusX on SubscriptionStatus {
   /// アクティブな状態かどうか
-  bool get isActive => 
-      state == SubscriptionState.active || 
+  bool get isActive =>
+      state == SubscriptionState.active ||
       state == SubscriptionState.trial ||
       state == SubscriptionState.cancelled; // キャンセル済みでも期間中はアクティブ
 

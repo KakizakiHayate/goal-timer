@@ -4,9 +4,9 @@ import '../../domain/entities/entities.dart';
 /// デバッグ用のRevenueCatデータソース（StoreKit設定待ち）
 class RevenueCatDataSourceDebug {
   static RevenueCatDataSourceDebug? _instance;
-  
+
   RevenueCatDataSourceDebug._();
-  
+
   static RevenueCatDataSourceDebug get instance {
     _instance ??= RevenueCatDataSourceDebug._();
     return _instance!;
@@ -57,7 +57,7 @@ class RevenueCatDataSourceDebug {
   /// デバッグ用の購入処理
   Future<PurchaseResult> purchaseProduct(String productId) async {
     await Future.delayed(const Duration(seconds: 1));
-    
+
     // デバッグモードでは常に成功を返す
     return PurchaseResult(
       success: true,
@@ -87,17 +87,19 @@ class RevenueCatDataSourceDebug {
   /// サブスクリプション状態をストリームで監視（デバッグ用）
   Stream<SubscriptionStatus> subscriptionStatusStream() {
     final controller = StreamController<SubscriptionStatus>.broadcast();
-    
+
     // 初期状態を送信
-    controller.add(SubscriptionStatus(
-      isActive: false,
-      expirationDate: null,
-      willRenew: false,
-      isTrial: false,
-      planId: null,
-      state: SubscriptionState.none,
-    ));
-    
+    controller.add(
+      SubscriptionStatus(
+        isActive: false,
+        expirationDate: null,
+        willRenew: false,
+        isTrial: false,
+        planId: null,
+        state: SubscriptionState.none,
+      ),
+    );
+
     return controller.stream;
   }
 

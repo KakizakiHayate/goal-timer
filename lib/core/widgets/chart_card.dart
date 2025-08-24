@@ -39,17 +39,14 @@ class _ChartCardState extends State<ChartCard>
       duration: AnimationConsts.slow,
       vsync: this,
     );
-    
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
         curve: const Interval(0.0, 0.8, curve: Curves.easeOut),
       ),
     );
-    
+
     _animationController.forward();
   }
 
@@ -75,15 +72,12 @@ class _ChartCardState extends State<ChartCard>
           children: [
             // ヘッダー
             _buildHeader(),
-            
+
             const SizedBox(height: SpacingConsts.l),
-            
+
             // チャート
-            SizedBox(
-              height: 200,
-              child: widget.chart,
-            ),
-            
+            SizedBox(height: 200, child: widget.chart),
+
             // 凡例
             if (widget.legendItems != null) ...[
               const SizedBox(height: SpacingConsts.l),
@@ -122,9 +116,7 @@ class _ChartCardState extends State<ChartCard>
           const SizedBox(height: SpacingConsts.xs),
           Text(
             widget.subtitle!,
-            style: TextConsts.body.copyWith(
-              color: ColorConsts.textSecondary,
-            ),
+            style: TextConsts.body.copyWith(color: ColorConsts.textSecondary),
           ),
         ],
       ],
@@ -135,29 +127,30 @@ class _ChartCardState extends State<ChartCard>
     return Wrap(
       spacing: SpacingConsts.m,
       runSpacing: SpacingConsts.s,
-      children: widget.legendItems!.map((item) {
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 12,
-              height: 12,
-              decoration: BoxDecoration(
-                color: item.color,
-                shape: BoxShape.circle,
-              ),
-            ),
-            const SizedBox(width: SpacingConsts.s),
-            Text(
-              item.label,
-              style: TextConsts.caption.copyWith(
-                color: ColorConsts.textSecondary,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        );
-      }).toList(),
+      children:
+          widget.legendItems!.map((item) {
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 12,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    color: item.color,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: SpacingConsts.s),
+                Text(
+                  item.label,
+                  style: TextConsts.caption.copyWith(
+                    color: ColorConsts.textSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            );
+          }).toList(),
     );
   }
 }
@@ -166,8 +159,5 @@ class ChartLegendItem {
   final String label;
   final Color color;
 
-  const ChartLegendItem({
-    required this.label,
-    required this.color,
-  });
+  const ChartLegendItem({required this.label, required this.color});
 }

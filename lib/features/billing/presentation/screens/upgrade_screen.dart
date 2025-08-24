@@ -55,7 +55,7 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
   Widget build(BuildContext context) {
     final billingState = ref.watch(billingViewModelProvider);
     final isProcessing = billingState.isPurchasing || billingState.isLoading;
-    
+
     return Scaffold(
       backgroundColor: ColorConsts.backgroundPrimary,
       appBar: AppBar(
@@ -87,29 +87,29 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
                   children: [
                     // ヘッダー部分
                     _buildHeader(),
-                    
+
                     const SizedBox(height: SpacingConsts.xl),
-                    
+
                     // 機能比較
                     _buildFeatureComparison(),
-                    
+
                     const SizedBox(height: SpacingConsts.xl),
-                    
+
                     // プラン選択
                     _buildPlanSelector(),
-                    
+
                     const SizedBox(height: SpacingConsts.xl),
-                    
+
                     // 価格表示
                     _buildPricing(),
-                    
+
                     const SizedBox(height: SpacingConsts.xl),
-                    
+
                     // アクションボタン
                     _buildActionButtons(),
-                    
+
                     const SizedBox(height: SpacingConsts.lg),
-                    
+
                     // 注意事項
                     _buildTermsAndNotes(),
                   ],
@@ -136,15 +136,11 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
             ),
             shape: BoxShape.circle,
           ),
-          child: const Icon(
-            Icons.star,
-            color: Colors.white,
-            size: 40,
-          ),
+          child: const Icon(Icons.star, color: Colors.white, size: 40),
         ),
-        
+
         const SizedBox(height: SpacingConsts.lg),
-        
+
         Text(
           BillingTextConsts.upgradeHeader,
           style: TextConsts.h2.copyWith(
@@ -153,9 +149,9 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
           ),
           textAlign: TextAlign.center,
         ),
-        
+
         const SizedBox(height: SpacingConsts.md),
-        
+
         Text(
           BillingTextConsts.upgradeSubtitle,
           style: TextConsts.bodyMedium.copyWith(
@@ -185,28 +181,28 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
               ),
             ),
           ),
-          
+
           _buildFeatureItem(
             icon: Icons.flag_outlined,
             title: BillingTextConsts.unlimitedGoalsTitle,
             description: BillingTextConsts.unlimitedGoalsDescription,
             isPremium: true,
           ),
-          
+
           _buildFeatureItem(
             icon: Icons.timer_outlined,
             title: BillingTextConsts.pomodoroTimerTitle,
             description: BillingTextConsts.pomodoroTimerDescription,
             isPremium: true,
           ),
-          
+
           _buildFeatureItem(
             icon: Icons.file_download_outlined,
             title: BillingTextConsts.csvExportTitle,
             description: BillingTextConsts.csvExportDescription,
             isPremium: true,
           ),
-          
+
           const SizedBox(height: SpacingConsts.md),
         ],
       ),
@@ -230,9 +226,10 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: isPremium 
-                  ? ColorConsts.primary.withOpacity(0.1)
-                  : ColorConsts.textTertiary.withOpacity(0.1),
+              color:
+                  isPremium
+                      ? ColorConsts.primary.withOpacity(0.1)
+                      : ColorConsts.textTertiary.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
@@ -241,9 +238,9 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
               size: 24,
             ),
           ),
-          
+
           const SizedBox(width: SpacingConsts.md),
-          
+
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -265,7 +262,7 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
               ],
             ),
           ),
-          
+
           if (isPremium)
             Container(
               padding: const EdgeInsets.symmetric(
@@ -300,14 +297,20 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
             fontWeight: FontWeight.bold,
           ),
         ),
-        
+
         const SizedBox(height: SpacingConsts.md),
-        
+
         // 月額プラン
         Container(
           decoration: BoxDecoration(
-            color: !_isYearlyPlan ? ColorConsts.primary.withOpacity(0.1) : ColorConsts.cardBackground,
-            border: !_isYearlyPlan ? Border.all(color: ColorConsts.primary, width: 2.0) : null,
+            color:
+                !_isYearlyPlan
+                    ? ColorConsts.primary.withOpacity(0.1)
+                    : ColorConsts.cardBackground,
+            border:
+                !_isYearlyPlan
+                    ? Border.all(color: ColorConsts.primary, width: 2.0)
+                    : null,
             borderRadius: BorderRadius.circular(16.0),
             boxShadow: [
               BoxShadow(
@@ -341,9 +344,9 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
                     },
                     activeColor: ColorConsts.primary,
                   ),
-                  
+
                   const SizedBox(width: SpacingConsts.sm),
-                  
+
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -366,7 +369,7 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
                       ],
                     ),
                   ),
-                  
+
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: SpacingConsts.sm,
@@ -389,14 +392,20 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
             ),
           ),
         ),
-        
+
         const SizedBox(height: SpacingConsts.md),
-        
+
         // 年額プラン
         Container(
           decoration: BoxDecoration(
-            color: _isYearlyPlan ? ColorConsts.primary.withOpacity(0.1) : ColorConsts.cardBackground,
-            border: _isYearlyPlan ? Border.all(color: ColorConsts.primary, width: 2.0) : null,
+            color:
+                _isYearlyPlan
+                    ? ColorConsts.primary.withOpacity(0.1)
+                    : ColorConsts.cardBackground,
+            border:
+                _isYearlyPlan
+                    ? Border.all(color: ColorConsts.primary, width: 2.0)
+                    : null,
             borderRadius: BorderRadius.circular(16.0),
             boxShadow: [
               BoxShadow(
@@ -430,9 +439,9 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
                     },
                     activeColor: ColorConsts.primary,
                   ),
-                  
+
                   const SizedBox(width: SpacingConsts.sm),
-                  
+
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -466,7 +475,7 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
                       ],
                     ),
                   ),
-                  
+
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: SpacingConsts.sm,
@@ -525,9 +534,9 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: SpacingConsts.xs),
-              
+
               Text(
                 BillingTextConsts.introDiscount,
                 style: TextConsts.bodySmall.copyWith(
@@ -535,9 +544,9 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              
+
               const SizedBox(height: SpacingConsts.sm),
-              
+
               Text(
                 BillingTextConsts.afterIntroPrice,
                 style: TextConsts.bodyMedium.copyWith(
@@ -559,9 +568,9 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: SpacingConsts.xs),
-              
+
               Text(
                 BillingTextConsts.yearlySavings,
                 style: TextConsts.bodySmall.copyWith(
@@ -569,9 +578,9 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              
+
               const SizedBox(height: SpacingConsts.sm),
-              
+
               Text(
                 BillingTextConsts.yearlyTotalSavings,
                 style: TextConsts.bodyMedium.copyWith(
@@ -579,9 +588,9 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
                 ),
               ),
             ],
-            
+
             const SizedBox(height: SpacingConsts.md),
-            
+
             Container(
               padding: const EdgeInsets.all(SpacingConsts.md),
               decoration: BoxDecoration(
@@ -616,26 +625,27 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
   Widget _buildActionButtons() {
     final billingState = ref.watch(billingViewModelProvider);
     final isProcessing = billingState.isPurchasing || billingState.isLoading;
-    
+
     return Column(
       children: [
         SizedBox(
           width: double.infinity,
           child: CommonButton(
-            text: isProcessing 
-                ? BillingTextConsts.loading
-                : (_isYearlyPlan 
-                    ? BillingTextConsts.startYearlyButton 
-                    : BillingTextConsts.startTrialButton),
+            text:
+                isProcessing
+                    ? BillingTextConsts.loading
+                    : (_isYearlyPlan
+                        ? BillingTextConsts.startYearlyButton
+                        : BillingTextConsts.startTrialButton),
             variant: ButtonVariant.primary,
             size: ButtonSize.large,
             onPressed: isProcessing ? null : _handlePurchase,
             isExpanded: true,
           ),
         ),
-        
+
         const SizedBox(height: SpacingConsts.md),
-        
+
         SizedBox(
           width: double.infinity,
           child: CommonButton(
@@ -655,14 +665,12 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
       children: [
         Text(
           BillingTextConsts.autoRenewalNote,
-          style: TextConsts.bodySmall.copyWith(
-            color: ColorConsts.textTertiary,
-          ),
+          style: TextConsts.bodySmall.copyWith(color: ColorConsts.textTertiary),
           textAlign: TextAlign.center,
         ),
-        
+
         const SizedBox(height: SpacingConsts.sm),
-        
+
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -676,14 +684,14 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
                 ),
               ),
             ),
-            
+
             Text(
               ' • ',
               style: TextConsts.bodySmall.copyWith(
                 color: ColorConsts.textTertiary,
               ),
             ),
-            
+
             TextButton(
               onPressed: _showPrivacyPolicy,
               child: Text(
@@ -702,18 +710,19 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
 
   void _handlePurchase() async {
     final billingViewModel = ref.read(billingViewModelProvider.notifier);
-    
+
     // 商品IDを決定（月額 or 年額）
-    final productId = _isYearlyPlan 
-        ? 'goal_timer_premium_1_year' 
-        : 'goal_timer_premium_1_month';
-    
+    final productId =
+        _isYearlyPlan
+            ? 'goal_timer_premium_1_year'
+            : 'goal_timer_premium_1_month';
+
     // 購入処理を実行
     await billingViewModel.purchaseProduct(productId);
-    
+
     // 購入結果を確認
     final state = ref.read(billingViewModelProvider);
-    
+
     if (state.lastPurchaseResult != null) {
       switch (state.lastPurchaseResult!.type) {
         case PurchaseResultType.success:
@@ -734,7 +743,9 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(state.errorMessage ?? BillingTextConsts.purchaseError),
+                content: Text(
+                  state.errorMessage ?? BillingTextConsts.purchaseError,
+                ),
                 backgroundColor: Colors.red,
               ),
             );
@@ -748,13 +759,13 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
 
   void _handleRestorePurchase() async {
     final billingViewModel = ref.read(billingViewModelProvider.notifier);
-    
+
     // 購入復元処理を実行
     await billingViewModel.restorePurchases();
-    
+
     // 復元結果を確認
     final state = ref.read(billingViewModelProvider);
-    
+
     if (state.lastRestoreResult != null) {
       if (state.lastRestoreResult!.success) {
         if (state.lastRestoreResult!.restoredCount > 0) {
@@ -781,7 +792,9 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(state.errorMessage ?? BillingTextConsts.restoreError),
+              content: Text(
+                state.errorMessage ?? BillingTextConsts.restoreError,
+              ),
               backgroundColor: Colors.red,
             ),
           );
@@ -793,32 +806,34 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
   void _showTermsOfService() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(BillingTextConsts.termsOfService),
-        content: Text(BillingTextConsts.termsContent),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(BillingTextConsts.closeButton),
+      builder:
+          (context) => AlertDialog(
+            title: Text(BillingTextConsts.termsOfService),
+            content: Text(BillingTextConsts.termsContent),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(BillingTextConsts.closeButton),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   void _showPrivacyPolicy() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(BillingTextConsts.privacyPolicy),
-        content: Text(BillingTextConsts.privacyContent),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(BillingTextConsts.closeButton),
+      builder:
+          (context) => AlertDialog(
+            title: Text(BillingTextConsts.privacyPolicy),
+            content: Text(BillingTextConsts.privacyContent),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(BillingTextConsts.closeButton),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 }

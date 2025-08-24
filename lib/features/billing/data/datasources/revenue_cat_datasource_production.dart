@@ -7,9 +7,9 @@ import '../../domain/entities/entities.dart';
 /// RevenueCat SDKとの通信を担当するデータソース（本番版）
 class RevenueCatDataSourceProduction {
   static RevenueCatDataSourceProduction? _instance;
-  
+
   RevenueCatDataSourceProduction._();
-  
+
   static RevenueCatDataSourceProduction get instance {
     _instance ??= RevenueCatDataSourceProduction._();
     return _instance!;
@@ -31,13 +31,13 @@ class RevenueCatDataSourceProduction {
     try {
       final offerings = await rc.Purchases.getOfferings();
       final products = <ProductInfo>[];
-      
+
       if (offerings.current != null) {
         for (final package in offerings.current!.availablePackages) {
           products.add(_mapProductInfo(package));
         }
       }
-      
+
       return products;
     } catch (e) {
       AppLogger.instance.e('Failed to get available products: $e');
@@ -50,18 +50,18 @@ class RevenueCatDataSourceProduction {
     try {
       final offerings = await rc.Purchases.getOfferings();
       rc.Package? packageToPurchase;
-      
+
       // パッケージを探す
       if (offerings.current != null) {
         for (final package in offerings.current!.availablePackages) {
-          if (package.identifier == productId || 
+          if (package.identifier == productId ||
               package.storeProduct.identifier == productId) {
             packageToPurchase = package;
             break;
           }
         }
       }
-      
+
       if (packageToPurchase == null) {
         return PurchaseResult.error(
           errorType: PurchaseErrorType.productNotFound,
@@ -69,9 +69,11 @@ class RevenueCatDataSourceProduction {
           productId: productId,
         );
       }
-      
-      final purchaserInfo = await rc.Purchases.purchasePackage(packageToPurchase);
-      
+
+      final purchaserInfo = await rc.Purchases.purchasePackage(
+        packageToPurchase,
+      );
+
       return PurchaseResult.success(
         transactionId: purchaserInfo.originalAppUserId,
         productId: productId,
@@ -79,7 +81,7 @@ class RevenueCatDataSourceProduction {
       );
     } on PlatformException catch (e) {
       AppLogger.instance.e('Purchase failed: ${e.code} - ${e.message}');
-      
+
       // エラーコードに応じた処理
       switch (e.code) {
         case '1': // PurchaseCancelledError
@@ -141,14 +143,11 @@ class RevenueCatDataSourceProduction {
     try {
       final customerInfo = await rc.Purchases.restorePurchases();
       final activeEntitlements = customerInfo.entitlements.active.keys.toList();
-      
+
       if (activeEntitlements.isEmpty) {
-        return RestoreResult.success(
-          restoredCount: 0,
-          restoredProductIds: [],
-        );
+        return RestoreResult.success(restoredCount: 0, restoredProductIds: []);
       }
-      
+
       return RestoreResult.success(
         restoredCount: activeEntitlements.length,
         restoredProductIds: activeEntitlements,
@@ -174,7 +173,7 @@ class RevenueCatDataSourceProduction {
   Stream<SubscriptionStatus> subscriptionStatusStream() {
     // RevenueCat SDK v8ではlistenerを使用
     final controller = StreamController<SubscriptionStatus>.broadcast();
-    
+
     // 定期的に状態を確認する簡易実装
     Timer.periodic(const Duration(seconds: 30), (_) async {
       try {
@@ -185,15 +184,17 @@ class RevenueCatDataSourceProduction {
         controller.add(SubscriptionStatus.free);
       }
     });
-    
+
     // 初回の状態を取得
-    getSubscriptionStatus().then((status) {
-      controller.add(status);
-    }).catchError((error) {
-      AppLogger.instance.e('Initial subscription status error: $error');
-      controller.add(SubscriptionStatus.free);
-    });
-    
+    getSubscriptionStatus()
+        .then((status) {
+          controller.add(status);
+        })
+        .catchError((error) {
+          AppLogger.instance.e('Initial subscription status error: $error');
+          controller.add(SubscriptionStatus.free);
+        });
+
     return controller.stream;
   }
 
@@ -214,7 +215,7 @@ class RevenueCatDataSourceProduction {
       final customerInfo = await rc.Purchases.getCustomerInfo();
       // "premium"というエンタイトルメントを確認
       return customerInfo.entitlements.active.containsKey('premium') ||
-             customerInfo.entitlements.active.isNotEmpty;
+          customerInfo.entitlements.active.isNotEmpty;
     } catch (e) {
       AppLogger.instance.e('Failed to check premium status: $e');
       return false;
@@ -225,34 +226,39 @@ class RevenueCatDataSourceProduction {
 
   CustomerInfo _mapCustomerInfo(rc.CustomerInfo wrapper) {
     final entitlements = <String, EntitlementInfo>{};
-    
+
     for (final entry in wrapper.entitlements.active.entries) {
       entitlements[entry.key] = EntitlementInfo(
         identifier: entry.key,
         isActive: true,
-        expirationDate: entry.value.expirationDate != null 
-            ? DateTime.tryParse(entry.value.expirationDate!) 
-            : null,
-        latestPurchaseDate: entry.value.latestPurchaseDate != null
-            ? DateTime.tryParse(entry.value.latestPurchaseDate!)
-            : null,
-        originalPurchaseDate: entry.value.originalPurchaseDate != null
-            ? DateTime.tryParse(entry.value.originalPurchaseDate!)
-            : null,
+        expirationDate:
+            entry.value.expirationDate != null
+                ? DateTime.tryParse(entry.value.expirationDate!)
+                : null,
+        latestPurchaseDate:
+            entry.value.latestPurchaseDate != null
+                ? DateTime.tryParse(entry.value.latestPurchaseDate!)
+                : null,
+        originalPurchaseDate:
+            entry.value.originalPurchaseDate != null
+                ? DateTime.tryParse(entry.value.originalPurchaseDate!)
+                : null,
         productIdentifier: entry.value.productIdentifier,
         willRenew: entry.value.willRenew,
       );
     }
-    
+
     return CustomerInfo(
       originalAppUserId: wrapper.originalAppUserId,
       entitlements: entitlements,
-      originalPurchaseDate: wrapper.originalPurchaseDate != null
-          ? DateTime.tryParse(wrapper.originalPurchaseDate!)
-          : null,
-      latestExpirationDate: wrapper.latestExpirationDate != null
-          ? DateTime.tryParse(wrapper.latestExpirationDate!)
-          : null,
+      originalPurchaseDate:
+          wrapper.originalPurchaseDate != null
+              ? DateTime.tryParse(wrapper.originalPurchaseDate!)
+              : null,
+      latestExpirationDate:
+          wrapper.latestExpirationDate != null
+              ? DateTime.tryParse(wrapper.latestExpirationDate!)
+              : null,
     );
   }
 
@@ -274,21 +280,23 @@ class RevenueCatDataSourceProduction {
 
   SubscriptionStatus _mapSubscriptionStatus(rc.CustomerInfo customerInfo) {
     final hasActiveEntitlement = customerInfo.entitlements.active.isNotEmpty;
-    final activeEntitlementKeys = customerInfo.entitlements.active.keys.toList();
-    
+    final activeEntitlementKeys =
+        customerInfo.entitlements.active.keys.toList();
+
     if (!hasActiveEntitlement) {
       return SubscriptionStatus.free;
     }
-    
+
     // アクティブなエンタイトルメントから情報を取得
     final firstEntitlement = customerInfo.entitlements.active.values.first;
-    final expirationDate = firstEntitlement.expirationDate != null
-        ? DateTime.tryParse(firstEntitlement.expirationDate!)
-        : null;
-    
+    final expirationDate =
+        firstEntitlement.expirationDate != null
+            ? DateTime.tryParse(firstEntitlement.expirationDate!)
+            : null;
+
     // トライアル期間かどうかを判定
     final isInTrialPeriod = firstEntitlement.periodType == rc.PeriodType.trial;
-    
+
     // サブスクリプション状態を判定
     SubscriptionState state;
     if (isInTrialPeriod) {
@@ -298,7 +306,7 @@ class RevenueCatDataSourceProduction {
     } else {
       state = SubscriptionState.none;
     }
-    
+
     return SubscriptionStatus(
       state: state,
       isPremium: hasActiveEntitlement,

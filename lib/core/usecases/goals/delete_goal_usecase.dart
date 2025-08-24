@@ -9,10 +9,7 @@ class DeleteGoalUseCase {
   DeleteGoalUseCase(this._repository);
 
   /// 目標を削除する
-  Future<void> call({
-    required String goalId,
-    required String goalTitle,
-  }) async {
+  Future<void> call({required String goalId, required String goalTitle}) async {
     try {
       AppLogger.instance.i('目標の削除を開始します: $goalTitle (ID: $goalId)');
 
@@ -23,7 +20,7 @@ class DeleteGoalUseCase {
 
       // リポジトリ経由でデータベースから削除
       await _repository.deleteGoal(goalId);
-      
+
       AppLogger.instance.i('目標の削除が完了しました: $goalTitle');
     } catch (e) {
       AppLogger.instance.e('目標の削除に失敗しました: $goalTitle', e);

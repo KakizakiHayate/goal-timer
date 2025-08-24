@@ -9,13 +9,21 @@ import '../../../../core/utils/animation_consts.dart';
 import '../../../../core/widgets/circular_progress_indicator.dart' as custom;
 import '../../../../core/widgets/animated_check_icon.dart';
 import '../../../../core/widgets/pressable_card.dart';
+import '../../../onboarding/presentation/view_models/tutorial_view_model.dart';
+import '../../../onboarding/presentation/widgets/tutorial_overlay.dart';
+import '../../../../core/utils/route_names.dart';
 
 /// 改善されたタイマー画面
 /// 集中力向上とモチベーション維持に焦点を当てたデザイン
 class TimerScreen extends ConsumerStatefulWidget {
   final String goalId;
+  final bool isTutorialMode;
 
-  const TimerScreen({super.key, required this.goalId});
+  const TimerScreen({
+    super.key, 
+    required this.goalId,
+    this.isTutorialMode = false,
+  });
 
   @override
   ConsumerState<TimerScreen> createState() => _TimerScreenState();
@@ -24,38 +32,35 @@ class TimerScreen extends ConsumerStatefulWidget {
 class _TimerScreenState extends ConsumerState<TimerScreen>
     with TickerProviderStateMixin {
   static final Set<String> _loggedGoalIds = {};
-  
+
   late AnimationController _pulseAnimationController;
   late Animation<double> _pulseAnimation;
   late AnimationController _slideAnimationController;
   late Animation<Offset> _slideAnimation;
-  
+
   bool _showCompletionAnimation = false;
 
   @override
   void initState() {
     super.initState();
-    
+
     _pulseAnimationController = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
     );
-    
-    _pulseAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.05,
-    ).animate(
+
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.05).animate(
       CurvedAnimation(
         parent: _pulseAnimationController,
         curve: Curves.easeInOut,
       ),
     );
-    
+
     _slideAnimationController = AnimationController(
       duration: AnimationConsts.medium,
       vsync: this,
     );
-    
+
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.1),
       end: Offset.zero,
@@ -65,7 +70,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
         curve: AnimationConsts.smoothCurve,
       ),
     );
-    
+
     _slideAnimationController.forward();
   }
 
@@ -85,23 +90,52 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
 
     final timerState = ref.watch(timerViewModelProvider);
     final timerViewModel = ref.read(timerViewModelProvider.notifier);
+    final tutorialState = ref.watch(tutorialViewModelProvider);
+
+    // チュートリアル中のタイマー完了を監視
+    ref.listen(timerViewModelProvider, (previous, current) {
+      if (widget.isTutorialMode && 
+          tutorialState.isTutorialActive &&
+          previous?.status != TimerStatus.completed &&
+          current.status == TimerStatus.completed) {
+        // チュートリアル完了処理
+        final tutorialViewModel = ref.read(tutorialViewModelProvider.notifier);
+        tutorialViewModel.completeTutorial();
+        
+        // アカウント登録画面に遷移
+        Future.delayed(const Duration(seconds: 2), () {
+          if (mounted) {
+            Navigator.pushReplacementNamed(context, RouteNames.onboardingAccountPromotion);
+          }
+        });
+      }
+    });
 
     // 目標IDをタイマービューモデルに設定
     if (timerState.goalId != widget.goalId) {
       Future.microtask(() {
         timerViewModel.setGoalId(widget.goalId);
+        timerViewModel.setTutorialMode(widget.isTutorialMode);
+      });
+    }
+
+    // チュートリアルモードの場合、タイマーを5秒に設定
+    if (widget.isTutorialMode && timerState.status == TimerStatus.initial) {
+      Future.microtask(() {
+        timerViewModel.setTutorialTime(5); // 5秒デモタイマー
       });
     }
 
     // タイマー実行中のパルスアニメーション
-    if (timerState.status == TimerStatus.running && !_pulseAnimationController.isAnimating) {
+    if (timerState.status == TimerStatus.running &&
+        !_pulseAnimationController.isAnimating) {
       _pulseAnimationController.repeat(reverse: true);
     } else if (timerState.status != TimerStatus.running) {
       _pulseAnimationController.stop();
       _pulseAnimationController.reset();
     }
 
-    return Scaffold(
+    final mainScaffold = Scaffold(
       backgroundColor: _getBackgroundColor(timerState),
       appBar: _buildAppBar(timerState),
       body: SlideTransition(
@@ -110,14 +144,28 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
           children: [
             // メインコンテンツ
             _buildMainContent(context, timerState, timerViewModel),
-            
+
             // 完了アニメーション
-            if (_showCompletionAnimation)
-              _buildCompletionOverlay(),
+            if (_showCompletionAnimation) _buildCompletionOverlay(),
           ],
         ),
       ),
     );
+
+    // チュートリアルオーバーレイの表示
+    if (widget.isTutorialMode && 
+        tutorialState.isTutorialActive &&
+        tutorialState.currentStepId == 'timer_operation' &&
+        timerState.status == TimerStatus.initial) {
+      return Stack(
+        children: [
+          mainScaffold,
+          _buildTimerOperationTutorial(),
+        ],
+      );
+    }
+
+    return mainScaffold;
   }
 
   PreferredSizeWidget _buildAppBar(TimerState timerState) {
@@ -156,22 +204,22 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
         child: Column(
           children: [
             const SizedBox(height: SpacingConsts.l),
-            
+
             // モード切り替え
             _buildModeSwitcher(timerState, timerViewModel),
-            
+
             const SizedBox(height: SpacingConsts.l),
-            
+
             // タイマー表示
-            _buildTimerDisplay(timerState),
-            
+            _buildTimerDisplay(timerState, timerViewModel),
+
             const SizedBox(height: SpacingConsts.l),
-            
+
             // コントロールボタン
             _buildControlButtons(timerState, timerViewModel),
-            
+
             const SizedBox(height: SpacingConsts.l),
-            
+
             // 統計情報
             _buildStatsCard(timerState),
           ],
@@ -180,7 +228,12 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
     );
   }
 
-  Widget _buildModeSwitcher(TimerState timerState, TimerViewModel timerViewModel) {
+  Widget _buildModeSwitcher(
+    TimerState timerState,
+    TimerViewModel timerViewModel,
+  ) {
+    final availableModes = timerViewModel.getAvailableModes();
+
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
@@ -190,18 +243,38 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildModeButton(
-            'フォーカス',
-            timerState.mode == TimerMode.countdown,
-            () => timerViewModel.changeMode(TimerMode.countdown),
-            Icons.timer_outlined,
-          ),
-          _buildModeButton(
-            'フリー',
-            timerState.mode == TimerMode.countup,
-            () => timerViewModel.changeMode(TimerMode.countup),
-            Icons.all_inclusive,
-          ),
+          // フォーカス（カウントダウン）
+          if (availableModes.contains(TimerMode.countdown))
+            _buildModeButton(
+              'フォーカス',
+              timerState.mode == TimerMode.countdown,
+              () => timerViewModel.changeMode(TimerMode.countdown),
+              Icons.timer_outlined,
+            ),
+
+          // フリー（カウントアップ）
+          if (availableModes.contains(TimerMode.countup))
+            _buildModeButton(
+              'フリー',
+              timerState.mode == TimerMode.countup,
+              () => timerViewModel.changeMode(TimerMode.countup),
+              Icons.all_inclusive,
+            ),
+
+          // ポモドーロ（プレミアム機能）
+          if (availableModes.contains(TimerMode.pomodoro))
+            _buildModeButton(
+              'ポモドーロ',
+              timerState.mode == TimerMode.pomodoro,
+              () => timerViewModel.changeMode(TimerMode.pomodoro),
+              Icons.spa,
+            )
+          else if (TimerMode.values.contains(TimerMode.pomodoro))
+            _buildLockedModeButton(
+              'ポモドーロ',
+              Icons.spa,
+              timerViewModel.getModeRestrictionMessage(TimerMode.pomodoro),
+            ),
         ],
       ),
     );
@@ -224,15 +297,16 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
         decoration: BoxDecoration(
           color: isActive ? Colors.white : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: isActive
-              ? [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    offset: const Offset(0, 2),
-                    blurRadius: 8,
-                  ),
-                ]
-              : null,
+          boxShadow:
+              isActive
+                  ? [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      offset: const Offset(0, 2),
+                      blurRadius: 8,
+                    ),
+                  ]
+                  : null,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -256,22 +330,79 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
     );
   }
 
-  Widget _buildTimerDisplay(TimerState timerState) {
+  Widget _buildLockedModeButton(
+    String text,
+    IconData icon,
+    String restrictionMessage,
+  ) {
+    return GestureDetector(
+      onTap: () {
+        // 制限メッセージを表示
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(restrictionMessage),
+            backgroundColor: ColorConsts.primary,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: SpacingConsts.l,
+          vertical: SpacingConsts.m,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.3),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.lock,
+              color: Colors.white.withValues(alpha: 0.6),
+              size: 20,
+            ),
+            const SizedBox(width: SpacingConsts.s),
+            Text(
+              text,
+              style: TextConsts.body.copyWith(
+                color: Colors.white.withValues(alpha: 0.6),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTimerDisplay(
+    TimerState timerState,
+    TimerViewModel timerViewModel,
+  ) {
     final minutes = timerState.currentSeconds ~/ 60;
     final seconds = timerState.currentSeconds % 60;
-    final timeText = '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    final timeText =
+        '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
 
-    final progressValue = timerState.mode == TimerMode.countdown
-        ? timerState.currentSeconds / (25 * 60)
-        : (timerState.currentSeconds % (60 * 60)) / (60 * 60);
+    final progressValue =
+        timerState.mode == TimerMode.countdown
+            ? timerState.currentSeconds / (25 * 60)
+            : (timerState.currentSeconds % (60 * 60)) / (60 * 60);
 
     return AnimatedBuilder(
       animation: _pulseAnimation,
       builder: (context, child) {
         return Transform.scale(
-          scale: timerState.status == TimerStatus.running 
-              ? _pulseAnimation.value 
-              : 1.0,
+          scale:
+              timerState.status == TimerStatus.running
+                  ? _pulseAnimation.value
+                  : 1.0,
           child: Container(
             width: 280,
             height: 280,
@@ -292,9 +423,10 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
               children: [
                 // プログレスリング
                 custom.CircularProgressIndicator(
-                  progress: timerState.mode == TimerMode.countdown 
-                      ? 1 - progressValue 
-                      : progressValue,
+                  progress:
+                      timerState.mode == TimerMode.countdown
+                          ? 1 - progressValue
+                          : progressValue,
                   size: 260.0,
                   strokeWidth: 12.0,
                   progressColor: Colors.white,
@@ -314,13 +446,12 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
                       ),
                       const SizedBox(height: SpacingConsts.s),
                       Text(
-                        timerState.mode == TimerMode.countdown 
-                            ? 'フォーカス中' 
-                            : 'フリータイム',
+                        _getTimerStatusText(timerState, timerViewModel),
                         style: TextConsts.body.copyWith(
-                          color: Colors.white.withOpacity(0.8),
+                          color: Colors.white.withValues(alpha: 0.8),
                           fontWeight: FontWeight.w600,
                         ),
+                        textAlign: TextAlign.center,
                       ),
                     ],
                   ),
@@ -333,7 +464,10 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
     );
   }
 
-  Widget _buildControlButtons(TimerState timerState, TimerViewModel timerViewModel) {
+  Widget _buildControlButtons(
+    TimerState timerState,
+    TimerViewModel timerViewModel,
+  ) {
     final isRunning = timerState.status == TimerStatus.running;
 
     return Row(
@@ -346,9 +480,9 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
           backgroundColor: Colors.white.withOpacity(0.2),
           iconColor: Colors.white,
         ),
-        
+
         const SizedBox(width: SpacingConsts.l),
-        
+
         // メイン操作ボタン
         _buildMainControlButton(
           icon: isRunning ? Icons.pause_rounded : Icons.play_arrow_rounded,
@@ -360,13 +494,15 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
             }
           },
         ),
-        
+
         const SizedBox(width: SpacingConsts.l),
-        
+
         // 設定ボタン
         _buildControlButton(
           icon: Icons.settings_rounded,
-          onPressed: () => _showTimerSettingDialog(context, timerState, timerViewModel),
+          onPressed:
+              () =>
+                  _showTimerSettingDialog(context, timerState, timerViewModel),
           backgroundColor: Colors.white.withOpacity(0.2),
           iconColor: Colors.white,
         ),
@@ -397,11 +533,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
             ),
           ],
         ),
-        child: Icon(
-          icon,
-          color: iconColor,
-          size: 28,
-        ),
+        child: Icon(icon, color: iconColor, size: 28),
       ),
     );
   }
@@ -426,11 +558,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
             ),
           ],
         ),
-        child: Icon(
-          icon,
-          color: ColorConsts.textPrimary,
-          size: 40,
-        ),
+        child: Icon(icon, color: ColorConsts.textPrimary, size: 40),
       ),
     );
   }
@@ -450,11 +578,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
               value: '2時間 30分', // TODO: 実際のデータに置き換え
             ),
           ),
-          Container(
-            width: 1,
-            height: 40,
-            color: Colors.white.withOpacity(0.3),
-          ),
+          Container(width: 1, height: 40, color: Colors.white.withOpacity(0.3)),
           Expanded(
             child: _buildStatItem(
               icon: Icons.whatshot_rounded,
@@ -474,11 +598,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
   }) {
     return Column(
       children: [
-        Icon(
-          icon,
-          color: Colors.white,
-          size: 24,
-        ),
+        Icon(icon, color: Colors.white, size: 24),
         const SizedBox(height: SpacingConsts.xs),
         Text(
           value,
@@ -518,16 +638,42 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
   Color _getBackgroundColor(TimerState timerState) {
     if (timerState.mode == TimerMode.countdown) {
       return ColorConsts.primary;
+    } else if (timerState.mode == TimerMode.pomodoro) {
+      // ポモドーロモードは集中時間と休憩時間で色を変える
+      return timerState.isPomodoroBreak
+          ? const Color(0xFF059669)
+          : ColorConsts.primary;
     } else {
       return ColorConsts.success;
     }
   }
 
   Color _getThemeColor(TimerState timerState) {
-    if (timerState.mode == TimerMode.countdown) {
+    if (timerState.mode == TimerMode.countdown ||
+        timerState.mode == TimerMode.pomodoro) {
       return ColorConsts.primaryDark;
     } else {
       return const Color(0xFF059669);
+    }
+  }
+
+  String _getTimerStatusText(
+    TimerState timerState,
+    TimerViewModel timerViewModel,
+  ) {
+    switch (timerState.mode) {
+      case TimerMode.countdown:
+        return 'フォーカス中';
+      case TimerMode.countup:
+        return 'フリータイム';
+      case TimerMode.pomodoro:
+        if (timerState.isPomodoroBreak) {
+          final breakType =
+              (timerState.pomodoroRound % 4 == 0) ? '長い休憩' : '短い休憩';
+          return 'ラウンド${timerState.pomodoroRound}\n$breakType';
+        } else {
+          return 'ラウンド${timerState.pomodoroRound}\n集中時間';
+        }
     }
   }
 
@@ -548,9 +694,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
             ),
             title: Text(
               'フォーカス時間設定',
-              style: TextConsts.h3.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
             ),
             content: StatefulBuilder(
               builder: (context, setState) {
@@ -637,29 +781,58 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
   void _showExitConfirmDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        title: const Text('タイマー終了'),
-        content: const Text('タイマーが実行中です。\n本当に終了しますか？'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('続ける'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pop(context);
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: ColorConsts.error,
+      builder:
+          (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
             ),
-            child: const Text('終了'),
+            title: const Text('タイマー終了'),
+            content: const Text('タイマーが実行中です。\n本当に終了しますか？'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('続ける'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                },
+                style: TextButton.styleFrom(foregroundColor: ColorConsts.error),
+                child: const Text('終了'),
+              ),
+            ],
           ),
-        ],
+    );
+  }
+
+  /// チュートリアル：タイマー操作ガイド
+  Widget _buildTimerOperationTutorial() {
+    return TutorialOverlay(
+      targetWidget: Container(
+        width: 120,
+        height: 120,
+        decoration: const BoxDecoration(
+          shape: BoxShape.circle,
+          color: ColorConsts.primary,
+        ),
+        child: const Icon(
+          Icons.play_arrow,
+          color: Colors.white,
+          size: 48,
+        ),
       ),
+      title: 'タイマーを開始しよう',
+      description: 'スタートボタンをタップしてタイマーを開始します。チュートリアル用に5秒間のデモタイマーが設定されています。',
+      onNext: () {
+        final tutorialViewModel = ref.read(tutorialViewModelProvider.notifier);
+        tutorialViewModel.startTimerCompletionStep();
+      },
+      onSkip: () {
+        final tutorialViewModel = ref.read(tutorialViewModelProvider.notifier);
+        tutorialViewModel.skipTutorial();
+        Navigator.pushReplacementNamed(context, RouteNames.onboardingAccountPromotion);
+      },
     );
   }
 }

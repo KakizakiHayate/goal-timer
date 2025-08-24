@@ -39,15 +39,19 @@ void main() async {
     if (Platform.isIOS) {
       apiKey = EnvConfig.revenueCatApplePublicApiKey;
     } else if (Platform.isAndroid) {
-      apiKey = 'your_android_public_sdk_key_here';  // Android用 Public SDK Key
+      apiKey = 'your_android_public_sdk_key_here'; // Android用 Public SDK Key
     }
-    
+
     if (apiKey.isNotEmpty && !apiKey.contains('your_')) {
       final configuration = PurchasesConfiguration(apiKey);
       await Purchases.configure(configuration);
-      AppLogger.instance.i('RevenueCat initialized successfully for ${Platform.operatingSystem}');
+      AppLogger.instance.i(
+        'RevenueCat initialized successfully for ${Platform.operatingSystem}',
+      );
     } else {
-      AppLogger.instance.w('RevenueCat API key not configured for ${Platform.operatingSystem}');
+      AppLogger.instance.w(
+        'RevenueCat API key not configured for ${Platform.operatingSystem}',
+      );
     }
   } catch (e) {
     AppLogger.instance.w('RevenueCat initialization failed: $e');

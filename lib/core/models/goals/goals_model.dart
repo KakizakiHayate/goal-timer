@@ -179,16 +179,25 @@ extension GoalsModelExtension on GoalsModel {
 
   /// 残り時間を文字列で取得
   String getRemainingTimeText() {
-    return TimeUtils.calculateRemainingTimeFromMinutes(targetMinutes, spentMinutes);
+    return TimeUtils.calculateRemainingTimeFromMinutes(
+      targetMinutes,
+      spentMinutes,
+    );
   }
 
   /// 残り時間（分）を取得
   int getRemainingMinutes() {
-    return TimeUtils.calculateRemainingMinutesFromTotal(targetMinutes, spentMinutes);
+    return TimeUtils.calculateRemainingMinutesFromTotal(
+      targetMinutes,
+      spentMinutes,
+    );
   }
 
   /// 進捗率を取得（0.0〜1.0）
   double getProgressRate() {
-    return TimeUtils.calculateProgressRateFromMinutes(targetMinutes, spentMinutes);
+    return TimeUtils.calculateProgressRateFromMinutes(
+      targetMinutes,
+      spentMinutes,
+    );
   }
 }

@@ -43,27 +43,21 @@ class _AchievementBadgeState extends State<AchievementBadge>
       duration: AnimationConsts.slow,
       vsync: this,
     );
-    
-    _scaleAnimation = Tween<double>(
-      begin: 0.8,
-      end: 1.0,
-    ).animate(
+
+    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
         curve: const Interval(0.0, 0.6, curve: AnimationConsts.bounceCurve),
       ),
     );
-    
-    _glowAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(
+
+    _glowAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
         curve: const Interval(0.4, 1.0, curve: Curves.easeOut),
       ),
     );
-    
+
     if (widget.isUnlocked) {
       _animationController.forward();
     }
@@ -95,64 +89,71 @@ class _AchievementBadgeState extends State<AchievementBadge>
             child: Container(
               padding: const EdgeInsets.all(SpacingConsts.l),
               decoration: BoxDecoration(
-                color: widget.isUnlocked
-                    ? ColorConsts.cardBackground
-                    : ColorConsts.backgroundSecondary,
+                color:
+                    widget.isUnlocked
+                        ? ColorConsts.cardBackground
+                        : ColorConsts.backgroundSecondary,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: widget.isUnlocked
-                      ? widget.color.withValues(alpha: 0.3)
-                      : ColorConsts.border,
+                  color:
+                      widget.isUnlocked
+                          ? widget.color.withValues(alpha: 0.3)
+                          : ColorConsts.border,
                   width: widget.isUnlocked ? 2 : 1,
                 ),
-                boxShadow: widget.isUnlocked
-                    ? [
-                        BoxShadow(
-                          color: widget.color.withValues(alpha: 0.3 * _glowAnimation.value),
-                          offset: const Offset(0, 4),
-                          blurRadius: 16,
-                          spreadRadius: 0,
-                        ),
-                      ]
-                    : null,
+                boxShadow:
+                    widget.isUnlocked
+                        ? [
+                          BoxShadow(
+                            color: widget.color.withValues(
+                              alpha: 0.3 * _glowAnimation.value,
+                            ),
+                            offset: const Offset(0, 4),
+                            blurRadius: 16,
+                            spreadRadius: 0,
+                          ),
+                        ]
+                        : null,
               ),
               child: Column(
                 children: [
                   // バッジアイコン
                   _buildBadgeIcon(),
-                  
+
                   const SizedBox(height: SpacingConsts.m),
-                  
+
                   // タイトル
                   Text(
                     widget.title,
                     style: TextConsts.body.copyWith(
-                      color: widget.isUnlocked
-                          ? ColorConsts.textPrimary
-                          : ColorConsts.textTertiary,
+                      color:
+                          widget.isUnlocked
+                              ? ColorConsts.textPrimary
+                              : ColorConsts.textTertiary,
                       fontWeight: FontWeight.bold,
                     ),
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  
+
                   const SizedBox(height: SpacingConsts.s),
-                  
+
                   // 説明
                   Text(
                     widget.description,
                     style: TextConsts.caption.copyWith(
-                      color: widget.isUnlocked
-                          ? ColorConsts.textSecondary
-                          : ColorConsts.textTertiary,
+                      color:
+                          widget.isUnlocked
+                              ? ColorConsts.textSecondary
+                              : ColorConsts.textTertiary,
                       height: 1.3,
                     ),
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  
+
                   // 解除日時
                   if (widget.isUnlocked && widget.unlockedAt != null) ...[
                     const SizedBox(height: SpacingConsts.s),
@@ -178,19 +179,21 @@ class _AchievementBadgeState extends State<AchievementBadge>
       width: 60,
       height: 60,
       decoration: BoxDecoration(
-        color: widget.isUnlocked
-            ? widget.color
-            : ColorConsts.textTertiary.withValues(alpha: 0.3),
+        color:
+            widget.isUnlocked
+                ? widget.color
+                : ColorConsts.textTertiary.withValues(alpha: 0.3),
         shape: BoxShape.circle,
-        boxShadow: widget.isUnlocked
-            ? [
-                BoxShadow(
-                  color: widget.color.withValues(alpha: 0.3),
-                  offset: const Offset(0, 4),
-                  blurRadius: 12,
-                ),
-              ]
-            : null,
+        boxShadow:
+            widget.isUnlocked
+                ? [
+                  BoxShadow(
+                    color: widget.color.withValues(alpha: 0.3),
+                    offset: const Offset(0, 4),
+                    blurRadius: 12,
+                  ),
+                ]
+                : null,
       ),
       child: Stack(
         alignment: Alignment.center,
@@ -211,11 +214,7 @@ class _AchievementBadgeState extends State<AchievementBadge>
                   color: ColorConsts.textTertiary,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.lock,
-                  color: Colors.white,
-                  size: 12,
-                ),
+                child: const Icon(Icons.lock, color: Colors.white, size: 12),
               ),
             ),
         ],
@@ -226,7 +225,7 @@ class _AchievementBadgeState extends State<AchievementBadge>
   String _formatUnlockedDate(DateTime date) {
     final now = DateTime.now();
     final difference = now.difference(date);
-    
+
     if (difference.inDays == 0) {
       return '今日解除';
     } else if (difference.inDays == 1) {

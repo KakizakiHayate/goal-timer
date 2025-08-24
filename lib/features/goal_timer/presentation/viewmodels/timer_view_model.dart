@@ -5,7 +5,15 @@ import 'package:goal_timer/core/provider/providers.dart';
 import 'package:goal_timer/core/models/daily_study_logs/daily_study_log_model.dart';
 import 'package:goal_timer/core/provider/supabase/goals/goals_provider.dart';
 import 'package:goal_timer/features/goal_detail/presentation/viewmodels/goal_detail_view_model.dart';
+import 'package:goal_timer/core/services/timer_restriction_service.dart';
 import 'package:uuid/uuid.dart';
+
+// タイマー制限サービスのプロバイダー
+final timerRestrictionServiceProvider = Provider<TimerRestrictionService>((
+  ref,
+) {
+  return TimerRestrictionService();
+});
 
 // タイマーの状態を管理するプロバイダー
 final timerViewModelProvider =
@@ -25,6 +33,7 @@ enum TimerStatus {
 enum TimerMode {
   countdown, // カウントダウン
   countup, // カウントアップ
+  pomodoro, // ポモドーロ（25分集中 + 5分休憩）
 }
 
 // タイマーの状態を表すクラス
@@ -34,6 +43,8 @@ class TimerState {
   final TimerStatus status; // 状態
   final TimerMode mode; // モード
   final String? goalId; // 関連する目標ID（必須になる予定だが、初期化時はnullを許可）
+  final bool isPomodoroBreak; // ポモドーロの休憩中かどうか
+  final int pomodoroRound; // ポモドーロの現在のラウンド数
 
   TimerState({
     this.totalSeconds = 25 * 60, // デフォルト25分
@@ -41,6 +52,8 @@ class TimerState {
     this.status = TimerStatus.initial,
     this.mode = TimerMode.countdown,
     this.goalId,
+    this.isPomodoroBreak = false,
+    this.pomodoroRound = 1,
   });
 
   // 新しい状態を作成するヘルパーメソッド
@@ -50,6 +63,8 @@ class TimerState {
     TimerStatus? status,
     TimerMode? mode,
     String? goalId,
+    bool? isPomodoroBreak,
+    int? pomodoroRound,
   }) {
     return TimerState(
       totalSeconds: totalSeconds ?? this.totalSeconds,
@@ -57,12 +72,14 @@ class TimerState {
       status: status ?? this.status,
       mode: mode ?? this.mode,
       goalId: goalId ?? this.goalId,
+      isPomodoroBreak: isPomodoroBreak ?? this.isPomodoroBreak,
+      pomodoroRound: pomodoroRound ?? this.pomodoroRound,
     );
   }
 
   // 進捗率（0.0〜1.0）
   double get progress {
-    if (mode == TimerMode.countdown) {
+    if (mode == TimerMode.countdown || mode == TimerMode.pomodoro) {
       return 1.0 - (currentSeconds / totalSeconds);
     } else {
       // カウントアップの場合は1時間（3600秒）を最大として進捗率を計算
@@ -86,12 +103,27 @@ class TimerViewModel extends StateNotifier<TimerState> {
   Timer? _timer;
   final Ref _ref;
   int _elapsedSeconds = 0; // タイマー実行中の経過秒数
+  bool _isTutorialMode = false; // チュートリアルモードフラグ
 
-  TimerViewModel(this._ref) : super(TimerState());
+  TimerViewModel(this._ref) : super(TimerState()) {
+    // タイマー制限サービスを初期化
+    _initializeRestrictions();
+  }
+
+  // タイマー制限サービスを初期化
+  Future<void> _initializeRestrictions() async {
+    final restrictionService = _ref.read(timerRestrictionServiceProvider);
+    await restrictionService.initializeUserPlan();
+  }
 
   // 目標IDを設定
   void setGoalId(String goalId) {
     state = state.copyWith(goalId: goalId);
+  }
+
+  // チュートリアルモードを設定
+  void setTutorialMode(bool isTutorialMode) {
+    _isTutorialMode = isTutorialMode;
   }
 
   // タイマーの開始
@@ -117,6 +149,13 @@ class TimerViewModel extends StateNotifier<TimerState> {
         } else {
           state = state.copyWith(currentSeconds: state.currentSeconds - 1);
         }
+      } else if (state.mode == TimerMode.pomodoro) {
+        // ポモドーロモード
+        if (state.currentSeconds <= 1) {
+          _completePomodoroTimer();
+        } else {
+          state = state.copyWith(currentSeconds: state.currentSeconds - 1);
+        }
       } else {
         // カウントアップモード
         state = state.copyWith(currentSeconds: state.currentSeconds + 1);
@@ -137,12 +176,24 @@ class TimerViewModel extends StateNotifier<TimerState> {
     _timer?.cancel();
 
     // モードによって初期値を変更
-    final initialSeconds =
-        (state.mode == TimerMode.countdown) ? state.totalSeconds : 0;
+    int initialSeconds;
+    switch (state.mode) {
+      case TimerMode.countdown:
+        initialSeconds = state.totalSeconds;
+        break;
+      case TimerMode.countup:
+        initialSeconds = 0;
+        break;
+      case TimerMode.pomodoro:
+        initialSeconds = 25 * 60; // ポモドーロは25分に戻す
+        break;
+    }
 
     state = state.copyWith(
       currentSeconds: initialSeconds,
       status: TimerStatus.initial,
+      isPomodoroBreak: false, // ポモドーロリセット時は集中時間に戻す
+      pomodoroRound: 1, // ラウンドもリセット
     );
     _elapsedSeconds = 0; // 経過秒数リセット
   }
@@ -159,14 +210,57 @@ class TimerViewModel extends StateNotifier<TimerState> {
 
     // 目標IDが設定されている場合のみ学習時間を記録
     if (state.hasGoal) {
-      _recordStudyTime();
+      _recordStudyTime(_isTutorialMode);
     } else {
       AppLogger.instance.e('目標IDが設定されていないため、学習時間を記録できません');
     }
   }
 
+  // ポモドーロタイマーの完了処理
+  void _completePomodoroTimer() {
+    _timer?.cancel();
+
+    if (state.isPomodoroBreak) {
+      // 休憩完了 -> 次のラウンドの集中時間に移行
+      state = state.copyWith(
+        isPomodoroBreak: false,
+        pomodoroRound: state.pomodoroRound + 1,
+        currentSeconds: 25 * 60, // 25分集中
+        totalSeconds: 25 * 60,
+        status: TimerStatus.initial,
+      );
+      AppLogger.instance.i('ポモドーロ休憩完了！ラウンド${state.pomodoroRound}の集中時間が始まります');
+    } else {
+      // 集中時間完了 -> 学習時間記録 & 休憩時間に移行
+      AppLogger.instance.i('ポモドーロ集中時間完了！ ラウンド: ${state.pomodoroRound}');
+
+      // 学習時間を記録（25分固定）
+      if (state.hasGoal) {
+        _recordStudyTime(_isTutorialMode);
+      }
+
+      // 4ラウンド目なら長い休憩（15分）、それ以外は短い休憩（5分）
+      final breakMinutes = (state.pomodoroRound % 4 == 0) ? 15 : 5;
+
+      state = state.copyWith(
+        isPomodoroBreak: true,
+        currentSeconds: breakMinutes * 60,
+        totalSeconds: breakMinutes * 60,
+        status: TimerStatus.initial,
+      );
+
+      AppLogger.instance.i('${breakMinutes}分の休憩時間に入ります');
+    }
+  }
+
   // 学習時間を記録する
-  Future<void> _recordStudyTime() async {
+  Future<void> _recordStudyTime([bool isTutorialMode = false]) async {
+    // チュートリアルモードの場合はデータを保存しない
+    if (isTutorialMode) {
+      AppLogger.instance.i('チュートリアルモード: タイマーデータの保存をスキップしました');
+      return;
+    }
+
     if (!state.hasGoal) {
       AppLogger.instance.e('目標IDが設定されていないため、学習時間を記録できません');
       return;
@@ -230,18 +324,45 @@ class TimerViewModel extends StateNotifier<TimerState> {
 
   // タイマーモードの変更
   void changeMode(TimerMode mode) {
+    // 制限チェック
+    final restrictionService = _ref.read(timerRestrictionServiceProvider);
+    final modeString = _timerModeToString(mode);
+
+    if (!restrictionService.canUseTimerMode(modeString)) {
+      AppLogger.instance.w('制限されたモードへの変更を試行: $modeString');
+      return; // 制限されている場合は変更しない
+    }
+
     if (state.status == TimerStatus.running) {
       pauseTimer();
     }
 
     // モードに基づいて初期値を設定
-    final initialSeconds =
-        (mode == TimerMode.countdown) ? state.totalSeconds : 0;
+    int initialSeconds;
+    int totalSeconds;
+
+    switch (mode) {
+      case TimerMode.countdown:
+        initialSeconds = state.totalSeconds;
+        totalSeconds = state.totalSeconds;
+        break;
+      case TimerMode.countup:
+        initialSeconds = 0;
+        totalSeconds = state.totalSeconds;
+        break;
+      case TimerMode.pomodoro:
+        initialSeconds = 25 * 60; // ポモドーロは25分から開始
+        totalSeconds = 25 * 60;
+        break;
+    }
 
     state = state.copyWith(
       mode: mode,
       currentSeconds: initialSeconds,
+      totalSeconds: totalSeconds,
       status: TimerStatus.initial,
+      isPomodoroBreak: false, // ポモドーロ切り替え時はリセット
+      pomodoroRound: 1, // ラウンドもリセット
     );
     _elapsedSeconds = 0; // 経過秒数リセット
   }
@@ -259,6 +380,89 @@ class TimerViewModel extends StateNotifier<TimerState> {
       status: TimerStatus.initial,
     );
     _elapsedSeconds = 0; // 経過秒数リセット
+  }
+
+  // チュートリアル用のタイマー時間を設定（秒単位）
+  void setTutorialTime(int seconds) {
+    if (state.status == TimerStatus.running) {
+      pauseTimer();
+    }
+
+    state = state.copyWith(
+      totalSeconds: seconds,
+      currentSeconds: state.mode == TimerMode.countdown ? seconds : 0,
+      status: TimerStatus.initial,
+    );
+    _elapsedSeconds = 0; // 経過秒数リセット
+  }
+
+  // タイマーモードを制限サービス用の文字列に変換
+  String _timerModeToString(TimerMode mode) {
+    switch (mode) {
+      case TimerMode.countdown:
+        return 'countdown';
+      case TimerMode.countup:
+        return 'countup';
+      case TimerMode.pomodoro:
+        return 'pomodoro';
+    }
+  }
+
+  // TimerModeから表示ラベルを取得
+  String getModeLabel(TimerMode mode) {
+    switch (mode) {
+      case TimerMode.countdown:
+        return 'フォーカス';
+      case TimerMode.countup:
+        return 'フリー';
+      case TimerMode.pomodoro:
+        return 'ポモドーロ';
+    }
+  }
+
+  // 現在のモードの表示ラベル
+  String get currentModeLabel => getModeLabel(state.mode);
+
+  // ポモドーロモードの説明文を取得
+  String get pomodoroDescription {
+    if (state.mode != TimerMode.pomodoro) {
+      return '';
+    }
+
+    if (state.isPomodoroBreak) {
+      final minutes = state.currentSeconds ~/ 60;
+      return 'ラウンド${state.pomodoroRound} - 休憩中 ($minutes分)';
+    } else {
+      return 'ラウンド${state.pomodoroRound} - 集中中 (25分)';
+    }
+  }
+
+  // 特定のモードが利用可能かチェック
+  bool canUseMode(TimerMode mode) {
+    final restrictionService = _ref.read(timerRestrictionServiceProvider);
+    return restrictionService.canUseTimerMode(_timerModeToString(mode));
+  }
+
+  // 利用可能なモード一覧を取得
+  List<TimerMode> getAvailableModes() {
+    final restrictionService = _ref.read(timerRestrictionServiceProvider);
+    final available = restrictionService.getAvailableTimerModes();
+
+    return TimerMode.values.where((mode) {
+      return available.contains(_timerModeToString(mode));
+    }).toList();
+  }
+
+  // モードの制限メッセージを取得
+  String getModeRestrictionMessage(TimerMode mode) {
+    final restrictionService = _ref.read(timerRestrictionServiceProvider);
+    return restrictionService.getRestrictionMessage(_timerModeToString(mode));
+  }
+
+  // 現在のユーザープランを取得
+  String getCurrentPlan() {
+    final restrictionService = _ref.read(timerRestrictionServiceProvider);
+    return restrictionService.getCurrentPlan();
   }
 
   @override

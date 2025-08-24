@@ -235,7 +235,7 @@ class HybridGoalsRepository implements GoalsRepository {
   Future<void> deleteGoal(String id) async {
     try {
       AppLogger.instance.i('🗑️ [HybridGoalsRepository] 目標削除処理を開始: $id');
-      
+
       // 1. まずローカルDBから削除
       await _localDatasource.deleteGoal(id);
       AppLogger.instance.i('✅ [HybridGoalsRepository] ローカルDBから削除完了: $id');
@@ -245,19 +245,27 @@ class HybridGoalsRepository implements GoalsRepository {
       if (connectivityResult == ConnectivityResult.none) {
         // オフライン：ローカル削除のみで未同期状態にする
         _syncNotifier.setOffline();
-        AppLogger.instance.i('📴 [HybridGoalsRepository] オフライン：ローカルのみ削除（後で同期が必要）: $id');
+        AppLogger.instance.i(
+          '📴 [HybridGoalsRepository] オフライン：ローカルのみ削除（後で同期が必要）: $id',
+        );
       } else {
         // オンライン：リモートからも削除を試みる
         try {
           await _remoteDatasource.deleteGoal(id);
           _syncNotifier.setSynced();
           AppLogger.instance.i('✅ [HybridGoalsRepository] リモートからも削除完了: $id');
-          AppLogger.instance.i('🎉 [HybridGoalsRepository] 目標をローカル＆リモート両方から削除しました: $id');
+          AppLogger.instance.i(
+            '🎉 [HybridGoalsRepository] 目標をローカル＆リモート両方から削除しました: $id',
+          );
         } catch (remoteError) {
           // リモート削除失敗：ローカル削除は成功として扱い、未同期状態にする
           _syncNotifier.setUnsynced();
-          AppLogger.instance.w('⚠️ [HybridGoalsRepository] リモート削除に失敗しました（後で同期が必要）: $id');
-          AppLogger.instance.w('⚠️ [HybridGoalsRepository] エラー詳細: $remoteError');
+          AppLogger.instance.w(
+            '⚠️ [HybridGoalsRepository] リモート削除に失敗しました（後で同期が必要）: $id',
+          );
+          AppLogger.instance.w(
+            '⚠️ [HybridGoalsRepository] エラー詳細: $remoteError',
+          );
           // エラーは再スローせず、ローカル削除の成功を優先
         }
       }

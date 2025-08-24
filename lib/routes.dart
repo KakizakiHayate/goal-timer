@@ -14,6 +14,9 @@ import 'package:goal_timer/features/splash/presentation/screens/splash_screen.da
 import 'package:goal_timer/features/auth/presentation/screens/login_screen.dart';
 import 'package:goal_timer/features/auth/presentation/screens/signup_screen.dart';
 import 'package:goal_timer/features/home/presentation/screens/home_screen.dart';
+import 'package:goal_timer/features/onboarding/presentation/screens/goal_creation_screen.dart';
+import 'package:goal_timer/features/onboarding/presentation/screens/demo_timer_screen.dart';
+import 'package:goal_timer/features/onboarding/presentation/screens/account_promotion_screen.dart';
 import 'package:goal_timer/core/utils/app_logger.dart';
 
 // TODO: 中規模・大規模になってきたら疎結合にすることを考える
@@ -29,6 +32,18 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case RouteNames.home:
       // ホーム画面
       return platformPageRoute(builder: (context) => const HomeScreen());
+
+    // オンボーディング画面
+    case RouteNames.onboardingGoalCreation:
+      return platformPageRoute(
+        builder: (context) => const GoalCreationScreen(),
+      );
+    case RouteNames.onboardingDemoTimer:
+      return platformPageRoute(builder: (context) => const DemoTimerScreen());
+    case RouteNames.onboardingAccountPromotion:
+      return platformPageRoute(
+        builder: (context) => const AccountPromotionScreen(),
+      );
     case RouteNames.goalDetailSetting:
       return platformPageRoute(
         builder: (context) => const GoalDetailSettingScreen(),
