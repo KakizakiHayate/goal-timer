@@ -60,7 +60,19 @@ class AuthViewModel extends StateNotifier<AuthState> {
         AppLogger.instance.i('認証完了後の同期チェックを開始します');
         await _syncChecker.checkAndSyncIfNeeded();
       } else {
-        state = AuthState.unauthenticated;
+        // tempユーザーの存在チェックを追加
+        final tempUserService = TempUserService();
+        final hasTempUser = await tempUserService.hasTempUser();
+        
+        if (hasTempUser) {
+          // tempユーザーが存在する = チュートリアル完了済み
+          AppLogger.instance.i('TempUserが存在します。ゲスト状態に設定します');
+          state = AuthState.guest;
+        } else {
+          // tempユーザーがいない = 初回起動
+          AppLogger.instance.i('TempUserが存在しません。未認証状態に設定します');
+          state = AuthState.unauthenticated;
+        }
       }
     } catch (e) {
       state = AuthState.error;

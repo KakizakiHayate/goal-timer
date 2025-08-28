@@ -26,6 +26,14 @@ class StartupLogicService {
       return '/onboarding/goal-creation';
     }
 
+    // Check if tutorial is active - if so, go to home instead of continuing onboarding
+    // This allows the tutorial to take over the user experience
+    final prefs = await SharedPreferences.getInstance();
+    final isTutorialActive = prefs.getBool('tutorial_active') ?? false;
+    if (isTutorialActive) {
+      return '/home'; // Let tutorial manage the flow
+    }
+
     // Determine route based on onboarding step
     final step = await _tempUserService.getOnboardingStep();
     if (step >= 3) {

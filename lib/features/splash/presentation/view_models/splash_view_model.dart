@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:goal_timer/core/config/env_config.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -102,7 +101,9 @@ class SplashViewModel extends StateNotifier<SplashState> {
       AppLogger.instance.i('SplashViewModel: 認証システムを初期化します');
 
       // authInitializationProviderから認証初期化を実行
+      AppLogger.instance.i('SplashViewModel: authInitializationProviderを読み込み開始');
       await _ref.read(authInitializationProvider.future);
+      AppLogger.instance.i('SplashViewModel: authInitializationProvider完了');
 
       // アプリ起動時の同期チェックを実行
       if (!_isDisposed) {
@@ -119,11 +120,15 @@ class SplashViewModel extends StateNotifier<SplashState> {
         }
       }
 
-      _safeUpdateState(
-        (state) => state.copyWith(isAuthReady: true, isLoading: false),
-      );
-
-      AppLogger.instance.i('SplashViewModel: 初期化が完了しました');
+      // disposeチェックを追加
+      if (!_isDisposed) {
+        _safeUpdateState(
+          (state) => state.copyWith(isAuthReady: true, isLoading: false),
+        );
+        AppLogger.instance.i('SplashViewModel: 初期化が完了しました');
+      } else {
+        AppLogger.instance.w('SplashViewModel: 初期化完了後にdisposeされていました');
+      }
     } catch (error) {
       AppLogger.instance.e('認証システムの初期化に失敗しました', error);
       _safeUpdateState(
@@ -145,8 +150,8 @@ class SplashViewModel extends StateNotifier<SplashState> {
         return;
       }
 
-      // クライアントの取得
-      final client = Supabase.instance.client;
+      // Supabaseが初期化されているか確認（クライアントの存在確認）
+      Supabase.instance.client; // 初期化されていない場合はエラーになる
 
       // 初期化状態を確認
       if (!EnvConfig.validateSupabaseConfig()) {
@@ -160,39 +165,12 @@ class SplashViewModel extends StateNotifier<SplashState> {
         return;
       }
 
-      // サーバー接続を確認
-      try {
-        // 処理中にdisposeされた場合は早期リターン
-        if (_isDisposed) return;
-
-        // 接続テスト方法1: 単純なテーブル存在確認（認証不要）
-        await client.from('users').select('id').limit(1);
-
-        // 接続成功
-        _safeUpdateState((state) => state.copyWith(isConnectionOk: true));
-      } catch (tableErr) {
-        debugPrint('テーブル接続テストエラー: $tableErr');
-
-        // 処理中にdisposeされた場合は早期リターン
-        if (_isDisposed) return;
-
-        // 接続テスト方法2: auth.getUser()を使用（認証が必要）
-        try {
-          await client.auth.getUser();
-
-          // 接続成功
-          _safeUpdateState((state) => state.copyWith(isConnectionOk: true));
-        } catch (authErr) {
-          // 全ての接続テストに失敗
-          _safeUpdateState(
-            (state) => state.copyWith(
-              isLoading: false,
-              errorMessage: 'サーバーに接続できません',
-              errorDetails: 'あなたのデバイスがネットワークに接続されていない可能性があります。',
-            ),
-          );
-        }
-      }
+      // Supabaseクライアントが初期化されていれば接続成功とみなす
+      // ゲストユーザーの場合、認証が必要なテーブルアクセスは失敗するため
+      // 実際のネットワーク接続確認は不要（オフラインファーストアプリとして動作）
+      _safeUpdateState((state) => state.copyWith(isConnectionOk: true));
+      
+      AppLogger.instance.i('SplashViewModel: Supabase接続確認完了（ゲストユーザー対応）');
     } catch (error) {
       _safeUpdateState(
         (state) => state.copyWith(

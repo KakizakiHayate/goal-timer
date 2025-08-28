@@ -27,7 +27,14 @@ class SupabaseUtils {
 
       final client = ref.read(supabaseClientProvider);
 
-      // 接続テスト方法1: 単純なテーブル存在確認（認証不要）
+      // ゲストユーザー（未認証）の場合は、usersテーブルアクセスをスキップ
+      final currentUser = client.auth.currentUser;
+      if (currentUser == null) {
+        debugPrint('ゲストユーザーのためusersテーブルアクセスをスキップ - 接続成功とみなす');
+        return true;
+      }
+
+      // 認証済みユーザーの場合のみテーブルアクセスを実行
       try {
         // テーブルの存在確認のみ（データが存在しなくても接続は確認できる）
         await client.from('users').select('id').limit(1);

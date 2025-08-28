@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/services/temp_user_service.dart';
 import 'onboarding_view_model.dart';
 
@@ -29,6 +30,12 @@ class TutorialViewModel extends StateNotifier<TutorialState> {
     required String tempUserId,
     required int totalSteps,
   }) async {
+    print('🚀 Starting tutorial with tempUserId: $tempUserId, totalSteps: $totalSteps');
+    
+    // チュートリアル状態を永続化して、StartupLogicServiceが参照できるようにする
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('tutorial_active', true);
+    
     state = state.copyWith(
       isTutorialActive: true,
       tempUserId: tempUserId,
@@ -37,35 +44,72 @@ class TutorialViewModel extends StateNotifier<TutorialState> {
       currentStepId: 'home_goal_selection',
       isCompleted: false,
     );
+    print('✅ Tutorial state updated: ${state.toString()}');
   }
 
   /// 次のステップに進む
-  void nextStep(String stepId) {
+  Future<void> nextStep(String stepId) async {
+    print('⏭️ nextStep called with stepId: $stepId');
+    print('Current state: index=${state.currentStepIndex}, total=${state.totalSteps}');
     if (state.currentStepIndex < state.totalSteps - 1) {
       state = state.copyWith(
         currentStepIndex: state.currentStepIndex + 1,
         currentStepId: stepId,
       );
+      print('✅ Advanced to step: ${state.currentStepIndex}, stepId: ${state.currentStepId}');
     } else {
       // チュートリアル完了
-      completeTutorial();
+      print('🏁 Tutorial completed, calling completeTutorial()');
+      await completeTutorial();
     }
   }
 
   /// チュートリアルを完了
-  void completeTutorial() {
+  Future<void> completeTutorial() async {
+    print('🏆 completeTutorial called');
+    
+    // tempユーザーがまだ作成されていない場合は作成
+    final tempUserId = await _tempUserService.getTempUserId();
+    if (tempUserId == null) {
+      final newTempUserId = await _tempUserService.generateTempUserId();
+      print('✅ Temp user created for guest mode: $newTempUserId');
+    } else {
+      print('ℹ️ Temp user already exists: $tempUserId');
+    }
+    
+    await _clearTutorialFlag();
     state = state.copyWith(
       isTutorialActive: false,
       isCompleted: true,
     );
+    print('✅ Tutorial completed, state: ${state.toString()}');
   }
 
   /// チュートリアルをスキップ
-  void skipTutorial() {
+  Future<void> skipTutorial() async {
+    print('⏸️ skipTutorial called');
+    
+    // tempユーザーがまだ作成されていない場合は作成（スキップしてもゲストユーザーになる）
+    final tempUserId = await _tempUserService.getTempUserId();
+    if (tempUserId == null) {
+      final newTempUserId = await _tempUserService.generateTempUserId();
+      print('✅ Temp user created for guest mode (skip): $newTempUserId');
+    } else {
+      print('ℹ️ Temp user already exists: $tempUserId');
+    }
+    
+    await _clearTutorialFlag();
     state = state.copyWith(
       isTutorialActive: false,
       isCompleted: true,
     );
+    print('✅ Tutorial skipped, state: ${state.toString()}');
+  }
+
+  /// チュートリアルフラグをクリア
+  Future<void> _clearTutorialFlag() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('tutorial_active');
   }
 
   /// チュートリアルをリセット

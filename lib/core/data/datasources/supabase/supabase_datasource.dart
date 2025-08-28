@@ -36,6 +36,13 @@ class SupabaseDatasource implements SupabaseRepository {
   @override
   Future<Map<String, dynamic>?> fetchAllUsers() async {
     try {
+      // ゲストユーザー（未認証）の場合は、usersテーブルアクセスをスキップ
+      final currentUser = client.auth.currentUser;
+      if (currentUser == null) {
+        AppLogger.instance.i('ゲストユーザーのためusersテーブル取得をスキップします');
+        return null;
+      }
+
       final allUsers = await client.from('users').select().single();
 
       return allUsers;
@@ -63,6 +70,14 @@ class SupabaseDatasource implements SupabaseRepository {
         return false;
       }
 
+      // ゲストユーザー（未認証）の場合は、usersテーブルアクセスをスキップ
+      final currentUser = client.auth.currentUser;
+      if (currentUser == null) {
+        AppLogger.instance.i('ゲストユーザーのためusersテーブルアクセスをスキップ - 接続成功とみなす');
+        return true;
+      }
+
+      // 認証済みユーザーの場合のみテーブルアクセスを実行
       // 接続テスト方法1: 単純なRPC呼び出し（認証不要）
       try {
         await client.rpc('current_timestamp');
@@ -71,7 +86,7 @@ class SupabaseDatasource implements SupabaseRepository {
       } catch (rpcErr) {
         AppLogger.instance.w('RPC current_timestamp失敗: $rpcErr');
 
-        // 接続テスト方法2: 単純なテーブル存在確認（認証不要）
+        // 接続テスト方法2: 単純なテーブル存在確認（認証済みユーザーのみ）
         try {
           // 構文を修正: count(*)ではなく単純にlimit(1)を使用
           final user = await client.from('users').select().limit(1).single();

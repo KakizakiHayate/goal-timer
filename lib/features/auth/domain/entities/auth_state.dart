@@ -37,7 +37,11 @@ extension AuthStateX on AuthState {
   bool get isError => this == AuthState.error;
 
   /// アプリを使用可能な状態かどうか（認証済みまたはゲスト）
-  bool get canUseApp => isAuthenticated || isGuest;
+  bool get canUseApp {
+    final canUse = isAuthenticated || isGuest;
+    print('🔍 AuthState.canUseApp - State: $this, isAuthenticated: $isAuthenticated, isGuest: $isGuest, canUseApp: $canUse');
+    return canUse;
+  }
 
   /// 初回起動またはログアウト後の状態かどうか
   bool get needsOnboarding => this == AuthState.initial || isUnauthenticated;

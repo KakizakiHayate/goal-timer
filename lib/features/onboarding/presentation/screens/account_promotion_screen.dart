@@ -7,6 +7,7 @@ import '../../../../core/widgets/common_button.dart';
 import '../widgets/onboarding_progress_bar.dart';
 import '../widgets/migration_progress_dialog.dart';
 import '../view_models/onboarding_view_model.dart';
+import '../view_models/tutorial_view_model.dart';
 import '../../../auth/provider/auth_provider.dart';
 import '../../../auth/presentation/widgets/auth_button.dart';
 import '../../../../core/services/data_migration_service.dart';
@@ -629,10 +630,23 @@ class _AccountPromotionScreenState
 
   Future<void> _onContinueAsGuestPressed() async {
     final onboardingViewModel = ref.read(onboardingViewModelProvider.notifier);
+    final tutorialViewModel = ref.read(tutorialViewModelProvider.notifier);
+    final tutorialState = ref.read(tutorialViewModelProvider);
 
     try {
       // ゲストとして続行
       await onboardingViewModel.continueAsGuest();
+
+      // チュートリアルが既に開始されているかチェック
+      // goal_creation_screen.dartで既にstartTutorialが呼ばれているはず
+      if (!tutorialState.isTutorialActive && !tutorialState.isCompleted) {
+        print('⚠️ Tutorial not active after goal creation, restarting tutorial');
+        final onboardingState = ref.read(onboardingViewModelProvider);
+        await tutorialViewModel.startTutorial(
+          tempUserId: onboardingState.tempUserId,
+          totalSteps: 3, // goal_selection -> timer_operation -> timer_completion
+        );
+      }
 
       if (mounted) {
         Navigator.pushReplacementNamed(context, '/home');

@@ -17,6 +17,10 @@ class SplashScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final splashState = ref.watch(splashViewModelProvider);
 
+    // デバッグログ追加
+    print('🔍 SplashScreen - isLoading: ${splashState.isLoading}, isReady: ${splashState.isReady}');
+    print('🔍 SplashScreen - isConnectionOk: ${splashState.isConnectionOk}, isAuthReady: ${splashState.isAuthReady}');
+
     // 初期化が完了した場合、スタートアップロジックに基づいて画面遷移
     if (!splashState.isLoading && splashState.isReady) {
       // 画面遷移を遅延実行（すぐに遷移するとスプラッシュが見えない）
@@ -29,6 +33,8 @@ class SplashScreen extends ConsumerWidget {
 
             final initialRoute =
                 await startupLogicService.determineInitialRoute();
+            
+            print('🚀 SplashScreen - navigating to: $initialRoute');
 
             if (context.mounted) {
               Navigator.pushReplacementNamed(context, initialRoute);

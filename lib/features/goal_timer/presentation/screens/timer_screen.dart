@@ -41,6 +41,9 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
   late Animation<Offset> _slideAnimation;
 
   bool _showCompletionAnimation = false;
+  
+  // チュートリアル用：メインタイマーボタンのKey
+  final GlobalKey _mainTimerButtonKey = GlobalKey();
 
   @override
   void initState() {
@@ -484,6 +487,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
         // メイン操作ボタン
         _buildMainControlButton(
           icon: isRunning ? Icons.pause_rounded : Icons.play_arrow_rounded,
+          key: _mainTimerButtonKey, // チュートリアル用のKey
           onPressed: () {
             if (isRunning) {
               timerViewModel.pauseTimer();
@@ -539,8 +543,10 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
   Widget _buildMainControlButton({
     required IconData icon,
     required VoidCallback onPressed,
+    GlobalKey? key,
   }) {
     return GestureDetector(
+      key: key,
       onTap: onPressed,
       child: Container(
         width: 88,
@@ -807,29 +813,19 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
   /// チュートリアル：タイマー操作ガイド
   Widget _buildTimerOperationTutorial() {
     return TutorialOverlay(
-      targetWidget: Container(
-        width: 120,
-        height: 120,
-        decoration: const BoxDecoration(
-          shape: BoxShape.circle,
-          color: ColorConsts.primary,
-        ),
-        child: const Icon(
-          Icons.play_arrow,
-          color: Colors.white,
-          size: 48,
-        ),
-      ),
+      targetButtonKey: _mainTimerButtonKey,
       title: 'タイマーを開始しよう',
       description: 'スタートボタンをタップしてタイマーを開始します。チュートリアル用に5秒間のデモタイマーが設定されています。',
-      onNext: () {
+      onNext: () async {
         final tutorialViewModel = ref.read(tutorialViewModelProvider.notifier);
-        tutorialViewModel.startTimerCompletionStep();
+        await tutorialViewModel.nextStep('timer_completion');
       },
-      onSkip: () {
+      onSkip: () async {
         final tutorialViewModel = ref.read(tutorialViewModelProvider.notifier);
-        tutorialViewModel.skipTutorial();
-        Navigator.pushReplacementNamed(context, RouteNames.onboardingAccountPromotion);
+        await tutorialViewModel.skipTutorial();
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, RouteNames.onboardingAccountPromotion);
+        }
       },
     );
   }

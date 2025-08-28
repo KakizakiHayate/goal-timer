@@ -3,35 +3,30 @@ import '../../../../core/utils/color_consts.dart';
 import '../../../../core/utils/spacing_consts.dart';
 import '../../../../core/utils/text_consts.dart';
 import '../../../../core/widgets/common_button.dart';
+import '../../../../core/widgets/cutout_overlay.dart';
 
-/// チュートリアル用のオーバーレイウィジェット
-/// 特定のUI要素をハイライトし、説明を表示
+/// 真のshowcaseview実装：実際のUI要素を切り抜いてハイライト表示
+/// targetButtonKeyで指定した要素のみを切り抜き、他をオーバーレイで覆う
 class TutorialOverlay extends StatefulWidget {
-  final Widget targetWidget;
   final String title;
   final String description;
   final VoidCallback? onNext;
   final VoidCallback? onSkip;
   final bool showSkip;
-  final EdgeInsets targetPadding;
-  final Alignment tooltipAlignment;
   final bool showPulseEffect;
-  final bool showArrow;
-  final GlobalKey? targetButtonKey; // 特定のボタンをハイライトする場合のKey
+  final GlobalKey targetButtonKey; // ハイライトする実際のUI要素のKey（必須）
+  final ScrollController? scrollController; // スクロール連動用
 
   const TutorialOverlay({
     super.key,
-    required this.targetWidget,
     required this.title,
     required this.description,
+    required this.targetButtonKey, // 必須パラメータに変更
     this.onNext,
     this.onSkip,
     this.showSkip = true,
-    this.targetPadding = const EdgeInsets.all(8.0),
-    this.tooltipAlignment = Alignment.bottomCenter,
     this.showPulseEffect = true,
-    this.showArrow = true,
-    this.targetButtonKey,
+    this.scrollController,
   });
 
   @override
@@ -76,6 +71,9 @@ class _TutorialOverlayState extends State<TutorialOverlay>
 
     // ボタンの位置を取得（少し遅らせる）
     _scheduleButtonPositionUpdate();
+
+    // スクロールイベントリスナーを追加
+    widget.scrollController?.addListener(_onScrollChanged);
   }
 
   @override
@@ -88,18 +86,16 @@ class _TutorialOverlayState extends State<TutorialOverlay>
   }
 
   void _scheduleButtonPositionUpdate() {
-    if (widget.targetButtonKey != null) {
-      // 複数回のコールバックで確実に取得
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+    // 複数回のコールバックで確実に取得
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _getButtonPosition();
+    });
+    // さらに少し遅らせて再取得
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (mounted) {
         _getButtonPosition();
-      });
-      // さらに少し遅らせて再取得
-      Future.delayed(const Duration(milliseconds: 100), () {
-        if (mounted) {
-          _getButtonPosition();
-        }
-      });
-    }
+      }
+    });
   }
 
   void _startPulseLoop() {
@@ -113,140 +109,140 @@ class _TutorialOverlayState extends State<TutorialOverlay>
   }
 
   void _getButtonPosition() {
-    if (widget.targetButtonKey?.currentContext != null) {
-      try {
-        final RenderBox? renderBox = 
-            widget.targetButtonKey!.currentContext!.findRenderObject() as RenderBox?;
-        if (renderBox != null && renderBox.hasSize) {
-          final position = renderBox.localToGlobal(Offset.zero);
-          final size = renderBox.size;
-          
-          // デバッグ用のログ
-          print('Button position found: $position, size: $size');
-          
-          if (mounted) {
-            setState(() {
-              _buttonRect = Rect.fromLTWH(position.dx, position.dy, size.width, size.height);
-            });
-          }
-        } else {
-          print('RenderBox not ready, retrying...');
-          // RenderBoxがまだ準備できていない場合は少し待ってから再試行
-          Future.delayed(const Duration(milliseconds: 50), () {
-            if (mounted) {
-              _getButtonPosition();
-            }
-          });
+    if (widget.targetButtonKey.currentContext == null) {
+      print('TargetButtonKey context is null, retrying...');
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) {
+          _getButtonPosition();
         }
-      } catch (e) {
-        print('Error getting button position: $e');
-      }
+      });
+      return;
     }
+
+    try {
+      final context = widget.targetButtonKey.currentContext!;
+      final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
+      
+      if (renderBox == null || !renderBox.hasSize) {
+        print('RenderBox not ready, retrying...');
+        Future.delayed(const Duration(milliseconds: 50), () {
+          if (mounted) {
+            _getButtonPosition();
+          }
+        });
+        return;
+      }
+
+      // グローバル座標を取得
+      final globalPosition = renderBox.localToGlobal(Offset.zero);
+      final size = renderBox.size;
+      
+      // MediaQueryのコンテキストを使用してスクリーン座標を正確に計算
+      final mediaQuery = MediaQuery.of(context);
+      final screenSize = mediaQuery.size;
+      final padding = mediaQuery.padding;
+      
+      // 実際の表示可能領域を考慮した位置調整
+      final adjustedPosition = Offset(
+        globalPosition.dx.clamp(0.0, screenSize.width - size.width),
+        globalPosition.dy.clamp(padding.top, screenSize.height - padding.bottom - size.height),
+      );
+      
+      print('Button position found: global=$globalPosition, adjusted=$adjustedPosition, size=$size');
+      print('Screen size: $screenSize, padding: $padding');
+      
+      if (mounted) {
+        setState(() {
+          _buttonRect = Rect.fromLTWH(
+            adjustedPosition.dx, 
+            adjustedPosition.dy, 
+            size.width, 
+            size.height
+          );
+        });
+      }
+    } catch (e, stackTrace) {
+      print('Error getting button position: $e');
+      print('Stack trace: $stackTrace');
+      
+      // エラーが発生した場合も少し待ってから再試行
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) {
+          _getButtonPosition();
+        }
+      });
+    }
+  }
+
+  void _onScrollChanged() {
+    // スクロールイベント発生時にボタンの位置を再計算
+    if (mounted) {
+      _getButtonPosition();
+    }
+  }
+
+  bool _isTargetVisible() {
+    if (_buttonRect == null) return false;
+    
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenPadding = MediaQuery.of(context).padding;
+    
+    // 表示可能領域内にあるかチェック
+    return _buttonRect!.top >= screenPadding.top && 
+           _buttonRect!.bottom <= screenHeight - screenPadding.bottom;
   }
 
   @override
   void dispose() {
+    widget.scrollController?.removeListener(_onScrollChanged);
     _animationController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Material(
+    // 真のshowcaseview：実際のUI要素を切り抜いて表示
+    print('🎯 TutorialOverlay build called');
+    print('- targetButtonKey: ${widget.targetButtonKey}');
+    print('- buttonRect: $_buttonRect');
+    
+    if (_buttonRect != null) {
+      print('✅ TutorialOverlay: Showing showcase view');
+      return _buildShowcaseView();
+    }
+    
+    // ボタン位置が取得できていない場合はローディング表示
+    print('⏳ TutorialOverlay: Button position not ready, showing loading...');
+    return Container(
       color: Colors.black.withValues(alpha: 0.7),
+      child: const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+  }
+
+  Widget _buildShowcaseView() {
+    return CutoutOverlay(
+      targetRect: _buttonRect!,
+      onTargetTap: () {
+        // ターゲット領域がタップされた場合は次のステップへ
+        widget.onNext?.call();
+      },
+      onOutsideTap: () {
+        // 外側がタップされた場合はスキップ
+        widget.onSkip?.call();
+      },
+      borderColor: ColorConsts.primary,
+      showPulseAnimation: widget.showPulseEffect,
       child: Stack(
         children: [
-          // オーバーレイ背景（タップで閉じる）
-          Positioned.fill(
-            child: GestureDetector(
-              onTap: widget.onSkip,
-              child: Container(color: Colors.transparent),
-            ),
-          ),
-
-          // ハイライトされたターゲット
-          if (widget.targetButtonKey != null && _buttonRect != null)
-            // ボタン特化のハイライト
-            _buildButtonHighlight()
-          else
-            // 通常のハイライト
-            Center(
-              child: FadeTransition(
-                opacity: _fadeAnimation,
-                child: AnimatedBuilder(
-                  animation: _pulseAnimation,
-                  builder: (context, child) {
-                    return Transform.scale(
-                      scale: widget.showPulseEffect ? _pulseAnimation.value : 1.0,
-                      child: Container(
-                        padding: widget.targetPadding,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: ColorConsts.primary,
-                            width: 3,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: ColorConsts.primary.withValues(alpha: 0.3),
-                              blurRadius: 20,
-                              spreadRadius: 5,
-                            ),
-                            BoxShadow(
-                              color: ColorConsts.primary.withValues(alpha: 0.1),
-                              blurRadius: 40,
-                              spreadRadius: 10,
-                            ),
-                          ],
-                        ),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(13),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.white.withValues(alpha: 0.8),
-                                blurRadius: 10,
-                                spreadRadius: 2,
-                              ),
-                            ],
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(13),
-                            child: widget.targetWidget,
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-
-          // ポインティングアロー（オプション）
-          if (widget.showArrow)
-            Positioned(
-              bottom: 140,
-              left: 0,
-              right: 0,
-              child: FadeTransition(
-                opacity: _fadeAnimation,
-                child: Center(
-                  child: Container(
-                    width: 0,
-                    height: 0,
-                    decoration: const BoxDecoration(
-                      border: Border(
-                        left: BorderSide(width: 15, color: Colors.transparent),
-                        right: BorderSide(width: 15, color: Colors.transparent),
-                        bottom: BorderSide(width: 20, color: Colors.white),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-
-          // 説明ツールチップ
+          // 背景は透明（実際のUIが見える）
+          Container(),
+          
+          // 矢印指示（ターゲットに向けて）
+          _buildArrowPointer(),
+          
+          // 説明ツールチップを画面下部に配置
           Positioned(
             left: SpacingConsts.md,
             right: SpacingConsts.md,
@@ -260,6 +256,7 @@ class _TutorialOverlayState extends State<TutorialOverlay>
       ),
     );
   }
+
 
   Widget _buildTooltip() {
     return Container(
@@ -325,6 +322,41 @@ class _TutorialOverlayState extends State<TutorialOverlay>
             ),
           ),
 
+          // スクロール指示（ターゲットが見えない場合）
+          if (!_isTargetVisible()) ...[ 
+            const SizedBox(height: SpacingConsts.sm),
+            Container(
+              padding: const EdgeInsets.all(SpacingConsts.sm),
+              decoration: BoxDecoration(
+                color: ColorConsts.warning.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: ColorConsts.warning.withValues(alpha: 0.3),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.swipe_vertical_rounded, 
+                    color: ColorConsts.warning, 
+                    size: 16,
+                  ),
+                  const SizedBox(width: SpacingConsts.xs),
+                  Expanded(
+                    child: Text(
+                      '目標カードが見えない場合は、画面をスクロールしてください',
+                      style: TextConsts.caption.copyWith(
+                        color: ColorConsts.warning,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+
           const SizedBox(height: SpacingConsts.lg),
 
           // アクションボタン
@@ -363,15 +395,19 @@ class _TutorialOverlayState extends State<TutorialOverlay>
     );
   }
 
-  Widget _buildButtonHighlight() {
+  Widget _buildArrowPointer() {
     if (_buttonRect == null) return const SizedBox.shrink();
 
-    // 緑色のハイライト色を定義
-    const highlightColor = Color(0xFF10B981); // 緑色
+    // ターゲット矩形の中心を計算
+    final targetCenter = _buttonRect!.center;
+    
+    // 矢印の位置を計算（ターゲットの上に表示）
+    final arrowTop = _buttonRect!.top - 60;
+    final arrowLeft = targetCenter.dx - 15; // 矢印の幅の半分
 
     return Positioned(
-      left: _buttonRect!.left - 12,
-      top: _buttonRect!.top - 12,
+      left: arrowLeft,
+      top: arrowTop,
       child: FadeTransition(
         opacity: _fadeAnimation,
         child: AnimatedBuilder(
@@ -379,34 +415,50 @@ class _TutorialOverlayState extends State<TutorialOverlay>
           builder: (context, child) {
             return Transform.scale(
               scale: widget.showPulseEffect ? _pulseAnimation.value : 1.0,
-              child: Container(
-                width: _buttonRect!.width + 24,
-                height: _buttonRect!.height + 24,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: highlightColor,
-                    width: 4,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // "ここをタップ" テキスト
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: SpacingConsts.sm,
+                      vertical: SpacingConsts.xs,
+                    ),
+                    decoration: BoxDecoration(
+                      color: ColorConsts.primary,
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.2),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Text(
+                      'ここをタップ',
+                      style: TextConsts.labelSmall.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: highlightColor.withValues(alpha: 0.6),
-                      blurRadius: 20,
-                      spreadRadius: 4,
+                  
+                  const SizedBox(height: SpacingConsts.xs),
+                  
+                  // 矢印
+                  Container(
+                    width: 0,
+                    height: 0,
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        left: BorderSide(width: 15, color: Colors.transparent),
+                        right: BorderSide(width: 15, color: Colors.transparent),
+                        top: BorderSide(width: 20, color: Colors.white),
+                      ),
                     ),
-                    BoxShadow(
-                      color: highlightColor.withValues(alpha: 0.3),
-                      blurRadius: 35,
-                      spreadRadius: 8,
-                    ),
-                    // より強いグロー効果
-                    BoxShadow(
-                      color: highlightColor.withValues(alpha: 0.8),
-                      blurRadius: 10,
-                      spreadRadius: 2,
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             );
           },
@@ -416,24 +468,28 @@ class _TutorialOverlayState extends State<TutorialOverlay>
   }
 }
 
+// NOTE: TutorialManagerは古いAPIを使用しているため、
+// 真のshowcaseview実装では実際のGlobalKeyが必要。
+// 必要に応じて後で再設計する。
+/*
 /// チュートリアルステップの情報を保持するモデル
 class TutorialStep {
   final String id;
   final String title;
   final String description;
-  final Widget Function() targetWidgetBuilder;
+  final GlobalKey targetKey; // 実際のUI要素のKey
   final VoidCallback? onComplete;
 
   const TutorialStep({
     required this.id,
     required this.title,
     required this.description,
-    required this.targetWidgetBuilder,
+    required this.targetKey,
     this.onComplete,
   });
 }
 
-/// 複数ステップのチュートリアルを管理するウィジェット
+/// 複数ステップのチュートリアルを管理するウィジェット（再設計予定）
 class TutorialManager extends StatefulWidget {
   final List<TutorialStep> steps;
   final VoidCallback? onComplete;
@@ -477,7 +533,7 @@ class _TutorialManagerState extends State<TutorialManager> {
     final currentStep = widget.steps[_currentStepIndex];
     
     return TutorialOverlay(
-      targetWidget: currentStep.targetWidgetBuilder(),
+      targetButtonKey: currentStep.targetKey,
       title: currentStep.title,
       description: currentStep.description,
       onNext: () {
@@ -488,3 +544,4 @@ class _TutorialManagerState extends State<TutorialManager> {
     );
   }
 }
+*/
