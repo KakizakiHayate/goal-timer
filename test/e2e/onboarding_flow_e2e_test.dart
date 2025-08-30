@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:goal_timer/main.dart';
 import 'package:goal_timer/features/onboarding/presentation/screens/goal_creation_screen.dart';
-import 'package:goal_timer/features/onboarding/presentation/screens/demo_timer_screen.dart';
+// Removed: import 'package:goal_timer/features/onboarding/presentation/screens/demo_timer_screen.dart';
 import 'package:goal_timer/features/onboarding/presentation/screens/account_promotion_screen.dart';
 import 'package:goal_timer/features/home/presentation/screens/home_screen.dart';
 import '../helpers/test_helpers.dart';
@@ -59,19 +59,16 @@ void main() {
       await tester.tap(find.byKey(const Key('next_button')));
       await tester.pumpAndSettle();
 
-      // ステップ2: デモタイマー画面が表示される
-      expect(find.byType(DemoTimerScreen), findsOneWidget);
-      expect(find.text('タイマーを体験'), findsOneWidget);
+      // ステップ2: ホーム画面が表示される（デモタイマー画面は削除）
+      expect(find.byType(HomeScreen), findsOneWidget);
       
-      // プログレスバーが66%を表示
-      expect(find.text('ステップ 2/3'), findsOneWidget);
-      expect(find.text('66%'), findsOneWidget);
+      // チュートリアルが開始される
+      expect(find.text('タイマーを開始しよう'), findsOneWidget);
+      expect(find.text('タイマーボタンを押して学習を開始しましょう'), findsOneWidget);
 
-      // デモタイマーが自動的に開始される
-      expect(find.text('タイマーを体験してみましょう'), findsOneWidget);
-      
-      // 5秒待機（デモタイマーの完了を待つ）
-      await tester.pump(const Duration(seconds: 5));
+      // チュートリアルオーバーレイの「次へ」ボタンをタップ
+      await tester.tap(find.text('次へ'));
+      await tester.pumpAndSettle();
       await tester.pumpAndSettle();
       
       // 完了ダイアログが表示される
@@ -166,7 +163,7 @@ void main() {
       // 次へボタンが有効化され、タップできることを確認
       await tester.tap(find.byKey(const Key('next_button')));
       await tester.pumpAndSettle();
-      expect(find.byType(DemoTimerScreen), findsOneWidget);
+      expect(find.byType(HomeScreen), findsOneWidget);
     });
 
     testWidgets('プログレスバーが正しく更新されること', (tester) async {
@@ -178,15 +175,11 @@ void main() {
       );
       await tester.pumpAndSettle();
       
-      // ステップ1: 33%
-      expect(find.text('33%'), findsOneWidget);
+      // ステップ1: 50%（2ステップ構成になったため）
+      expect(find.text('50%'), findsOneWidget);
       
-      // ステップ2に進む
+      // ステップ2に進む（ホーム画面でチュートリアル開始）
       await _fillGoalFormAndProceed(tester);
-      expect(find.text('66%'), findsOneWidget);
-      
-      // ステップ3に進む
-      await _completeTimerAndProceed(tester);
       expect(find.text('100%'), findsOneWidget);
     });
 

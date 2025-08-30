@@ -127,6 +127,11 @@ class TutorialViewModel extends StateNotifier<TutorialState> {
     state = state.copyWith(currentStepId: 'home_goal_selection');
   }
 
+  /// ホーム画面でのタイマーボタンshowcaseステップ
+  void startTimerButtonShowcaseStep() {
+    state = state.copyWith(currentStepId: 'home_timer_button_showcase');
+  }
+
   /// タイマー画面でのタイマー操作ステップ
   void startTimerOperationStep() {
     state = state.copyWith(currentStepId: 'timer_operation');

@@ -11,7 +11,6 @@ final class RouteNames {
 
   // オンボーディング画面
   static const String onboardingGoalCreation = '/onboarding/goal-creation';
-  static const String onboardingDemoTimer = '/onboarding/demo-timer';
   static const String onboardingAccountPromotion =
       '/onboarding/account-promotion';
 

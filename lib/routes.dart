@@ -15,7 +15,6 @@ import 'package:goal_timer/features/auth/presentation/screens/login_screen.dart'
 import 'package:goal_timer/features/auth/presentation/screens/signup_screen.dart';
 import 'package:goal_timer/features/home/presentation/screens/home_screen.dart';
 import 'package:goal_timer/features/onboarding/presentation/screens/goal_creation_screen.dart';
-import 'package:goal_timer/features/onboarding/presentation/screens/demo_timer_screen.dart';
 import 'package:goal_timer/features/onboarding/presentation/screens/account_promotion_screen.dart';
 import 'package:goal_timer/core/utils/app_logger.dart';
 
@@ -38,8 +37,6 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return platformPageRoute(
         builder: (context) => const GoalCreationScreen(),
       );
-    case RouteNames.onboardingDemoTimer:
-      return platformPageRoute(builder: (context) => const DemoTimerScreen());
     case RouteNames.onboardingAccountPromotion:
       return platformPageRoute(
         builder: (context) => const AccountPromotionScreen(),
@@ -50,11 +47,21 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       );
     // 特定の目標IDを指定したタイマー画面
     case RouteNames.timerWithGoal:
-      final goalId = settings.arguments as String;
-      AppLogger.instance.i('目標付きタイマー画面に遷移します: goalId=$goalId');
-      return platformPageRoute(
-        builder: (context) => TimerScreen(goalId: goalId),
-      );
+      if (settings.arguments is Map<String, dynamic>) {
+        final args = settings.arguments as Map<String, dynamic>;
+        final goalId = args['goalId'] as String;
+        final isTutorialMode = args['isTutorialMode'] as bool? ?? false;
+        AppLogger.instance.i('目標付きタイマー画面に遷移します: goalId=$goalId, isTutorialMode=$isTutorialMode');
+        return platformPageRoute(
+          builder: (context) => TimerScreen(goalId: goalId, isTutorialMode: isTutorialMode),
+        );
+      } else {
+        final goalId = settings.arguments as String;
+        AppLogger.instance.i('目標付きタイマー画面に遷移します: goalId=$goalId');
+        return platformPageRoute(
+          builder: (context) => TimerScreen(goalId: goalId),
+        );
+      }
     // 目標詳細画面
     case RouteNames.goalDetail:
       final goalId = settings.arguments as String;

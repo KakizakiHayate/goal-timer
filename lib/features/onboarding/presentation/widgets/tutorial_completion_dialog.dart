@@ -85,7 +85,10 @@ class _TutorialCompletionDialogState extends State<TutorialCompletionDialog>
                 opacity: _fadeAnimation,
                 child: Container(
                   margin: const EdgeInsets.all(SpacingConsts.lg),
-                  padding: const EdgeInsets.all(SpacingConsts.lg),
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height * 0.85,
+                    maxWidth: MediaQuery.of(context).size.width - (SpacingConsts.lg * 2),
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(24),
@@ -98,57 +101,60 @@ class _TutorialCompletionDialogState extends State<TutorialCompletionDialog>
                       ),
                     ],
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // 成功アイコン
-                      _buildSuccessIcon(),
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(SpacingConsts.lg),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // 成功アイコン
+                        _buildSuccessIcon(),
 
-                      const SizedBox(height: SpacingConsts.lg),
+                        const SizedBox(height: SpacingConsts.lg),
 
-                      // タイトル
-                      Text(
-                        'チュートリアル完了！',
-                        style: TextConsts.h2.copyWith(
-                          color: ColorConsts.textPrimary,
-                          fontWeight: FontWeight.bold,
+                        // タイトル
+                        Text(
+                          'チュートリアル完了！',
+                          style: TextConsts.h2.copyWith(
+                            color: ColorConsts.textPrimary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
-                        textAlign: TextAlign.center,
-                      ),
 
-                      const SizedBox(height: SpacingConsts.md),
+                        const SizedBox(height: SpacingConsts.md),
 
-                      // メッセージ
-                      Text(
-                        'お疲れ様でした！\n「${widget.goalTitle}」のタイマーを体験していただきました。',
-                        style: TextConsts.bodyLarge.copyWith(
-                          color: ColorConsts.textSecondary,
-                          height: 1.6,
+                        // メッセージ
+                        Text(
+                          'お疲れ様でした！\n「${widget.goalTitle}」のタイマーを体験していただきました。',
+                          style: TextConsts.bodyLarge.copyWith(
+                            color: ColorConsts.textSecondary,
+                            height: 1.6,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
-                        textAlign: TextAlign.center,
-                      ),
 
-                      const SizedBox(height: SpacingConsts.lg),
+                        const SizedBox(height: SpacingConsts.lg),
 
-                      // 機能説明
-                      _buildFeatureExplanation(),
+                        // 機能説明
+                        _buildFeatureExplanation(),
 
-                      const SizedBox(height: SpacingConsts.xl),
+                        const SizedBox(height: SpacingConsts.xl),
 
-                      // アカウント作成のメリット
-                      _buildAccountBenefits(),
+                        // アカウント作成のメリット
+                        _buildAccountBenefits(),
 
-                      const SizedBox(height: SpacingConsts.xl),
+                        const SizedBox(height: SpacingConsts.xl),
 
-                      // 続行ボタン
-                      CommonButton(
-                        text: 'アカウント作成へ進む',
-                        variant: ButtonVariant.primary,
-                        size: ButtonSize.large,
-                        isExpanded: true,
-                        onPressed: widget.onContinue,
-                      ),
-                    ],
+                        // 続行ボタン
+                        CommonButton(
+                          text: 'アカウント作成へ進む',
+                          variant: ButtonVariant.primary,
+                          size: ButtonSize.large,
+                          isExpanded: true,
+                          onPressed: widget.onContinue,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -205,11 +211,13 @@ class _TutorialCompletionDialogState extends State<TutorialCompletionDialog>
                 size: 20,
               ),
               const SizedBox(width: SpacingConsts.sm),
-              Text(
-                'タイマー機能の使い方',
-                style: TextConsts.labelLarge.copyWith(
-                  color: ColorConsts.textPrimary,
-                  fontWeight: FontWeight.w600,
+              Expanded(
+                child: Text(
+                  'タイマー機能の使い方',
+                  style: TextConsts.labelLarge.copyWith(
+                    color: ColorConsts.textPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
@@ -258,11 +266,13 @@ class _TutorialCompletionDialogState extends State<TutorialCompletionDialog>
                 size: 20,
               ),
               const SizedBox(width: SpacingConsts.sm),
-              Text(
-                'アカウント作成で更に便利に',
-                style: TextConsts.labelLarge.copyWith(
-                  color: ColorConsts.primary,
-                  fontWeight: FontWeight.w600,
+              Expanded(
+                child: Text(
+                  'アカウント作成で更に便利に',
+                  style: TextConsts.labelLarge.copyWith(
+                    color: ColorConsts.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],

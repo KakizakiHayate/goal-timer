@@ -242,39 +242,46 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
           // フォーカス（カウントダウン）
           if (availableModes.contains(TimerMode.countdown))
-            _buildModeButton(
-              'フォーカス',
-              timerState.mode == TimerMode.countdown,
-              () => timerViewModel.changeMode(TimerMode.countdown),
-              Icons.timer_outlined,
+            Expanded(
+              child: _buildModeButton(
+                'フォーカス',
+                timerState.mode == TimerMode.countdown,
+                () => timerViewModel.changeMode(TimerMode.countdown),
+                Icons.timer_outlined,
+              ),
             ),
 
           // フリー（カウントアップ）
           if (availableModes.contains(TimerMode.countup))
-            _buildModeButton(
-              'フリー',
-              timerState.mode == TimerMode.countup,
-              () => timerViewModel.changeMode(TimerMode.countup),
-              Icons.all_inclusive,
+            Expanded(
+              child: _buildModeButton(
+                'フリー',
+                timerState.mode == TimerMode.countup,
+                () => timerViewModel.changeMode(TimerMode.countup),
+                Icons.all_inclusive,
+              ),
             ),
 
           // ポモドーロ（プレミアム機能）
           if (availableModes.contains(TimerMode.pomodoro))
-            _buildModeButton(
-              'ポモドーロ',
-              timerState.mode == TimerMode.pomodoro,
-              () => timerViewModel.changeMode(TimerMode.pomodoro),
-              Icons.spa,
+            Expanded(
+              child: _buildModeButton(
+                'ポモドーロ',
+                timerState.mode == TimerMode.pomodoro,
+                () => timerViewModel.changeMode(TimerMode.pomodoro),
+                Icons.spa,
+              ),
             )
           else if (TimerMode.values.contains(TimerMode.pomodoro))
-            _buildLockedModeButton(
-              'ポモドーロ',
-              Icons.spa,
-              timerViewModel.getModeRestrictionMessage(TimerMode.pomodoro),
+            Expanded(
+              child: _buildLockedModeButton(
+                'ポモドーロ',
+                Icons.spa,
+                timerViewModel.getModeRestrictionMessage(TimerMode.pomodoro),
+              ),
             ),
         ],
       ),

@@ -110,7 +110,7 @@ class _TutorialOverlayState extends State<TutorialOverlay>
 
   void _getButtonPosition() {
     if (widget.targetButtonKey.currentContext == null) {
-      print('TargetButtonKey context is null, retrying...');
+      print('⚠️ [TutorialOverlay] TargetButtonKey context is null, retrying...');
       Future.delayed(const Duration(milliseconds: 100), () {
         if (mounted) {
           _getButtonPosition();
@@ -124,7 +124,7 @@ class _TutorialOverlayState extends State<TutorialOverlay>
       final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
       
       if (renderBox == null || !renderBox.hasSize) {
-        print('RenderBox not ready, retrying...');
+        print('⚠️ [TutorialOverlay] RenderBox not ready, retrying...');
         Future.delayed(const Duration(milliseconds: 50), () {
           if (mounted) {
             _getButtonPosition();
@@ -148,8 +148,8 @@ class _TutorialOverlayState extends State<TutorialOverlay>
         globalPosition.dy.clamp(padding.top, screenSize.height - padding.bottom - size.height),
       );
       
-      print('Button position found: global=$globalPosition, adjusted=$adjustedPosition, size=$size');
-      print('Screen size: $screenSize, padding: $padding');
+      print('✅ [TutorialOverlay] Button position found: global=$globalPosition, adjusted=$adjustedPosition, size=$size');
+      print('✅ [TutorialOverlay] Screen size: $screenSize, padding: $padding');
       
       if (mounted) {
         setState(() {
@@ -162,8 +162,8 @@ class _TutorialOverlayState extends State<TutorialOverlay>
         });
       }
     } catch (e, stackTrace) {
-      print('Error getting button position: $e');
-      print('Stack trace: $stackTrace');
+      print('❌ [TutorialOverlay] Error getting button position: $e');
+      print('❌ [TutorialOverlay] Stack trace: $stackTrace');
       
       // エラーが発生した場合も少し待ってから再試行
       Future.delayed(const Duration(milliseconds: 100), () {

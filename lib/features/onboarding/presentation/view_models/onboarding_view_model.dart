@@ -107,14 +107,9 @@ class OnboardingViewModel extends StateNotifier<OnboardingState> {
     await completeStep(1);
   }
 
-  /// デモタイマー完了（ステップ2）
-  Future<void> completeDemoTimer() async {
-    await completeStep(2);
-  }
-
-  /// アカウント作成完了（ステップ3）
+  /// アカウント作成完了（ステップ2）
   Future<void> completeAccountCreation() async {
-    await completeStep(3);
+    await completeStep(2);
   }
 
   /// ゲストとして続行

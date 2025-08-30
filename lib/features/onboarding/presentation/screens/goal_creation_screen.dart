@@ -53,7 +53,7 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
       body: Column(
         children: [
           // プログレスバー
-          OnboardingProgressBar(progress: 0.33, currentStep: 1, totalSteps: 3),
+          OnboardingProgressBar(progress: 0.50, currentStep: 1, totalSteps: 2),
 
           // フォーム部分
           Expanded(
@@ -385,16 +385,19 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
       // 認証状態をゲスト状態に設定
       authViewModel.setGuestState();
 
-      // チュートリアルフローを開始（後でホーム画面で自動的に開始する）
+      // チュートリアルフローを開始（ホーム画面でタイマーボタンshowcase）
       final onboardingState = ref.read(onboardingViewModelProvider);
       await tutorialViewModel.startTutorial(
         tempUserId: onboardingState.tempUserId,
-        totalSteps: 3, // goal_selection -> timer_operation -> timer_completion
+        totalSteps: 3, // home_goal_selection -> home_timer_button_showcase -> timer_operation
       );
+      
+      // ゴール作成完了後、次のチュートリアルステップに進む
+      await tutorialViewModel.nextStep('home_timer_button_showcase');
 
-      // 次の画面に遷移（デモタイマー画面）
+      // 次の画面に遷移（ホーム画面）
       if (mounted) {
-        Navigator.pushReplacementNamed(context, '/onboarding/demo-timer');
+        Navigator.pushReplacementNamed(context, RouteNames.home);
       }
     } catch (e) {
       // エラーは onboardingViewModel 内で処理される
