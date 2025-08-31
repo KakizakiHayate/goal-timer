@@ -235,55 +235,53 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
   ) {
     final availableModes = timerViewModel.getAvailableModes();
 
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        children: [
-          // フォーカス（カウントダウン）
-          if (availableModes.contains(TimerMode.countdown))
-            Expanded(
-              child: _buildModeButton(
-                'フォーカス',
-                timerState.mode == TimerMode.countdown,
-                () => timerViewModel.changeMode(TimerMode.countdown),
-                Icons.timer_outlined,
-              ),
-            ),
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Container(
+        padding: const EdgeInsets.all(2), // 余白を削減
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.2),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: IntrinsicHeight(
+          child: Row(
+            mainAxisSize: MainAxisSize.min, // 必要最小限の幅に
+            children: [
+              // フォーカス（カウントダウン）
+              if (availableModes.contains(TimerMode.countdown))
+                _buildModeButton(
+                  'フォーカス',
+                  timerState.mode == TimerMode.countdown,
+                  () => timerViewModel.changeMode(TimerMode.countdown),
+                  Icons.timer_outlined,
+                ),
 
-          // フリー（カウントアップ）
-          if (availableModes.contains(TimerMode.countup))
-            Expanded(
-              child: _buildModeButton(
-                'フリー',
-                timerState.mode == TimerMode.countup,
-                () => timerViewModel.changeMode(TimerMode.countup),
-                Icons.all_inclusive,
-              ),
-            ),
+              // フリー（カウントアップ）
+              if (availableModes.contains(TimerMode.countup))
+                _buildModeButton(
+                  'フリー',
+                  timerState.mode == TimerMode.countup,
+                  () => timerViewModel.changeMode(TimerMode.countup),
+                  Icons.all_inclusive,
+                ),
 
-          // ポモドーロ（プレミアム機能）
-          if (availableModes.contains(TimerMode.pomodoro))
-            Expanded(
-              child: _buildModeButton(
-                'ポモドーロ',
-                timerState.mode == TimerMode.pomodoro,
-                () => timerViewModel.changeMode(TimerMode.pomodoro),
-                Icons.spa,
-              ),
-            )
-          else if (TimerMode.values.contains(TimerMode.pomodoro))
-            Expanded(
-              child: _buildLockedModeButton(
-                'ポモドーロ',
-                Icons.spa,
-                timerViewModel.getModeRestrictionMessage(TimerMode.pomodoro),
-              ),
-            ),
-        ],
+              // ポモドーロ（プレミアム機能）
+              if (availableModes.contains(TimerMode.pomodoro))
+                _buildModeButton(
+                  'ポモドーロ',
+                  timerState.mode == TimerMode.pomodoro,
+                  () => timerViewModel.changeMode(TimerMode.pomodoro),
+                  Icons.spa,
+                )
+              else if (TimerMode.values.contains(TimerMode.pomodoro))
+                _buildLockedModeButton(
+                  'ポモドーロ',
+                  Icons.spa,
+                  timerViewModel.getModeRestrictionMessage(TimerMode.pomodoro),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -299,8 +297,8 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
       child: AnimatedContainer(
         duration: AnimationConsts.fast,
         padding: const EdgeInsets.symmetric(
-          horizontal: SpacingConsts.l,
-          vertical: SpacingConsts.m,
+          horizontal: SpacingConsts.m, // 水平の余白を削減
+          vertical: SpacingConsts.s,   // 垂直の余白を削減
         ),
         decoration: BoxDecoration(
           color: isActive ? Colors.white : Colors.transparent,
@@ -324,7 +322,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
               color: isActive ? ColorConsts.textPrimary : Colors.white,
               size: 20,
             ),
-            const SizedBox(width: SpacingConsts.s),
+            const SizedBox(width: SpacingConsts.xs), // アイコンとテキストの間隔を縮小
             Text(
               text,
               style: TextConsts.body.copyWith(
@@ -356,8 +354,8 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
       },
       child: Container(
         padding: const EdgeInsets.symmetric(
-          horizontal: SpacingConsts.l,
-          vertical: SpacingConsts.m,
+          horizontal: SpacingConsts.m, // 水平の余白を削減
+          vertical: SpacingConsts.s,   // 垂直の余白を削減
         ),
         decoration: BoxDecoration(
           color: Colors.transparent,
@@ -375,7 +373,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
               color: Colors.white.withValues(alpha: 0.6),
               size: 20,
             ),
-            const SizedBox(width: SpacingConsts.s),
+            const SizedBox(width: SpacingConsts.xs), // アイコンとテキストの間隔を縮小
             Text(
               text,
               style: TextConsts.body.copyWith(
