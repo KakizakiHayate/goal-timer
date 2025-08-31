@@ -100,7 +100,7 @@ class StartupLogicService {
       case 1:
         return '/onboarding/demo-timer';
       case 2:
-        return '/onboarding/account-creation';
+        return '/onboarding/account-promotion';
       default:
         return '/onboarding/goal-creation';
     }

@@ -53,7 +53,7 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
       body: Column(
         children: [
           // プログレスバー
-          OnboardingProgressBar(progress: 0.50, currentStep: 1, totalSteps: 2),
+          OnboardingProgressBar(progress: 0.33, currentStep: 1, totalSteps: 3),
 
           // フォーム部分
           Expanded(
