@@ -123,7 +123,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
     // チュートリアルモードの場合、タイマーを5秒に設定
     if (widget.isTutorialMode && timerState.status == TimerStatus.initial) {
       Future.microtask(() {
-        timerViewModel.setTutorialTime(5); // 5秒デモタイマー
+        timerViewModel.setTutorialTime(TimerConstants.tutorialDurationSeconds);
       });
     }
 

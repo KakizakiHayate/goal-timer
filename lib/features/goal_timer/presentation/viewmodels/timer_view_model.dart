@@ -8,6 +8,14 @@ import 'package:goal_timer/features/goal_detail/presentation/viewmodels/goal_det
 import 'package:goal_timer/core/services/timer_restriction_service.dart';
 import 'package:uuid/uuid.dart';
 
+// タイマー関連の定数
+class TimerConstants {
+  static const int tutorialDurationSeconds = 5; // チュートリアル用タイマーの秒数
+  static const int countdownCompleteThreshold = 0; // カウントダウン完了の閾値
+  static const int pomodoroWorkMinutes = 25; // ポモドーロ作業時間（分）
+  static const int pomodoroBreakMinutes = 5; // ポモドーロ休憩時間（分）
+}
+
 // タイマー制限サービスのプロバイダー
 final timerRestrictionServiceProvider = Provider<TimerRestrictionService>((
   ref,
@@ -144,7 +152,7 @@ class TimerViewModel extends StateNotifier<TimerState> {
 
       if (state.mode == TimerMode.countdown) {
         // カウントダウンモード
-        if (state.currentSeconds <= 1) {
+        if (state.currentSeconds <= TimerConstants.countdownCompleteThreshold) {
           completeTimer();
         } else {
           state = state.copyWith(currentSeconds: state.currentSeconds - 1);

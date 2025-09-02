@@ -284,8 +284,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 'goalId': 'tutorial_demo_goal',
                 'isTutorialMode': true,
               },
-            ).then((_) {
-              // タイマー画面から戻ってきた後、次のステップに進む
+            );
+            // タイマー画面が完全にロードされてから次のステップに進む
+            Future.delayed(const Duration(milliseconds: 800), () {
               tutorialViewModel.nextStep('timer_operation');
             });
           },
@@ -722,10 +723,12 @@ class _HomeTabContent extends ConsumerWidget {
               },
             );
             
-            // チュートリアル中の場合、次のステップに進む
+            // チュートリアル中の場合、タイマー画面が完全にロードされてから次のステップに進む
             if (isInTutorial) {
-              final tutorialViewModel = ref.read(tutorialViewModelProvider.notifier);
-              tutorialViewModel.nextStep('timer_operation');
+              Future.delayed(const Duration(milliseconds: 800), () {
+                final tutorialViewModel = ref.read(tutorialViewModelProvider.notifier);
+                tutorialViewModel.nextStep('timer_operation');
+              });
             }
           },
           onEditTap: () async {
