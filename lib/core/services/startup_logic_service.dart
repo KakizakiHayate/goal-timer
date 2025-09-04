@@ -98,7 +98,8 @@ class StartupLogicService {
       case 0:
         return '/onboarding/goal-creation';
       case 1:
-        return '/onboarding/demo-timer';
+        // ゴール作成完了後はホーム画面でチュートリアルを開始
+        return '/home';
       case 2:
         return '/onboarding/account-promotion';
       default:

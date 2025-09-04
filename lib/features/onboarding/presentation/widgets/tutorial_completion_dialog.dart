@@ -6,7 +6,7 @@ import '../../../../core/widgets/common_button.dart';
 
 /// チュートリアル完了を知らせるダイアログ
 class TutorialCompletionDialog extends StatefulWidget {
-  final VoidCallback onContinue;
+  final Future<void> Function() onContinue;
   final String goalTitle;
 
   const TutorialCompletionDialog({
@@ -20,7 +20,7 @@ class TutorialCompletionDialog extends StatefulWidget {
 
   static void show(
     BuildContext context, {
-    required VoidCallback onContinue,
+    required Future<void> Function() onContinue,
     required String goalTitle,
   }) {
     showDialog(
@@ -151,7 +151,9 @@ class _TutorialCompletionDialogState extends State<TutorialCompletionDialog>
                           variant: ButtonVariant.primary,
                           size: ButtonSize.large,
                           isExpanded: true,
-                          onPressed: widget.onContinue,
+                          onPressed: () {
+                            widget.onContinue();
+                          },
                         ),
                       ],
                     ),

@@ -99,16 +99,38 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
 
     // チュートリアル中のタイマー完了を監視
     ref.listen(timerViewModelProvider, (previous, current) {
+      // 最新のチュートリアル状態を取得
+      final currentTutorialState = ref.read(tutorialViewModelProvider);
+      
+      AppLogger.instance.d('🔍 タイマー状態変化を検知:');
+      AppLogger.instance.d('  - isTutorialMode: ${widget.isTutorialMode}');
+      AppLogger.instance.d('  - currentTutorialState.isTutorialActive: ${currentTutorialState.isTutorialActive}');
+      AppLogger.instance.d('  - currentTutorialState.currentStepId: ${currentTutorialState.currentStepId}');
+      AppLogger.instance.d('  - previous?.status: ${previous?.status}');
+      AppLogger.instance.d('  - current.status: ${current.status}');
+      
       if (widget.isTutorialMode && 
-          tutorialState.isTutorialActive &&
+          currentTutorialState.isTutorialActive &&
           previous?.status != TimerStatus.completed &&
           current.status == TimerStatus.completed) {
-        // チュートリアル完了処理
-        final tutorialViewModel = ref.read(tutorialViewModelProvider.notifier);
-        tutorialViewModel.completeTutorial();
+        AppLogger.instance.i('🎉 チュートリアル完了条件を満たしました - ダイアログを表示します');
         
-        // 目標情報を取得
+        // ダイアログ表示（completeTutorialはダイアログ内で実行）
         _showTutorialCompletionDialog();
+      } else {
+        AppLogger.instance.d('⚠️ チュートリアル完了条件を満たしていません');
+        if (!widget.isTutorialMode) {
+          AppLogger.instance.d('   理由: isTutorialMode=false');
+        }
+        if (!currentTutorialState.isTutorialActive) {
+          AppLogger.instance.d('   理由: isTutorialActive=false');
+        }
+        if (previous?.status == TimerStatus.completed) {
+          AppLogger.instance.d('   理由: 既にcompletedだった');
+        }
+        if (current.status != TimerStatus.completed) {
+          AppLogger.instance.d('   理由: currentはcompletedではない');
+        }
       }
     });
 
@@ -837,33 +859,61 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
 
   /// チュートリアル完了ダイアログを表示
   Future<void> _showTutorialCompletionDialog() async {
+    AppLogger.instance.i('🎨 _showTutorialCompletionDialog()開始');
+    AppLogger.instance.d('  - mounted状態: $mounted');
+    AppLogger.instance.d('  - goalId: ${widget.goalId}');
+    
     // 目標データを取得
     try {
+      AppLogger.instance.d('📋 目標データを取得中...');
       final goalsRepository = ref.read(hybridGoalsRepositoryProvider);
       final goal = await goalsRepository.getGoalById(widget.goalId);
       final goalTitle = goal?.title ?? '学習目標';
+      AppLogger.instance.i('✅ 目標データ取得成功: $goalTitle');
 
       if (mounted) {
+        AppLogger.instance.i('🎭 ダイアログ表示開始');
         TutorialCompletionDialog.show(
           context,
           goalTitle: goalTitle,
-          onContinue: () {
+          onContinue: () async {
+            AppLogger.instance.i('▶️ 続けるボタンがタップされました');
+            
+            // ここでチュートリアル完了処理を実行
+            final tutorialViewModel = ref.read(tutorialViewModelProvider.notifier);
+            await tutorialViewModel.completeTutorial();
+            AppLogger.instance.i('✅ チュートリアル完了処理が完了しました');
+            
             Navigator.of(context).pop(); // ダイアログを閉じる
+            AppLogger.instance.i('🚀 AccountPromotionScreenへ遷移中...');
             Navigator.pushReplacementNamed(
               context, 
               RouteNames.onboardingAccountPromotion,
             );
           },
         );
+        AppLogger.instance.i('✨ ダイアログ表示完了');
+      } else {
+        AppLogger.instance.w('⚠️ ウィジェットがmountされていません');
       }
     } catch (e) {
+      AppLogger.instance.e('❌ 目標データ取得エラー: $e');
       // エラーの場合はデフォルトのタイトルで表示
       if (mounted) {
+        AppLogger.instance.i('🎭 エラー時ダイアログ表示開始');
         TutorialCompletionDialog.show(
           context,
           goalTitle: '学習目標',
-          onContinue: () {
+          onContinue: () async {
+            AppLogger.instance.i('▶️ 続けるボタンがタップされました（エラー時）');
+            
+            // ここでチュートリアル完了処理を実行
+            final tutorialViewModel = ref.read(tutorialViewModelProvider.notifier);
+            await tutorialViewModel.completeTutorial();
+            AppLogger.instance.i('✅ チュートリアル完了処理が完了しました（エラー時）');
+            
             Navigator.of(context).pop(); // ダイアログを閉じる
+            AppLogger.instance.i('🚀 AccountPromotionScreenへ遷移中...（エラー時）');
             Navigator.pushReplacementNamed(
               context, 
               RouteNames.onboardingAccountPromotion,

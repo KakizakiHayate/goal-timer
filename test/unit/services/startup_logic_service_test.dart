@@ -32,10 +32,10 @@ void main() {
         final route = await startupLogicService.determineInitialRoute();
 
         // Assert
-        expect(route, equals('/onboarding/account-creation'));
+        expect(route, equals('/onboarding/account-promotion'));
       });
 
-      test('should return goal creation route for step 1', () async {
+      test('should return home route for step 1 (tutorial starts)', () async {
         // Arrange
         await tempUserService.generateTempUserId();
         await tempUserService.updateOnboardingStep(1);
@@ -44,10 +44,10 @@ void main() {
         final route = await startupLogicService.determineInitialRoute();
 
         // Assert
-        expect(route, equals('/onboarding/demo-timer'));
+        expect(route, equals('/home'));
       });
 
-      test('should return demo timer route for step 2', () async {
+      test('should return account promotion route for step 2', () async {
         // Arrange
         await tempUserService.generateTempUserId();
         await tempUserService.updateOnboardingStep(2);
@@ -56,7 +56,7 @@ void main() {
         final route = await startupLogicService.determineInitialRoute();
 
         // Assert
-        expect(route, equals('/onboarding/account-creation'));
+        expect(route, equals('/onboarding/account-promotion'));
       });
 
       test('should clean up and restart onboarding for expired temp user', () async {

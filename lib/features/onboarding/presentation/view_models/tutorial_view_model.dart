@@ -23,7 +23,50 @@ class TutorialState with _$TutorialState {
 class TutorialViewModel extends StateNotifier<TutorialState> {
   final TempUserService _tempUserService;
 
-  TutorialViewModel(this._tempUserService) : super(const TutorialState());
+  TutorialViewModel(this._tempUserService) : super(const TutorialState()) {
+    print('🏗️ TutorialViewModel 初期化開始');
+    print('初期状態: ${state.toString()}');
+    // 初期化時にSharedPreferencesから状態を復元
+    _loadTutorialState();
+  }
+
+  /// SharedPreferencesからチュートリアル状態を復元
+  Future<void> _loadTutorialState() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final isTutorialActive = prefs.getBool('tutorial_active') ?? false;
+      
+      if (isTutorialActive) {
+        // チュートリアルが進行中の場合、保存された状態を復元
+        final tempUserId = await _tempUserService.getTempUserId();
+        final currentStepId = prefs.getString('tutorial_current_step') ?? 'home_goal_selection';
+        final currentStepIndex = prefs.getInt('tutorial_current_step_index') ?? 0;
+        final totalSteps = prefs.getInt('tutorial_total_steps') ?? 3;
+        
+        print('🔄 チュートリアル状態を復元中...');
+        print('  - isTutorialActive: $isTutorialActive');
+        print('  - currentStepId: $currentStepId');
+        print('  - currentStepIndex: $currentStepIndex');
+        print('  - totalSteps: $totalSteps');
+        print('  - tempUserId: $tempUserId');
+        
+        state = state.copyWith(
+          isTutorialActive: true,
+          tempUserId: tempUserId,
+          currentStepId: currentStepId,
+          currentStepIndex: currentStepIndex,
+          totalSteps: totalSteps,
+          isCompleted: false,
+        );
+        
+        print('✅ チュートリアル状態を復元しました: ${state.toString()}');
+      } else {
+        print('ℹ️ アクティブなチュートリアルはありません');
+      }
+    } catch (e) {
+      print('❌ チュートリアル状態の復元に失敗: $e');
+    }
+  }
 
   /// チュートリアルを開始
   Future<void> startTutorial({
@@ -32,28 +75,42 @@ class TutorialViewModel extends StateNotifier<TutorialState> {
   }) async {
     print('🚀 Starting tutorial with tempUserId: $tempUserId, totalSteps: $totalSteps');
     
+    const currentStepId = 'home_goal_selection';
+    const currentStepIndex = 0;
+    
     // チュートリアル状態を永続化して、StartupLogicServiceが参照できるようにする
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('tutorial_active', true);
+    await prefs.setString('tutorial_current_step', currentStepId);
+    await prefs.setInt('tutorial_current_step_index', currentStepIndex);
+    await prefs.setInt('tutorial_total_steps', totalSteps);
     
     state = state.copyWith(
       isTutorialActive: true,
       tempUserId: tempUserId,
       totalSteps: totalSteps,
-      currentStepIndex: 0,
-      currentStepId: 'home_goal_selection',
+      currentStepIndex: currentStepIndex,
+      currentStepId: currentStepId,
       isCompleted: false,
     );
-    print('✅ Tutorial state updated: ${state.toString()}');
+    print('✅ Tutorial state updated and saved: ${state.toString()}');
   }
 
   /// 次のステップに進む
   Future<void> nextStep(String stepId) async {
     print('⏭️ nextStep called with stepId: $stepId');
     print('Current state: index=${state.currentStepIndex}, total=${state.totalSteps}');
+    
     if (state.currentStepIndex < state.totalSteps - 1) {
+      final newStepIndex = state.currentStepIndex + 1;
+      
+      // SharedPreferencesに保存
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('tutorial_current_step', stepId);
+      await prefs.setInt('tutorial_current_step_index', newStepIndex);
+      
       state = state.copyWith(
-        currentStepIndex: state.currentStepIndex + 1,
+        currentStepIndex: newStepIndex,
         currentStepId: stepId,
       );
       print('✅ Advanced to step: ${state.currentStepIndex}, stepId: ${state.currentStepId}');
@@ -67,6 +124,7 @@ class TutorialViewModel extends StateNotifier<TutorialState> {
   /// チュートリアルを完了
   Future<void> completeTutorial() async {
     print('🏆 completeTutorial called');
+    print('📋 現在のチュートリアル状態: isTutorialActive=${state.isTutorialActive}');
     
     // tempユーザーがまだ作成されていない場合は作成
     final tempUserId = await _tempUserService.getTempUserId();
@@ -77,12 +135,15 @@ class TutorialViewModel extends StateNotifier<TutorialState> {
       print('ℹ️ Temp user already exists: $tempUserId');
     }
     
+    print('🚩 チュートリアルフラグをクリア中...');
     await _clearTutorialFlag();
+    
+    print('🔄 チュートリアル状態を更新中...');
     state = state.copyWith(
       isTutorialActive: false,
       isCompleted: true,
     );
-    print('✅ Tutorial completed, state: ${state.toString()}');
+    print('✅ チュートリアル完了 - 新しい状態: isTutorialActive=${state.isTutorialActive}, isCompleted=${state.isCompleted}');
   }
 
   /// チュートリアルをスキップ
@@ -110,6 +171,10 @@ class TutorialViewModel extends StateNotifier<TutorialState> {
   Future<void> _clearTutorialFlag() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('tutorial_active');
+    await prefs.remove('tutorial_current_step');
+    await prefs.remove('tutorial_current_step_index');
+    await prefs.remove('tutorial_total_steps');
+    print('🗑️ チュートリアル関連のSharedPreferencesデータをクリアしました');
   }
 
   /// チュートリアルをリセット

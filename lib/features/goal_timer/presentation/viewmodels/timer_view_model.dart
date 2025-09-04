@@ -153,9 +153,11 @@ class TimerViewModel extends StateNotifier<TimerState> {
       if (state.mode == TimerMode.countdown) {
         // カウントダウンモード
         if (state.currentSeconds <= TimerConstants.countdownCompleteThreshold) {
+          AppLogger.instance.i('🎯 タイマー完了条件到達: currentSeconds=${state.currentSeconds}, threshold=${TimerConstants.countdownCompleteThreshold}');
           completeTimer();
         } else {
           state = state.copyWith(currentSeconds: state.currentSeconds - 1);
+          AppLogger.instance.d('⏱️ カウントダウン: ${state.currentSeconds}秒');
         }
       } else if (state.mode == TimerMode.pomodoro) {
         // ポモドーロモード
@@ -208,8 +210,10 @@ class TimerViewModel extends StateNotifier<TimerState> {
 
   // タイマーの完了処理
   void completeTimer() {
+    AppLogger.instance.i('🚀 completeTimer()開始 - 現在の状態: ${state.status}');
     _timer?.cancel();
     state = state.copyWith(status: TimerStatus.completed);
+    AppLogger.instance.i('✅ タイマー状態をcompletedに変更完了');
 
     // 完了を知らせるフィードバック（ここではログのみ、実装時にバイブレーションや音を追加）
     AppLogger.instance.i(

@@ -154,9 +154,9 @@ class MockStartupLogicService {
       case 0:
         return '/onboarding/goal-creation';
       case 1:
-        return '/onboarding/demo-timer';
+        return '/home';
       case 2:
-        return '/onboarding/account-creation';
+        return '/onboarding/account-promotion';
       default:
         return '/onboarding/goal-creation';
     }

@@ -389,7 +389,7 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
       final onboardingState = ref.read(onboardingViewModelProvider);
       await tutorialViewModel.startTutorial(
         tempUserId: onboardingState.tempUserId,
-        totalSteps: 3, // home_goal_selection -> home_timer_button_showcase -> timer_operation
+        totalSteps: 4, // home_goal_selection -> home_timer_button_showcase -> timer_operation -> completion
       );
       
       // ゴール作成完了後、次のチュートリアルステップに進む
