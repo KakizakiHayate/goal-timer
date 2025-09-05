@@ -114,7 +114,7 @@ class OnboardingViewModel extends StateNotifier<OnboardingState> {
 
   /// ゲストとして続行
   Future<void> continueAsGuest() async {
-    await completeAccountCreation();
+    await completeStep(3);
   }
 
   /// データ移行実行
