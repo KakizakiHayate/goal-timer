@@ -5,6 +5,7 @@ import 'package:goal_timer/features/statistics/data/repositories/statistics_repo
 import 'package:goal_timer/core/data/repositories/hybrid/daily_study_logs/hybrid_daily_study_logs_repository.dart';
 import 'package:goal_timer/features/statistics/domain/entities/statistics.dart';
 import 'package:goal_timer/features/statistics/domain/entities/daily_stats.dart';
+import 'package:goal_timer/features/statistics/domain/repositories/statistics_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../helpers/statistics_test_data.dart';
 
@@ -13,6 +14,7 @@ import '../../helpers/statistics_test_data.dart';
   HybridDailyStudyLogsRepository,
   SupabaseClient,
   PostgrestFilterBuilder,
+  PostgrestBuilder,
 ])
 import 'statistics_repository_test.mocks.dart';
 
@@ -25,7 +27,10 @@ void main() {
     setUp(() {
       mockDailyStudyLogRepository = MockHybridDailyStudyLogsRepository();
       mockSupabaseClient = MockSupabaseClient();
-      repository = StatisticsRepositoryImpl(mockDailyStudyLogRepository);
+      repository = StatisticsRepositoryImpl(
+        mockDailyStudyLogRepository,
+        client: mockSupabaseClient,
+      );
     });
 
     group('getStatistics', () {
@@ -34,9 +39,10 @@ void main() {
         final startDate = DateTime.now().subtract(const Duration(days: 7));
         final endDate = DateTime.now();
         final mockLogs = StatisticsTestData.thisWeekStudyLogs;
-        
-        when(mockDailyStudyLogRepository.getLogsByDateRange(any, any))
-            .thenAnswer((_) async => mockLogs);
+
+        when(
+          mockDailyStudyLogRepository.getLogsByDateRange(any, any),
+        ).thenAnswer((_) async => mockLogs);
 
         // Act
         final result = await repository.getStatistics(
@@ -47,10 +53,15 @@ void main() {
         // Assert
         expect(result, isA<List<Statistics>>());
         expect(result.isNotEmpty, isTrue);
-        verify(mockDailyStudyLogRepository.getLogsByDateRange(startDate, endDate));
-        
+        verify(
+          mockDailyStudyLogRepository.getLogsByDateRange(startDate, endDate),
+        );
+
         // 総学習時間の検証
-        final totalMinutes = result.fold<int>(0, (sum, stat) => sum + stat.totalMinutes);
+        final totalMinutes = result.fold<int>(
+          0,
+          (sum, stat) => sum + stat.totalMinutes,
+        );
         expect(totalMinutes, StatisticsTestData.expectedThisWeekTotalMinutes);
       });
 
@@ -58,9 +69,10 @@ void main() {
         // Arrange
         final startDate = DateTime.now().subtract(const Duration(days: 30));
         final endDate = DateTime.now().subtract(const Duration(days: 20));
-        
-        when(mockDailyStudyLogRepository.getLogsByDateRange(any, any))
-            .thenAnswer((_) async => StatisticsTestData.emptyStudyLogs);
+
+        when(
+          mockDailyStudyLogRepository.getLogsByDateRange(any, any),
+        ).thenAnswer((_) async => StatisticsTestData.emptyStudyLogs);
 
         // Act
         final result = await repository.getStatistics(
@@ -75,9 +87,10 @@ void main() {
       test('TC003: デフォルトの期間（過去7日間）で統計データを取得できること', () async {
         // Arrange
         final mockLogs = StatisticsTestData.thisWeekStudyLogs;
-        
-        when(mockDailyStudyLogRepository.getLogsByDateRange(any, any))
-            .thenAnswer((_) async => mockLogs);
+
+        when(
+          mockDailyStudyLogRepository.getLogsByDateRange(any, any),
+        ).thenAnswer((_) async => mockLogs);
 
         // Act
         final result = await repository.getStatistics();
@@ -85,22 +98,35 @@ void main() {
         // Assert
         expect(result, isA<List<Statistics>>());
         verify(mockDailyStudyLogRepository.getLogsByDateRange(any, any));
-        
+
         // 呼び出し時の引数を検証
-        final captured = verify(mockDailyStudyLogRepository.getLogsByDateRange(captureAny, captureAny)).captured;
+        final captured =
+            verify(
+              mockDailyStudyLogRepository.getLogsByDateRange(
+                captureAny,
+                captureAny,
+              ),
+            ).captured;
         final capturedStartDate = captured[0] as DateTime;
         final capturedEndDate = captured[1] as DateTime;
-        
-        expect(capturedStartDate.difference(DateTime.now()).inDays, closeTo(-7, 1));
-        expect(capturedEndDate.difference(DateTime.now()).inMinutes, lessThan(5));
+
+        expect(
+          capturedStartDate.difference(DateTime.now()).inDays,
+          closeTo(-7, 1),
+        );
+        expect(
+          capturedEndDate.difference(DateTime.now()).inMinutes,
+          lessThan(5),
+        );
       });
 
       test('TC004: 日付ごとに正しくグループ化されること', () async {
         // Arrange
         final mockLogs = StatisticsTestData.thisWeekStudyLogs;
-        
-        when(mockDailyStudyLogRepository.getLogsByDateRange(any, any))
-            .thenAnswer((_) async => mockLogs);
+
+        when(
+          mockDailyStudyLogRepository.getLogsByDateRange(any, any),
+        ).thenAnswer((_) async => mockLogs);
 
         // Act
         final result = await repository.getStatistics();
@@ -108,15 +134,19 @@ void main() {
         // Assert
         // 日付順にソートされていることを確認
         for (int i = 0; i < result.length - 1; i++) {
-          expect(result[i].date.isAfter(result[i + 1].date) || 
-                result[i].date.isAtSameMomentAs(result[i + 1].date), isTrue);
+          expect(
+            result[i].date.isAfter(result[i + 1].date) ||
+                result[i].date.isAtSameMomentAs(result[i + 1].date),
+            isTrue,
+          );
         }
       });
 
       test('TC005: エラーハンドリング - 例外発生時は空リストを返すこと', () async {
         // Arrange
-        when(mockDailyStudyLogRepository.getLogsByDateRange(any, any))
-            .thenThrow(Exception('Database error'));
+        when(
+          mockDailyStudyLogRepository.getLogsByDateRange(any, any),
+        ).thenThrow(Exception('Database error'));
 
         // Act
         final result = await repository.getStatistics();
@@ -136,9 +166,10 @@ void main() {
           date,
           date,
         );
-        
-        when(mockDailyStudyLogRepository.getDailyLogs(any))
-            .thenAnswer((_) async => mockLogs);
+
+        when(
+          mockDailyStudyLogRepository.getDailyLogs(any),
+        ).thenAnswer((_) async => mockLogs);
 
         // Act
         final result = await repository.getStatisticsById(id);
@@ -153,10 +184,10 @@ void main() {
       test('TC007: 該当日の学習記録がない場合は0の統計データを返すこと', () async {
         // Arrange
         const id = '2025-01-01';
-        final date = DateTime.parse(id);
-        
-        when(mockDailyStudyLogRepository.getDailyLogs(any))
-            .thenAnswer((_) async => []);
+
+        when(
+          mockDailyStudyLogRepository.getDailyLogs(any),
+        ).thenAnswer((_) async => []);
 
         // Act
         final result = await repository.getStatisticsById(id);
@@ -186,21 +217,10 @@ void main() {
         // Arrange
         final date = DateTime.now();
         final mockLogs = StatisticsTestData.thisWeekStudyLogs;
-        final mockGoalsResponse = [
-          {'title': '英語学習'},
-          {'title': 'プログラミング'},
-          {'title': '資格勉強'},
-        ];
-        
-        when(mockDailyStudyLogRepository.getDailyLogs(any))
-            .thenAnswer((_) async => mockLogs);
 
-        // Supabaseクライアントのモック設定
-        final mockFilterBuilder = MockPostgrestFilterBuilder();
-        when(mockSupabaseClient.from('goals')).thenReturn(mockFilterBuilder);
-        when(mockFilterBuilder.select(any)).thenReturn(mockFilterBuilder);
-        when(mockFilterBuilder.eq(any, any)).thenReturn(mockFilterBuilder);
-        when(mockFilterBuilder.single()).thenAnswer((_) async => mockGoalsResponse.first);
+        when(
+          mockDailyStudyLogRepository.getDailyLogs(any),
+        ).thenAnswer((_) async => mockLogs);
 
         // Act
         final result = await repository.getDailyStats(date);
@@ -216,9 +236,10 @@ void main() {
       test('TC010: 該当日の学習記録がない場合は0の統計データを返すこと', () async {
         // Arrange
         final date = DateTime.now();
-        
-        when(mockDailyStudyLogRepository.getDailyLogs(any))
-            .thenAnswer((_) async => []);
+
+        when(
+          mockDailyStudyLogRepository.getDailyLogs(any),
+        ).thenAnswer((_) async => []);
 
         // Act
         final result = await repository.getDailyStats(date);
@@ -234,16 +255,10 @@ void main() {
         // Arrange
         final date = DateTime.now();
         final mockLogs = [StatisticsTestData.thisWeekStudyLogs.first];
-        
-        when(mockDailyStudyLogRepository.getDailyLogs(any))
-            .thenAnswer((_) async => mockLogs);
 
-        // Supabaseクライアントのモック設定（エラーを発生させる）
-        final mockFilterBuilder = MockPostgrestFilterBuilder();
-        when(mockSupabaseClient.from('goals')).thenReturn(mockFilterBuilder);
-        when(mockFilterBuilder.select(any)).thenReturn(mockFilterBuilder);
-        when(mockFilterBuilder.eq(any, any)).thenReturn(mockFilterBuilder);
-        when(mockFilterBuilder.single()).thenThrow(Exception('Goal not found'));
+        when(
+          mockDailyStudyLogRepository.getDailyLogs(any),
+        ).thenAnswer((_) async => mockLogs);
 
         // Act
         final result = await repository.getDailyStats(date);
@@ -258,9 +273,10 @@ void main() {
       test('TC012: エラーハンドリング - 例外発生時は0の統計データを返すこと', () async {
         // Arrange
         final date = DateTime.now();
-        
-        when(mockDailyStudyLogRepository.getDailyLogs(any))
-            .thenThrow(Exception('Database error'));
+
+        when(
+          mockDailyStudyLogRepository.getDailyLogs(any),
+        ).thenThrow(Exception('Database error'));
 
         // Act
         final result = await repository.getDailyStats(date);
@@ -281,9 +297,10 @@ void main() {
           StatisticsTestData.thisWeekStudyLogs[7], // goal2: 45分
           StatisticsTestData.thisWeekStudyLogs[12], // goal3: 30分
         ];
-        
-        when(mockDailyStudyLogRepository.getLogsByDateRange(any, any))
-            .thenAnswer((_) async => mockLogs);
+
+        when(
+          mockDailyStudyLogRepository.getLogsByDateRange(any, any),
+        ).thenAnswer((_) async => mockLogs);
 
         // Act
         final result = await repository.getStatistics();
@@ -310,9 +327,10 @@ void main() {
             date: today,
           ),
         ];
-        
-        when(mockDailyStudyLogRepository.getLogsByDateRange(any, any))
-            .thenAnswer((_) async => mockLogs);
+
+        when(
+          mockDailyStudyLogRepository.getLogsByDateRange(any, any),
+        ).thenAnswer((_) async => mockLogs);
 
         // Act
         final result = await repository.getStatistics();
@@ -328,15 +346,17 @@ void main() {
     group('パフォーマンステスト', () {
       test('TC015: 大量データでも適切に処理されること', () async {
         // Arrange
-        final largeLogs = List.generate(1000, (index) => 
-          StatisticsTestData.thisWeekStudyLogs[0].copyWith(
+        final largeLogs = List.generate(
+          1000,
+          (index) => StatisticsTestData.thisWeekStudyLogs[0].copyWith(
             id: 'large-log-$index',
             date: DateTime.now().subtract(Duration(days: index % 30)),
-          )
+          ),
         );
-        
-        when(mockDailyStudyLogRepository.getLogsByDateRange(any, any))
-            .thenAnswer((_) async => largeLogs);
+
+        when(
+          mockDailyStudyLogRepository.getLogsByDateRange(any, any),
+        ).thenAnswer((_) async => largeLogs);
 
         // Act
         final stopwatch = Stopwatch()..start();
@@ -355,9 +375,10 @@ void main() {
         final mockLogs = [
           StatisticsTestData.thisWeekStudyLogs[0].copyWith(minutes: 0),
         ];
-        
-        when(mockDailyStudyLogRepository.getLogsByDateRange(any, any))
-            .thenAnswer((_) async => mockLogs);
+
+        when(
+          mockDailyStudyLogRepository.getLogsByDateRange(any, any),
+        ).thenAnswer((_) async => mockLogs);
 
         // Act
         final result = await repository.getStatistics();
@@ -374,9 +395,10 @@ void main() {
         final mockLogs = [
           StatisticsTestData.thisWeekStudyLogs[0].copyWith(minutes: 999999),
         ];
-        
-        when(mockDailyStudyLogRepository.getLogsByDateRange(any, any))
-            .thenAnswer((_) async => mockLogs);
+
+        when(
+          mockDailyStudyLogRepository.getLogsByDateRange(any, any),
+        ).thenAnswer((_) async => mockLogs);
 
         // Act
         final result = await repository.getStatistics();
@@ -385,6 +407,125 @@ void main() {
         expect(result.isNotEmpty, isTrue);
         final dayStats = result.first;
         expect(dayStats.totalMinutes, 999999);
+      });
+    });
+
+    group('getBatchDailyStats', () {
+      test('TC018: 複数日の統計データを一括取得できること（N+1問題解決）', () async {
+        // Arrange
+        final dates = [
+          DateTime(2025, 1, 1),
+          DateTime(2025, 1, 2),
+          DateTime(2025, 1, 3),
+        ];
+        final mockLogs = StatisticsTestData.thisWeekStudyLogs;
+
+        when(
+          mockDailyStudyLogRepository.getLogsByDateRange(any, any),
+        ).thenAnswer((_) async => mockLogs);
+
+        // Act
+        final result = await repository.getBatchDailyStats(dates);
+
+        // Assert
+        expect(result, isA<Map<DateTime, DailyStats>>());
+        expect(result.keys.length, dates.length);
+
+        // 各日付のデータが存在することを確認
+        for (final date in dates) {
+          expect(result.containsKey(date), isTrue);
+          expect(result[date], isA<DailyStats>());
+        }
+
+        // 範囲クエリが1回だけ呼ばれることを確認（N+1問題解決）
+        verify(
+          mockDailyStudyLogRepository.getLogsByDateRange(any, any),
+        ).called(1);
+      });
+
+      test('TC019: 空の日付リストの場合は空のMapを返すこと', () async {
+        // Act
+        final result = await repository.getBatchDailyStats([]);
+
+        // Assert
+        expect(result, isEmpty);
+        verifyNever(mockDailyStudyLogRepository.getLogsByDateRange(any, any));
+      });
+
+      test('TC020: 学習記録がない日は0データを返すこと', () async {
+        // Arrange
+        final dates = [DateTime(2025, 1, 1)];
+
+        when(
+          mockDailyStudyLogRepository.getLogsByDateRange(any, any),
+        ).thenAnswer((_) async => []);
+
+        // Act
+        final result = await repository.getBatchDailyStats(dates);
+
+        // Assert
+        expect(result[dates.first]?.totalMinutes, 0);
+        expect(result[dates.first]?.goalMinutes, isEmpty);
+        expect(result[dates.first]?.goalTitles, isEmpty);
+      });
+    });
+
+    group('getCompleteStatistics', () {
+      test('TC021: 全ての統計データを型安全に一括取得できること', () async {
+        // Arrange
+        final startDate = DateTime.now().subtract(const Duration(days: 7));
+        final endDate = DateTime.now();
+        final mockLogs = StatisticsTestData.thisWeekStudyLogs;
+
+        when(
+          mockDailyStudyLogRepository.getLogsByDateRange(any, any),
+        ).thenAnswer((_) async => mockLogs);
+        when(
+          mockDailyStudyLogRepository.getDailyLogs(any),
+        ).thenAnswer((_) async => mockLogs);
+
+        // Act
+        final result = await repository.getCompleteStatistics(
+          startDate: startDate,
+          endDate: endDate,
+        );
+
+        // Assert
+        expect(result, isA<StatisticsBundle>());
+        expect(result.statistics, isA<List<Statistics>>());
+        expect(result.consecutiveDays, isA<int>());
+        expect(result.achievementRate, isA<double>());
+        expect(result.averageSessionTime, isA<double>());
+        expect(result.studyTimeComparison, isA<Map<String, dynamic>>());
+        expect(result.streakComparison, isA<Map<String, dynamic>>());
+        expect(result.achievementRateComparison, isA<Map<String, dynamic>>());
+        expect(result.averageTimeComparison, isA<Map<String, dynamic>>());
+      });
+
+      test('TC022: エラー時は適切なデフォルト値を返すこと', () async {
+        // Arrange
+        final startDate = DateTime.now().subtract(const Duration(days: 7));
+        final endDate = DateTime.now();
+
+        when(
+          mockDailyStudyLogRepository.getLogsByDateRange(any, any),
+        ).thenThrow(Exception('Database error'));
+
+        // Act
+        final result = await repository.getCompleteStatistics(
+          startDate: startDate,
+          endDate: endDate,
+        );
+
+        // Assert
+        expect(result.statistics, isEmpty);
+        expect(result.consecutiveDays, 0);
+        expect(result.achievementRate, 0.0);
+        expect(result.averageSessionTime, 0.0);
+        expect(result.studyTimeComparison['current'], 0);
+        expect(result.streakComparison['current'], 0);
+        expect(result.achievementRateComparison['current'], 0.0);
+        expect(result.averageTimeComparison['current'], 0.0);
       });
     });
   });

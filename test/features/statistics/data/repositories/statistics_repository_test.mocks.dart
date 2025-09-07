@@ -1693,3 +1693,223 @@ class MockPostgrestFilterBuilder<T> extends _i1.Mock
             ),
       ) as _i4.Future<T>);
 }
+
+/// A class which mocks [PostgrestBuilder].
+///
+/// See the documentation for Mockito's code generation for more information.
+// ignore: must_be_immutable
+class MockPostgrestBuilder<T, S, R> extends _i1.Mock
+    implements _i3.PostgrestBuilder<T, S, R> {
+  MockPostgrestBuilder() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i3.PostgrestBuilder<T, S, R> setHeader(
+    String? key,
+    String? value,
+  ) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #setHeader,
+          [
+            key,
+            value,
+          ],
+        ),
+        returnValue: _FakePostgrestBuilder_12<T, S, R>(
+          this,
+          Invocation.method(
+            #setHeader,
+            [
+              key,
+              value,
+            ],
+          ),
+        ),
+      ) as _i3.PostgrestBuilder<T, S, R>);
+
+  @override
+  Uri appendSearchParams(
+    String? key,
+    String? value, [
+    Uri? url,
+  ]) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #appendSearchParams,
+          [
+            key,
+            value,
+            url,
+          ],
+        ),
+        returnValue: _FakeUri_13(
+          this,
+          Invocation.method(
+            #appendSearchParams,
+            [
+              key,
+              value,
+              url,
+            ],
+          ),
+        ),
+      ) as Uri);
+
+  @override
+  Uri overrideSearchParams(
+    String? key,
+    String? value,
+  ) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #overrideSearchParams,
+          [
+            key,
+            value,
+          ],
+        ),
+        returnValue: _FakeUri_13(
+          this,
+          Invocation.method(
+            #overrideSearchParams,
+            [
+              key,
+              value,
+            ],
+          ),
+        ),
+      ) as Uri);
+
+  @override
+  _i4.Stream<T> asStream() => (super.noSuchMethod(
+        Invocation.method(
+          #asStream,
+          [],
+        ),
+        returnValue: _i4.Stream<T>.empty(),
+      ) as _i4.Stream<T>);
+
+  @override
+  _i4.Future<T> catchError(
+    Function? onError, {
+    bool Function(Object)? test,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #catchError,
+          [onError],
+          {#test: test},
+        ),
+        returnValue: _i6.ifNotNull(
+              _i6.dummyValueOrNull<T>(
+                this,
+                Invocation.method(
+                  #catchError,
+                  [onError],
+                  {#test: test},
+                ),
+              ),
+              (T v) => _i4.Future<T>.value(v),
+            ) ??
+            _FakeFuture_14<T>(
+              this,
+              Invocation.method(
+                #catchError,
+                [onError],
+                {#test: test},
+              ),
+            ),
+      ) as _i4.Future<T>);
+
+  @override
+  _i4.Future<U> then<U>(
+    _i4.FutureOr<U> Function(T)? onValue, {
+    Function? onError,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #then,
+          [onValue],
+          {#onError: onError},
+        ),
+        returnValue: _i6.ifNotNull(
+              _i6.dummyValueOrNull<U>(
+                this,
+                Invocation.method(
+                  #then,
+                  [onValue],
+                  {#onError: onError},
+                ),
+              ),
+              (U v) => _i4.Future<U>.value(v),
+            ) ??
+            _FakeFuture_14<U>(
+              this,
+              Invocation.method(
+                #then,
+                [onValue],
+                {#onError: onError},
+              ),
+            ),
+      ) as _i4.Future<U>);
+
+  @override
+  _i4.Future<T> timeout(
+    Duration? timeLimit, {
+    _i4.FutureOr<T> Function()? onTimeout,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #timeout,
+          [timeLimit],
+          {#onTimeout: onTimeout},
+        ),
+        returnValue: _i6.ifNotNull(
+              _i6.dummyValueOrNull<T>(
+                this,
+                Invocation.method(
+                  #timeout,
+                  [timeLimit],
+                  {#onTimeout: onTimeout},
+                ),
+              ),
+              (T v) => _i4.Future<T>.value(v),
+            ) ??
+            _FakeFuture_14<T>(
+              this,
+              Invocation.method(
+                #timeout,
+                [timeLimit],
+                {#onTimeout: onTimeout},
+              ),
+            ),
+      ) as _i4.Future<T>);
+
+  @override
+  _i4.Future<T> whenComplete(_i4.FutureOr<void> Function()? action) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #whenComplete,
+          [action],
+        ),
+        returnValue: _i6.ifNotNull(
+              _i6.dummyValueOrNull<T>(
+                this,
+                Invocation.method(
+                  #whenComplete,
+                  [action],
+                ),
+              ),
+              (T v) => _i4.Future<T>.value(v),
+            ) ??
+            _FakeFuture_14<T>(
+              this,
+              Invocation.method(
+                #whenComplete,
+                [action],
+              ),
+            ),
+      ) as _i4.Future<T>);
+}

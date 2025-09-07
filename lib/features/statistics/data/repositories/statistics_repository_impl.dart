@@ -8,9 +8,12 @@ import 'package:goal_timer/core/utils/app_logger.dart';
 
 class StatisticsRepositoryImpl implements StatisticsRepository {
   final HybridDailyStudyLogsRepository _dailyStudyLogRepository;
-  final SupabaseClient _client = Supabase.instance.client;
+  final SupabaseClient _client;
 
-  StatisticsRepositoryImpl(this._dailyStudyLogRepository);
+  StatisticsRepositoryImpl(
+    this._dailyStudyLogRepository, {
+    SupabaseClient? client,
+  }) : _client = client ?? Supabase.instance.client;
 
   @override
   Future<List<Statistics>> getStatistics({
@@ -212,11 +215,11 @@ class StatisticsRepositoryImpl implements StatisticsRepository {
           startDate ?? DateTime.now().subtract(const Duration(days: 7));
       final end = endDate ?? DateTime.now();
 
-      // 期間内のアクティブな目標を取得
+      // 期間内の未完了な目標を取得（進行中の目標）
       final goalsResponse = await _client
           .from('goals')
           .select('id')
-          .eq('is_active', true);
+          .eq('is_completed', false);
 
       if (goalsResponse.isEmpty) return 0.0;
 
@@ -336,7 +339,7 @@ class StatisticsRepositoryImpl implements StatisticsRepository {
         'current': currentStreak,
         'previous': previousStreak,
         'difference': difference,
-        'changeText': difference >= 0 ? '+${difference}日' : '${difference}日',
+        'changeText': difference >= 0 ? '+$difference日' : '$difference日',
       };
     } catch (e, stackTrace) {
       AppLogger.instance.e('getStreakComparison error', e, stackTrace);
@@ -438,6 +441,175 @@ class StatisticsRepositoryImpl implements StatisticsRepository {
         'difference': 0.0,
         'changeText': '+0分',
       };
+    }
+  }
+
+  @override
+  Future<Map<DateTime, DailyStats>> getBatchDailyStats(
+    List<DateTime> dates,
+  ) async {
+    try {
+      if (dates.isEmpty) return {};
+
+      final Map<DateTime, DailyStats> result = {};
+
+      // 日付範囲を取得
+      final startDate = dates.reduce((a, b) => a.isBefore(b) ? a : b);
+      final endDate = dates.reduce((a, b) => a.isAfter(b) ? a : b);
+
+      // 指定期間の全ての学習ログを一括取得
+      final allLogs = await _dailyStudyLogRepository.getLogsByDateRange(
+        startDate,
+        endDate,
+      );
+
+      // 日付ごとにログをグループ化
+      final Map<String, List<DailyStudyLogModel>> logsByDate = {};
+      for (var log in allLogs) {
+        final dateStr = log.date.toIso8601String().split('T')[0];
+        logsByDate.putIfAbsent(dateStr, () => []).add(log);
+      }
+
+      // 全ての目標IDを収集
+      final allGoalIds = allLogs.map((log) => log.goalId).toSet().toList();
+
+      // 目標タイトルを一括取得（N+1問題解決）
+      final Map<String, String> goalTitles = {};
+      if (allGoalIds.isNotEmpty) {
+        try {
+          final goalsResponse = await _client
+              .from('goals')
+              .select('id, title')
+              .inFilter('id', allGoalIds);
+
+          for (final goalData in goalsResponse) {
+            goalTitles[goalData['id'] as String] = goalData['title'] as String;
+          }
+        } catch (e) {
+          AppLogger.instance.e('目標名の一括取得に失敗しました', e);
+        }
+      }
+
+      // 各日付のDailyStatsを構築
+      for (final date in dates) {
+        final dateStr = date.toIso8601String().split('T')[0];
+        final logsForDate = logsByDate[dateStr] ?? [];
+
+        if (logsForDate.isEmpty) {
+          result[date] = DailyStats(
+            date: date,
+            totalMinutes: 0,
+            goalMinutes: {},
+            goalTitles: {},
+          );
+          continue;
+        }
+
+        int totalMinutes = 0;
+        final Map<String, int> goalMinutes = {};
+
+        // 目標IDごとに学習時間を集計
+        for (var log in logsForDate) {
+          final goalId = log.goalId;
+          final minutes = log.minutes;
+
+          totalMinutes += minutes;
+          goalMinutes[goalId] = (goalMinutes[goalId] ?? 0) + minutes;
+        }
+
+        // その日に使用された目標のタイトルだけを抽出
+        final dayGoalTitles = <String, String>{};
+        for (final goalId in goalMinutes.keys) {
+          if (goalTitles.containsKey(goalId)) {
+            dayGoalTitles[goalId] = goalTitles[goalId]!;
+          }
+        }
+
+        result[date] = DailyStats(
+          date: date,
+          totalMinutes: totalMinutes,
+          goalMinutes: goalMinutes,
+          goalTitles: dayGoalTitles,
+        );
+      }
+
+      return result;
+    } catch (e, stackTrace) {
+      AppLogger.instance.e('getBatchDailyStats error', e, stackTrace);
+      return {};
+    }
+  }
+
+  @override
+  Future<StatisticsBundle> getCompleteStatistics({
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    try {
+      // 全ての統計データを並行取得（型安全）
+      final futures = await Future.wait([
+        getStatistics(startDate: startDate, endDate: endDate),
+        getConsecutiveStudyDays(),
+        getGoalAchievementRate(startDate: startDate, endDate: endDate),
+        getAverageSessionTime(startDate: startDate, endDate: endDate),
+        getStudyTimeComparison(
+          currentStartDate: startDate,
+          currentEndDate: endDate,
+        ),
+        getStreakComparison(),
+        getAchievementRateComparison(
+          currentStartDate: startDate,
+          currentEndDate: endDate,
+        ),
+        getAverageTimeComparison(
+          currentStartDate: startDate,
+          currentEndDate: endDate,
+        ),
+      ]);
+
+      return StatisticsBundle(
+        statistics: futures[0] as List<Statistics>,
+        consecutiveDays: futures[1] as int,
+        achievementRate: futures[2] as double,
+        averageSessionTime: futures[3] as double,
+        studyTimeComparison: futures[4] as Map<String, dynamic>,
+        streakComparison: futures[5] as Map<String, dynamic>,
+        achievementRateComparison: futures[6] as Map<String, dynamic>,
+        averageTimeComparison: futures[7] as Map<String, dynamic>,
+      );
+    } catch (e, stackTrace) {
+      AppLogger.instance.e('getCompleteStatistics error', e, stackTrace);
+      // エラー時のデフォルト値を返す
+      return StatisticsBundle(
+        statistics: [],
+        consecutiveDays: 0,
+        achievementRate: 0.0,
+        averageSessionTime: 0.0,
+        studyTimeComparison: {
+          'current': 0,
+          'previous': 0,
+          'difference': 0,
+          'changeText': '+0.0h',
+        },
+        streakComparison: {
+          'current': 0,
+          'previous': 0,
+          'difference': 0,
+          'changeText': '+0日',
+        },
+        achievementRateComparison: {
+          'current': 0.0,
+          'previous': 0.0,
+          'difference': 0.0,
+          'changeText': '+0%',
+        },
+        averageTimeComparison: {
+          'current': 0.0,
+          'previous': 0.0,
+          'difference': 0.0,
+          'changeText': '+0分',
+        },
+      );
     }
   }
 }
