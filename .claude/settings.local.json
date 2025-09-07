@@ -60,7 +60,19 @@
       "mcp__serena__get_symbols_overview",
       "mcp__serena__find_file",
       "mcp__serena__find_symbol",
-      "mcp__serena__write_memory"
+      "mcp__serena__write_memory",
+      "Bash(gh auth switch:*)",
+      "Bash(gh pr view:*)",
+      "mcp__serena__think_about_collected_information",
+      "mcp__serena__replace_symbol_body",
+      "mcp__github__create_issue",
+      "Bash(gh repo view:*)",
+      "Bash(gh repo list:*)",
+      "mcp__serena__insert_after_symbol",
+      "Bash(gh issue edit:*)",
+      "Bash(afplay:*)",
+      "Bash(gh issue create:*)",
+      "Bash(gh issue:*)"
     ],
     "deny": []
   },

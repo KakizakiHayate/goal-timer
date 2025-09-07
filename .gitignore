@@ -64,3 +64,5 @@ ios/Flutter/Profile.xcconfig
 android/app/google-services.json
 
 docs/
+
+ai-rules/
