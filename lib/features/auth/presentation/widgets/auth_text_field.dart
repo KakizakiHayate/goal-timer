@@ -40,7 +40,7 @@ class _AuthTextFieldState extends State<AuthTextField>
   late final FocusNode _focusNode;
   late AnimationController _animationController;
   late Animation<double> _focusAnimation;
-  
+
   bool _isObscured = true;
   bool _isFocused = false;
 
@@ -50,22 +50,19 @@ class _AuthTextFieldState extends State<AuthTextField>
     _controller = TextEditingController(text: widget.initialValue);
     _focusNode = FocusNode();
     _isObscured = widget.obscureText;
-    
+
     _animationController = AnimationController(
       duration: AnimationConsts.fast,
       vsync: this,
     );
-    
-    _focusAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(
+
+    _focusAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
         curve: AnimationConsts.defaultCurve,
       ),
     );
-    
+
     _focusNode.addListener(_handleFocusChange);
   }
 
@@ -73,7 +70,7 @@ class _AuthTextFieldState extends State<AuthTextField>
     setState(() {
       _isFocused = _focusNode.hasFocus;
     });
-    
+
     if (_focusNode.hasFocus) {
       _animationController.forward();
     } else {
@@ -92,7 +89,7 @@ class _AuthTextFieldState extends State<AuthTextField>
   @override
   Widget build(BuildContext context) {
     final hasError = widget.errorText != null && widget.errorText!.isNotEmpty;
-    
+
     return AnimatedBuilder(
       animation: _focusAnimation,
       builder: (context, child) {
@@ -106,7 +103,9 @@ class _AuthTextFieldState extends State<AuthTextField>
                 boxShadow: [
                   if (_isFocused && !hasError)
                     BoxShadow(
-                      color: ColorConsts.primary.withOpacity(0.15 * _focusAnimation.value),
+                      color: ColorConsts.primary.withOpacity(
+                        0.15 * _focusAnimation.value,
+                      ),
                       offset: const Offset(0, 4),
                       blurRadius: 16,
                       spreadRadius: 0,
@@ -125,22 +124,32 @@ class _AuthTextFieldState extends State<AuthTextField>
                 onFieldSubmitted: widget.onSubmitted,
                 style: TextStyle(
                   fontSize: 17,
-                  color: widget.enabled ? ColorConsts.textPrimary : ColorConsts.disabledText,
+                  color:
+                      widget.enabled
+                          ? ColorConsts.textPrimary
+                          : ColorConsts.disabledText,
                   fontWeight: FontWeight.w500,
                 ),
                 decoration: InputDecoration(
                   labelText: widget.labelText,
                   labelStyle: TextStyle(
                     fontSize: 16,
-                    color: hasError 
-                        ? ColorConsts.error
-                        : (_isFocused ? ColorConsts.primary : ColorConsts.textSecondary),
-                    fontWeight: _isFocused ? FontWeight.w500 : FontWeight.normal,
+                    color:
+                        hasError
+                            ? ColorConsts.error
+                            : (_isFocused
+                                ? ColorConsts.primary
+                                : ColorConsts.textSecondary),
+                    fontWeight:
+                        _isFocused ? FontWeight.w500 : FontWeight.normal,
                   ),
                   filled: true,
-                  fillColor: widget.enabled 
-                      ? (_isFocused ? ColorConsts.primaryExtraLight : ColorConsts.backgroundSecondary)
-                      : ColorConsts.disabled,
+                  fillColor:
+                      widget.enabled
+                          ? (_isFocused
+                              ? ColorConsts.primaryExtraLight
+                              : ColorConsts.backgroundSecondary)
+                          : ColorConsts.disabled,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 20,
                     vertical: 18,
@@ -184,23 +193,29 @@ class _AuthTextFieldState extends State<AuthTextField>
                       width: 1.5,
                     ),
                   ),
-                  suffixIcon: widget.obscureText
-                      ? IconButton(
-                          icon: AnimatedSwitcher(
-                            duration: AnimationConsts.fast,
-                            child: Icon(
-                              _isObscured ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                              key: ValueKey(_isObscured),
-                              color: _isFocused ? ColorConsts.primary : ColorConsts.textSecondary,
+                  suffixIcon:
+                      widget.obscureText
+                          ? IconButton(
+                            icon: AnimatedSwitcher(
+                              duration: AnimationConsts.fast,
+                              child: Icon(
+                                _isObscured
+                                    ? Icons.visibility_off_outlined
+                                    : Icons.visibility_outlined,
+                                key: ValueKey(_isObscured),
+                                color:
+                                    _isFocused
+                                        ? ColorConsts.primary
+                                        : ColorConsts.textSecondary,
+                              ),
                             ),
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _isObscured = !_isObscured;
-                            });
-                          },
-                        )
-                      : null,
+                            onPressed: () {
+                              setState(() {
+                                _isObscured = !_isObscured;
+                              });
+                            },
+                          )
+                          : null,
                 ),
               ),
             ),

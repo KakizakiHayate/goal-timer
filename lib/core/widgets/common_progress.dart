@@ -3,11 +3,7 @@ import '../utils/color_consts.dart';
 import '../utils/spacing_consts.dart';
 import '../utils/text_consts.dart';
 
-enum ProgressVariant {
-  linear,
-  circular,
-  ring,
-}
+enum ProgressVariant { linear, circular, ring }
 
 class CommonProgress extends StatefulWidget {
   final double progress; // 0.0 - 1.0
@@ -19,7 +15,7 @@ class CommonProgress extends StatefulWidget {
   final Color? backgroundColor;
   final String? centerText;
   final Widget? centerWidget;
-  
+
   const CommonProgress({
     super.key,
     required this.progress,
@@ -52,10 +48,9 @@ class _CommonProgressState extends State<CommonProgress>
     _progressAnimation = Tween<double>(
       begin: 0.0,
       end: widget.progress,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    ).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
     _animationController.forward();
   }
 
@@ -66,10 +61,9 @@ class _CommonProgressState extends State<CommonProgress>
       _progressAnimation = Tween<double>(
         begin: oldWidget.progress,
         end: widget.progress,
-      ).animate(CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeInOut,
-      ));
+      ).animate(
+        CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+      );
       _animationController.reset();
       _animationController.forward();
     }
@@ -82,7 +76,8 @@ class _CommonProgressState extends State<CommonProgress>
   }
 
   Color get _progressColor => widget.progressColor ?? ColorConsts.primary;
-  Color get _backgroundColor => widget.backgroundColor ?? ColorConsts.backgroundSecondary;
+  Color get _backgroundColor =>
+      widget.backgroundColor ?? ColorConsts.backgroundSecondary;
 
   Widget _buildLinearProgress() {
     return Container(
@@ -117,7 +112,7 @@ class _CommonProgressState extends State<CommonProgress>
   Widget _buildCircularProgress() {
     final size = widget.size ?? 60.0;
     final strokeWidth = widget.strokeWidth ?? 6.0;
-    
+
     return SizedBox(
       width: size,
       height: size,
@@ -179,7 +174,7 @@ class _CommonProgressState extends State<CommonProgress>
   Widget _buildRingProgress() {
     final size = widget.size ?? 120.0;
     final strokeWidth = widget.strokeWidth ?? 12.0;
-    
+
     return SizedBox(
       width: size,
       height: size,

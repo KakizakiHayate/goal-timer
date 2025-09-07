@@ -25,40 +25,41 @@ class PremiumUpgradeDialog extends StatelessWidget {
   factory PremiumUpgradeDialog.goalLimit({
     int? currentGoalCount,
     VoidCallback? onUpgrade,
-  }) =>
-      PremiumUpgradeDialog(
-        title: '目標の作成制限',
-        message: currentGoalCount != null
+  }) => PremiumUpgradeDialog(
+    title: '目標の作成制限',
+    message:
+        currentGoalCount != null
             ? '無料版では目標を3個まで作成できます。\n現在：$currentGoalCount/3個\n\nプレミアムプランにアップグレードして無制限に目標を作成しませんか？'
             : '無料版では目標を3個まで作成できます。\n\nプレミアムプランで無制限に目標を作成できます。',
-        featureName: '無制限の目標作成',
-        onUpgrade: onUpgrade,
-      );
+    featureName: '無制限の目標作成',
+    onUpgrade: onUpgrade,
+  );
 
   /// ポモドーロタイマー制限用ダイアログ
   factory PremiumUpgradeDialog.pomodoroLimit({VoidCallback? onUpgrade}) =>
       PremiumUpgradeDialog(
         title: 'ポモドーロタイマー',
-        message: 'ポモドーロタイマーはプレミアム限定機能です。\n\n25分の集中と5分の休憩を自動で管理し、効率的な学習をサポートします。',
+        message:
+            'ポモドーロタイマーはプレミアム限定機能です。\n\n25分の集中と5分の休憩を自動で管理し、効率的な学習をサポートします。',
         featureName: 'ポモドーロタイマー',
         onUpgrade: onUpgrade,
       );
 
   /// CSVエクスポート制限用ダイアログ
-  factory PremiumUpgradeDialog.csvExportLimit({VoidCallback? onUpgrade}) =>
-      PremiumUpgradeDialog(
-        title: 'CSVエクスポート',
-        message: 'CSVエクスポートはプレミアム限定機能です。\n\n学習データをCSVファイルで出力し、詳細な分析や他のツールとの連携が可能になります。',
-        featureName: 'CSVデータエクスポート',
-        onUpgrade: onUpgrade,
-      );
+  factory PremiumUpgradeDialog.csvExportLimit({
+    VoidCallback? onUpgrade,
+  }) => PremiumUpgradeDialog(
+    title: 'CSVエクスポート',
+    message:
+        'CSVエクスポートはプレミアム限定機能です。\n\n学習データをCSVファイルで出力し、詳細な分析や他のツールとの連携が可能になります。',
+    featureName: 'CSVデータエクスポート',
+    onUpgrade: onUpgrade,
+  );
 
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Container(
         padding: const EdgeInsets.all(SpacingConsts.xl),
         decoration: BoxDecoration(
@@ -80,11 +81,7 @@ class PremiumUpgradeDialog extends StatelessWidget {
                 ),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
-                Icons.star,
-                color: Colors.white,
-                size: 32,
-              ),
+              child: const Icon(Icons.star, color: Colors.white, size: 32),
             ),
 
             const SizedBox(height: SpacingConsts.lg),
@@ -130,11 +127,7 @@ class PremiumUpgradeDialog extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      Icons.star,
-                      color: ColorConsts.primary,
-                      size: 16,
-                    ),
+                    Icon(Icons.star, color: ColorConsts.primary, size: 16),
                     const SizedBox(width: SpacingConsts.xs),
                     Text(
                       featureName!,
@@ -194,10 +187,7 @@ class PremiumUpgradeDialog extends StatelessWidget {
   }
 
   /// ダイアログを表示するヘルパーメソッド
-  static Future<void> show(
-    BuildContext context,
-    PremiumUpgradeDialog dialog,
-  ) {
+  static Future<void> show(BuildContext context, PremiumUpgradeDialog dialog) {
     return showDialog<void>(
       context: context,
       barrierDismissible: true,

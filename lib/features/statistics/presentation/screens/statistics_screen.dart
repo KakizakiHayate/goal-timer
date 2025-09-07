@@ -6,7 +6,6 @@ import '../../../../core/utils/spacing_consts.dart';
 import '../../../../core/utils/animation_consts.dart';
 import '../../../../core/widgets/metric_card.dart';
 import '../../../../core/widgets/chart_card.dart';
-import '../../../../core/widgets/achievement_badge.dart';
 
 /// 改善された統計画面
 /// データビジュアライゼーションと達成感を重視
@@ -30,17 +29,11 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
       duration: AnimationConsts.slow,
       vsync: this,
     );
-    
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeOut,
-      ),
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
     );
-    
+
     _animationController.forward();
   }
 
@@ -60,7 +53,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
           slivers: [
             // アプリバー
             _buildSliverAppBar(),
-            
+
             // コンテンツ
             SliverToBoxAdapter(
               child: Padding(
@@ -69,22 +62,17 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
                   children: [
                     // 期間選択
                     _buildPeriodSelector(),
-                    
+
                     const SizedBox(height: SpacingConsts.l),
-                    
+
                     // メトリクスグリッド
                     _buildMetricsGrid(),
-                    
+
                     const SizedBox(height: SpacingConsts.l),
-                    
+
                     // チャート
                     _buildChartsSection(),
-                    
-                    const SizedBox(height: SpacingConsts.l),
-                    
-                    // 達成バッジ
-                    _buildAchievementsSection(),
-                    
+
                     const SizedBox(height: SpacingConsts.l),
                   ],
                 ),
@@ -125,7 +113,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
 
   Widget _buildPeriodSelector() {
     final periods = ['週間', '月間', '年間'];
-    
+
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
@@ -133,48 +121,57 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
-        children: periods.asMap().entries.map((entry) {
-          final index = entry.key;
-          final period = entry.value;
-          final isSelected = _selectedPeriod == index;
-          
-          return Expanded(
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  _selectedPeriod = index;
-                });
-              },
-              child: AnimatedContainer(
-                duration: AnimationConsts.fast,
-                padding: const EdgeInsets.symmetric(
-                  vertical: SpacingConsts.m,
-                ),
-                decoration: BoxDecoration(
-                  color: isSelected ? ColorConsts.cardBackground : Colors.transparent,
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: isSelected
-                      ? [
-                          BoxShadow(
-                            color: ColorConsts.shadowLight,
-                            offset: const Offset(0, 2),
-                            blurRadius: 4,
-                          ),
-                        ]
-                      : null,
-                ),
-                child: Text(
-                  period,
-                  style: TextConsts.body.copyWith(
-                    color: isSelected ? ColorConsts.primary : ColorConsts.textSecondary,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+        children:
+            periods.asMap().entries.map((entry) {
+              final index = entry.key;
+              final period = entry.value;
+              final isSelected = _selectedPeriod == index;
+
+              return Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _selectedPeriod = index;
+                    });
+                  },
+                  child: AnimatedContainer(
+                    duration: AnimationConsts.fast,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: SpacingConsts.m,
+                    ),
+                    decoration: BoxDecoration(
+                      color:
+                          isSelected
+                              ? ColorConsts.cardBackground
+                              : Colors.transparent,
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow:
+                          isSelected
+                              ? [
+                                BoxShadow(
+                                  color: ColorConsts.shadowLight,
+                                  offset: const Offset(0, 2),
+                                  blurRadius: 4,
+                                ),
+                              ]
+                              : null,
+                    ),
+                    child: Text(
+                      period,
+                      style: TextConsts.body.copyWith(
+                        color:
+                            isSelected
+                                ? ColorConsts.primary
+                                : ColorConsts.textSecondary,
+                        fontWeight:
+                            isSelected ? FontWeight.bold : FontWeight.w500,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
-                  textAlign: TextAlign.center,
                 ),
-              ),
-            ),
-          );
-        }).toList(),
+              );
+            }).toList(),
       ),
     );
   }
@@ -185,7 +182,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
         // 画面幅に応じて2列のレイアウトを動的に調整
         final availableWidth = constraints.maxWidth;
         final cardWidth = (availableWidth - SpacingConsts.m) / 2;
-        
+
         return Column(
           children: [
             // 1行目
@@ -280,9 +277,9 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
             ChartLegendItem(label: '目標', color: ColorConsts.textTertiary),
           ],
         ),
-        
+
         const SizedBox(height: SpacingConsts.l),
-        
+
         // 目標別時間分布チャート
         ChartCard(
           title: '目標別時間分布',
@@ -309,10 +306,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
         child: Text(
           '時間推移チャート\n（実装予定）',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            color: ColorConsts.textSecondary,
-            fontSize: 16,
-          ),
+          style: TextStyle(color: ColorConsts.textSecondary, fontSize: 16),
         ),
       ),
     );
@@ -329,140 +323,10 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
         child: Text(
           '分布チャート\n（実装予定）',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            color: ColorConsts.textSecondary,
-            fontSize: 16,
-          ),
+          style: TextStyle(color: ColorConsts.textSecondary, fontSize: 16),
         ),
       ),
     );
   }
 
-  Widget _buildAchievementsSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '達成バッジ',
-          style: TextConsts.h3.copyWith(
-            color: ColorConsts.textPrimary,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        
-        const SizedBox(height: SpacingConsts.m),
-        
-        Text(
-          '継続的な努力で獲得できるバッジです',
-          style: TextConsts.body.copyWith(
-            color: ColorConsts.textSecondary,
-          ),
-        ),
-        
-        const SizedBox(height: SpacingConsts.l),
-        
-        LayoutBuilder(
-          builder: (context, constraints) {
-            // 画面幅に応じて3列のレイアウトを動的に調整
-            final availableWidth = constraints.maxWidth;
-            final cardWidth = (availableWidth - (SpacingConsts.m * 2)) / 3;
-            
-            return Column(
-              children: [
-                // 1行目
-                Row(
-                  children: [
-                    Expanded(
-                      child: SizedBox(
-                        width: cardWidth,
-                        child: AchievementBadge(
-                          title: '初回達成',
-                          description: '初めて目標を達成',
-                          icon: Icons.flag_outlined,
-                          color: ColorConsts.success,
-                          isUnlocked: true,
-                          unlockedAt: DateTime.now().subtract(const Duration(days: 5)),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: SpacingConsts.m),
-                    Expanded(
-                      child: SizedBox(
-                        width: cardWidth,
-                        child: AchievementBadge(
-                          title: '3日継続',
-                          description: '3日間連続で目標達成',
-                          icon: Icons.local_fire_department,
-                          color: ColorConsts.warning,
-                          isUnlocked: true,
-                          unlockedAt: DateTime.now().subtract(const Duration(days: 2)),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: SpacingConsts.m),
-                    Expanded(
-                      child: SizedBox(
-                        width: cardWidth,
-                        child: AchievementBadge(
-                          title: '1週間継続',
-                          description: '7日間連続で目標達成',
-                          icon: Icons.calendar_view_week,
-                          color: ColorConsts.primary,
-                          isUnlocked: false,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: SpacingConsts.m),
-                // 2行目
-                Row(
-                  children: [
-                    Expanded(
-                      child: SizedBox(
-                        width: cardWidth,
-                        child: AchievementBadge(
-                          title: '早起き習慣',
-                          description: '朝6時前に勉強開始',
-                          icon: Icons.wb_sunny_outlined,
-                          color: ColorConsts.warning,
-                          isUnlocked: false,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: SpacingConsts.m),
-                    Expanded(
-                      child: SizedBox(
-                        width: cardWidth,
-                        child: AchievementBadge(
-                          title: '集中マスター',
-                          description: '2時間連続で集中',
-                          icon: Icons.psychology_outlined,
-                          color: ColorConsts.primary,
-                          isUnlocked: false,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: SpacingConsts.m),
-                    Expanded(
-                      child: SizedBox(
-                        width: cardWidth,
-                        child: AchievementBadge(
-                          title: '目標達成王',
-                          description: '月間目標を100%達成',
-                          icon: Icons.emoji_events_outlined,
-                          color: const Color(0xFFFFD700),
-                          isUnlocked: false,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            );
-          },
-        ),
-      ],
-    );
-  }
 }

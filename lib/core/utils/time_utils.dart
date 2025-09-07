@@ -8,7 +8,10 @@ class TimeUtils {
   }
 
   /// 残り時間を計算（分単位で指定）
-  static String calculateRemainingTimeFromMinutes(int targetMinutes, int spentMinutes) {
+  static String calculateRemainingTimeFromMinutes(
+    int targetMinutes,
+    int spentMinutes,
+  ) {
     // 残り分を計算
     final remainingMinutes = targetMinutes - spentMinutes;
 
@@ -30,7 +33,10 @@ class TimeUtils {
   }
 
   /// 残り時間（分）を計算（分単位で指定）
-  static int calculateRemainingMinutesFromTotal(int targetMinutes, int spentMinutes) {
+  static int calculateRemainingMinutesFromTotal(
+    int targetMinutes,
+    int spentMinutes,
+  ) {
     return (targetMinutes - spentMinutes).clamp(0, double.infinity).toInt();
   }
 
@@ -41,7 +47,10 @@ class TimeUtils {
   }
 
   /// 目標進捗率を計算（0.0 〜 1.0）（分単位で指定）
-  static double calculateProgressRateFromMinutes(int targetMinutes, int spentMinutes) {
+  static double calculateProgressRateFromMinutes(
+    int targetMinutes,
+    int spentMinutes,
+  ) {
     if (targetMinutes <= 0) return 1.0;
     return (spentMinutes / targetMinutes).clamp(0.0, 1.0);
   }

@@ -7,11 +7,11 @@ import 'package:uuid/uuid.dart';
 /// クリーンアーキテクチャに従い、ViewModelとRepositoryの間の橋渡しを行う
 class CreateGoalUseCase {
   final GoalsRepository _repository;
-  
+
   // 目標時間の制約
   static const int minTargetMinutes = 1;
   static const int maxTargetMinutes = 1439; // 23時間59分
-  
+
   // バリデーションの制約
   static const int minTitleLength = 2;
   static const int minAvoidMessageLength = 5;
@@ -42,10 +42,15 @@ class CreateGoalUseCase {
         throw ArgumentError('ネガティブ回避メッセージは必須です');
       }
       if (avoidMessage.trim().length < minAvoidMessageLength) {
-        throw ArgumentError('ネガティブ回避メッセージは$minAvoidMessageLength文字以上である必要があります');
+        throw ArgumentError(
+          'ネガティブ回避メッセージは$minAvoidMessageLength文字以上である必要があります',
+        );
       }
-      if (targetMinutes < minTargetMinutes || targetMinutes > maxTargetMinutes) {
-        throw ArgumentError('目標時間は$minTargetMinutes分から$maxTargetMinutes分（23時間59分）の範囲で設定してください');
+      if (targetMinutes < minTargetMinutes ||
+          targetMinutes > maxTargetMinutes) {
+        throw ArgumentError(
+          '目標時間は$minTargetMinutes分から$maxTargetMinutes分（23時間59分）の範囲で設定してください',
+        );
       }
 
       // 目標モデルを作成
@@ -54,7 +59,9 @@ class CreateGoalUseCase {
         userId: userId,
         title: title.trim(),
         description: description.trim(),
-        deadline: deadline ?? DateTime.now().add(const Duration(days: defaultDeadlineDays)),
+        deadline:
+            deadline ??
+            DateTime.now().add(const Duration(days: defaultDeadlineDays)),
         isCompleted: false,
         avoidMessage: avoidMessage.trim(),
         targetMinutes: targetMinutes,
@@ -64,7 +71,7 @@ class CreateGoalUseCase {
 
       // リポジトリ経由でデータベースに保存
       final createdGoal = await _repository.createGoal(goal);
-      
+
       AppLogger.instance.i('目標の作成が完了しました: ${createdGoal.title}');
       return createdGoal;
     } catch (e) {

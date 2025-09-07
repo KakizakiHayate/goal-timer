@@ -23,13 +23,13 @@ class PremiumBadge extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isPremiumAsync = ref.watch(isPremiumProvider);
-    
+
     return isPremiumAsync.when(
       data: (isPremium) {
         if (!isPremium) {
           return const SizedBox.shrink(); // プレミアムでない場合は非表示
         }
-        
+
         return _buildBadge();
       },
       loading: () => const SizedBox.shrink(),
@@ -40,7 +40,7 @@ class PremiumBadge extends ConsumerWidget {
   Widget _buildBadge() {
     final badgeColor = backgroundColor ?? const Color(0xFFFFD700); // ゴールド
     final foregroundColor = textColor ?? Colors.white;
-    
+
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: _getPadding().horizontal,
@@ -61,11 +61,7 @@ class PremiumBadge extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (showIcon) ...[
-            Icon(
-              Icons.star,
-              color: foregroundColor,
-              size: _getIconSize(),
-            ),
+            Icon(Icons.star, color: foregroundColor, size: _getIconSize()),
             SizedBox(width: _getSpacing()),
           ],
           Text(
@@ -143,11 +139,7 @@ class PremiumBadge extends ConsumerWidget {
 }
 
 /// プレミアムバッジのサイズ
-enum PremiumBadgeSize {
-  small,
-  medium,
-  large,
-}
+enum PremiumBadgeSize { small, medium, large }
 
 /// サブスクリプション状態表示ウィジェット
 class SubscriptionStatusWidget extends ConsumerWidget {
@@ -156,13 +148,13 @@ class SubscriptionStatusWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final subscriptionStatusAsync = ref.watch(subscriptionStatusStreamProvider);
-    
+
     return subscriptionStatusAsync.when(
       data: (status) {
         if (!status.isPremium) {
           return const SizedBox.shrink();
         }
-        
+
         return Container(
           padding: const EdgeInsets.symmetric(
             horizontal: SpacingConsts.md,
@@ -171,20 +163,14 @@ class SubscriptionStatusWidget extends ConsumerWidget {
           decoration: BoxDecoration(
             color: ColorConsts.primary.withOpacity(0.1),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: ColorConsts.primary.withOpacity(0.2),
-            ),
+            border: Border.all(color: ColorConsts.primary.withOpacity(0.2)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  const Icon(
-                    Icons.star,
-                    color: Color(0xFFFFD700),
-                    size: 16,
-                  ),
+                  const Icon(Icons.star, color: Color(0xFFFFD700), size: 16),
                   const SizedBox(width: SpacingConsts.xs),
                   Text(
                     'Premium',
@@ -214,7 +200,7 @@ class SubscriptionStatusWidget extends ConsumerWidget {
                     ),
                 ],
               ),
-              
+
               if (status.expirationDate != null) ...[
                 const SizedBox(height: SpacingConsts.xs),
                 Text(

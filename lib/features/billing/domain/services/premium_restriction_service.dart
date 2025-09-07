@@ -4,10 +4,10 @@ import '../entities/entities.dart';
 /// プレミアム制限サービス
 class PremiumRestrictionService {
   final BillingRepository _repository;
-  
+
   // 無料版の制限値
   static const int freeGoalLimit = 3;
-  
+
   PremiumRestrictionService(this._repository);
 
   /// プレミアムユーザーかどうか確認
@@ -58,7 +58,7 @@ class PremiumRestrictionService {
     if (isPremium) {
       return '無制限に目標を作成できます';
     }
-    
+
     final remaining = await getRemainingGoals(currentGoalCount);
     if (remaining > 0) {
       return 'あと$remaining個の目標を作成できます';

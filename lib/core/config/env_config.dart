@@ -23,7 +23,8 @@ class EnvConfig {
   static bool get isProduction => appEnv == 'production';
 
   /// iOS版RevenueCatのAPIキー
-  static String get revenueCatApplePublicApiKey => dotenv.env['REVENUECAT_APPLE_PUBLIC_API_KEY'] ?? '';
+  static String get revenueCatApplePublicApiKey =>
+      dotenv.env['REVENUECAT_APPLE_PUBLIC_API_KEY'] ?? '';
 
   /// デバイス固有のIDを取得（未設定の場合は新規生成）
   static String get deviceId {

@@ -63,9 +63,10 @@ class DefaultFirebaseOptions {
     messagingSenderId: '817605522713',
     projectId: 'goal-timer-43a41',
     storageBucket: 'goal-timer-43a41.firebasestorage.app',
-    androidClientId: '817605522713-037cipbqtfbj2k9aslf37354th773o4k.apps.googleusercontent.com',
-    iosClientId: '817605522713-vuikookd27ubs5jbvbk2nevbing8ff6q.apps.googleusercontent.com',
+    androidClientId:
+        '817605522713-037cipbqtfbj2k9aslf37354th773o4k.apps.googleusercontent.com',
+    iosClientId:
+        '817605522713-vuikookd27ubs5jbvbk2nevbing8ff6q.apps.googleusercontent.com',
     iosBundleId: 'com.h.dev.goal.timer',
   );
-
 }

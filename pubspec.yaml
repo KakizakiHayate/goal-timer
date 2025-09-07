@@ -77,8 +77,12 @@ dev_dependencies:
   
   flutter_lints: '3.0.1'
   
+  # テスト用モック
+  mockito: ^5.4.4
+  
   # アプリアイコン生成
   flutter_launcher_icons: ^0.13.1
+  mocktail: ^1.0.4
 
 flutter:
   uses-material-design: true

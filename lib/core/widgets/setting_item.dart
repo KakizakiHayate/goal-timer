@@ -42,17 +42,11 @@ class _SettingItemState extends State<SettingItem>
       duration: AnimationConsts.fast,
       vsync: this,
     );
-    
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeOut,
-      ),
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
     );
-    
+
     _animationController.forward();
   }
 
@@ -80,20 +74,23 @@ class _SettingItemState extends State<SettingItem>
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: (widget.iconColor ?? ColorConsts.primary).withOpacity(0.1),
+                color: (widget.iconColor ?? ColorConsts.primary).withOpacity(
+                  0.1,
+                ),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
                 widget.icon,
-                color: widget.enabled 
-                    ? (widget.iconColor ?? ColorConsts.primary)
-                    : ColorConsts.disabledText,
+                color:
+                    widget.enabled
+                        ? (widget.iconColor ?? ColorConsts.primary)
+                        : ColorConsts.disabledText,
                 size: 22,
               ),
             ),
-            
+
             const SizedBox(width: SpacingConsts.m),
-            
+
             // タイトルとサブタイトル
             Expanded(
               child: Column(
@@ -102,9 +99,10 @@ class _SettingItemState extends State<SettingItem>
                   Text(
                     widget.title,
                     style: TextConsts.body.copyWith(
-                      color: widget.enabled 
-                          ? ColorConsts.textPrimary
-                          : ColorConsts.disabledText,
+                      color:
+                          widget.enabled
+                              ? ColorConsts.textPrimary
+                              : ColorConsts.disabledText,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -113,9 +111,10 @@ class _SettingItemState extends State<SettingItem>
                     Text(
                       widget.subtitle!,
                       style: TextConsts.caption.copyWith(
-                        color: widget.enabled 
-                            ? ColorConsts.textSecondary
-                            : ColorConsts.disabledText,
+                        color:
+                            widget.enabled
+                                ? ColorConsts.textSecondary
+                                : ColorConsts.disabledText,
                         height: 1.3,
                       ),
                     ),
@@ -123,7 +122,7 @@ class _SettingItemState extends State<SettingItem>
                 ],
               ),
             ),
-            
+
             // トレーリング
             if (widget.trailing != null) ...[
               const SizedBox(width: SpacingConsts.m),
@@ -133,9 +132,10 @@ class _SettingItemState extends State<SettingItem>
               Icon(
                 Icons.arrow_forward_ios,
                 size: 16,
-                color: widget.enabled 
-                    ? ColorConsts.textTertiary
-                    : ColorConsts.disabledText,
+                color:
+                    widget.enabled
+                        ? ColorConsts.textTertiary
+                        : ColorConsts.disabledText,
               ),
             ],
           ],

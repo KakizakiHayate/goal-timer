@@ -264,7 +264,8 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen>
                     const SizedBox(height: SpacingConsts.m),
                     _buildProgressDetail(
                       label: '目標時間',
-                      value: '${(goal.targetMinutes ~/ 60)}時間${(goal.targetMinutes % 60)}分',
+                      value:
+                          '${(goal.targetMinutes ~/ 60)}時間${(goal.targetMinutes % 60)}分',
                       color: ColorConsts.textSecondary,
                     ),
                   ],

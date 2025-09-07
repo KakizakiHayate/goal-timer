@@ -7,6 +7,8 @@ import 'package:goal_timer/features/auth/domain/entities/auth_state.dart'
     as app_auth;
 import 'package:goal_timer/core/provider/providers.dart';
 import 'package:goal_timer/core/utils/route_names.dart';
+import 'package:goal_timer/core/services/startup_logic_service.dart';
+import 'package:goal_timer/core/services/temp_user_service.dart';
 
 class SplashScreen extends ConsumerWidget {
   const SplashScreen({super.key});
@@ -15,33 +17,54 @@ class SplashScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final splashState = ref.watch(splashViewModelProvider);
 
-    // 初期化が完了した場合、認証状態に基づいて画面遷移
+    // デバッグログ追加
+    print('🔍 SplashScreen - isLoading: ${splashState.isLoading}, isReady: ${splashState.isReady}');
+    print('🔍 SplashScreen - isConnectionOk: ${splashState.isConnectionOk}, isAuthReady: ${splashState.isAuthReady}');
+
+    // 初期化が完了した場合、スタートアップロジックに基づいて画面遷移
     if (!splashState.isLoading && splashState.isReady) {
       // 画面遷移を遅延実行（すぐに遷移するとスプラッシュが見えない）
       Future.delayed(Duration.zero, () async {
         if (context.mounted) {
-          // 認証状態を確認
-          final authState = ref.read(globalAuthStateProvider);
+          try {
+            // スタートアップロジックサービスを使用してルートを決定
+            final tempUserService = TempUserService();
+            final startupLogicService = StartupLogicService(tempUserService);
 
-          switch (authState) {
-            case app_auth.AuthState.authenticated:
-              // 認証済みの場合はホーム画面へ
-              Navigator.pushReplacementNamed(context, RouteNames.home);
-              break;
-            case app_auth.AuthState.unauthenticated:
-            case app_auth.AuthState.initial:
-            case app_auth.AuthState.error:
-              // 未認証の場合はログイン画面へ
-              Navigator.pushReplacementNamed(context, RouteNames.login);
-              break;
-            case app_auth.AuthState.loading:
-              // まだ認証状態が確定していない場合は少し待つ
-              Future.delayed(const Duration(milliseconds: 500), () {
-                if (context.mounted) {
+            final initialRoute =
+                await startupLogicService.determineInitialRoute();
+            
+            print('🚀 SplashScreen - navigating to: $initialRoute');
+
+            if (context.mounted) {
+              Navigator.pushReplacementNamed(context, initialRoute);
+            }
+          } catch (e) {
+            if (context.mounted) {
+              // エラーが発生した場合は、認証状態にフォールバック
+              final authState = ref.read(globalAuthStateProvider);
+
+              switch (authState) {
+                case app_auth.AuthState.authenticated:
+                case app_auth.AuthState.guest:
+                  // 認証済みまたはゲストユーザーはホーム画面
+                  Navigator.pushReplacementNamed(context, RouteNames.home);
+                  break;
+                case app_auth.AuthState.unauthenticated:
+                  // 未認証の場合はログイン画面
                   Navigator.pushReplacementNamed(context, RouteNames.login);
-                }
-              });
-              break;
+                  break;
+                case app_auth.AuthState.initial:
+                case app_auth.AuthState.error:
+                case app_auth.AuthState.loading:
+                  // 初回起動またはエラーの場合はオンボーディング開始
+                  Navigator.pushReplacementNamed(
+                    context,
+                    RouteNames.onboardingGoalCreation,
+                  );
+                  break;
+              }
+            }
           }
         }
       });

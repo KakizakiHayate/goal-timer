@@ -26,7 +26,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   String _password = '';
   String? _emailError;
   String? _passwordError;
-  
+
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
@@ -38,17 +38,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       duration: AnimationConsts.slow,
       vsync: this,
     );
-    
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
         curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
       ),
     );
-    
+
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.1),
       end: Offset.zero,
@@ -58,7 +55,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
         curve: const Interval(0.2, 1.0, curve: Curves.easeOutCubic),
       ),
     );
-    
+
     _animationController.forward();
   }
 
@@ -126,10 +123,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                     _buildSocialLoginButtons(authState, authNotifier),
 
                     SizedBox(height: SpacingConsts.xxl),
-                    
+
                     // サインアップリンク
                     _buildSignUpLink(),
-                    
+
                     // 下部余白
                     SizedBox(height: SpacingConsts.xl),
                   ],
@@ -165,11 +162,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
               ),
             ],
           ),
-          child: Icon(
-            Icons.timer_outlined,
-            color: Colors.white,
-            size: 36,
-          ),
+          child: Icon(Icons.timer_outlined, color: Colors.white, size: 36),
         ),
         SizedBox(height: SpacingConsts.l),
         Text(
@@ -248,10 +241,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             height: 1,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  ColorConsts.border.withOpacity(0),
-                  ColorConsts.border,
-                ],
+                colors: [ColorConsts.border.withOpacity(0), ColorConsts.border],
               ),
             ),
           ),
@@ -271,10 +261,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             height: 1,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  ColorConsts.border,
-                  ColorConsts.border.withOpacity(0),
-                ],
+                colors: [ColorConsts.border, ColorConsts.border.withOpacity(0)],
               ),
             ),
           ),
@@ -317,9 +304,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       children: [
         Text(
           'アカウントをお持ちでない方は ',
-          style: TextConsts.body.copyWith(
-            color: ColorConsts.textSecondary,
-          ),
+          style: TextConsts.body.copyWith(color: ColorConsts.textSecondary),
         ),
         GestureDetector(
           onTap: () {
@@ -398,16 +383,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       SnackBar(
         content: Text(
           message,
-          style: const TextStyle(
-            fontWeight: FontWeight.w500,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.w500),
         ),
         backgroundColor: ColorConsts.error,
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.all(SpacingConsts.l),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }

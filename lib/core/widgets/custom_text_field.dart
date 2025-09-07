@@ -48,7 +48,7 @@ class _CustomTextFieldState extends State<CustomTextField>
   late final FocusNode _focusNode;
   late AnimationController _animationController;
   late Animation<double> _focusAnimation;
-  
+
   bool _isFocused = false;
   String? _errorText;
 
@@ -57,22 +57,19 @@ class _CustomTextFieldState extends State<CustomTextField>
     super.initState();
     _controller = TextEditingController(text: widget.initialValue);
     _focusNode = FocusNode();
-    
+
     _animationController = AnimationController(
       duration: AnimationConsts.fast,
       vsync: this,
     );
-    
-    _focusAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(
+
+    _focusAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
         curve: AnimationConsts.defaultCurve,
       ),
     );
-    
+
     _focusNode.addListener(_handleFocusChange);
     _controller.addListener(_handleTextChange);
   }
@@ -81,7 +78,7 @@ class _CustomTextFieldState extends State<CustomTextField>
     setState(() {
       _isFocused = _focusNode.hasFocus;
     });
-    
+
     if (_focusNode.hasFocus) {
       _animationController.forward();
     } else {
@@ -92,7 +89,7 @@ class _CustomTextFieldState extends State<CustomTextField>
   void _handleTextChange() {
     final text = _controller.text;
     widget.onChanged(text);
-    
+
     if (widget.validator != null) {
       setState(() {
         _errorText = widget.validator!(text);
@@ -111,7 +108,7 @@ class _CustomTextFieldState extends State<CustomTextField>
   @override
   Widget build(BuildContext context) {
     final hasError = _errorText != null && _errorText!.isNotEmpty;
-    
+
     return AnimatedBuilder(
       animation: _focusAnimation,
       builder: (context, child) {
@@ -124,14 +121,17 @@ class _CustomTextFieldState extends State<CustomTextField>
               child: Text(
                 widget.labelText,
                 style: TextConsts.body.copyWith(
-                  color: hasError 
-                      ? ColorConsts.error
-                      : (_isFocused ? ColorConsts.primary : ColorConsts.textSecondary),
+                  color:
+                      hasError
+                          ? ColorConsts.error
+                          : (_isFocused
+                              ? ColorConsts.primary
+                              : ColorConsts.textSecondary),
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ),
-            
+
             // テキストフィールド
             AnimatedContainer(
               duration: AnimationConsts.fast,
@@ -140,7 +140,9 @@ class _CustomTextFieldState extends State<CustomTextField>
                 boxShadow: [
                   if (_isFocused && !hasError)
                     BoxShadow(
-                      color: ColorConsts.primary.withValues(alpha: 0.15 * _focusAnimation.value),
+                      color: ColorConsts.primary.withValues(
+                        alpha: 0.15 * _focusAnimation.value,
+                      ),
                       offset: const Offset(0, 4),
                       blurRadius: 16,
                       spreadRadius: 0,
@@ -157,7 +159,10 @@ class _CustomTextFieldState extends State<CustomTextField>
                 textInputAction: widget.textInputAction,
                 onFieldSubmitted: widget.onSubmitted,
                 style: TextConsts.body.copyWith(
-                  color: widget.enabled ? ColorConsts.textPrimary : ColorConsts.disabledText,
+                  color:
+                      widget.enabled
+                          ? ColorConsts.textPrimary
+                          : ColorConsts.disabledText,
                   fontWeight: FontWeight.w500,
                 ),
                 decoration: InputDecoration(
@@ -166,12 +171,18 @@ class _CustomTextFieldState extends State<CustomTextField>
                     color: ColorConsts.textTertiary,
                   ),
                   filled: true,
-                  fillColor: widget.enabled 
-                      ? (_isFocused ? ColorConsts.primaryExtraLight : ColorConsts.backgroundSecondary)
-                      : ColorConsts.disabled,
+                  fillColor:
+                      widget.enabled
+                          ? (_isFocused
+                              ? ColorConsts.primaryExtraLight
+                              : ColorConsts.backgroundSecondary)
+                          : ColorConsts.disabled,
                   contentPadding: EdgeInsets.symmetric(
                     horizontal: SpacingConsts.l,
-                    vertical: widget.maxLines > 1 ? SpacingConsts.l : SpacingConsts.m + 2,
+                    vertical:
+                        widget.maxLines > 1
+                            ? SpacingConsts.l
+                            : SpacingConsts.m + 2,
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -212,24 +223,30 @@ class _CustomTextFieldState extends State<CustomTextField>
                       width: 1.5,
                     ),
                   ),
-                  prefixIcon: widget.prefixIcon != null
-                      ? Icon(
-                          widget.prefixIcon,
-                          color: _isFocused ? ColorConsts.primary : ColorConsts.textSecondary,
-                          size: 22,
-                        )
-                      : null,
+                  prefixIcon:
+                      widget.prefixIcon != null
+                          ? Icon(
+                            widget.prefixIcon,
+                            color:
+                                _isFocused
+                                    ? ColorConsts.primary
+                                    : ColorConsts.textSecondary,
+                            size: 22,
+                          )
+                          : null,
                   suffixIcon: widget.suffixIcon,
                   counterText: '', // 文字数カウンターを非表示
                 ),
               ),
             ),
-            
+
             // エラーメッセージ
             if (hasError) ...[
               const SizedBox(height: SpacingConsts.s),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: SpacingConsts.l),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: SpacingConsts.l,
+                ),
                 child: Text(
                   _errorText!,
                   style: TextConsts.caption.copyWith(
@@ -239,20 +256,23 @@ class _CustomTextFieldState extends State<CustomTextField>
                 ),
               ),
             ],
-            
+
             // 文字数制限表示
             if (widget.maxLength != null && _isFocused) ...[
               const SizedBox(height: SpacingConsts.s),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: SpacingConsts.l),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: SpacingConsts.l,
+                ),
                 child: Align(
                   alignment: Alignment.centerRight,
                   child: Text(
                     '${_controller.text.length}/${widget.maxLength}',
                     style: TextConsts.caption.copyWith(
-                      color: _controller.text.length > (widget.maxLength! * 0.9)
-                          ? ColorConsts.warning
-                          : ColorConsts.textTertiary,
+                      color:
+                          _controller.text.length > (widget.maxLength! * 0.9)
+                              ? ColorConsts.warning
+                              : ColorConsts.textTertiary,
                     ),
                   ),
                 ),

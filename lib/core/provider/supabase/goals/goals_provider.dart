@@ -46,8 +46,7 @@ final goalsNotifierProvider =
 class GoalsNotifier extends StateNotifier<AsyncValue<List<GoalsModel>>> {
   final SupabaseGoalsRepository _repository;
 
-  GoalsNotifier(this._repository)
-    : super(const AsyncValue.loading()) {
+  GoalsNotifier(this._repository) : super(const AsyncValue.loading()) {
     loadGoals();
   }
 

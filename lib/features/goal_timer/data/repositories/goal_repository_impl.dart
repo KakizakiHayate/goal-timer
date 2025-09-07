@@ -29,8 +29,10 @@ class GoalRepositoryImpl implements GoalRepository {
   @override
   Future<Goal?> getGoalById(String id) async {
     await Future.delayed(const Duration(milliseconds: 300));
-    return _goals.firstWhere((goal) => goal.id == id,
-        orElse: () => throw Exception('Goal not found'));
+    return _goals.firstWhere(
+      (goal) => goal.id == id,
+      orElse: () => throw Exception('Goal not found'),
+    );
   }
 
   @override

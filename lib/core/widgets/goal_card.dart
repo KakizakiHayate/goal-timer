@@ -18,6 +18,8 @@ class GoalCard extends StatelessWidget {
   final VoidCallback? onTimerTap;
   final VoidCallback? onEditTap;
   final bool isActive;
+  final GlobalKey? tutorialKey; // チュートリアル用のKey
+  final GlobalKey? timerButtonKey; // タイマーボタン用のKey
 
   const GoalCard({
     super.key,
@@ -30,11 +32,14 @@ class GoalCard extends StatelessWidget {
     this.onTimerTap,
     this.onEditTap,
     this.isActive = true,
+    this.tutorialKey,
+    this.timerButtonKey,
   });
 
   @override
   Widget build(BuildContext context) {
     return PressableCard(
+      key: tutorialKey, // チュートリアル用のKeyを追加
       onTap: onTap,
       margin: const EdgeInsets.symmetric(
         horizontal: SpacingConsts.l,
@@ -49,19 +54,19 @@ class GoalCard extends StatelessWidget {
         children: [
           // ヘッダー行
           _buildHeader(),
-          
+
           const SizedBox(height: SpacingConsts.m),
-          
+
           // プログレス表示
           _buildProgress(),
-          
+
           if (avoidMessage != null) ...[
             const SizedBox(height: SpacingConsts.m),
             _buildAvoidanceMessage(),
           ],
-          
+
           const SizedBox(height: SpacingConsts.m),
-          
+
           // アクションボタン
           _buildActionButtons(),
         ],
@@ -111,7 +116,7 @@ class GoalCard extends StatelessWidget {
 
   Widget _buildProgress() {
     final percentage = (progress * 100).toInt();
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -162,18 +167,11 @@ class GoalCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: ColorConsts.error.withOpacity(0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: ColorConsts.error.withOpacity(0.2),
-          width: 1,
-        ),
+        border: Border.all(color: ColorConsts.error.withOpacity(0.2), width: 1),
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.warning_amber_rounded,
-            color: ColorConsts.error,
-            size: 18,
-          ),
+          Icon(Icons.warning_amber_rounded, color: ColorConsts.error, size: 18),
           const SizedBox(width: SpacingConsts.s),
           Expanded(
             child: Text(
@@ -198,6 +196,7 @@ class GoalCard extends StatelessWidget {
         Expanded(
           flex: 2,
           child: _ActionButton(
+            key: timerButtonKey, // タイマーボタン用のKeyを設定
             icon: Icons.timer_outlined,
             label: 'タイマー開始',
             backgroundColor: ColorConsts.primary,
@@ -240,6 +239,7 @@ class _ActionButton extends StatefulWidget {
   final VoidCallback? onTap;
 
   const _ActionButton({
+    super.key,
     required this.icon,
     required this.label,
     required this.backgroundColor,
@@ -300,24 +300,21 @@ class _ActionButtonState extends State<_ActionButton>
               decoration: BoxDecoration(
                 color: widget.backgroundColor,
                 borderRadius: BorderRadius.circular(12),
-                boxShadow: widget.backgroundColor == ColorConsts.primary
-                    ? [
-                        BoxShadow(
-                          color: ColorConsts.primary.withOpacity(0.3),
-                          offset: const Offset(0, 2),
-                          blurRadius: 8,
-                        ),
-                      ]
-                    : null,
+                boxShadow:
+                    widget.backgroundColor == ColorConsts.primary
+                        ? [
+                          BoxShadow(
+                            color: ColorConsts.primary.withOpacity(0.3),
+                            offset: const Offset(0, 2),
+                            blurRadius: 8,
+                          ),
+                        ]
+                        : null,
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    widget.icon,
-                    color: widget.textColor,
-                    size: 18,
-                  ),
+                  Icon(widget.icon, color: widget.textColor, size: 18),
                   const SizedBox(width: SpacingConsts.xs),
                   Text(
                     widget.label,

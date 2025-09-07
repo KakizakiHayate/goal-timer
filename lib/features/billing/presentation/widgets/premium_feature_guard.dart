@@ -27,7 +27,7 @@ class PremiumFeatureGuard extends ConsumerWidget {
       builder: (context, ref, _) {
         // プレミアム状態を監視
         final isPremiumAsync = ref.watch(isPremiumProvider);
-        
+
         return isPremiumAsync.when(
           data: (isPremium) {
             if (isPremium) {
@@ -64,7 +64,7 @@ class PremiumFeatureGuard extends ConsumerWidget {
     }
 
     final canCreateAsync = ref.watch(canCreateGoalProvider(currentGoalCount!));
-    
+
     return canCreateAsync.when(
       data: (canCreate) {
         if (canCreate) {
@@ -91,40 +91,25 @@ class PremiumFeatureGuard extends ConsumerWidget {
           onTap();
         }
       },
-      child: Opacity(
-        opacity: 0.6,
-        child: child,
-      ),
+      child: Opacity(opacity: 0.6, child: child),
     );
   }
 
   void _showGoalLimitDialog(BuildContext context) {
     PremiumUpgradeDialog.show(
       context,
-      PremiumUpgradeDialog.goalLimit(
-        currentGoalCount: currentGoalCount,
-      ),
+      PremiumUpgradeDialog.goalLimit(currentGoalCount: currentGoalCount),
     );
   }
 
   void _showPomodoroDialog(BuildContext context) {
-    PremiumUpgradeDialog.show(
-      context,
-      PremiumUpgradeDialog.pomodoroLimit(),
-    );
+    PremiumUpgradeDialog.show(context, PremiumUpgradeDialog.pomodoroLimit());
   }
 
   void _showCsvExportDialog(BuildContext context) {
-    PremiumUpgradeDialog.show(
-      context,
-      PremiumUpgradeDialog.csvExportLimit(),
-    );
+    PremiumUpgradeDialog.show(context, PremiumUpgradeDialog.csvExportLimit());
   }
 }
 
 /// プレミアム機能の種類
-enum PremiumFeatureType {
-  goalCreation,
-  pomodoroTimer,
-  csvExport,
-}
+enum PremiumFeatureType { goalCreation, pomodoroTimer, csvExport }

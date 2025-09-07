@@ -7,7 +7,7 @@ class BillingRepositoryImpl implements BillingRepository {
   final RevenueCatDataSourceProduction _dataSource;
 
   BillingRepositoryImpl({RevenueCatDataSourceProduction? dataSource})
-      : _dataSource = dataSource ?? RevenueCatDataSourceProduction.instance;
+    : _dataSource = dataSource ?? RevenueCatDataSourceProduction.instance;
 
   @override
   Future<SubscriptionStatus> getSubscriptionStatus() async {

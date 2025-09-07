@@ -36,11 +36,7 @@ class PredefinedPlans {
     trialDuration: Duration(days: 7),
     introPrice: '¥240',
     discount: '50%オフ',
-    features: [
-      '無制限の目標作成',
-      'ポモドーロタイマー',
-      'CSVデータエクスポート',
-    ],
+    features: ['無制限の目標作成', 'ポモドーロタイマー', 'CSVデータエクスポート'],
   );
 
   static const yearly = SubscriptionPlan(
@@ -53,12 +49,7 @@ class PredefinedPlans {
     trialDuration: Duration(days: 7),
     introPrice: null,
     discount: '17%お得',
-    features: [
-      '無制限の目標作成',
-      'ポモドーロタイマー',
-      'CSVデータエクスポート',
-      '月額換算 ¥400（¥80お得）',
-    ],
+    features: ['無制限の目標作成', 'ポモドーロタイマー', 'CSVデータエクスポート', '月額換算 ¥400（¥80お得）'],
     isPopular: true,
   );
 

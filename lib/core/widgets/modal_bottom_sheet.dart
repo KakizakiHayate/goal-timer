@@ -45,15 +45,16 @@ class ModalBottomSheet extends StatefulWidget {
       backgroundColor: Colors.transparent,
       enableDrag: enableDrag,
       isDismissible: isDismissible,
-      builder: (context) => ModalBottomSheet(
-        title: title,
-        actions: actions,
-        isScrollable: isScrollable,
-        height: height,
-        enableDrag: enableDrag,
-        isDismissible: isDismissible,
-        child: child,
-      ),
+      builder:
+          (context) => ModalBottomSheet(
+            title: title,
+            actions: actions,
+            isScrollable: isScrollable,
+            height: height,
+            enableDrag: enableDrag,
+            isDismissible: isDismissible,
+            child: child,
+          ),
     );
   }
 }
@@ -70,17 +71,14 @@ class _ModalBottomSheetState extends State<ModalBottomSheet>
       duration: AnimationConsts.medium,
       vsync: this,
     );
-    
-    _slideAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.0,
-    ).animate(
+
+    _slideAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
       CurvedAnimation(
         parent: _animationController,
         curve: AnimationConsts.smoothCurve,
       ),
     );
-    
+
     _animationController.forward();
   }
 
@@ -95,17 +93,21 @@ class _ModalBottomSheetState extends State<ModalBottomSheet>
     final mediaQuery = MediaQuery.of(context);
     final maxHeight = mediaQuery.size.height * 0.9;
     final minHeight = mediaQuery.size.height * 0.3;
-    
+
     // DraggableScrollableSheetを使用してスワイプ機能を実装
     return AnimatedBuilder(
       animation: _slideAnimation,
       builder: (context, child) {
         return Transform.translate(
-          offset: Offset(0, _slideAnimation.value * mediaQuery.size.height * 0.1),
+          offset: Offset(
+            0,
+            _slideAnimation.value * mediaQuery.size.height * 0.1,
+          ),
           child: DraggableScrollableSheet(
-            initialChildSize: widget.height != null 
-                ? (widget.height! / mediaQuery.size.height).clamp(0.3, 0.9)
-                : 0.85,
+            initialChildSize:
+                widget.height != null
+                    ? (widget.height! / mediaQuery.size.height).clamp(0.3, 0.9)
+                    : 0.85,
             minChildSize: (minHeight / mediaQuery.size.height).clamp(0.3, 0.9),
             maxChildSize: (maxHeight / mediaQuery.size.height).clamp(0.3, 0.9),
             expand: false,
@@ -122,31 +124,32 @@ class _ModalBottomSheetState extends State<ModalBottomSheet>
                   children: [
                     // ハンドル（ドラッグ用）
                     _buildHandle(),
-                    
+
                     // ヘッダー
                     _buildHeader(),
-                    
+
                     // コンテンツ
                     Expanded(
-                      child: widget.isScrollable
-                          ? SingleChildScrollView(
-                              controller: scrollController,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: SpacingConsts.l,
+                      child:
+                          widget.isScrollable
+                              ? SingleChildScrollView(
+                                controller: scrollController,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: SpacingConsts.l,
+                                ),
+                                child: widget.child,
+                              )
+                              : Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: SpacingConsts.l,
+                                ),
+                                child: widget.child,
                               ),
-                              child: widget.child,
-                            )
-                          : Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: SpacingConsts.l,
-                              ),
-                              child: widget.child,
-                            ),
                     ),
-                    
+
                     // アクション
                     if (widget.actions != null) _buildActions(),
-                    
+
                     // Safe Area padding
                     SizedBox(height: mediaQuery.padding.bottom),
                   ],
@@ -184,12 +187,7 @@ class _ModalBottomSheetState extends State<ModalBottomSheet>
         vertical: SpacingConsts.m,
       ),
       decoration: const BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: ColorConsts.border,
-            width: 1,
-          ),
-        ),
+        border: Border(bottom: BorderSide(color: ColorConsts.border, width: 1)),
       ),
       child: Row(
         children: [
@@ -226,12 +224,7 @@ class _ModalBottomSheetState extends State<ModalBottomSheet>
     return Container(
       padding: const EdgeInsets.all(SpacingConsts.l),
       decoration: const BoxDecoration(
-        border: Border(
-          top: BorderSide(
-            color: ColorConsts.border,
-            width: 1,
-          ),
-        ),
+        border: Border(top: BorderSide(color: ColorConsts.border, width: 1)),
       ),
       child: Row(
         children: [

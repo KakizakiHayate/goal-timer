@@ -34,10 +34,7 @@ class _StreakIndicatorState extends State<StreakIndicator>
         duration: AnimationConsts.medium,
         vsync: this,
       );
-      _scaleAnimation = Tween<double>(
-        begin: 0.8,
-        end: 1.0,
-      ).animate(
+      _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
         CurvedAnimation(
           parent: _controller,
           curve: AnimationConsts.bounceCurve,
@@ -91,10 +88,7 @@ class _StreakIndicatorState extends State<StreakIndicator>
     return AnimatedBuilder(
       animation: _scaleAnimation,
       builder: (context, child) {
-        return Transform.scale(
-          scale: _scaleAnimation.value,
-          child: content,
-        );
+        return Transform.scale(scale: _scaleAnimation.value, child: content);
       },
     );
   }

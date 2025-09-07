@@ -207,7 +207,7 @@ class LocalGoalsDatasource {
       targetMinutes: () {
         final targetMins = map['target_minutes'] as int?;
         if (targetMins != null) return targetMins;
-        
+
         final targetHours = map['total_target_hours'] as int?;
         return targetHours != null ? targetHours * 60 : 0;
       }(),

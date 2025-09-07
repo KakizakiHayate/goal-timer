@@ -15,12 +15,14 @@ final billingRepositoryProvider = Provider<BillingRepository>((ref) {
 /// BillingViewModelプロバイダー
 final billingViewModelProvider =
     StateNotifierProvider<BillingViewModel, BillingState>((ref) {
-  final repository = ref.watch(billingRepositoryProvider);
-  return BillingViewModel(repository);
-});
+      final repository = ref.watch(billingRepositoryProvider);
+      return BillingViewModel(repository);
+    });
 
 /// サブスクリプション状態のストリームプロバイダー
-final subscriptionStatusStreamProvider = StreamProvider<SubscriptionStatus>((ref) {
+final subscriptionStatusStreamProvider = StreamProvider<SubscriptionStatus>((
+  ref,
+) {
   final repository = ref.watch(billingRepositoryProvider);
   return repository.subscriptionStatusStream();
 });
@@ -39,16 +41,16 @@ class BillingViewModel extends StateNotifier<BillingState> {
   final RestorePurchasesUseCase _restorePurchases;
   final GetAvailableProductsUseCase _getAvailableProducts;
   final CheckPremiumStatusUseCase _checkPremiumStatus;
-  
+
   StreamSubscription<SubscriptionStatus>? _statusSubscription;
 
   BillingViewModel(this._repository)
-      : _getSubscriptionStatus = GetSubscriptionStatusUseCase(_repository),
-        _purchaseProduct = PurchaseProductUseCase(_repository),
-        _restorePurchases = RestorePurchasesUseCase(_repository),
-        _getAvailableProducts = GetAvailableProductsUseCase(_repository),
-        _checkPremiumStatus = CheckPremiumStatusUseCase(_repository),
-        super(const BillingState()) {
+    : _getSubscriptionStatus = GetSubscriptionStatusUseCase(_repository),
+      _purchaseProduct = PurchaseProductUseCase(_repository),
+      _restorePurchases = RestorePurchasesUseCase(_repository),
+      _getAvailableProducts = GetAvailableProductsUseCase(_repository),
+      _checkPremiumStatus = CheckPremiumStatusUseCase(_repository),
+      super(const BillingState()) {
     _initialize();
   }
 
@@ -62,13 +64,10 @@ class BillingViewModel extends StateNotifier<BillingState> {
   /// サブスクリプション状態を読み込み
   Future<void> loadSubscriptionStatus() async {
     state = state.copyWith(isLoading: true, errorMessage: null);
-    
+
     try {
       final status = await _getSubscriptionStatus();
-      state = state.copyWith(
-        subscriptionStatus: status,
-        isLoading: false,
-      );
+      state = state.copyWith(subscriptionStatus: status, isLoading: false);
     } catch (e) {
       AppLogger.instance.e('Failed to load subscription status: $e');
       state = state.copyWith(
@@ -109,21 +108,18 @@ class BillingViewModel extends StateNotifier<BillingState> {
   /// 商品を購入
   Future<void> purchaseProduct(String productId) async {
     if (state.isPurchasing) return;
-    
+
     state = state.copyWith(
       isPurchasing: true,
       errorMessage: null,
       lastPurchaseResult: null,
     );
-    
+
     try {
       final result = await _purchaseProduct(productId);
-      
-      state = state.copyWith(
-        isPurchasing: false,
-        lastPurchaseResult: result,
-      );
-      
+
+      state = state.copyWith(isPurchasing: false, lastPurchaseResult: result);
+
       // 購入成功時は状態を更新
       if (result.type == PurchaseResultType.success) {
         await loadSubscriptionStatus();
@@ -153,22 +149,17 @@ class BillingViewModel extends StateNotifier<BillingState> {
       errorMessage: null,
       lastRestoreResult: null,
     );
-    
+
     try {
       final result = await _restorePurchases();
-      
-      state = state.copyWith(
-        isLoading: false,
-        lastRestoreResult: result,
-      );
-      
+
+      state = state.copyWith(isLoading: false, lastRestoreResult: result);
+
       // 復元成功時は状態を更新
       if (result.success) {
         await loadSubscriptionStatus();
         if (result.restoredCount == 0) {
-          state = state.copyWith(
-            errorMessage: '復元可能な購入が見つかりませんでした',
-          );
+          state = state.copyWith(errorMessage: '復元可能な購入が見つかりませんでした');
         }
       } else {
         state = state.copyWith(

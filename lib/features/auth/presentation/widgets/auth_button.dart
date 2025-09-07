@@ -105,34 +105,36 @@ class _AuthButtonState extends State<AuthButton>
                 boxShadow: _getBoxShadow(),
               ),
               child: Center(
-                child: widget.isLoading
-                    ? SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            _getLoadingColor(),
-                          ),
-                        ),
-                      )
-                    : Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          if (widget.type != AuthButtonType.email) ...[
-                            _getIcon(),
-                            const SizedBox(width: 12),
-                          ],
-                          Text(
-                            widget.text,
-                            style: _getTextStyle().copyWith(
-                              color: isEnabled
-                                  ? _getTextColor()
-                                  : ColorConsts.disabledText,
+                child:
+                    widget.isLoading
+                        ? SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              _getLoadingColor(),
                             ),
                           ),
-                        ],
-                      ),
+                        )
+                        : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            if (widget.type != AuthButtonType.email) ...[
+                              _getIcon(),
+                              const SizedBox(width: 12),
+                            ],
+                            Text(
+                              widget.text,
+                              style: _getTextStyle().copyWith(
+                                color:
+                                    isEnabled
+                                        ? _getTextColor()
+                                        : ColorConsts.disabledText,
+                              ),
+                            ),
+                          ],
+                        ),
               ),
             ),
           ),
@@ -214,11 +216,7 @@ class _AuthButtonState extends State<AuthButton>
           color: ColorConsts.textPrimary,
         );
       case AuthButtonType.apple:
-        return const Icon(
-          Icons.apple,
-          size: 24,
-          color: Colors.white,
-        );
+        return const Icon(Icons.apple, size: 24, color: Colors.white);
       case AuthButtonType.email:
         return const SizedBox.shrink();
     }

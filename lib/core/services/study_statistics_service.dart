@@ -14,9 +14,9 @@ class StudyStatisticsService {
     required UsersRepository usersRepository,
     required DailyStudyLogsRepository dailyStudyLogsRepository,
     required GoalsRepository goalsRepository,
-  })  : _usersRepository = usersRepository,
-        _dailyStudyLogsRepository = dailyStudyLogsRepository,
-        _goalsRepository = goalsRepository;
+  }) : _usersRepository = usersRepository,
+       _dailyStudyLogsRepository = dailyStudyLogsRepository,
+       _goalsRepository = goalsRepository;
 
   /// 現在のユーザーの学習統計を取得
   Future<StudyStatistics> getCurrentUserStatistics() async {
@@ -39,11 +39,12 @@ class StudyStatisticsService {
   Future<StudyStatistics> getUserStatistics(String userId) async {
     try {
       final today = DateTime.now();
-      
+
       // 一度だけgoalsを取得
       final allGoals = await _goalsRepository.getGoals();
-      final userGoals = allGoals.where((goal) => goal.userId == userId).toList();
-      
+      final userGoals =
+          allGoals.where((goal) => goal.userId == userId).toList();
+
       // 取得したgoalsを各メソッドに渡す
       final results = await Future.wait([
         _getTodayStudyMinutes(userId, today, userGoals),
@@ -58,9 +59,10 @@ class StudyStatisticsService {
       final goalCounts = results[3] as Map<String, int>;
 
       // 進捗率を計算
-      final todayProgress = todayTargetMinutes > 0 
-          ? (todayStudyMinutes / todayTargetMinutes).clamp(0.0, 1.0) 
-          : 0.0;
+      final todayProgress =
+          todayTargetMinutes > 0
+              ? (todayStudyMinutes / todayTargetMinutes).clamp(0.0, 1.0)
+              : 0.0;
 
       return StudyStatistics(
         todayProgress: todayProgress,
@@ -69,7 +71,10 @@ class StudyStatisticsService {
         currentStreak: currentStreak,
         totalGoals: goalCounts['total'] ?? 0,
         completedGoals: goalCounts['completed'] ?? 0,
-        remainingMinutes: (todayTargetMinutes - todayStudyMinutes).clamp(0, todayTargetMinutes),
+        remainingMinutes: (todayTargetMinutes - todayStudyMinutes).clamp(
+          0,
+          todayTargetMinutes,
+        ),
         lastUpdated: DateTime.now(),
       );
     } catch (e) {
@@ -79,7 +84,11 @@ class StudyStatisticsService {
   }
 
   /// 今日の学習時間を取得（分）
-  Future<int> _getTodayStudyMinutes(String userId, DateTime today, List<dynamic> userGoals) async {
+  Future<int> _getTodayStudyMinutes(
+    String userId,
+    DateTime today,
+    List<dynamic> userGoals,
+  ) async {
     try {
       final dailyLogs = await _dailyStudyLogsRepository.getLogsByDateRange(
         _startOfDay(today),
@@ -102,7 +111,10 @@ class StudyStatisticsService {
   }
 
   /// 今日の目標時間を取得（分）
-  Future<int> _getTodayTargetMinutes(String userId, List<dynamic> userGoals) async {
+  Future<int> _getTodayTargetMinutes(
+    String userId,
+    List<dynamic> userGoals,
+  ) async {
     try {
       final activeGoals = userGoals.where((goal) => !goal.isCompleted).toList();
 
@@ -110,8 +122,9 @@ class StudyStatisticsService {
       final todayTargetMinutes = activeGoals.fold<int>(0, (sum, goal) {
         final remainingDays = goal.deadline.difference(DateTime.now()).inDays;
         if (remainingDays <= 0) return sum;
-        
-        final dailyTargetMinutes = goal.targetMinutes.toDouble() / remainingDays;
+
+        final dailyTargetMinutes =
+            goal.targetMinutes.toDouble() / remainingDays;
         final dailyMinutes = dailyTargetMinutes.toInt();
         return (sum + dailyMinutes) as int;
       });
@@ -125,7 +138,11 @@ class StudyStatisticsService {
   }
 
   /// 現在のストリーク（連続学習日数）を取得
-  Future<int> _getCurrentStreak(String userId, DateTime today, List<dynamic> userGoals) async {
+  Future<int> _getCurrentStreak(
+    String userId,
+    DateTime today,
+    List<dynamic> userGoals,
+  ) async {
     try {
       // 過去30日分のデータを取得
       final startDate = today.subtract(const Duration(days: 30));
@@ -137,9 +154,8 @@ class StudyStatisticsService {
       // 渡されたgoalsデータを使用
       final userGoalIds = userGoals.map((goal) => goal.id).toSet();
 
-      final userLogs = dailyLogs
-          .where((log) => userGoalIds.contains(log.goalId))
-          .toList();
+      final userLogs =
+          dailyLogs.where((log) => userGoalIds.contains(log.goalId)).toList();
 
       // 日付ごとに学習時間をグループ化
       final dailyMinutes = <String, int>{};
@@ -151,11 +167,11 @@ class StudyStatisticsService {
       // 連続学習日数を計算
       int streak = 0;
       DateTime checkDate = today;
-      
+
       while (checkDate.isAfter(startDate)) {
         final dateKey = _formatDate(checkDate);
         final minutesForDay = dailyMinutes[dateKey] ?? 0;
-        
+
         if (minutesForDay > 0) {
           streak++;
           checkDate = checkDate.subtract(const Duration(days: 1));
@@ -173,16 +189,16 @@ class StudyStatisticsService {
   }
 
   /// 目標数（総数・完了数）を取得
-  Future<Map<String, int>> _getGoalCounts(String userId, List<dynamic> userGoals) async {
+  Future<Map<String, int>> _getGoalCounts(
+    String userId,
+    List<dynamic> userGoals,
+  ) async {
     try {
       final totalGoals = userGoals.length;
       final completedGoals = userGoals.where((goal) => goal.isCompleted).length;
 
       AppLogger.instance.d('目標数 - 総数: $totalGoals, 完了: $completedGoals');
-      return {
-        'total': totalGoals,
-        'completed': completedGoals,
-      };
+      return {'total': totalGoals, 'completed': completedGoals};
     } catch (e) {
       AppLogger.instance.e('目標数取得エラー', e);
       return {'total': 0, 'completed': 0};
@@ -194,7 +210,7 @@ class StudyStatisticsService {
     try {
       final today = DateTime.now();
       final startDate = today.subtract(const Duration(days: 30));
-      
+
       final dailyLogs = await _dailyStudyLogsRepository.getLogsByDateRange(
         startDate,
         today,
@@ -212,11 +228,11 @@ class StudyStatisticsService {
       // 連続学習日数を計算
       int streak = 0;
       DateTime checkDate = today;
-      
+
       while (checkDate.isAfter(startDate)) {
         final dateKey = _formatDate(checkDate);
         final minutesForDay = dailyMinutes[dateKey] ?? 0;
-        
+
         if (minutesForDay > 0) {
           streak++;
           checkDate = checkDate.subtract(const Duration(days: 1));
