@@ -72,7 +72,10 @@
       "Bash(gh issue edit:*)",
       "Bash(afplay:*)",
       "Bash(gh issue create:*)",
-      "Bash(gh issue:*)"
+      "Bash(gh issue:*)",
+      "Bash(git checkout:*)",
+      "Bash(git pull:*)",
+      "Bash(git reset:*)"
     ],
     "deny": []
   },
