@@ -8,6 +8,7 @@ import '../../../../core/widgets/setting_item.dart';
 import '../../../../core/widgets/pressable_card.dart';
 import '../../../../core/services/timer_restriction_service.dart';
 import '../../../auth/provider/auth_provider.dart';
+import '../../../auth/domain/entities/auth_state.dart';
 import '../../../shared/widgets/sync_status_indicator.dart';
 import '../../../billing/presentation/screens/upgrade_screen.dart';
 
@@ -400,17 +401,35 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
   }
 
   Widget _buildAccountSection() {
-    return _buildSection(
-      title: 'アカウント',
-      children: [
-        SettingItem(
-          title: 'サインアウト',
-          subtitle: 'アカウントからサインアウト',
-          icon: Icons.logout,
-          iconColor: ColorConsts.error,
-          onTap: _showSignOutDialog,
-        ),
-      ],
+    return Consumer(
+      builder: (context, ref, _) {
+        final authState = ref.watch(authViewModelProvider);
+        final isGuest = authState.isGuest;
+
+        return _buildSection(
+          title: 'アカウント',
+          children: [
+            // ゲストユーザーの場合のみアカウント連携項目を表示
+            if (isGuest)
+              SettingItem(
+                title: 'アカウント連携',
+                subtitle: 'Google・Appleアカウントと連携する',
+                icon: Icons.link,
+                iconColor: ColorConsts.primary,
+                onTap: _navigateToAccountLinking,
+              ),
+
+            // アカウント終了項目（ゲストの場合は「リセット」、認証済みの場合は「サインアウト」）
+            SettingItem(
+              title: isGuest ? 'リセット' : 'サインアウト',
+              subtitle: isGuest ? 'すべてのデータを削除してリセット' : 'アカウントからサインアウト',
+              icon: isGuest ? Icons.refresh : Icons.logout,
+              iconColor: ColorConsts.error,
+              onTap: isGuest ? _showResetDialog : _showSignOutDialog,
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -876,6 +895,88 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     Navigator.of(
       context,
     ).push(MaterialPageRoute(builder: (context) => const UpgradeScreen()));
+  }
+
+  // アカウント連携画面への遷移
+  void _navigateToAccountLinking() {
+    // TODO: AccountPromotionScreenへのナビゲーション実装
+    // 現在は開発中のため、開発中ダイアログを表示
+    _showComingSoonDialog('アカウント連携');
+
+    // 実装予定のコード:
+    // Navigator.of(context).pushNamed(
+    //   '/onboarding/account-promotion',
+    //   arguments: {
+    //     'fromSettings': true,
+    //     'skipOnboardingFlow': true,
+    //   },
+    // );
+  }
+
+  // ゲストユーザー向けリセット処理
+  void _showResetDialog() {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('データをリセット'),
+            content: const Text(
+              'すべての目標と学習記録が削除されます。\n'
+              'この操作は元に戻せません。\n'
+              '本当にリセットしますか？',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('キャンセル'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  await _performReset();
+                },
+                style: TextButton.styleFrom(foregroundColor: ColorConsts.error),
+                child: const Text('リセット'),
+              ),
+            ],
+          ),
+    );
+  }
+
+  // リセット処理の実行
+  Future<void> _performReset() async {
+    try {
+      // TODO: ゲストデータの削除処理
+      // final tempUserService = ref.read(tempUserServiceProvider);
+      // await tempUserService.clearAllData();
+
+      // 現在は開発中のため、成功メッセージを表示
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('リセットが完了しました（開発中）'),
+            backgroundColor: ColorConsts.success,
+          ),
+        );
+      }
+
+      // TODO: 初期画面に戻る処理
+      // if (mounted) {
+      //   Navigator.of(context).pushNamedAndRemoveUntil(
+      //     '/onboarding/goal-creation',
+      //     (route) => false,
+      //   );
+      // }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('リセットに失敗しました: $e'),
+            backgroundColor: ColorConsts.error,
+          ),
+        );
+      }
+    }
   }
 
   void _showComingSoonDialog(String feature) {
