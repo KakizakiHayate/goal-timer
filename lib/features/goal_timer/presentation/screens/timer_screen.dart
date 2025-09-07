@@ -206,11 +206,8 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
       leading: IconButton(
         icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
         onPressed: () {
-          if (timerState.status == TimerStatus.running) {
-            _showExitConfirmDialog(context);
-          } else {
-            Navigator.of(context).pop();
-          }
+          final timerViewModel = ref.read(timerViewModelProvider.notifier);
+          _handleBackButton(context, timerState, timerViewModel);
         },
       ),
     );
@@ -526,15 +523,19 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
 
         const SizedBox(width: SpacingConsts.l),
 
-        // 設定ボタン
-        _buildControlButton(
-          icon: Icons.settings_rounded,
-          onPressed:
-              () =>
-                  _showTimerSettingDialog(context, timerState, timerViewModel),
-          backgroundColor: Colors.white.withOpacity(0.2),
-          iconColor: Colors.white,
-        ),
+        // 学習完了ボタン（経過時間がある場合のみ表示）
+        _shouldShowCompleteButton(timerState)
+            ? _buildControlButton(
+                icon: Icons.check_rounded,
+                onPressed: () => _showCompleteConfirmDialog(
+                  context,
+                  timerState,
+                  timerViewModel,
+                ),
+                backgroundColor: Colors.green.withOpacity(0.2),
+                iconColor: Colors.white,
+              )
+            : const SizedBox(width: 64), // ボタンサイズ分のスペースを確保
       ],
     );
   }
@@ -809,6 +810,159 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
     }
   }
 
+  /// 戻るボタンの処理
+  void _handleBackButton(
+    BuildContext context,
+    TimerState timerState,
+    TimerViewModel timerViewModel,
+  ) {
+    // 学習時間があるかどうかを判定
+    bool hasStudyTime = false;
+    
+    switch (timerState.mode) {
+      case TimerMode.countdown:
+        // カウントダウン: 設定時間より少ない時間が残っている場合は学習した
+        hasStudyTime = timerState.currentSeconds < timerState.totalSeconds;
+        break;
+      case TimerMode.countup:
+        // カウントアップ: 1秒以上経過している場合は学習した
+        hasStudyTime = timerState.currentSeconds > 0;
+        break;
+      case TimerMode.pomodoro:
+        // ポモドーロ: 設定時間より少ない時間が残っている場合は学習した
+        hasStudyTime = timerState.currentSeconds < timerState.totalSeconds;
+        break;
+    }
+    
+    if (hasStudyTime) {
+      _showSaveConfirmDialog(context, timerState, timerViewModel);
+    } else {
+      // 経過時間がない場合はそのまま戻る
+      Navigator.of(context).pop();
+    }
+  }
+
+  /// 学習時間の保存確認ダイアログを表示
+  void _showSaveConfirmDialog(
+    BuildContext context,
+    TimerState timerState,
+    TimerViewModel timerViewModel,
+  ) {
+    // 学習時間の計算
+    int studyTimeInSeconds;
+    
+    switch (timerState.mode) {
+      case TimerMode.countdown:
+        // フォーカスモード: 設定時間 - 残り時間 = 学習時間
+        studyTimeInSeconds = timerState.totalSeconds - timerState.currentSeconds;
+        break;
+      case TimerMode.countup:
+        // フリーモード: 経過時間 = 学習時間
+        studyTimeInSeconds = timerState.currentSeconds;
+        break;
+      case TimerMode.pomodoro:
+        // ポモドーロモード: 設定時間 - 残り時間 = 学習時間
+        studyTimeInSeconds = timerState.totalSeconds - timerState.currentSeconds;
+        break;
+    }
+
+    final studyMinutes = studyTimeInSeconds ~/ 60;
+    final studySeconds = studyTimeInSeconds % 60;
+    final studyTimeText = studySeconds > 0 
+        ? '$studyMinutes分$studySeconds秒' 
+        : '$studyMinutes分';
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: Text(
+          '学習時間の保存',
+          style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '$studyTimeTextの学習時間が記録されています。',
+              style: TextConsts.body.copyWith(
+                color: ColorConsts.textPrimary,
+              ),
+            ),
+            const SizedBox(height: SpacingConsts.sm),
+            Text(
+              '次回から学習から離れる場合は、学習完了のチェックマークボタンを押してください',
+              style: TextConsts.caption.copyWith(
+                color: ColorConsts.textSecondary,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context), // ダイアログを閉じて戻る
+            child: Text(
+              '戻る',
+              style: TextConsts.body.copyWith(
+                color: ColorConsts.textSecondary,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              // 保存しないで戻る
+              Navigator.pop(context); // ダイアログを閉じる
+              timerViewModel.resetTimer(); // タイマーをリセット
+              Navigator.pop(context); // 画面を戻る
+            },
+            child: Text(
+              '⭐ 保存しない',
+              style: TextConsts.body.copyWith(
+                color: ColorConsts.textSecondary,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              // タイマーを停止
+              timerViewModel.completeTimer();
+              
+              // TODO: 学習記録を保存する処理を実装
+              // StudyLogを作成してRepositoryに保存
+              
+              Navigator.pop(context); // ダイアログを閉じる
+              Navigator.pop(context); // 画面を戻る
+              
+              // 保存完了フィードバックを表示
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('$studyTimeTextの学習を記録しました'),
+                  backgroundColor: ColorConsts.success,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ColorConsts.primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              '💾 保存する',
+              style: TextConsts.body.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showExitConfirmDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -922,5 +1076,126 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
         );
       }
     }
+  }
+
+  /// 学習完了ボタンを表示するかどうかを判定
+  bool _shouldShowCompleteButton(TimerState timerState) {
+    // タイマー実行中 || 一時停止中 || (学習時間がある場合)
+    bool hasStudyTime = false;
+    
+    switch (timerState.mode) {
+      case TimerMode.countdown:
+        hasStudyTime = timerState.currentSeconds < timerState.totalSeconds;
+        break;
+      case TimerMode.countup:
+        hasStudyTime = timerState.currentSeconds > 0;
+        break;
+      case TimerMode.pomodoro:
+        hasStudyTime = timerState.currentSeconds < timerState.totalSeconds;
+        break;
+    }
+    
+    return timerState.status == TimerStatus.running ||
+           timerState.status == TimerStatus.paused ||
+           hasStudyTime;
+  }
+
+  /// 学習完了確認ダイアログを表示
+  void _showCompleteConfirmDialog(
+    BuildContext context,
+    TimerState timerState,
+    TimerViewModel timerViewModel,
+  ) {
+    // 学習時間の計算
+    int studyTimeInSeconds;
+    
+    switch (timerState.mode) {
+      case TimerMode.countdown:
+        // フォーカスモード: 設定時間 - 残り時間 = 学習時間
+        studyTimeInSeconds = timerState.totalSeconds - timerState.currentSeconds;
+        break;
+      case TimerMode.countup:
+        // フリーモード: 経過時間 = 学習時間
+        studyTimeInSeconds = timerState.currentSeconds;
+        break;
+      case TimerMode.pomodoro:
+        // ポモドーロモード: 設定時間 - 残り時間 = 学習時間
+        studyTimeInSeconds = timerState.totalSeconds - timerState.currentSeconds;
+        break;
+    }
+
+    final studyMinutes = studyTimeInSeconds ~/ 60;
+    final studySeconds = studyTimeInSeconds % 60;
+    final studyTimeText = studySeconds > 0 
+        ? '$studyMinutes分$studySeconds秒' 
+        : '$studyMinutes分';
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: Text(
+          '学習完了',
+          style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          '$studyTimeTextを学習完了として記録しますか？',
+          style: TextConsts.body.copyWith(
+            color: ColorConsts.textSecondary,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'キャンセル',
+              style: TextConsts.body.copyWith(
+                color: ColorConsts.textSecondary,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              // タイマーを停止
+              timerViewModel.completeTimer();
+              
+              // TODO: 学習記録を保存する処理を実装
+              // StudyLogを作成してRepositoryに保存
+              
+              Navigator.pop(context);
+              
+              // 完了フィードバックを表示
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('$studyTimeTextの学習を記録しました！'),
+                  backgroundColor: ColorConsts.success,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+              
+              // 完了アニメーションを表示
+              setState(() {
+                _showCompletionAnimation = true;
+              });
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ColorConsts.success,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              '完了',
+              style: TextConsts.body.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
