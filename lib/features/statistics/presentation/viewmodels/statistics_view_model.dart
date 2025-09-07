@@ -71,62 +71,37 @@ final dailyStatsProvider = FutureProvider.autoDispose<DailyStats>((ref) async {
   return useCase.execute(selectedDate);
 });
 
-// 統計メトリクスのプロバイダー
+// 統計メトリクスのプロバイダー（型安全性向上）
 final statisticsMetricsProvider = FutureProvider.autoDispose<StatisticsMetrics>(
   (ref) async {
     final dateRange = ref.watch(dateRangeProvider);
     final repository = ref.watch(statisticsRepositoryProvider);
 
-    // 並行して各種統計データを取得
-    final results = await Future.wait([
-      repository.getStatistics(
-        startDate: dateRange.startDate,
-        endDate: dateRange.endDate,
-      ),
-      repository.getConsecutiveStudyDays(),
-      repository.getGoalAchievementRate(
-        startDate: dateRange.startDate,
-        endDate: dateRange.endDate,
-      ),
-      repository.getAverageSessionTime(
-        startDate: dateRange.startDate,
-        endDate: dateRange.endDate,
-      ),
-      repository.getStudyTimeComparison(
-        currentStartDate: dateRange.startDate,
-        currentEndDate: dateRange.endDate,
-      ),
-      repository.getStreakComparison(),
-      repository.getAchievementRateComparison(
-        currentStartDate: dateRange.startDate,
-        currentEndDate: dateRange.endDate,
-      ),
-      repository.getAverageTimeComparison(
-        currentStartDate: dateRange.startDate,
-        currentEndDate: dateRange.endDate,
-      ),
-    ]);
+    // 型安全な一括取得メソッドを使用
+    final bundle = await repository.getCompleteStatistics(
+      startDate: dateRange.startDate,
+      endDate: dateRange.endDate,
+    );
 
-    final statistics = results[0] as List<Statistics>;
-    final totalMinutes = statistics.fold<int>(
+    final totalMinutes = bundle.statistics.fold<int>(
       0,
       (sum, stat) => sum + stat.totalMinutes,
     );
 
     return StatisticsMetrics(
       totalHours: (totalMinutes / 60).toStringAsFixed(1),
-      consecutiveDays: (results[1] as int).toString(),
-      achievementRate: (results[2] as double).toStringAsFixed(0),
-      averageSessionTime: (results[3] as double).toStringAsFixed(0),
-      studyTimeComparison: results[4] as Map<String, dynamic>,
-      streakComparison: results[5] as Map<String, dynamic>,
-      achievementRateComparison: results[6] as Map<String, dynamic>,
-      averageTimeComparison: results[7] as Map<String, dynamic>,
+      consecutiveDays: bundle.consecutiveDays.toString(),
+      achievementRate: bundle.achievementRate.toStringAsFixed(0),
+      averageSessionTime: bundle.averageSessionTime.toStringAsFixed(0),
+      studyTimeComparison: bundle.studyTimeComparison,
+      streakComparison: bundle.streakComparison,
+      achievementRateComparison: bundle.achievementRateComparison,
+      averageTimeComparison: bundle.averageTimeComparison,
     );
   },
 );
 
-// 目標別統計データのプロバイダー
+// 目標別統計データのプロバイダー（N+1クエリ問題解決）
 final goalStatisticsProvider = FutureProvider.autoDispose<List<GoalStatistic>>((
   ref,
 ) async {
@@ -138,13 +113,19 @@ final goalStatisticsProvider = FutureProvider.autoDispose<List<GoalStatistic>>((
     endDate: dateRange.endDate,
   );
 
+  if (statistics.isEmpty) {
+    return [];
+  }
+
+  // 全ての日付を収集してバッチクエリを実行
+  final dates = statistics.map((stat) => stat.date).toList();
+  final batchDailyStats = await repository.getBatchDailyStats(dates);
+
   // 目標IDごとの学習時間を集計
   final Map<String, int> goalMinutes = {};
   final Map<String, String> goalTitles = {};
 
-  for (final stat in statistics) {
-    // 各日のDailyStatsを取得して目標別データを集計
-    final dailyStats = await repository.getDailyStats(stat.date);
+  for (final dailyStats in batchDailyStats.values) {
     for (final entry in dailyStats.goalMinutes.entries) {
       goalMinutes[entry.key] = (goalMinutes[entry.key] ?? 0) + entry.value;
       if (dailyStats.goalTitles.containsKey(entry.key)) {
