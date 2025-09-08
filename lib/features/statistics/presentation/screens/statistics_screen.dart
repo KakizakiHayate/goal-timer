@@ -268,55 +268,8 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
                           ),
                         ],
                       ),
-                      const SizedBox(height: SpacingConsts.m),
-                      // 2行目
-                      Row(
-                        children: [
-                          Expanded(
-                            child: SizedBox(
-                              width: cardWidth,
-                              child: MetricCard(
-                                title: '達成率',
-                                value: metrics.achievementRate,
-                                unit: '%',
-                                icon: Icons.trending_up_outlined,
-                                iconColor: ColorConsts.success,
-                                changeText:
-                                    metrics
-                                        .achievementRateComparison['changeText'] ??
-                                    '+0%',
-                                changeColor: _getChangeColor(
-                                  metrics.achievementRateComparison['difference'] ??
-                                      0,
-                                ),
-                                subtitle: '目標達成率',
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: SpacingConsts.m),
-                          Expanded(
-                            child: SizedBox(
-                              width: cardWidth,
-                              child: MetricCard(
-                                title: '平均集中時間',
-                                value: metrics.averageSessionTime,
-                                unit: '分',
-                                icon: Icons.timer_outlined,
-                                iconColor: ColorConsts.primary,
-                                changeText:
-                                    metrics
-                                        .averageTimeComparison['changeText'] ??
-                                    '+0分',
-                                changeColor: _getChangeColor(
-                                  metrics.averageTimeComparison['difference'] ??
-                                      0,
-                                ),
-                                subtitle: '1セッション平均',
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                      // Issue #51: 「達成率」と「平均集中時間」のMetricCardを削除
+                      // 2x1グリッドレイアウトに変更（上段の2項目のみ保持）
                     ],
                   );
                 },
