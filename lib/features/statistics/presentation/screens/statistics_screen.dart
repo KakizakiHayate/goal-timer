@@ -4,12 +4,10 @@ import '../../../../core/utils/color_consts.dart';
 import '../../../../core/utils/text_consts.dart';
 import '../../../../core/utils/spacing_consts.dart';
 import '../../../../core/utils/animation_consts.dart';
-import '../../../../core/widgets/metric_card.dart';
-import '../../../../core/widgets/chart_card.dart';
 import '../viewmodels/statistics_view_model.dart';
 
-/// 改善された統計画面
-/// データビジュアライゼーションと達成感を重視
+/// Issue #49: シンプル化された統計画面
+/// 期間選択式に変更、3項目のみ表示
 class StatisticsScreen extends ConsumerStatefulWidget {
   const StatisticsScreen({super.key});
 
@@ -21,7 +19,10 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
     with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
-  int _selectedPeriod = 0; // 0: 週間, 1: 月間, 2: 年間
+  
+  // Issue #49: 期間選択用の状態
+  DateTime _selectedStartDate = DateTime.now();
+  DateTime _selectedEndDate = DateTime.now();
 
   @override
   void initState() {
@@ -37,9 +38,9 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
 
     _animationController.forward();
 
-    // 初期化時にデータ期間を設定
+    // Issue #49: 初期化時に今日の日付で設定
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _updateDateRange();
+      _updateDateRangeForToday();
     });
   }
 
@@ -66,18 +67,13 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
                 padding: const EdgeInsets.all(SpacingConsts.l),
                 child: Column(
                   children: [
-                    // 期間選択
-                    _buildPeriodSelector(),
+                    // Issue #49: 期間表示と変更ボタン
+                    _buildPeriodDisplay(),
 
                     const SizedBox(height: SpacingConsts.l),
 
-                    // メトリクスグリッド
-                    _buildMetricsGrid(),
-
-                    const SizedBox(height: SpacingConsts.l),
-
-                    // チャート
-                    _buildChartsSection(),
+                    // Issue #49: シンプル化されたメトリクス（3項目のみ）
+                    _buildSimplifiedMetrics(),
 
                     const SizedBox(height: SpacingConsts.l),
                   ],
@@ -98,7 +94,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
       backgroundColor: ColorConsts.primary,
       flexibleSpace: FlexibleSpaceBar(
         title: Text(
-          '統計',
+          '📊 学習統計',
           style: TextConsts.h3.copyWith(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -117,210 +113,112 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
     );
   }
 
-  Widget _buildPeriodSelector() {
-    final periods = ['週間', '月間', '年間'];
+  // Issue #49: 期間表示と変更ボタン
+  Widget _buildPeriodDisplay() {
+    final isRangeSelection = !_isSameDay(_selectedStartDate, _selectedEndDate);
+    final displayText = isRangeSelection 
+        ? '期間: ${_formatDate(_selectedStartDate)} - ${_formatDate(_selectedEndDate)}'
+        : '期間: ${_formatDate(_selectedStartDate)}';
 
     return Container(
-      padding: const EdgeInsets.all(4),
+      padding: const EdgeInsets.all(SpacingConsts.m),
       decoration: BoxDecoration(
-        color: ColorConsts.backgroundSecondary,
+        color: ColorConsts.cardBackground,
         borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: ColorConsts.shadowLight,
+            offset: const Offset(0, 2),
+            blurRadius: 4,
+          ),
+        ],
       ),
-      child: Row(
-        children:
-            periods.asMap().entries.map((entry) {
-              final index = entry.key;
-              final period = entry.value;
-              final isSelected = _selectedPeriod == index;
-
-              return Expanded(
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _selectedPeriod = index;
-                    });
-                    // 期間変更時にdateRangeProviderを更新
-                    _updateDateRange();
-                  },
-                  child: AnimatedContainer(
-                    duration: AnimationConsts.fast,
-                    padding: const EdgeInsets.symmetric(
-                      vertical: SpacingConsts.m,
-                    ),
-                    decoration: BoxDecoration(
-                      color:
-                          isSelected
-                              ? ColorConsts.cardBackground
-                              : Colors.transparent,
-                      borderRadius: BorderRadius.circular(8),
-                      boxShadow:
-                          isSelected
-                              ? [
-                                BoxShadow(
-                                  color: ColorConsts.shadowLight,
-                                  offset: const Offset(0, 2),
-                                  blurRadius: 4,
-                                ),
-                              ]
-                              : null,
-                    ),
-                    child: Text(
-                      period,
-                      style: TextConsts.body.copyWith(
-                        color:
-                            isSelected
-                                ? ColorConsts.primary
-                                : ColorConsts.textSecondary,
-                        fontWeight:
-                            isSelected ? FontWeight.bold : FontWeight.w500,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '📅 $displayText',
+                style: TextConsts.bodyMedium.copyWith(
+                  color: ColorConsts.textPrimary,
+                  fontWeight: FontWeight.w500,
                 ),
-              );
-            }).toList(),
+              ),
+            ],
+          ),
+          const SizedBox(height: SpacingConsts.sm),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: _showPeriodSelectionDialog,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: ColorConsts.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: SpacingConsts.sm),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text('期間を変更する'),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  void _updateDateRange() {
-    final now = DateTime.now();
-    DateTime startDate;
-
-    switch (_selectedPeriod) {
-      case 0: // 週間
-        startDate = now.subtract(const Duration(days: 7));
-        break;
-      case 1: // 月間
-        startDate = now.subtract(const Duration(days: 30));
-        break;
-      case 2: // 年間
-        startDate = now.subtract(const Duration(days: 365));
-        break;
-      default:
-        startDate = now.subtract(const Duration(days: 7));
-    }
-
-    ref.read(dateRangeProvider.notifier).state = DateRange(
-      startDate: startDate,
-      endDate: now,
-    );
-  }
-
-  Widget _buildMetricsGrid() {
+  // Issue #49: シンプル化されたメトリクス表示（3項目のみ）
+  Widget _buildSimplifiedMetrics() {
     return Consumer(
       builder: (context, ref, child) {
         final metricsAsync = ref.watch(statisticsMetricsProvider);
 
         return metricsAsync.when(
-          data:
-              (metrics) => LayoutBuilder(
-                builder: (context, constraints) {
-                  // 画面幅に応じて2列のレイアウトを動的に調整
-                  final availableWidth = constraints.maxWidth;
-                  final cardWidth = (availableWidth - SpacingConsts.m) / 2;
-
-                  return Column(
-                    children: [
-                      // 1行目
-                      Row(
-                        children: [
-                          Expanded(
-                            child: SizedBox(
-                              width: cardWidth,
-                              child: MetricCard(
-                                title: '総勉強時間',
-                                value: metrics.totalHours,
-                                unit: 'h',
-                                icon: Icons.schedule_outlined,
-                                iconColor: ColorConsts.primary,
-                                changeText:
-                                    metrics.studyTimeComparison['changeText'] ??
-                                    '+0.0h',
-                                changeColor: _getChangeColor(
-                                  metrics.studyTimeComparison['difference'] ??
-                                      0,
-                                ),
-                                subtitle: _getPeriodText(),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: SpacingConsts.m),
-                          Expanded(
-                            child: SizedBox(
-                              width: cardWidth,
-                              child: MetricCard(
-                                title: '継続日数',
-                                value: metrics.consecutiveDays,
-                                unit: '日',
-                                icon: Icons.whatshot_outlined,
-                                iconColor: ColorConsts.warning,
-                                changeText:
-                                    metrics.streakComparison['changeText'] ??
-                                    '+0日',
-                                changeColor: _getChangeColor(
-                                  metrics.streakComparison['difference'] ?? 0,
-                                ),
-                                subtitle: '現在のストリーク',
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: SpacingConsts.m),
-                      // 2行目
-                      Row(
-                        children: [
-                          Expanded(
-                            child: SizedBox(
-                              width: cardWidth,
-                              child: MetricCard(
-                                title: '達成率',
-                                value: metrics.achievementRate,
-                                unit: '%',
-                                icon: Icons.trending_up_outlined,
-                                iconColor: ColorConsts.success,
-                                changeText:
-                                    metrics
-                                        .achievementRateComparison['changeText'] ??
-                                    '+0%',
-                                changeColor: _getChangeColor(
-                                  metrics.achievementRateComparison['difference'] ??
-                                      0,
-                                ),
-                                subtitle: '目標達成率',
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: SpacingConsts.m),
-                          Expanded(
-                            child: SizedBox(
-                              width: cardWidth,
-                              child: MetricCard(
-                                title: '平均集中時間',
-                                value: metrics.averageSessionTime,
-                                unit: '分',
-                                icon: Icons.timer_outlined,
-                                iconColor: ColorConsts.primary,
-                                changeText:
-                                    metrics
-                                        .averageTimeComparison['changeText'] ??
-                                    '+0分',
-                                changeColor: _getChangeColor(
-                                  metrics.averageTimeComparison['difference'] ??
-                                      0,
-                                ),
-                                subtitle: '1セッション平均',
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  );
-                },
-              ),
+          data: (metrics) => Container(
+            padding: const EdgeInsets.all(SpacingConsts.m),
+            decoration: BoxDecoration(
+              color: ColorConsts.cardBackground,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: ColorConsts.shadowLight,
+                  offset: const Offset(0, 2),
+                  blurRadius: 4,
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '📈 統計データ',
+                  style: TextConsts.h4.copyWith(
+                    color: ColorConsts.textPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: SpacingConsts.m),
+                _buildSimpleMetricRow(
+                  label: '総学習時間',
+                  value: metrics.totalHours,
+                  icon: Icons.schedule_outlined,
+                ),
+                const SizedBox(height: SpacingConsts.sm),
+                _buildSimpleMetricRow(
+                  label: '継続日数',
+                  value: metrics.consecutiveDays,
+                  icon: Icons.whatshot_outlined,
+                ),
+                const SizedBox(height: SpacingConsts.sm),
+                _buildSimpleMetricRow(
+                  label: '目標達成率',
+                  value: metrics.achievementRate,
+                  icon: Icons.trending_up_outlined,
+                ),
+              ],
+            ),
+          ),
           loading: () => _buildLoadingMetrics(),
           error: (error, stack) => _buildErrorMetrics(),
         );
@@ -328,10 +226,47 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
     );
   }
 
+  Widget _buildSimpleMetricRow({
+    required String label,
+    required String value,
+    required IconData icon,
+  }) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 20,
+          color: ColorConsts.primary,
+        ),
+        const SizedBox(width: SpacingConsts.sm),
+        Expanded(
+          child: Text(
+            label,
+            style: TextConsts.bodyMedium.copyWith(
+              color: ColorConsts.textPrimary,
+            ),
+          ),
+        ),
+        Text(
+          value,
+          style: TextConsts.bodyMedium.copyWith(
+            color: ColorConsts.primary,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildLoadingMetrics() {
-    return const SizedBox(
+    return Container(
       height: 200,
-      child: Center(child: CircularProgressIndicator()),
+      padding: const EdgeInsets.all(SpacingConsts.m),
+      decoration: BoxDecoration(
+        color: ColorConsts.cardBackground,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: const Center(child: CircularProgressIndicator()),
     );
   }
 
@@ -359,186 +294,146 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
     );
   }
 
-  Color _getChangeColor(dynamic difference) {
-    if (difference == null) return ColorConsts.textSecondary;
-    final diff =
-        difference is int ? difference.toDouble() : difference as double;
-    return diff >= 0 ? ColorConsts.success : ColorConsts.error;
+  // Issue #49: ヘルパー関数
+  bool _isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
-  String _getPeriodText() {
-    switch (_selectedPeriod) {
-      case 0:
-        return '先週比';
-      case 1:
-        return '先月比';
-      case 2:
-        return '昨年比';
-      default:
-        return '前期間比';
-    }
+  String _formatDate(DateTime date) {
+    return '${date.year}/${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')}';
   }
 
-  Widget _buildChartsSection() {
-    return Consumer(
-      builder: (context, ref, child) {
-        final goalStatsAsync = ref.watch(goalStatisticsProvider);
+  void _updateDateRangeForToday() {
+    final today = DateTime.now();
+    setState(() {
+      _selectedStartDate = DateTime(today.year, today.month, today.day);
+      _selectedEndDate = DateTime(today.year, today.month, today.day);
+    });
 
-        return Column(
-          children: [
-            // 勉強時間チャート
-            ChartCard(
-              title: '勉強時間の推移',
-              subtitle: _getTimeChartSubtitle(),
-              chart: _buildTimeChart(),
-              legendItems: [
-                ChartLegendItem(label: '実績', color: ColorConsts.primary),
-                ChartLegendItem(label: '目標', color: ColorConsts.textTertiary),
-              ],
-            ),
-
-            const SizedBox(height: SpacingConsts.l),
-
-            // 目標別時間分布チャート
-            goalStatsAsync.when(
-              data:
-                  (goalStats) => ChartCard(
-                    title: '目標別時間分布',
-                    subtitle: _getDistributionChartSubtitle(),
-                    chart: _buildDistributionChart(),
-                    legendItems: _buildGoalLegendItems(goalStats),
-                  ),
-              loading:
-                  () => ChartCard(
-                    title: '目標別時間分布',
-                    subtitle: _getDistributionChartSubtitle(),
-                    chart: _buildLoadingChart(),
-                    legendItems: [],
-                  ),
-              error:
-                  (error, stack) => ChartCard(
-                    title: '目標別時間分布',
-                    subtitle: _getDistributionChartSubtitle(),
-                    chart: _buildErrorChart(),
-                    legendItems: [],
-                  ),
-            ),
-          ],
-        );
-      },
+    // dateRangeProviderを今日の日付で更新
+    ref.read(dateRangeProvider.notifier).state = DateRange(
+      startDate: _selectedStartDate,
+      endDate: _selectedEndDate,
     );
   }
 
-  String _getTimeChartSubtitle() {
-    switch (_selectedPeriod) {
-      case 0:
-        return '過去7日間の勉強時間';
-      case 1:
-        return '過去30日間の勉強時間';
-      case 2:
-        return '過去365日間の勉強時間';
-      default:
-        return '過去7日間の勉強時間';
-    }
-  }
-
-  String _getDistributionChartSubtitle() {
-    switch (_selectedPeriod) {
-      case 0:
-        return '今週の目標別勉強時間';
-      case 1:
-        return '今月の目標別勉強時間';
-      case 2:
-        return '今年の目標別勉強時間';
-      default:
-        return '今週の目標別勉強時間';
-    }
-  }
-
-  List<ChartLegendItem> _buildGoalLegendItems(List<GoalStatistic> goalStats) {
-    final colors = [
-      ColorConsts.primary,
-      ColorConsts.success,
-      ColorConsts.warning,
-      ColorConsts.error,
-      ColorConsts.primaryLight,
-    ];
-
-    return goalStats.take(5).toList().asMap().entries.map((entry) {
-      final index = entry.key;
-      final goal = entry.value;
-      return ChartLegendItem(
-        label: goal.goalTitle,
-        color: colors[index % colors.length],
-      );
-    }).toList();
-  }
-
-  Widget _buildLoadingChart() {
-    return Container(
-      height: 120,
-      decoration: BoxDecoration(
-        color: ColorConsts.backgroundSecondary,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: const Center(child: CircularProgressIndicator()),
-    );
-  }
-
-  Widget _buildErrorChart() {
-    return Container(
-      height: 120,
-      decoration: BoxDecoration(
-        color: ColorConsts.backgroundSecondary,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+  void _showPeriodSelectionDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('期間を選択'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.error_outline, color: ColorConsts.error, size: 32),
-            SizedBox(height: SpacingConsts.s),
-            Text(
-              'チャートの読み込みに失敗しました',
-              style: TextStyle(color: ColorConsts.textSecondary, fontSize: 12),
+            ListTile(
+              title: const Text('今日'),
+              onTap: () {
+                _selectToday();
+                Navigator.of(context).pop();
+              },
+            ),
+            ListTile(
+              title: const Text('昨日'),
+              onTap: () {
+                _selectYesterday();
+                Navigator.of(context).pop();
+              },
+            ),
+            ListTile(
+              title: const Text('過去7日間'),
+              onTap: () {
+                _selectLast7Days();
+                Navigator.of(context).pop();
+              },
+            ),
+            ListTile(
+              title: const Text('過去30日間'),
+              onTap: () {
+                _selectLast30Days();
+                Navigator.of(context).pop();
+              },
+            ),
+            ListTile(
+              title: const Text('カスタム範囲'),
+              onTap: () {
+                Navigator.of(context).pop();
+                _showCustomRangePicker();
+              },
             ),
           ],
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('キャンセル'),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildTimeChart() {
-    // TODO: 実際のチャートライブラリを使用して実装
-    return Container(
-      decoration: BoxDecoration(
-        color: ColorConsts.backgroundSecondary,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: const Center(
-        child: Text(
-          '時間推移チャート\n（実装予定）',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: ColorConsts.textSecondary, fontSize: 16),
-        ),
-      ),
-    );
+  void _selectToday() {
+    final today = DateTime.now();
+    setState(() {
+      _selectedStartDate = DateTime(today.year, today.month, today.day);
+      _selectedEndDate = DateTime(today.year, today.month, today.day);
+    });
+    _updateDateRange();
   }
 
-  Widget _buildDistributionChart() {
-    // TODO: 実際のチャートライブラリを使用して実装
-    return Container(
-      decoration: BoxDecoration(
-        color: ColorConsts.backgroundSecondary,
-        borderRadius: BorderRadius.circular(12),
+  void _selectYesterday() {
+    final yesterday = DateTime.now().subtract(const Duration(days: 1));
+    setState(() {
+      _selectedStartDate = DateTime(yesterday.year, yesterday.month, yesterday.day);
+      _selectedEndDate = DateTime(yesterday.year, yesterday.month, yesterday.day);
+    });
+    _updateDateRange();
+  }
+
+  void _selectLast7Days() {
+    final today = DateTime.now();
+    final sevenDaysAgo = today.subtract(const Duration(days: 7));
+    setState(() {
+      _selectedStartDate = DateTime(sevenDaysAgo.year, sevenDaysAgo.month, sevenDaysAgo.day);
+      _selectedEndDate = DateTime(today.year, today.month, today.day);
+    });
+    _updateDateRange();
+  }
+
+  void _selectLast30Days() {
+    final today = DateTime.now();
+    final thirtyDaysAgo = today.subtract(const Duration(days: 30));
+    setState(() {
+      _selectedStartDate = DateTime(thirtyDaysAgo.year, thirtyDaysAgo.month, thirtyDaysAgo.day);
+      _selectedEndDate = DateTime(today.year, today.month, today.day);
+    });
+    _updateDateRange();
+  }
+
+  void _showCustomRangePicker() async {
+    final DateTimeRange? picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime.now().subtract(const Duration(days: 365)),
+      lastDate: DateTime.now(),
+      initialDateRange: DateTimeRange(
+        start: _selectedStartDate,
+        end: _selectedEndDate,
       ),
-      child: const Center(
-        child: Text(
-          '分布チャート\n（実装予定）',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: ColorConsts.textSecondary, fontSize: 16),
-        ),
-      ),
+    );
+
+    if (picked != null) {
+      setState(() {
+        _selectedStartDate = picked.start;
+        _selectedEndDate = picked.end;
+      });
+      _updateDateRange();
+    }
+  }
+
+  void _updateDateRange() {
+    ref.read(dateRangeProvider.notifier).state = DateRange(
+      startDate: _selectedStartDate,
+      endDate: _selectedEndDate,
     );
   }
 }
