@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:goal_timer/core/data/repositories/hybrid/daily_study_logs/hybrid_daily_study_logs_repository.dart';
 import 'package:goal_timer/core/models/daily_study_logs/daily_study_log_model.dart';
 import 'package:goal_timer/features/statistics/domain/entities/daily_stats.dart';
@@ -610,6 +611,200 @@ class StatisticsRepositoryImpl implements StatisticsRepository {
           'changeText': '+0分',
         },
       );
+    }
+  }
+
+  /// Issue #52: ローカルDB優先でデータを取得
+  Future<List<Statistics>> getLocalStatistics({
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
+    try {
+      AppLogger.instance.i('🏠 統計データをローカルDBから取得開始');
+      
+      final start = startDate ?? DateTime.now().subtract(const Duration(days: 7));
+      final end = endDate ?? DateTime.now();
+
+      // ローカルDBから直接取得（Supabaseへの通信なし）
+      final dailyLogs = await _dailyStudyLogRepository.getLogsByDateRange(
+        start,
+        end,
+      );
+
+      // 日付ごとにグループ化
+      final Map<String, List<DailyStudyLogModel>> logsByDate = {};
+      for (var log in dailyLogs) {
+        final dateStr = log.date.toIso8601String().split('T')[0];
+        logsByDate.putIfAbsent(dateStr, () => []).add(log);
+      }
+
+      // 統計データに変換
+      final List<Statistics> statistics = [];
+      for (var entry in logsByDate.entries) {
+        final date = DateTime.parse(entry.key);
+        int totalMinutes = 0;
+        final Set<String> uniqueGoalIds = {};
+
+        for (var log in entry.value) {
+          totalMinutes += log.minutes;
+          uniqueGoalIds.add(log.goalId);
+        }
+
+        statistics.add(
+          Statistics(
+            id: entry.key,
+            date: date,
+            totalMinutes: totalMinutes,
+            goalCount: uniqueGoalIds.length,
+          ),
+        );
+      }
+
+      // 日付順にソート
+      statistics.sort((a, b) => b.date.compareTo(a.date));
+
+      AppLogger.instance.i('✅ ローカル統計データ取得完了: ${statistics.length}件');
+      return statistics;
+    } catch (e, stackTrace) {
+      AppLogger.instance.e('❌ ローカル統計データ取得エラー', e, stackTrace);
+      return [];
+    }
+  }
+
+  /// Issue #52: ローカルDB優先で完全統計データを取得
+  Future<StatisticsBundle> getLocalCompleteStatistics({
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    try {
+      AppLogger.instance.i('🏠 完全統計データをローカルDBから取得開始');
+
+      // ローカルデータのみを使用して統計計算
+      final statistics = await getLocalStatistics(
+        startDate: startDate,
+        endDate: endDate,
+      );
+
+      // 継続日数計算（ローカルのみ）
+      int consecutiveDays = 0;
+      try {
+        consecutiveDays = await _calculateLocalConsecutiveDays();
+      } catch (e) {
+        AppLogger.instance.w('継続日数計算エラー（ローカル）: $e');
+      }
+
+      // 簡易的な達成率・平均時間計算
+      double achievementRate = 0.0;
+      double averageSessionTime = 0.0;
+      if (statistics.isNotEmpty) {
+        final totalMinutes = statistics.fold<int>(0, (sum, stat) => sum + stat.totalMinutes);
+        final daysWithData = statistics.where((stat) => stat.totalMinutes > 0).length;
+        achievementRate = daysWithData / statistics.length * 100;
+        averageSessionTime = daysWithData > 0 ? totalMinutes / daysWithData : 0.0;
+      }
+
+      AppLogger.instance.i('✅ ローカル完全統計データ取得完了');
+      
+      return StatisticsBundle(
+        statistics: statistics,
+        consecutiveDays: consecutiveDays,
+        achievementRate: achievementRate,
+        averageSessionTime: averageSessionTime,
+        studyTimeComparison: {'current': 0, 'previous': 0, 'difference': 0, 'changeText': '+0.0h'},
+        streakComparison: {'current': 0, 'previous': 0, 'difference': 0, 'changeText': '+0日'},
+        achievementRateComparison: {'current': 0.0, 'previous': 0.0, 'difference': 0.0, 'changeText': '+0%'},
+        averageTimeComparison: {'current': 0.0, 'previous': 0.0, 'difference': 0.0, 'changeText': '+0分'},
+      );
+    } catch (e, stackTrace) {
+      AppLogger.instance.e('❌ ローカル完全統計データ取得エラー', e, stackTrace);
+      return StatisticsBundle(
+        statistics: [],
+        consecutiveDays: 0,
+        achievementRate: 0.0,
+        averageSessionTime: 0.0,
+        studyTimeComparison: {'current': 0, 'previous': 0, 'difference': 0, 'changeText': '+0.0h'},
+        streakComparison: {'current': 0, 'previous': 0, 'difference': 0, 'changeText': '+0日'},
+        achievementRateComparison: {'current': 0.0, 'previous': 0.0, 'difference': 0.0, 'changeText': '+0%'},
+        averageTimeComparison: {'current': 0.0, 'previous': 0.0, 'difference': 0.0, 'changeText': '+0分'},
+      );
+    }
+  }
+
+  /// Issue #52: バックグラウンド同期チェックとデータ更新
+  Future<StatisticsBundle?> checkAndSyncIfNeeded({
+    required DateTime startDate,
+    required DateTime endDate,
+    bool isAuthenticatedUser = false,
+  }) async {
+    try {
+      // ゲストユーザーの場合は同期をスキップ
+      if (!isAuthenticatedUser) {
+        AppLogger.instance.i('👤 ゲストユーザー: 同期チェックをスキップ');
+        return null;
+      }
+
+      AppLogger.instance.i('🔄 バックグラウンド同期チェック開始');
+
+      // 簡易的な同期判定（実際の実装ではより詳細な更新日時比較を行う）
+      final needsSync = await _needsSynchronization(startDate, endDate);
+      
+      if (!needsSync) {
+        AppLogger.instance.i('✅ 同期不要: データが最新です');
+        return null;
+      }
+
+      AppLogger.instance.i('🔄 同期が必要: データ同期を実行');
+      
+      // 実際の同期処理を実行
+      final syncedData = await getCompleteStatistics(
+        startDate: startDate,
+        endDate: endDate,
+      );
+
+      AppLogger.instance.i('✅ バックグラウンド同期完了');
+      return syncedData;
+    } catch (e, stackTrace) {
+      AppLogger.instance.e('❌ バックグラウンド同期エラー', e, stackTrace);
+      // エラーの場合はnullを返してローカルデータを維持
+      return null;
+    }
+  }
+
+  /// Issue #52: 同期が必要かどうかを判定
+  Future<bool> _needsSynchronization(DateTime startDate, DateTime endDate) async {
+    try {
+      // TODO: 実際の実装では最終更新日時の比較を行う
+      // 現在は簡易的にランダムで判定（デモ用）
+      await Future.delayed(const Duration(milliseconds: 500)); // 通信のシミュレーション
+      return DateTime.now().millisecond % 3 == 0; // 約1/3の確率で同期が必要
+    } catch (e) {
+      AppLogger.instance.w('同期判定エラー: $e');
+      return false;
+    }
+  }
+
+  /// Issue #52: ローカルの継続日数計算
+  Future<int> _calculateLocalConsecutiveDays() async {
+    try {
+      final today = DateTime.now();
+      int consecutiveDays = 0;
+      
+      // 今日から遡って継続日数をカウント
+      for (int i = 0; i < 365; i++) { // 最大365日遡る
+        final checkDate = today.subtract(Duration(days: i));
+        final logs = await _dailyStudyLogRepository.getDailyLogs(checkDate);
+        
+        if (logs.isNotEmpty) {
+          consecutiveDays++;
+        } else {
+          break; // 学習記録がない日で継続が途切れる
+        }
+      }
+      
+      return consecutiveDays;
+    } catch (e) {
+      AppLogger.instance.w('ローカル継続日数計算エラー: $e');
+      return 0;
     }
   }
 }

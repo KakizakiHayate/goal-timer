@@ -1,7 +1,12 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:goal_timer/core/provider/providers.dart';
+import 'package:goal_timer/features/auth/domain/entities/auth_state.dart';
+import 'package:goal_timer/features/auth/provider/auth_provider.dart';
+import 'package:goal_timer/core/utils/app_logger.dart';
 import '../../domain/entities/statistics.dart';
 import '../../domain/entities/daily_stats.dart';
+import '../../domain/repositories/statistics_repository.dart';
 import '../../domain/usecases/get_statistics_usecase.dart';
 import '../../domain/usecases/get_daily_stats_usecase.dart';
 import '../../data/repositories/statistics_repository_impl.dart';
@@ -183,4 +188,112 @@ class GoalStatistic {
     required this.goalTitle,
     required this.totalMinutes,
   });
+}
+
+/// Issue #52: 最適化されたローカル優先統計メトリクスプロバイダー
+final optimizedStatisticsMetricsProvider = StateNotifierProvider.autoDispose<OptimizedStatisticsNotifier, AsyncValue<StatisticsMetrics>>(
+  (ref) => OptimizedStatisticsNotifier(ref),
+);
+
+/// Issue #52: 最適化統計データ管理用StateNotifier
+class OptimizedStatisticsNotifier extends StateNotifier<AsyncValue<StatisticsMetrics>> {
+  final AutoDisposeRef _ref;
+  Timer? _syncTimer;
+
+  OptimizedStatisticsNotifier(this._ref) : super(const AsyncValue.loading()) {
+    _initializeOptimizedStatistics();
+  }
+
+  @override
+  void dispose() {
+    _syncTimer?.cancel();
+    super.dispose();
+  }
+
+  /// Issue #52: 最適化統計データの初期化
+  Future<void> _initializeOptimizedStatistics() async {
+    try {
+      AppLogger.instance.i('🚀 最適化統計データ初期化開始');
+      
+      // 1. ローカルデータを即座に取得・表示
+      final dateRange = _ref.read(dateRangeProvider);
+      final repository = _ref.read(statisticsRepositoryProvider);
+      
+      final localData = await repository.getLocalCompleteStatistics(
+        startDate: dateRange.startDate,
+        endDate: dateRange.endDate,
+      );
+      
+      // ローカルデータを即座に表示
+      state = AsyncValue.data(_buildStatisticsMetrics(localData));
+      AppLogger.instance.i('✅ ローカルデータ表示完了');
+      
+      // 2. 並行処理でバックグラウンド同期チェック
+      _startBackgroundSyncCheck();
+      
+    } catch (e, stackTrace) {
+      AppLogger.instance.e('❌ 最適化統計データ初期化エラー', e, stackTrace);
+      state = AsyncValue.error(e, stackTrace);
+    }
+  }
+
+  /// Issue #52: バックグラウンド同期チェック開始
+  void _startBackgroundSyncCheck() {
+    // 認証状態を確認
+    final authState = _ref.read(authViewModelProvider);
+    final isAuthenticated = !authState.isGuest && authState.isAuthenticated;
+    
+    if (!isAuthenticated) {
+      AppLogger.instance.i('👤 ゲストユーザーのため同期チェックをスキップ');
+      return;
+    }
+    
+    // マイクロタスクで並行処理実行
+    Future.microtask(() async {
+      try {
+        final dateRange = _ref.read(dateRangeProvider);
+        final repository = _ref.read(statisticsRepositoryProvider);
+        
+        final syncedData = await repository.checkAndSyncIfNeeded(
+          startDate: dateRange.startDate,
+          endDate: dateRange.endDate,
+          isAuthenticatedUser: isAuthenticated,
+        );
+        
+        // 同期されたデータがある場合のみUI更新
+        if (syncedData != null && mounted) {
+          state = AsyncValue.data(_buildStatisticsMetrics(syncedData));
+          AppLogger.instance.i('🔄 バックグラウンド同期によりUI更新');
+        }
+      } catch (e, stackTrace) {
+        AppLogger.instance.e('❌ バックグラウンド同期エラー', e, stackTrace);
+        // エラーの場合はローカルデータを維持（stateは更新しない）
+      }
+    });
+  }
+
+  /// Issue #52: StatisticsBundleからStatisticsMetricsを構築
+  StatisticsMetrics _buildStatisticsMetrics(StatisticsBundle bundle) {
+    final totalMinutes = bundle.statistics.fold<int>(
+      0,
+      (sum, stat) => sum + stat.totalMinutes,
+    );
+
+    return StatisticsMetrics(
+      totalHours: (totalMinutes / 60).toStringAsFixed(1),
+      consecutiveDays: bundle.consecutiveDays.toString(),
+      achievementRate: bundle.achievementRate.toStringAsFixed(0),
+      averageSessionTime: bundle.averageSessionTime.toStringAsFixed(0),
+      studyTimeComparison: bundle.studyTimeComparison,
+      streakComparison: bundle.streakComparison,
+      achievementRateComparison: bundle.achievementRateComparison,
+      averageTimeComparison: bundle.averageTimeComparison,
+    );
+  }
+
+  /// Issue #52: 期間変更時の処理
+  void onDateRangeChanged() {
+    AppLogger.instance.i('📅 期間変更により統計データを更新');
+    _initializeOptimizedStatistics();
+  }
 }

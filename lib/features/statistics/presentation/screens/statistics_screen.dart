@@ -206,12 +206,16 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
       startDate: startDate,
       endDate: now,
     );
+    
+    // Issue #52: 期間変更時に最適化統計プロバイダーに通知
+    ref.read(optimizedStatisticsMetricsProvider.notifier).onDateRangeChanged();
   }
 
   Widget _buildMetricsGrid() {
     return Consumer(
       builder: (context, ref, child) {
-        final metricsAsync = ref.watch(statisticsMetricsProvider);
+        // Issue #52: 最適化されたローカル優先統計プロバイダーを使用
+        final metricsAsync = ref.watch(optimizedStatisticsMetricsProvider);
 
         return metricsAsync.when(
           data:
