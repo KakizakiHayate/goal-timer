@@ -17,6 +17,7 @@ class GoalCard extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onTimerTap;
   final VoidCallback? onEditTap;
+  final VoidCallback? onManualRecordTap; // Issue #44: 手動記録ボタン
   final bool isActive;
   final GlobalKey? tutorialKey; // チュートリアル用のKey
   final GlobalKey? timerButtonKey; // タイマーボタン用のKey
@@ -31,6 +32,7 @@ class GoalCard extends StatelessWidget {
     this.onTap,
     this.onTimerTap,
     this.onEditTap,
+    this.onManualRecordTap, // Issue #44: 手動記録コールバック
     this.isActive = true,
     this.tutorialKey,
     this.timerButtonKey,
@@ -203,6 +205,15 @@ class GoalCard extends StatelessWidget {
             textColor: Colors.white,
             onTap: onTimerTap,
           ),
+        ),
+        const SizedBox(width: SpacingConsts.s),
+        // Issue #44: 手動記録ボタンを追加
+        _ActionButton(
+          icon: Icons.add_circle_outline,
+          label: '手動記録',
+          backgroundColor: ColorConsts.backgroundSecondary,
+          textColor: ColorConsts.primary,
+          onTap: onManualRecordTap,
         ),
         const SizedBox(width: SpacingConsts.s),
         _ActionButton(

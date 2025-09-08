@@ -5,6 +5,7 @@ import '../../../../core/utils/text_consts.dart';
 import '../../../../core/utils/spacing_consts.dart';
 import '../../../../core/utils/animation_consts.dart';
 import '../../../../core/widgets/goal_card.dart';
+import '../../../manual_record/presentation/widgets/quick_record_dialog.dart'; // Issue #44
 import '../widgets/today_progress_widget.dart';
 import '../view_models/home_view_model.dart';
 import '../../provider/home_provider.dart';
@@ -730,6 +731,16 @@ class _HomeTabContent extends ConsumerWidget {
                 tutorialViewModel.nextStep('timer_operation');
               });
             }
+          },
+          // Issue #44: 手動記録ボタンのコールバック
+          onManualRecordTap: () {
+            showDialog(
+              context: context,
+              builder: (context) => QuickRecordDialog(
+                goalId: goal.id,
+                goalTitle: goal.title,
+              ),
+            );
           },
           onEditTap: () async {
             AppLogger.instance.i('🎯 [HomeScreen] 編集ボタンがタップされました');
