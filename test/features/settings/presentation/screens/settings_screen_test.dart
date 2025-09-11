@@ -82,9 +82,14 @@ void main() {
         await tester.tap(profileTile);
         await tester.pumpAndSettle();
         
-        // タップ後の状態を確認（例：ダイアログ表示やナビゲーション）
-        // 実際の実装に応じて適切なアサーションを追加
-        expect(find.byType(SettingsScreen), findsOneWidget);
+        // タップ後の状態を確認（プロフィール編集ダイアログ表示）
+        expect(find.text('プロフィール編集'), findsOneWidget);
+        expect(find.textContaining('この機能は開発中です'), findsOneWidget);
+        expect(find.byType(AlertDialog), findsOneWidget);
+        
+        // ダイアログを閉じる
+        await tester.tap(find.text('OK'));
+        await tester.pumpAndSettle();
 
         // デフォルトタイマー時間の設定項目をタップできることを確認
         final timerTile = find.text('デフォルトタイマー時間');
@@ -94,8 +99,10 @@ void main() {
         await tester.tap(timerTile, warnIfMissed: false);
         await tester.pumpAndSettle();
         
-        // タップ後の状態を確認
-        expect(find.byType(SettingsScreen), findsOneWidget);
+        // タップ後の状態を確認（タイマー設定ダイアログ表示）
+        expect(find.text('タイマー設定'), findsOneWidget);
+        expect(find.textContaining('この機能は開発中です'), findsOneWidget);
+        expect(find.byType(AlertDialog), findsOneWidget);
       });
     });
 
@@ -159,32 +166,37 @@ void main() {
       });
     });
 
-    group('パフォーマンステスト', () {
-      testWidgets('test_render_performance_after_cleanup - 描画パフォーマンス向上確認', (tester) async {
-        // パフォーマンステストはWidget treeの構造確認に焦点を当てる
+    group('Widget構造テスト', () {
+      testWidgets('test_widget_tree_optimization - Widget tree最適化確認', (tester) async {
         await tester.pumpWidget(testWidget);
         await tester.pumpAndSettle();
 
-        // 削除された不要な要素がWidget treeに存在しないことを確認
-        expect(find.text('通知を有効にする'), findsNothing);
-        expect(find.text('サウンド'), findsNothing);
-        expect(find.text('バイブレーション'), findsNothing);
-        expect(find.text('テーマ'), findsNothing);
-        expect(find.text('週の開始日'), findsNothing);
+        // 削除されたセクションに関連するWidgetが存在しないことを確認
+        final removedFeatureTexts = [
+          '通知を有効にする',
+          'サウンド', 
+          'バイブレーション',
+          'テーマ',
+          '週の開始日',
+          'ヘルプ・FAQ'
+        ];
 
-        // Widget treeが期待通りにクリーンアップされていることを確認
-        // 削除機能に関連するWidgetが存在しないことを確認
-        final allTexts = find.byType(Text);
-        final textWidgets = tester.widgetList<Text>(allTexts);
-        final textContents = textWidgets.map((widget) => widget.data ?? '').toList();
+        for (final text in removedFeatureTexts) {
+          expect(find.text(text), findsNothing, 
+                 reason: '削除対象テキスト「$text」がWidget treeに存在しない');
+        }
+
+        // Switch Widgetが削除されたことを確認（通知設定のSwitch）
+        final switches = find.byType(Switch);
+        expect(switches, findsNothing, 
+               reason: '通知設定のSwitchウィジェットが削除されている');
         
-        // 削除対象のテキストが含まれていないことを確認
-        expect(textContents.any((text) => text.contains('通知')), isFalse);
-        expect(textContents.any((text) => text.contains('テーマ')), isFalse);
-        expect(textContents.any((text) => text.contains('週の開始日')), isFalse);
-        
-        // 画面が正常にレンダリングされることを確認
+        // 必要最小限のWidget構造を確認
         expect(find.byType(SettingsScreen), findsOneWidget);
+        expect(find.byType(AppBar), findsOneWidget);
+        expect(find.byType(SingleChildScrollView), findsOneWidget);
+        expect(find.byType(PressableCard), findsWidgets, 
+               reason: '残存機能のカードが表示されている');
       });
     });
 

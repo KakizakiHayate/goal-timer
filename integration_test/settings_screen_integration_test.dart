@@ -23,22 +23,36 @@ void main() {
 
     // 削除対象機能の確認メソッド
     void verifyRemovedFeatures() {
-      expect(find.text('通知設定'), findsNothing);
-      expect(find.text('通知を有効にする'), findsNothing);
-      expect(find.text('サウンド'), findsNothing);
-      expect(find.text('バイブレーション'), findsNothing);
-      expect(find.text('テーマ'), findsNothing);
-      expect(find.text('週の開始日'), findsNothing);
-      expect(find.text('ヘルプ・FAQ'), findsNothing);
+      final removedFeatures = [
+        '通知設定',
+        '通知を有効にする',
+        'サウンド',
+        'バイブレーション',
+        'テーマ',
+        '週の開始日',
+        'ヘルプ・FAQ'
+      ];
+      
+      for (final feature in removedFeatures) {
+        expect(find.text(feature), findsNothing, 
+               reason: '$feature が削除されていることを確認');
+      }
     }
 
-    // 残存機能の確認メソッド
+    // 残存機能の確認メソッド  
     void verifyRemainingFeatures() {
-      expect(find.text('ユーザー名'), findsAtLeastNWidgets(1));
-      expect(find.text('プレミアム'), findsAtLeastNWidgets(1));
-      expect(find.text('デフォルトタイマー時間'), findsOneWidget);
-      expect(find.text('お問い合わせ'), findsOneWidget);
-      expect(find.text('サインアウト'), findsOneWidget);
+      final remainingFeatures = {
+        'ユーザー名': findsOneWidget,
+        'プレミアム会員': findsOneWidget,
+        'デフォルトタイマー時間': findsOneWidget,
+        'お問い合わせ': findsOneWidget,
+        'サインアウト': findsOneWidget,
+      };
+      
+      remainingFeatures.forEach((feature, matcher) {
+        expect(find.text(feature), matcher, 
+               reason: '$feature が正常に表示されていることを確認');
+      });
     }
 
     testWidgets('設定画面への遷移と削除機能の確認', (tester) async {
