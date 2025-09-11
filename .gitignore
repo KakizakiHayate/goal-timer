@@ -66,3 +66,9 @@ android/app/google-services.json
 docs/
 
 ai-rules/
+.serena/
+.claude/commands/exec-issue.md
+ios/Runner/GoogleService-Info.plist.backup
+ios/Runner.xcodeproj/project.pbxproj.backup
+
+
