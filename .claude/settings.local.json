@@ -72,7 +72,8 @@
       "Bash(gh issue edit:*)",
       "Bash(afplay:*)",
       "Bash(gh issue create:*)",
-      "Bash(gh issue:*)"
+      "Bash(gh issue:*)",
+      "Bash(gh pr list:*)"
     ],
     "deny": []
   },
