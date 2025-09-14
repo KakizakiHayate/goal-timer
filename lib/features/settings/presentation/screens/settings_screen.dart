@@ -33,11 +33,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
-  bool _notificationsEnabled = true;
-  bool _soundEnabled = true;
-  bool _vibrationEnabled = true;
-  String _selectedTheme = 'system'; // system, light, dark
-
   @override
   void initState() {
     super.initState();
@@ -73,10 +68,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
         ),
         backgroundColor: ColorConsts.primary,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
       ),
       body: FadeTransition(
         opacity: _fadeAnimation,
@@ -92,11 +83,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
 
               // プレミアムプラン
               _buildPremiumSection(),
-
-              const SizedBox(height: SpacingConsts.l),
-
-              // 通知設定
-              _buildNotificationSection(),
 
               const SizedBox(height: SpacingConsts.l),
 
@@ -359,25 +345,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
       title: 'アプリ設定',
       children: [
         SettingItem(
-          title: 'テーマ',
-          subtitle: _getThemeSubtitle(),
-          icon: Icons.palette_outlined,
-          iconColor: ColorConsts.primary,
-          onTap: _showThemeSelector,
-        ),
-        SettingItem(
           title: 'デフォルトタイマー時間',
           subtitle: '新しい目標のデフォルト時間：25分',
           icon: Icons.timer_outlined,
           iconColor: ColorConsts.warning,
           onTap: _showTimerSettings,
-        ),
-        SettingItem(
-          title: '週の開始日',
-          subtitle: '統計の週の開始日：月曜日',
-          icon: Icons.calendar_today_outlined,
-          iconColor: ColorConsts.success,
-          onTap: _showWeekStartSettings,
         ),
       ],
     );
@@ -466,13 +438,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
       title: 'サポート',
       children: [
         SettingItem(
-          title: 'ヘルプ・FAQ',
-          subtitle: 'よくある質問と使い方',
-          icon: Icons.help_outline,
-          iconColor: ColorConsts.primary,
-          onTap: _showHelp,
-        ),
-        SettingItem(
           title: 'お問い合わせ',
           subtitle: 'ご意見・ご要望をお聞かせください',
           icon: Icons.email_outlined,
@@ -528,18 +493,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
         ...children,
       ],
     );
-  }
-
-  String _getThemeSubtitle() {
-    switch (_selectedTheme) {
-      case 'light':
-        return 'ライトテーマ';
-      case 'dark':
-        return 'ダークテーマ';
-      case 'system':
-      default:
-        return 'システム設定に従う';
-    }
   }
 
   // モーダル・ダイアログ表示メソッド
@@ -654,60 +607,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     }
   }
 
-  void _showThemeSelector() {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('テーマ選択'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                RadioListTile<String>(
-                  title: const Text('システム設定に従う'),
-                  value: 'system',
-                  groupValue: _selectedTheme,
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedTheme = value!;
-                    });
-                    Navigator.pop(context);
-                  },
-                ),
-                RadioListTile<String>(
-                  title: const Text('ライトテーマ'),
-                  value: 'light',
-                  groupValue: _selectedTheme,
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedTheme = value!;
-                    });
-                    Navigator.pop(context);
-                  },
-                ),
-                RadioListTile<String>(
-                  title: const Text('ダークテーマ'),
-                  value: 'dark',
-                  groupValue: _selectedTheme,
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedTheme = value!;
-                    });
-                    Navigator.pop(context);
-                  },
-                ),
-              ],
-            ),
-          ),
-    );
-  }
-
   void _showTimerSettings() {
     _showComingSoonDialog('タイマー設定');
-  }
-
-  void _showWeekStartSettings() {
-    _showComingSoonDialog('週開始日設定');
   }
 
   void _exportData() {
@@ -720,10 +621,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
 
   void _showPrivacyPolicy() {
     _showComingSoonDialog('プライバシーポリシー');
-  }
-
-  void _showHelp() {
-    _showComingSoonDialog('ヘルプ');
   }
 
   void _showContact() {
