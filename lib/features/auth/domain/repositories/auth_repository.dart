@@ -35,4 +35,7 @@ abstract class AuthRepository {
 
   /// メールが確認済みかチェック
   Future<bool> isEmailVerified();
+
+  /// ユーザー情報を更新
+  Future<AppUser> updateUserInfo(Map<String, dynamic> updates);
 }
