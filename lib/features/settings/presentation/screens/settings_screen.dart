@@ -7,6 +7,8 @@ import '../../../../core/utils/animation_consts.dart';
 import '../../../../core/widgets/setting_item.dart';
 import '../../../../core/widgets/pressable_card.dart';
 import '../../../../core/services/timer_restriction_service.dart';
+import '../../../../core/services/temp_user_service.dart';
+import '../../../../core/utils/route_names.dart';
 import '../../../auth/provider/auth_provider.dart';
 import '../../../auth/domain/entities/app_user.dart';
 import '../../../auth/domain/entities/auth_state.dart';
@@ -18,6 +20,11 @@ final timerRestrictionServiceProvider = Provider<TimerRestrictionService>((
   ref,
 ) {
   return TimerRestrictionService();
+});
+
+// 一時ユーザーサービスのプロバイダー
+final tempUserServiceProvider = Provider<TempUserService>((ref) {
+  return TempUserService();
 });
 
 /// 改善された設定画面
@@ -1009,18 +1016,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
 
   // アカウント連携画面への遷移
   void _navigateToAccountLinking() {
-    // TODO: AccountPromotionScreenへのナビゲーション実装
-    // 現在は開発中のため、開発中ダイアログを表示
-    _showComingSoonDialog('アカウント連携');
-
-    // 実装予定のコード:
-    // Navigator.of(context).pushNamed(
-    //   '/onboarding/account-promotion',
-    //   arguments: {
-    //     'fromSettings': true,
-    //     'skipOnboardingFlow': true,
-    //   },
-    // );
+    Navigator.of(context).pushNamed(
+      RouteNames.onboardingAccountPromotion,
+      arguments: {'fromSettings': true, 'skipOnboardingFlow': true},
+    );
   }
 
   // ゲストユーザー向けリセット処理
@@ -1056,27 +1055,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
   // リセット処理の実行
   Future<void> _performReset() async {
     try {
-      // TODO: ゲストデータの削除処理
-      // final tempUserService = ref.read(tempUserServiceProvider);
-      // await tempUserService.clearAllData();
+      // ゲストデータの削除処理
+      final tempUserService = ref.read(tempUserServiceProvider);
+      await tempUserService.clearAllData();
 
-      // 現在は開発中のため、成功メッセージを表示
+      // 成功メッセージを表示
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('リセットが完了しました（開発中）'),
+            content: Text('リセットが完了しました'),
             backgroundColor: ColorConsts.success,
           ),
         );
       }
 
-      // TODO: 初期画面に戻る処理
-      // if (mounted) {
-      //   Navigator.of(context).pushNamedAndRemoveUntil(
-      //     '/onboarding/goal-creation',
-      //     (route) => false,
-      //   );
-      // }
+      // 初期画面に戻る処理
+      if (mounted) {
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          RouteNames.onboardingGoalCreation,
+          (route) => false,
+        );
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

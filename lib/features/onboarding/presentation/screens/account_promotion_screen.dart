@@ -15,7 +15,14 @@ import '../../../../core/services/temp_user_service.dart';
 
 /// アカウント作成促進画面（オンボーディング ステップ3）
 class AccountPromotionScreen extends ConsumerStatefulWidget {
-  const AccountPromotionScreen({super.key});
+  final bool fromSettings;
+  final bool skipOnboardingFlow;
+
+  const AccountPromotionScreen({
+    super.key,
+    this.fromSettings = false,
+    this.skipOnboardingFlow = false,
+  });
 
   @override
   ConsumerState<AccountPromotionScreen> createState() =>
@@ -32,21 +39,22 @@ class _AccountPromotionScreenState
       backgroundColor: ColorConsts.backgroundPrimary,
       appBar: AppBar(
         title: Text(
-          'アカウント設定',
+          widget.fromSettings ? 'アカウント連携' : 'アカウント設定',
           style: TextConsts.h4.copyWith(color: ColorConsts.textPrimary),
         ),
         backgroundColor: ColorConsts.backgroundPrimary,
         elevation: 0,
-        automaticallyImplyLeading: false, // 戻るボタンなし
+        automaticallyImplyLeading: widget.fromSettings, // 設定画面からの場合は戻るボタンを表示
       ),
       body: Column(
         children: [
-          // プログレスバー
-          const OnboardingProgressBar(
-            progress: 1.0,
-            currentStep: 3,
-            totalSteps: 3,
-          ),
+          // プログレスバー（設定画面からの場合は非表示）
+          if (!widget.fromSettings)
+            const OnboardingProgressBar(
+              progress: 1.0,
+              currentStep: 3,
+              totalSteps: 3,
+            ),
 
           // メインコンテンツ
           Expanded(
@@ -235,49 +243,56 @@ class _AccountPromotionScreenState
 
                 const SizedBox(height: SpacingConsts.lg),
 
-                // または分割線
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        height: 1,
-                        color: ColorConsts.textTertiary.withValues(alpha: 0.3),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: SpacingConsts.md,
-                      ),
-                      child: Text(
-                        'または',
-                        style: TextConsts.bodySmall.copyWith(
-                          color: ColorConsts.textTertiary,
+                // または分割線（設定画面からの場合は非表示）
+                if (!widget.fromSettings)
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 1,
+                          color: ColorConsts.textTertiary.withValues(
+                            alpha: 0.3,
+                          ),
                         ),
                       ),
-                    ),
-                    Expanded(
-                      child: Container(
-                        height: 1,
-                        color: ColorConsts.textTertiary.withValues(alpha: 0.3),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: SpacingConsts.md,
+                        ),
+                        child: Text(
+                          'または',
+                          style: TextConsts.bodySmall.copyWith(
+                            color: ColorConsts.textTertiary,
+                          ),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
+                      Expanded(
+                        child: Container(
+                          height: 1,
+                          color: ColorConsts.textTertiary.withValues(
+                            alpha: 0.3,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
 
-                const SizedBox(height: SpacingConsts.lg),
+                if (!widget.fromSettings)
+                  const SizedBox(height: SpacingConsts.lg),
 
-                // ゲストとして続行ボタン
-                CommonButton(
-                  key: const Key('continue_as_guest_button'),
-                  text: 'ゲストとして続行',
-                  variant: ButtonVariant.ghost,
-                  size: ButtonSize.large,
-                  isExpanded: true,
-                  isLoading:
-                      onboardingState.isLoading &&
-                      onboardingState.isDataMigrationInProgress,
-                  onPressed: _onContinueAsGuestPressed,
-                ),
+                // ゲストとして続行ボタン（設定画面からの場合は非表示）
+                if (!widget.fromSettings)
+                  CommonButton(
+                    key: const Key('continue_as_guest_button'),
+                    text: 'ゲストとして続行',
+                    variant: ButtonVariant.ghost,
+                    size: ButtonSize.large,
+                    isExpanded: true,
+                    isLoading:
+                        onboardingState.isLoading &&
+                        onboardingState.isDataMigrationInProgress,
+                    onPressed: _onContinueAsGuestPressed,
+                  ),
               ],
             ),
           ),
@@ -561,7 +576,19 @@ class _AccountPromotionScreenState
       }
 
       if (mounted) {
-        Navigator.pushReplacementNamed(context, '/home');
+        if (widget.fromSettings) {
+          // 設定画面から来た場合は設定画面に戻る
+          Navigator.of(context).pop();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Googleアカウント連携が完了しました'),
+              backgroundColor: ColorConsts.success,
+            ),
+          );
+        } else {
+          // 通常のオンボーディングフロー
+          Navigator.pushReplacementNamed(context, '/home');
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -607,7 +634,19 @@ class _AccountPromotionScreenState
       }
 
       if (mounted) {
-        Navigator.pushReplacementNamed(context, '/home');
+        if (widget.fromSettings) {
+          // 設定画面から来た場合は設定画面に戻る
+          Navigator.of(context).pop();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Appleアカウント連携が完了しました'),
+              backgroundColor: ColorConsts.success,
+            ),
+          );
+        } else {
+          // 通常のオンボーディングフロー
+          Navigator.pushReplacementNamed(context, '/home');
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -640,11 +679,14 @@ class _AccountPromotionScreenState
       // チュートリアルが既に開始されているかチェック
       // goal_creation_screen.dartで既にstartTutorialが呼ばれているはず
       if (!tutorialState.isTutorialActive && !tutorialState.isCompleted) {
-        print('⚠️ Tutorial not active after goal creation, restarting tutorial');
+        print(
+          '⚠️ Tutorial not active after goal creation, restarting tutorial',
+        );
         final onboardingState = ref.read(onboardingViewModelProvider);
         await tutorialViewModel.startTutorial(
           tempUserId: onboardingState.tempUserId,
-          totalSteps: 3, // goal_selection -> timer_operation -> timer_completion
+          totalSteps:
+              3, // goal_selection -> timer_operation -> timer_completion
         );
       }
 
