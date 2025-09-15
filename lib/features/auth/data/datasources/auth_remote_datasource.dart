@@ -43,6 +43,9 @@ abstract class AuthRemoteDataSource {
 
   /// メールが確認済みかチェック
   Future<bool> isEmailVerified();
+
+  /// ユーザーのメタデータを更新
+  Future<AppUser> updateUserMetadata(Map<String, dynamic> metadata);
 }
 
 /// リモート認証データソースの実装
@@ -315,6 +318,23 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<bool> isEmailVerified() async {
     final user = _supabase.auth.currentUser;
     return user?.emailConfirmedAt != null;
+  }
+
+  @override
+  Future<AppUser> updateUserMetadata(Map<String, dynamic> metadata) async {
+    try {
+      final response = await _supabase.auth.updateUser(
+        UserAttributes(data: metadata),
+      );
+
+      if (response.user == null) {
+        throw Exception('ユーザー情報の更新に失敗しました');
+      }
+
+      return _mapToAppUser(response.user!);
+    } catch (e) {
+      throw Exception('メタデータ更新エラー: ${e.toString()}');
+    }
   }
 
   /// SupabaseのUserをAppUserエンティティにマッピング

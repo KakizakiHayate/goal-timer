@@ -8,6 +8,7 @@ import '../../../../core/widgets/setting_item.dart';
 import '../../../../core/widgets/pressable_card.dart';
 import '../../../../core/services/timer_restriction_service.dart';
 import '../../../auth/provider/auth_provider.dart';
+import '../../../auth/domain/entities/app_user.dart';
 import '../../../auth/domain/entities/auth_state.dart';
 import '../../../shared/widgets/sync_status_indicator.dart';
 import '../../../billing/presentation/screens/upgrade_screen.dart';
@@ -32,10 +33,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
+  // 通知設定の状態変数
   bool _notificationsEnabled = true;
   bool _soundEnabled = true;
   bool _vibrationEnabled = true;
-  String _selectedTheme = 'system'; // system, light, dark
 
   @override
   void initState() {
@@ -72,10 +73,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
         ),
         backgroundColor: ColorConsts.primary,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
       ),
       body: FadeTransition(
         opacity: _fadeAnimation,
@@ -126,13 +123,33 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
   }
 
   Widget _buildProfileSection() {
+    return Consumer(
+      builder: (context, ref, _) {
+        final currentUser = ref.watch(currentUserProvider);
+        final authState = ref.watch(authViewModelProvider);
+
+        return currentUser.when(
+          data: (user) => _buildProfileCard(user, authState),
+          loading: () => _buildProfileLoadingCard(),
+          error: (_, __) => _buildProfileErrorCard(),
+        );
+      },
+    );
+  }
+
+  Widget _buildProfileCard(AppUser? user, AuthState authState) {
+    // デフォルト値の設定
+    final displayName = user?.displayName ?? 'ゲストユーザー';
+    final email = user?.email ?? '';
+    final showEmail = email.isNotEmpty && authState != AuthState.guest;
+
     return PressableCard(
       margin: EdgeInsets.zero,
       padding: const EdgeInsets.all(SpacingConsts.l),
       backgroundColor: ColorConsts.cardBackground,
       borderRadius: 20.0,
       elevation: 2.0,
-      onTap: _showProfileModal,
+      onTap: () => _showUsernameEditDialog(displayName),
       child: Row(
         children: [
           // アバター
@@ -158,19 +175,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'ユーザー名',
+                  displayName,
                   style: TextConsts.h4.copyWith(
                     color: ColorConsts.textPrimary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: SpacingConsts.xs),
-                Text(
-                  'user@example.com',
-                  style: TextConsts.body.copyWith(
-                    color: ColorConsts.textSecondary,
+                if (showEmail) ...[
+                  const SizedBox(height: SpacingConsts.xs),
+                  Text(
+                    email,
+                    style: TextConsts.body.copyWith(
+                      color: ColorConsts.textSecondary,
+                    ),
                   ),
-                ),
+                ],
                 const SizedBox(height: SpacingConsts.s),
                 Container(
                   padding: const EdgeInsets.symmetric(
@@ -198,6 +217,73 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
             size: 16,
             color: ColorConsts.textTertiary,
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfileLoadingCard() {
+    return PressableCard(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.all(SpacingConsts.l),
+      backgroundColor: ColorConsts.cardBackground,
+      borderRadius: 20.0,
+      elevation: 2.0,
+      onTap: null,
+      child: Row(
+        children: [
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              color: ColorConsts.backgroundSecondary,
+              shape: BoxShape.circle,
+            ),
+            child: const CircularProgressIndicator(),
+          ),
+          const SizedBox(width: SpacingConsts.l),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  height: 20,
+                  width: 120,
+                  decoration: BoxDecoration(
+                    color: ColorConsts.backgroundSecondary,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                const SizedBox(height: SpacingConsts.xs),
+                Container(
+                  height: 16,
+                  width: 200,
+                  decoration: BoxDecoration(
+                    color: ColorConsts.backgroundSecondary,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfileErrorCard() {
+    return PressableCard(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.all(SpacingConsts.l),
+      backgroundColor: ColorConsts.cardBackground,
+      borderRadius: 20.0,
+      elevation: 2.0,
+      onTap: null,
+      child: const Row(
+        children: [
+          Icon(Icons.error_outline, color: ColorConsts.error),
+          SizedBox(width: SpacingConsts.l),
+          Text('プロフィール情報の読み込みに失敗しました'),
         ],
       ),
     );
@@ -269,25 +355,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
       title: 'アプリ設定',
       children: [
         SettingItem(
-          title: 'テーマ',
-          subtitle: _getThemeSubtitle(),
-          icon: Icons.palette_outlined,
-          iconColor: ColorConsts.primary,
-          onTap: _showThemeSelector,
-        ),
-        SettingItem(
           title: 'デフォルトタイマー時間',
           subtitle: '新しい目標のデフォルト時間：25分',
           icon: Icons.timer_outlined,
           iconColor: ColorConsts.warning,
           onTap: _showTimerSettings,
-        ),
-        SettingItem(
-          title: '週の開始日',
-          subtitle: '統計の週の開始日：月曜日',
-          icon: Icons.calendar_today_outlined,
-          iconColor: ColorConsts.success,
-          onTap: _showWeekStartSettings,
         ),
       ],
     );
@@ -376,13 +448,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
       title: 'サポート',
       children: [
         SettingItem(
-          title: 'ヘルプ・FAQ',
-          subtitle: 'よくある質問と使い方',
-          icon: Icons.help_outline,
-          iconColor: ColorConsts.primary,
-          onTap: _showHelp,
-        ),
-        SettingItem(
           title: 'お問い合わせ',
           subtitle: 'ご意見・ご要望をお聞かせください',
           icon: Icons.email_outlined,
@@ -458,78 +523,127 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     );
   }
 
-  String _getThemeSubtitle() {
-    switch (_selectedTheme) {
-      case 'light':
-        return 'ライトテーマ';
-      case 'dark':
-        return 'ダークテーマ';
-      case 'system':
-      default:
-        return 'システム設定に従う';
-    }
-  }
-
   // モーダル・ダイアログ表示メソッド
-  void _showProfileModal() {
-    // TODO: プロフィール編集モーダルの実装
-    _showComingSoonDialog('プロフィール編集');
-  }
+  void _showUsernameEditDialog(String currentUsername) {
+    final textController = TextEditingController(text: currentUsername);
+    String? errorText;
 
-  void _showThemeSelector() {
     showDialog(
       context: context,
       builder:
-          (context) => AlertDialog(
-            title: const Text('テーマ選択'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                RadioListTile<String>(
-                  title: const Text('システム設定に従う'),
-                  value: 'system',
-                  groupValue: _selectedTheme,
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedTheme = value!;
-                    });
-                    Navigator.pop(context);
-                  },
+          (context) => StatefulBuilder(
+            builder:
+                (context, setState) => AlertDialog(
+                  title: const Text('ユーザー名編集'),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text('新しいユーザー名を入力してください'),
+                      const SizedBox(height: SpacingConsts.md),
+                      TextField(
+                        controller: textController,
+                        decoration: InputDecoration(
+                          labelText: 'ユーザー名',
+                          errorText: errorText,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(color: ColorConsts.primary),
+                          ),
+                        ),
+                        maxLength: 50,
+                      ),
+                    ],
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('キャンセル'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        final newUsername = textController.text.trim();
+                        final validation = _validateUsername(newUsername);
+
+                        if (validation != null) {
+                          setState(() {
+                            errorText = validation;
+                          });
+                          return;
+                        }
+
+                        // ユーザー名更新処理
+                        _updateUsername(newUsername);
+                        Navigator.pop(context);
+                      },
+                      child: const Text('保存'),
+                    ),
+                  ],
                 ),
-                RadioListTile<String>(
-                  title: const Text('ライトテーマ'),
-                  value: 'light',
-                  groupValue: _selectedTheme,
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedTheme = value!;
-                    });
-                    Navigator.pop(context);
-                  },
-                ),
-                RadioListTile<String>(
-                  title: const Text('ダークテーマ'),
-                  value: 'dark',
-                  groupValue: _selectedTheme,
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedTheme = value!;
-                    });
-                    Navigator.pop(context);
-                  },
-                ),
-              ],
-            ),
           ),
     );
   }
 
-  void _showTimerSettings() {
-    _showComingSoonDialog('タイマー設定');
+  String? _validateUsername(String username) {
+    if (username.isEmpty) {
+      return 'ユーザー名を入力してください';
+    }
+
+    if (username.length > 50) {
+      return 'ユーザー名は50文字以内で入力してください';
+    }
+
+    // 無効な文字のチェック（英数字、ひらがな、カタカナ、漢字、スペース、一部記号のみ許可）
+    final validPattern = RegExp(r'^[a-zA-Z0-9ぁ-んァ-ンー一-龯\s\-_\.]+$');
+    if (!validPattern.hasMatch(username)) {
+      return '使用できない文字が含まれています';
+    }
+
+    return null;
   }
 
-  void _showWeekStartSettings() {
-    _showComingSoonDialog('週開始日設定');
+  Future<void> _updateUsername(String newUsername) async {
+    try {
+      // 現在のユーザー情報を取得
+      final currentUser = await ref.read(currentUserProvider.future);
+      if (currentUser == null) {
+        throw Exception('ユーザーが見つかりません');
+      }
+
+      // ユーザー名更新ユースケースを実行
+      final updateUsernameUseCase = ref.read(updateUsernameUseCaseProvider);
+      await updateUsernameUseCase.execute(currentUser.id, newUsername);
+
+      // プロバイダーを更新してUIに反映
+      ref.invalidate(currentUserProvider);
+
+      // 成功メッセージを表示
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('ユーザー名を更新しました'),
+            backgroundColor: ColorConsts.success,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('ユーザー名の更新に失敗しました: $e'),
+            backgroundColor: ColorConsts.error,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+  void _showTimerSettings() {
+    _showComingSoonDialog('タイマー設定');
   }
 
   void _exportData() {
@@ -542,10 +656,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
 
   void _showPrivacyPolicy() {
     _showComingSoonDialog('プライバシーポリシー');
-  }
-
-  void _showHelp() {
-    _showComingSoonDialog('ヘルプ');
   }
 
   void _showContact() {
