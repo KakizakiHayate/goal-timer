@@ -38,8 +38,13 @@ Route<dynamic> generateRoute(RouteSettings settings) {
         builder: (context) => const GoalCreationScreen(),
       );
     case RouteNames.onboardingAccountPromotion:
+      final args = settings.arguments as Map<String, dynamic>?;
       return platformPageRoute(
-        builder: (context) => const AccountPromotionScreen(),
+        builder:
+            (context) => AccountPromotionScreen(
+              fromSettings: args?['fromSettings'] ?? false,
+              skipOnboardingFlow: args?['skipOnboardingFlow'] ?? false,
+            ),
       );
     case RouteNames.goalDetailSetting:
       return platformPageRoute(
@@ -51,9 +56,13 @@ Route<dynamic> generateRoute(RouteSettings settings) {
         final args = settings.arguments as Map<String, dynamic>;
         final goalId = args['goalId'] as String;
         final isTutorialMode = args['isTutorialMode'] as bool? ?? false;
-        AppLogger.instance.i('目標付きタイマー画面に遷移します: goalId=$goalId, isTutorialMode=$isTutorialMode');
+        AppLogger.instance.i(
+          '目標付きタイマー画面に遷移します: goalId=$goalId, isTutorialMode=$isTutorialMode',
+        );
         return platformPageRoute(
-          builder: (context) => TimerScreen(goalId: goalId, isTutorialMode: isTutorialMode),
+          builder:
+              (context) =>
+                  TimerScreen(goalId: goalId, isTutorialMode: isTutorialMode),
         );
       } else {
         final goalId = settings.arguments as String;

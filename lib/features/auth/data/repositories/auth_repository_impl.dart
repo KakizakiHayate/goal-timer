@@ -121,4 +121,18 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<bool> isEmailVerified() async {
     return await _remoteDataSource.isEmailVerified();
   }
+
+  @override
+  Future<AppUser> updateUserInfo(Map<String, dynamic> updates) async {
+    try {
+      final updatedUser = await _remoteDataSource.updateUserMetadata(updates);
+
+      // ローカルにも保存
+      await _localDataSource.saveUserInfo(updatedUser.toJson());
+
+      return updatedUser;
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

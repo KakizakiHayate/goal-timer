@@ -17,6 +17,7 @@ import '../domain/usecases/sign_in_with_apple_usecase.dart';
 import '../domain/usecases/sign_out_usecase.dart';
 import '../domain/usecases/get_current_user_usecase.dart';
 import '../domain/usecases/create_user_profile_usecase.dart';
+import '../domain/usecases/update_username_usecase.dart';
 
 // ViewModels
 import '../presentation/view_models/auth_view_model.dart';
@@ -27,6 +28,7 @@ import '../domain/entities/auth_state.dart';
 
 // Shared providers from core
 import '../../../core/provider/providers.dart';
+import '../../../core/provider/sync_state_provider.dart';
 
 // === 外部依存関係プロバイダー ===
 
@@ -100,13 +102,38 @@ final getCurrentUserUseCaseProvider = Provider<GetCurrentUserUseCase>((ref) {
   return GetCurrentUserUseCase(repository);
 });
 
-/// プロファイル作成ユースケースのプロバイダー
+/// プロファイル作成ユースケースのプロバイダー（並行処理版）
 final createUserProfileUseCaseProvider = Provider<CreateUserProfileUseCase>((
   ref,
 ) {
   final authRepository = ref.watch(authRepositoryProvider);
   final usersRepository = ref.watch(hybridUsersRepositoryProvider);
-  return CreateUserProfileUseCase(authRepository, usersRepository);
+  final localDatasource = ref.watch(localUsersDatasourceProvider);
+  final remoteDatasource = ref.watch(remoteUsersDatasourceProvider);
+  final syncNotifier = ref.watch(syncStateProvider.notifier);
+
+  return CreateUserProfileUseCase(
+    authRepository,
+    usersRepository,
+    localDatasource,
+    remoteDatasource,
+    syncNotifier,
+  );
+});
+
+/// ユーザー名更新ユースケースのプロバイダー（非同期処理版）
+final updateUsernameUseCaseProvider = Provider<UpdateUsernameUseCase>((ref) {
+  final authRepository = ref.watch(authRepositoryProvider);
+  final usersRepository = ref.watch(hybridUsersRepositoryProvider);
+  final remoteDatasource = ref.watch(remoteUsersDatasourceProvider);
+  final syncNotifier = ref.watch(syncStateProvider.notifier);
+
+  return UpdateUsernameUseCase(
+    authRepository,
+    usersRepository,
+    remoteDatasource,
+    syncNotifier,
+  );
 });
 
 // === ViewModel プロバイダー ===
