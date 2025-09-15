@@ -33,6 +33,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
+  // 通知設定の状態変数
+  bool _notificationsEnabled = true;
+  bool _soundEnabled = true;
+  bool _vibrationEnabled = true;
+
   @override
   void initState() {
     super.initState();
@@ -83,6 +88,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
 
               // プレミアムプラン
               _buildPremiumSection(),
+
+              const SizedBox(height: SpacingConsts.l),
+
+              // 通知設定
+              _buildNotificationSection(),
 
               const SizedBox(height: SpacingConsts.l),
 
@@ -593,7 +603,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
       }
 
       // プロバイダーを更新してUIに反映（実際の実装では適切な更新方法を使用）
-      ref.refresh(currentUserProvider);
+      ref.invalidate(currentUserProvider);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
