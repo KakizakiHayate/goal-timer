@@ -588,8 +588,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
 
   Future<void> _updateUsername(String newUsername) async {
     try {
-      // TODO: 実際のユーザー名更新処理を実装
-      // ここでユーザー名をバックエンドに送信して更新する
+      // 現在のユーザー情報を取得
+      final currentUser = await ref.read(currentUserProvider.future);
+      if (currentUser == null) {
+        throw Exception('ユーザーが見つかりません');
+      }
+
+      // ユーザー名更新ユースケースを実行
+      final updateUsernameUseCase = ref.read(updateUsernameUseCaseProvider);
+      await updateUsernameUseCase.execute(currentUser.id, newUsername);
+
+      // プロバイダーを更新してUIに反映
+      ref.invalidate(currentUserProvider);
 
       // 成功メッセージを表示
       if (mounted) {
@@ -601,9 +611,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
           ),
         );
       }
-
-      // プロバイダーを更新してUIに反映（実際の実装では適切な更新方法を使用）
-      ref.invalidate(currentUserProvider);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
