@@ -104,9 +104,6 @@ class TimerState {
 
   // 目標IDが設定されているかチェック
   bool get hasGoal => goalId != null && goalId!.isNotEmpty;
-  
-  // 経過時間があるかチェック（1秒以上）
-  bool get hasElapsedTime => _elapsedSeconds > 0;
 }
 
 // タイマービューモデル
@@ -210,6 +207,9 @@ class TimerViewModel extends StateNotifier<TimerState> {
     );
     _elapsedSeconds = 0; // 経過秒数リセット
   }
+
+  // 経過時間があるかチェック（1秒以上）
+  bool get hasElapsedTime => _elapsedSeconds > 0;
 
   // タイマーの完了処理
   void completeTimer() {
