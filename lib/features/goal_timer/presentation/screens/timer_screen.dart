@@ -206,7 +206,8 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
       leading: IconButton(
         icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
         onPressed: () {
-          if (timerState.status == TimerStatus.running) {
+          final timerViewModel = ref.read(timerViewModelProvider.notifier);
+          if (timerViewModel.hasElapsedTime) {
             _showExitConfirmDialog(context);
           } else {
             Navigator.of(context).pop();
@@ -526,15 +527,14 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
 
         const SizedBox(width: SpacingConsts.l),
 
-        // 設定ボタン
-        _buildControlButton(
-          icon: Icons.settings_rounded,
-          onPressed:
-              () =>
-                  _showTimerSettingDialog(context, timerState, timerViewModel),
-          backgroundColor: Colors.white.withOpacity(0.2),
-          iconColor: Colors.white,
-        ),
+        // 学習完了ボタン（設定ボタンを置き換え）
+        if (_shouldShowCompletionButton(timerState))
+          _buildControlButton(
+            icon: Icons.check_rounded,
+            onPressed: () => _showCompleteConfirmDialog(context, timerState, timerViewModel),
+            backgroundColor: Colors.white.withOpacity(0.2),
+            iconColor: Colors.white,
+          ),
       ],
     );
   }
@@ -708,132 +708,122 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
     }
   }
 
-  void _showTimerSettingDialog(
-    BuildContext context,
-    TimerState timerState,
-    TimerViewModel timerViewModel,
-  ) {
-    if (timerState.mode == TimerMode.countdown) {
-      showDialog(
-        context: context,
-        builder: (context) {
-          int minutes = 25;
 
-          return AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            title: Text(
-              'フォーカス時間設定',
-              style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
-            ),
-            content: StatefulBuilder(
-              builder: (context, setState) {
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '集中時間を設定してください',
-                      style: TextConsts.body.copyWith(
-                        color: ColorConsts.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: SpacingConsts.l),
-                    Container(
-                      padding: const EdgeInsets.all(SpacingConsts.l),
-                      decoration: BoxDecoration(
-                        color: ColorConsts.primaryExtraLight,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Column(
-                        children: [
-                          Text(
-                            '$minutes分',
-                            style: TextConsts.h2.copyWith(
-                              color: ColorConsts.primary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Slider(
-                            value: minutes.toDouble(),
-                            min: 5,
-                            max: 60,
-                            divisions: 11,
-                            activeColor: ColorConsts.primary,
-                            onChanged: (value) {
-                              setState(() {
-                                minutes = value.toInt();
-                              });
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(
-                  'キャンセル',
+  void _showExitConfirmDialog(BuildContext context) {
+    final timerState = ref.read(timerViewModelProvider);
+    final timerViewModel = ref.read(timerViewModelProvider.notifier);
+    
+    // 経過時間がない場合は直接終了
+    if (!timerViewModel.hasElapsedTime) {
+      Navigator.of(context).pop();
+      return;
+    }
+
+    // モード別の学習時間計算（表示用）
+    int studyMinutes;
+    switch (timerState.mode) {
+      case TimerMode.countdown:
+        studyMinutes = (timerState.totalSeconds - timerState.currentSeconds) ~/ 60;
+        break;
+      case TimerMode.countup:
+        studyMinutes = timerState.currentSeconds ~/ 60;
+        break;
+      case TimerMode.pomodoro:
+        studyMinutes = 25;
+        break;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: Text(
+          '学習時間の保存',
+          style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          '次回から学習から離れる場合は、学習完了のチェックマークボタンを押してください\n\nカウントした時間が失われてしまいます。保存しますか？',
+          style: TextConsts.body.copyWith(
+            color: ColorConsts.textSecondary,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // ダイアログを閉じる
+            },
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('↩️'),
+                const SizedBox(width: 4),
+                Text(
+                  '戻る',
                   style: TextConsts.body.copyWith(
                     color: ColorConsts.textSecondary,
                   ),
                 ),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  timerViewModel.setTime(minutes);
-                  Navigator.pop(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: ColorConsts.primary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+              ],
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // ダイアログを閉じる
+              Navigator.pop(context); // タイマー画面を閉じる
+            },
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('🗑️'),
+                const SizedBox(width: 4),
+                Text(
+                  '保存しない',
+                  style: TextConsts.body.copyWith(
+                    color: ColorConsts.error,
                   ),
                 ),
-                child: Text(
-                  '設定',
+              ],
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              timerViewModel.completeTimerManually();
+              Navigator.pop(context); // ダイアログを閉じる
+              // フィードバック表示
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('${studyMinutes}分の学習を記録しました'),
+                  backgroundColor: ColorConsts.success,
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+              Navigator.pop(context); // タイマー画面を閉じる
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ColorConsts.primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('💾'),
+                const SizedBox(width: 4),
+                Text(
+                  '保存する',
                   style: TextConsts.body.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-              ),
-            ],
-          );
-        },
-      );
-    }
-  }
-
-  void _showExitConfirmDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
+              ],
             ),
-            title: const Text('タイマー終了'),
-            content: const Text('タイマーが実行中です。\n本当に終了しますか？'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('続ける'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.pop(context);
-                },
-                style: TextButton.styleFrom(foregroundColor: ColorConsts.error),
-                child: const Text('終了'),
-              ),
-            ],
           ),
+        ],
+      ),
     );
   }
 
@@ -922,5 +912,92 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
         );
       }
     }
+  }
+
+  // 学習完了ボタンの表示判定
+  bool _shouldShowCompletionButton(TimerState timerState) {
+    final timerViewModel = ref.read(timerViewModelProvider.notifier);
+    return timerState.status == TimerStatus.running ||
+           timerState.status == TimerStatus.paused ||
+           timerViewModel.hasElapsedTime;
+  }
+
+  void _showCompleteConfirmDialog(
+    BuildContext context,
+    TimerState timerState,
+    TimerViewModel timerViewModel,
+  ) {
+    // モード別の学習時間計算（表示用）
+    int studyMinutes;
+    switch (timerState.mode) {
+      case TimerMode.countdown:
+        studyMinutes = (timerState.totalSeconds - timerState.currentSeconds) ~/ 60;
+        break;
+      case TimerMode.countup:
+        studyMinutes = timerViewModel.hasElapsedTime ? (timerState.currentSeconds ~/ 60) : 0;
+        break;
+      case TimerMode.pomodoro:
+        studyMinutes = 25;
+        break;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: Text(
+          '学習完了',
+          style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          '$studyMinutes分を学習完了として記録しますか？',
+          style: TextConsts.body.copyWith(
+            color: ColorConsts.textSecondary,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'キャンセル',
+              style: TextConsts.body.copyWith(
+                color: ColorConsts.textSecondary,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              timerViewModel.completeTimerManually();
+              Navigator.pop(context);
+              // フィードバック表示
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('${studyMinutes}分の学習を記録しました！'),
+                  backgroundColor: ColorConsts.success,
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+              // タイマー画面を閉じる
+              Navigator.pop(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ColorConsts.primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              '完了',
+              style: TextConsts.body.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
