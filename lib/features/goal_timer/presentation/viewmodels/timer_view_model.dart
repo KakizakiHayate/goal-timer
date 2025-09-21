@@ -381,6 +381,7 @@ class TimerViewModel extends StateNotifier<TimerState> {
   }
 
   // カウントダウンの時間を設定（分単位）
+  // ここでタイマーセット
   void setTime(int minutes) {
     if (state.status == TimerStatus.running) {
       pauseTimer();

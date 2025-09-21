@@ -102,6 +102,14 @@ class LocalDailyStudyLogsDatasource {
       final db = await _database.database;
       final now = DateTime.now().toUtc();
 
+      // データ検証
+      if (log.goalId.isEmpty) {
+        throw Exception('目標IDが指定されていません');
+      }
+      if (log.totalSeconds < 0) {
+        throw Exception('学習時間が不正です: ${log.totalSeconds}秒');
+      }
+
       // 新しいログの場合はIDを生成
       final newLog =
           log.id.isEmpty
@@ -146,8 +154,16 @@ class LocalDailyStudyLogsDatasource {
 
       return _convertToDailyStudyLogModel(map);
     } catch (e) {
-      AppLogger.instance.e('ローカルでの学習記録作成/更新に失敗しました: $e');
-      rethrow;
+      if (e.toString().contains('no column named total_seconds')) {
+        AppLogger.instance.e('データベーススキーマが古い可能性があります。アプリを再起動してマイグレーションを実行してください。', e);
+        throw Exception('データベースの構造が古いため、学習記録を保存できません。アプリを再起動してください。');
+      } else if (e.toString().contains('FOREIGN KEY constraint failed')) {
+        AppLogger.instance.e('指定された目標IDが存在しません: ${log.goalId}', e);
+        throw Exception('指定された目標が見つかりません。目標を確認してください。');
+      } else {
+        AppLogger.instance.e('ローカルでの学習記録作成/更新に失敗しました: $e');
+        throw Exception('学習記録の保存に失敗しました。しばらく時間をおいて再試行してください。');
+      }
     }
   }
 
@@ -226,14 +242,40 @@ class LocalDailyStudyLogsDatasource {
 
   // SQLiteのマップからDailyStudyLogModelに変換
   DailyStudyLogModel _convertToDailyStudyLogModel(Map<String, dynamic> map) {
-    return DailyStudyLogModel(
-      id: map['id'] as String,
-      goalId: map['goal_id'] as String,
-      date:
-          map['date'] is String
-              ? DateTime.parse(map['date'])
-              : (map['date'] as DateTime),
-      totalSeconds: map['total_seconds'] as int? ?? (map['minutes'] as int? ?? 0) * 60,
-    );
+    try {
+      // 必須フィールドの存在チェック
+      if (!map.containsKey('id') || map['id'] == null) {
+        throw Exception('学習記録のIDが見つかりません');
+      }
+      if (!map.containsKey('goal_id') || map['goal_id'] == null) {
+        throw Exception('目標IDが見つかりません');
+      }
+      if (!map.containsKey('date') || map['date'] == null) {
+        throw Exception('日付情報が見つかりません');
+      }
+
+      // 学習時間の取得（後方互換性対応）
+      int totalSeconds = 0;
+      if (map.containsKey('total_seconds') && map['total_seconds'] != null) {
+        totalSeconds = map['total_seconds'] as int;
+      } else if (map.containsKey('minutes') && map['minutes'] != null) {
+        // 古いデータ形式からの変換
+        totalSeconds = (map['minutes'] as int) * 60;
+        AppLogger.instance.d('古いminutes形式から変換: ${map['minutes']}分 → ${totalSeconds}秒');
+      }
+
+      return DailyStudyLogModel(
+        id: map['id'] as String,
+        goalId: map['goal_id'] as String,
+        date:
+            map['date'] is String
+                ? DateTime.parse(map['date'])
+                : (map['date'] as DateTime),
+        totalSeconds: totalSeconds,
+      );
+    } catch (e) {
+      AppLogger.instance.e('学習記録データの変換に失敗しました: $map', e);
+      rethrow;
+    }
   }
 }
