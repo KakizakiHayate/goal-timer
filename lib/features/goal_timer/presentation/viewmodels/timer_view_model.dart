@@ -279,22 +279,23 @@ class TimerViewModel extends StateNotifier<TimerState> {
     }
 
     // カウントダウンモードの場合は設定時間、カウントアップモードの場合は経過時間を使用
-    final studyMinutes =
+    final studyTimeInSeconds =
         state.mode == TimerMode.countdown
-            ? state.totalSeconds ~/
-                60 // 設定した時間（分）
-            : _elapsedSeconds ~/ 60; // 経過した時間（分）
+            ? state.totalSeconds // 設定した時間（秒）
+            : _elapsedSeconds; // 経過した時間（秒）
 
-    if (studyMinutes <= 0) {
+    final studyMinutes = studyTimeInSeconds ~/ 60;
+
+    if (studyTimeInSeconds <= 0) {
       AppLogger.instance.w(
-        '学習時間が0分のため記録しません: 学習時間=$studyMinutes分, 目標ID=${state.goalId}',
+        '学習時間が0秒のため記録しません: 学習時間=$studyTimeInSeconds秒, 目標ID=${state.goalId}',
       );
       return;
     }
 
     try {
       AppLogger.instance.i(
-        'タイマー完了: 目標ID ${state.goalId} に $studyMinutes 分を記録します',
+        'タイマー完了: 目標ID ${state.goalId} に $studyTimeInSeconds 秒（$studyMinutes分）を記録します',
       );
 
       // 今日の日付で学習記録を作成
@@ -303,7 +304,7 @@ class TimerViewModel extends StateNotifier<TimerState> {
         id: const Uuid().v4(),
         goalId: state.goalId!,
         date: DateTime(today.year, today.month, today.day), // 時間は0:00に正規化
-        minutes: studyMinutes,
+        totalSeconds: studyTimeInSeconds,
       );
 
       // 学習記録リポジトリに記録

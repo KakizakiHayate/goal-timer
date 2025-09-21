@@ -48,7 +48,7 @@ class StatisticsRepositoryImpl implements StatisticsRepository {
         final Set<String> uniqueGoalIds = {};
 
         for (var log in entry.value) {
-          totalMinutes += log.minutes;
+          totalMinutes += log.totalMinutes;
           uniqueGoalIds.add(log.goalId);
         }
 
@@ -89,7 +89,7 @@ class StatisticsRepositoryImpl implements StatisticsRepository {
       final Set<String> uniqueGoalIds = {};
 
       for (var log in logs) {
-        totalMinutes += log.minutes;
+        totalMinutes += log.totalMinutes;
         uniqueGoalIds.add(log.goalId);
       }
 
@@ -132,7 +132,7 @@ class StatisticsRepositoryImpl implements StatisticsRepository {
       // 目標IDごとに学習時間を集計
       for (var log in logs) {
         final goalId = log.goalId;
-        final minutes = log.minutes;
+        final minutes = log.totalMinutes;
 
         totalMinutes += minutes;
         goalMinutes[goalId] = (goalMinutes[goalId] ?? 0) + minutes;
@@ -256,7 +256,7 @@ class StatisticsRepositoryImpl implements StatisticsRepository {
 
       if (logs.isEmpty) return 0.0;
 
-      final totalMinutes = logs.fold<int>(0, (sum, log) => sum + log.minutes);
+      final totalMinutes = logs.fold<int>(0, (sum, log) => sum + log.totalMinutes);
       return totalMinutes / logs.length;
     } catch (e, stackTrace) {
       AppLogger.instance.e('getAverageSessionTime error', e, stackTrace);
@@ -286,7 +286,7 @@ class StatisticsRepositoryImpl implements StatisticsRepository {
       );
       final currentTotalMinutes = currentLogs.fold<int>(
         0,
-        (sum, log) => sum + log.minutes,
+        (sum, log) => sum + log.totalMinutes,
       );
 
       // 前期間のデータ取得
@@ -296,7 +296,7 @@ class StatisticsRepositoryImpl implements StatisticsRepository {
       );
       final previousTotalMinutes = previousLogs.fold<int>(
         0,
-        (sum, log) => sum + log.minutes,
+        (sum, log) => sum + log.totalMinutes,
       );
 
       final difference = currentTotalMinutes - previousTotalMinutes;
@@ -511,7 +511,7 @@ class StatisticsRepositoryImpl implements StatisticsRepository {
         // 目標IDごとに学習時間を集計
         for (var log in logsForDate) {
           final goalId = log.goalId;
-          final minutes = log.minutes;
+          final minutes = log.totalMinutes;
 
           totalMinutes += minutes;
           goalMinutes[goalId] = (goalMinutes[goalId] ?? 0) + minutes;

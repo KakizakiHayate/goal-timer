@@ -15,8 +15,8 @@ class DailyStudyLogModel with _$DailyStudyLogModel {
     /// 学習した日付
     required DateTime date,
 
-    /// 学習した時間（分）
-    required int minutes,
+    /// 学習した時間（秒）
+    required int totalSeconds,
 
     /// 最終更新日時
     @Default(null) DateTime? updatedAt,
@@ -44,15 +44,29 @@ class DailyStudyLogModel with _$DailyStudyLogModel {
       throw ArgumentError('Invalid date format');
     }
 
-    // 整数値の安全な変換
-    int parsedMinutes;
-    final minutesValue = map['minutes'];
-    if (minutesValue is int) {
-      parsedMinutes = minutesValue;
-    } else if (minutesValue is String) {
-      parsedMinutes = int.tryParse(minutesValue) ?? 0;
+    // 整数値の安全な変換（total_secondsまたは古いminutesフィールドに対応）
+    int parsedTotalSeconds;
+    if (map['total_seconds'] != null) {
+      final secondsValue = map['total_seconds'];
+      if (secondsValue is int) {
+        parsedTotalSeconds = secondsValue;
+      } else if (secondsValue is String) {
+        parsedTotalSeconds = int.tryParse(secondsValue) ?? 0;
+      } else {
+        parsedTotalSeconds = 0;
+      }
+    } else if (map['minutes'] != null) {
+      // 後方互換性: 古いminutesフィールドから変換
+      final minutesValue = map['minutes'];
+      if (minutesValue is int) {
+        parsedTotalSeconds = minutesValue * 60;
+      } else if (minutesValue is String) {
+        parsedTotalSeconds = (int.tryParse(minutesValue) ?? 0) * 60;
+      } else {
+        parsedTotalSeconds = 0;
+      }
     } else {
-      parsedMinutes = 0;
+      parsedTotalSeconds = 0;
     }
 
     // updatedAtの変換
@@ -91,7 +105,7 @@ class DailyStudyLogModel with _$DailyStudyLogModel {
       id: map['id'] ?? '',
       goalId: map['goal_id'] ?? '',
       date: parsedDate,
-      minutes: parsedMinutes,
+      totalSeconds: parsedTotalSeconds,
       updatedAt: parsedUpdatedAt,
       syncUpdatedAt: parsedSyncUpdatedAt,
       isSynced: parsedIsSynced,
@@ -100,13 +114,31 @@ class DailyStudyLogModel with _$DailyStudyLogModel {
 }
 
 extension DailyStudyLogModelExtension on DailyStudyLogModel {
+  /// 分単位で取得
+  int get totalMinutes => totalSeconds ~/ 60;
+
+  /// 表示用にフォーマットされた時間文字列
+  String get displayTime {
+    final hours = totalSeconds ~/ 3600;
+    final minutes = (totalSeconds % 3600) ~/ 60;
+    final seconds = totalSeconds % 60;
+
+    if (hours > 0) {
+      return '${hours}時間${minutes}分';
+    } else if (minutes > 0) {
+      return seconds > 0 ? '${minutes}分${seconds}秒' : '${minutes}分';
+    } else {
+      return '${seconds}秒';
+    }
+  }
+
   /// SupabaseへのInsert/Update用のMapに変換
   Map<String, dynamic> toMap() {
     return {
       'id': id,
       'goal_id': goalId,
       'date': date.toIso8601String(),
-      'minutes': minutes,
+      'total_seconds': totalSeconds,
     };
   }
 }

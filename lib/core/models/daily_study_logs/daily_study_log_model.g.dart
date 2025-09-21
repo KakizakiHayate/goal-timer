@@ -12,7 +12,7 @@ _$DailyStudyLogModelImpl _$$DailyStudyLogModelImplFromJson(
       id: json['id'] as String,
       goalId: json['goalId'] as String,
       date: DateTime.parse(json['date'] as String),
-      minutes: json['minutes'] as int,
+      totalSeconds: json['totalSeconds'] as int,
       updatedAt: json['updatedAt'] == null
           ? null
           : DateTime.parse(json['updatedAt'] as String),
@@ -28,7 +28,7 @@ Map<String, dynamic> _$$DailyStudyLogModelImplToJson(
       'id': instance.id,
       'goalId': instance.goalId,
       'date': instance.date.toIso8601String(),
-      'minutes': instance.minutes,
+      'totalSeconds': instance.totalSeconds,
       'updatedAt': instance.updatedAt?.toIso8601String(),
       'syncUpdatedAt': instance.syncUpdatedAt?.toIso8601String(),
       'isSynced': instance.isSynced,

@@ -109,7 +109,7 @@ class LocalDailyStudyLogsDatasource {
                 id: const Uuid().v4(),
                 goalId: log.goalId,
                 date: log.date,
-                minutes: log.minutes,
+                totalSeconds: log.totalSeconds,
               )
               : log;
 
@@ -121,7 +121,7 @@ class LocalDailyStudyLogsDatasource {
         'id': newLog.id,
         'goal_id': newLog.goalId,
         'date': newLog.date.toIso8601String().split('T')[0],
-        'minutes': newLog.minutes,
+        'total_seconds': newLog.totalSeconds,
         'updated_at': now.toIso8601String(),
         'sync_updated_at': now.toIso8601String(),
         'is_synced': 0,
@@ -233,7 +233,7 @@ class LocalDailyStudyLogsDatasource {
           map['date'] is String
               ? DateTime.parse(map['date'])
               : (map['date'] as DateTime),
-      minutes: map['minutes'] as int,
+      totalSeconds: map['total_seconds'] as int? ?? (map['minutes'] as int? ?? 0) * 60,
     );
   }
 }

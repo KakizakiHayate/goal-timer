@@ -29,8 +29,8 @@ mixin _$DailyStudyLogModel {
   /// 学習した日付
   DateTime get date => throw _privateConstructorUsedError;
 
-  /// 学習した時間（分）
-  int get minutes => throw _privateConstructorUsedError;
+  /// 学習した時間（秒）
+  int get totalSeconds => throw _privateConstructorUsedError;
 
   /// 最終更新日時
   DateTime? get updatedAt => throw _privateConstructorUsedError;
@@ -57,7 +57,7 @@ abstract class $DailyStudyLogModelCopyWith<$Res> {
       {String id,
       String goalId,
       DateTime date,
-      int minutes,
+      int totalSeconds,
       DateTime? updatedAt,
       DateTime? syncUpdatedAt,
       bool isSynced});
@@ -79,7 +79,7 @@ class _$DailyStudyLogModelCopyWithImpl<$Res, $Val extends DailyStudyLogModel>
     Object? id = null,
     Object? goalId = null,
     Object? date = null,
-    Object? minutes = null,
+    Object? totalSeconds = null,
     Object? updatedAt = freezed,
     Object? syncUpdatedAt = freezed,
     Object? isSynced = null,
@@ -97,9 +97,9 @@ class _$DailyStudyLogModelCopyWithImpl<$Res, $Val extends DailyStudyLogModel>
           ? _value.date
           : date // ignore: cast_nullable_to_non_nullable
               as DateTime,
-      minutes: null == minutes
-          ? _value.minutes
-          : minutes // ignore: cast_nullable_to_non_nullable
+      totalSeconds: null == totalSeconds
+          ? _value.totalSeconds
+          : totalSeconds // ignore: cast_nullable_to_non_nullable
               as int,
       updatedAt: freezed == updatedAt
           ? _value.updatedAt
@@ -129,7 +129,7 @@ abstract class _$$DailyStudyLogModelImplCopyWith<$Res>
       {String id,
       String goalId,
       DateTime date,
-      int minutes,
+      int totalSeconds,
       DateTime? updatedAt,
       DateTime? syncUpdatedAt,
       bool isSynced});
@@ -149,7 +149,7 @@ class __$$DailyStudyLogModelImplCopyWithImpl<$Res>
     Object? id = null,
     Object? goalId = null,
     Object? date = null,
-    Object? minutes = null,
+    Object? totalSeconds = null,
     Object? updatedAt = freezed,
     Object? syncUpdatedAt = freezed,
     Object? isSynced = null,
@@ -167,9 +167,9 @@ class __$$DailyStudyLogModelImplCopyWithImpl<$Res>
           ? _value.date
           : date // ignore: cast_nullable_to_non_nullable
               as DateTime,
-      minutes: null == minutes
-          ? _value.minutes
-          : minutes // ignore: cast_nullable_to_non_nullable
+      totalSeconds: null == totalSeconds
+          ? _value.totalSeconds
+          : totalSeconds // ignore: cast_nullable_to_non_nullable
               as int,
       updatedAt: freezed == updatedAt
           ? _value.updatedAt
@@ -194,7 +194,7 @@ class _$DailyStudyLogModelImpl implements _DailyStudyLogModel {
       {required this.id,
       required this.goalId,
       required this.date,
-      required this.minutes,
+      required this.totalSeconds,
       this.updatedAt = null,
       this.syncUpdatedAt = null,
       this.isSynced = false});
@@ -214,9 +214,9 @@ class _$DailyStudyLogModelImpl implements _DailyStudyLogModel {
   @override
   final DateTime date;
 
-  /// 学習した時間（分）
+  /// 学習した時間（秒）
   @override
-  final int minutes;
+  final int totalSeconds;
 
   /// 最終更新日時
   @override
@@ -235,7 +235,7 @@ class _$DailyStudyLogModelImpl implements _DailyStudyLogModel {
 
   @override
   String toString() {
-    return 'DailyStudyLogModel(id: $id, goalId: $goalId, date: $date, minutes: $minutes, updatedAt: $updatedAt, syncUpdatedAt: $syncUpdatedAt, isSynced: $isSynced)';
+    return 'DailyStudyLogModel(id: $id, goalId: $goalId, date: $date, totalSeconds: $totalSeconds, updatedAt: $updatedAt, syncUpdatedAt: $syncUpdatedAt, isSynced: $isSynced)';
   }
 
   @override
@@ -246,7 +246,8 @@ class _$DailyStudyLogModelImpl implements _DailyStudyLogModel {
             (identical(other.id, id) || other.id == id) &&
             (identical(other.goalId, goalId) || other.goalId == goalId) &&
             (identical(other.date, date) || other.date == date) &&
-            (identical(other.minutes, minutes) || other.minutes == minutes) &&
+            (identical(other.totalSeconds, totalSeconds) ||
+                other.totalSeconds == totalSeconds) &&
             (identical(other.updatedAt, updatedAt) ||
                 other.updatedAt == updatedAt) &&
             (identical(other.syncUpdatedAt, syncUpdatedAt) ||
@@ -257,7 +258,7 @@ class _$DailyStudyLogModelImpl implements _DailyStudyLogModel {
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, id, goalId, date, minutes,
+  int get hashCode => Object.hash(runtimeType, id, goalId, date, totalSeconds,
       updatedAt, syncUpdatedAt, isSynced);
 
   @JsonKey(ignore: true)
@@ -280,7 +281,7 @@ abstract class _DailyStudyLogModel implements DailyStudyLogModel {
       {required final String id,
       required final String goalId,
       required final DateTime date,
-      required final int minutes,
+      required final int totalSeconds,
       final DateTime? updatedAt,
       final DateTime? syncUpdatedAt,
       final bool isSynced}) = _$DailyStudyLogModelImpl;
@@ -302,8 +303,8 @@ abstract class _DailyStudyLogModel implements DailyStudyLogModel {
   DateTime get date;
   @override
 
-  /// 学習した時間（分）
-  int get minutes;
+  /// 学習した時間（秒）
+  int get totalSeconds;
   @override
 
   /// 最終更新日時
