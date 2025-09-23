@@ -1038,10 +1038,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
                   try {
                     // パターン1: タイマー画面に留まる学習完了フロー
 
-                    // 1. タイマーを停止
-                    timerViewModel.completeTimer();
-
-                    // 2. 学習記録を保存
+                    // 学習記録を保存（タイマー停止も含む）
                     await _saveStudyTimeManually(
                       timerState,
                       timerViewModel,
@@ -1144,8 +1141,8 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
       // 目標データのキャッシュをクリアして最新状態を反映
       ref.invalidate(goalDetailListProvider);
 
-      // タイマーを完了状態に設定
-      timerViewModel.completeTimer();
+      // タイマーを停止（データ保存は上記で完了済み）
+      timerViewModel.pauseTimer();
 
       AppLogger.instance.i('学習時間の手動記録が完了しました: $studyTimeInSeconds秒');
     } catch (error) {
