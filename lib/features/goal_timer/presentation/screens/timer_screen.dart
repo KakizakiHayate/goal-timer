@@ -149,13 +149,6 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
       });
     }
 
-    // チュートリアルモードの場合、タイマーを5秒に設定
-    if (widget.isTutorialMode && timerState.status == TimerStatus.initial) {
-      Future.microtask(() {
-        timerViewModel.setTutorialTime(TimerConstants.tutorialDurationSeconds);
-      });
-    }
-
     // タイマー実行中のパルスアニメーション
     if (timerState.status == TimerStatus.running &&
         !_pulseAnimationController.isAnimating) {

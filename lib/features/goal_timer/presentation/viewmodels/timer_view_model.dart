@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:goal_timer/core/utils/app_logger.dart';
 import 'package:goal_timer/core/provider/providers.dart';
 import 'package:goal_timer/core/models/daily_study_logs/daily_study_log_model.dart';
-import 'package:goal_timer/core/provider/supabase/goals/goals_provider.dart';
 import 'package:goal_timer/features/goal_detail/presentation/viewmodels/goal_detail_view_model.dart';
 import 'package:goal_timer/core/services/timer_restriction_service.dart';
+import 'package:goal_timer/features/settings/presentation/viewmodels/settings_view_model.dart';
 import 'package:uuid/uuid.dart';
 
 // タイマー関連の定数
@@ -129,9 +129,60 @@ class TimerViewModel extends StateNotifier<TimerState> {
     state = state.copyWith(goalId: goalId);
   }
 
-  // チュートリアルモードを設定
+  // チュートリアルモードを設定し、適切な初期時間も設定
   void setTutorialMode(bool isTutorialMode) {
     _isTutorialMode = isTutorialMode;
+
+    // チュートリアルモードなら5秒、そうでなければユーザーのデフォルト時間を設定
+    if (isTutorialMode) {
+      _setInitialTime(TimerConstants.tutorialDurationSeconds, isSeconds: true);
+      AppLogger.instance.i(
+        'チュートリアルモード: タイマーを${TimerConstants.tutorialDurationSeconds}秒に設定しました',
+      );
+    } else {
+      _setUserDefaultTime();
+    }
+  }
+
+  // ユーザーのデフォルト時間を設定
+  void _setUserDefaultTime() {
+    try {
+      final settingsAsyncValue = _ref.read(settingsProvider);
+      settingsAsyncValue.when(
+        data: (settings) {
+          _setInitialTime(settings.defaultTimerDuration, isSeconds: false);
+          AppLogger.instance.i(
+            'ユーザーデフォルト時間: タイマーを${settings.defaultTimerDuration}分に設定しました',
+          );
+        },
+        loading: () {
+          // ローディング中はデフォルト値を使用
+          _setInitialTime(25, isSeconds: false);
+          AppLogger.instance.i('設定読み込み中: デフォルト25分を使用');
+        },
+        error: (error, stack) {
+          // エラー時もデフォルト値を使用
+          _setInitialTime(25, isSeconds: false);
+          AppLogger.instance.w('設定読み込みエラー: デフォルト25分を使用 - $error');
+        },
+      );
+    } catch (e) {
+      // 例外時もデフォルト値を使用
+      _setInitialTime(25, isSeconds: false);
+      AppLogger.instance.w('設定読み込み例外: デフォルト25分を使用 - $e');
+    }
+  }
+
+  // 初期時間を設定する内部メソッド
+  void _setInitialTime(int time, {required bool isSeconds}) {
+    final seconds = isSeconds ? time : time * 60;
+
+    state = state.copyWith(
+      totalSeconds: seconds,
+      currentSeconds: state.mode == TimerMode.countdown ? seconds : 0,
+      status: TimerStatus.initial,
+    );
+    _elapsedSeconds = 0;
   }
 
   // タイマーの開始
@@ -153,7 +204,9 @@ class TimerViewModel extends StateNotifier<TimerState> {
       if (state.mode == TimerMode.countdown) {
         // カウントダウンモード
         if (state.currentSeconds <= TimerConstants.countdownCompleteThreshold) {
-          AppLogger.instance.i('🎯 タイマー完了条件到達: currentSeconds=${state.currentSeconds}, threshold=${TimerConstants.countdownCompleteThreshold}');
+          AppLogger.instance.i(
+            '🎯 タイマー完了条件到達: currentSeconds=${state.currentSeconds}, threshold=${TimerConstants.countdownCompleteThreshold}',
+          );
           completeTimer();
         } else {
           state = state.copyWith(currentSeconds: state.currentSeconds - 1);
@@ -281,7 +334,8 @@ class TimerViewModel extends StateNotifier<TimerState> {
     // カウントダウンモードの場合は設定時間、カウントアップモードの場合は経過時間を使用
     final studyTimeInSeconds =
         state.mode == TimerMode.countdown
-            ? state.totalSeconds // 設定した時間（秒）
+            ? state
+                .totalSeconds // 設定した時間（秒）
             : _elapsedSeconds; // 経過した時間（秒）
 
     final studyMinutes = studyTimeInSeconds ~/ 60;
