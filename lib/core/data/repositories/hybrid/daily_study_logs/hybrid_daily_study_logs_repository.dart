@@ -153,8 +153,24 @@ class HybridDailyStudyLogsRepository implements DailyStudyLogsRepository {
       final connectivityResult = await _connectivity.checkConnectivity();
       if (connectivityResult != ConnectivityResult.none) {
         try {
-          // Supabaseに同期
-          await _remoteDatasource.upsertDailyLog(log);
+          // ローカルDBから最新のデータを取得（仮ユーザー情報を含む）
+          final latestLocalLog = await _localDatasource.getLogById(localLog.id);
+          if (latestLocalLog != null) {
+            // 仮ユーザー情報が設定されている場合は、Supabase用に仮ユーザー情報を追加
+            DailyStudyLogModel logToSync = latestLocalLog;
+            if (latestLocalLog.isTemp || latestLocalLog.tempUserId != null) {
+              logToSync = latestLocalLog.copyWith(
+                isTemp: true,
+                tempUserId: latestLocalLog.tempUserId ?? 'local_user_temp_${DateTime.now().millisecondsSinceEpoch}',
+              );
+            }
+
+            // Supabaseに同期
+            await _remoteDatasource.upsertDailyLog(logToSync);
+          } else {
+            // fallback: 元のlogを使用
+            await _remoteDatasource.upsertDailyLog(log);
+          }
 
           // 同期成功したらフラグを更新
           final syncedLog = localLog.copyWith(isSynced: true);

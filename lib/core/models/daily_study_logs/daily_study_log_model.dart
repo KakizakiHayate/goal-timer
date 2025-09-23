@@ -18,6 +18,9 @@ class DailyStudyLogModel with _$DailyStudyLogModel {
     /// 学習した時間（秒）
     required int totalSeconds,
 
+    /// 作成日時
+    @Default(null) DateTime? createdAt,
+
     /// 最終更新日時
     @Default(null) DateTime? updatedAt,
 
@@ -26,6 +29,12 @@ class DailyStudyLogModel with _$DailyStudyLogModel {
 
     /// 同期状態（ローカルDBのみで使用）
     @Default(false) bool isSynced,
+
+    /// 仮ユーザーかどうか
+    @Default(false) bool isTemp,
+
+    /// 仮ユーザーのID
+    @Default(null) String? tempUserId,
   }) = _DailyStudyLogModel;
 
   /// Supabaseからのデータを元にDailyStudyLogModelを生成
@@ -34,12 +43,13 @@ class DailyStudyLogModel with _$DailyStudyLogModel {
 
   /// 後方互換性のためのfromMapメソッド
   factory DailyStudyLogModel.fromMap(Map<String, dynamic> map) {
-    // 日付の型変換処理
+    // 日付の型変換処理（新スキーマでは study_date、旧スキーマでは date）
     DateTime parsedDate;
-    if (map['date'] is String) {
-      parsedDate = DateTime.parse(map['date']);
-    } else if (map['date'] is DateTime) {
-      parsedDate = map['date'];
+    final dateValue = map['study_date'] ?? map['date'];
+    if (dateValue is String) {
+      parsedDate = DateTime.parse(dateValue);
+    } else if (dateValue is DateTime) {
+      parsedDate = dateValue;
     } else {
       throw ArgumentError('Invalid date format');
     }
@@ -79,6 +89,16 @@ class DailyStudyLogModel with _$DailyStudyLogModel {
       }
     }
 
+    // createdAtの変換
+    DateTime? parsedCreatedAt;
+    if (map['created_at'] != null) {
+      if (map['created_at'] is String) {
+        parsedCreatedAt = DateTime.parse(map['created_at']);
+      } else if (map['created_at'] is DateTime) {
+        parsedCreatedAt = map['created_at'];
+      }
+    }
+
     // syncUpdatedAtの変換
     DateTime? parsedSyncUpdatedAt;
     if (map['sync_updated_at'] != null) {
@@ -101,14 +121,29 @@ class DailyStudyLogModel with _$DailyStudyLogModel {
       }
     }
 
+    // 仮ユーザー状態の変換
+    bool parsedIsTemp = false;
+    if (map['is_temp'] != null) {
+      if (map['is_temp'] is bool) {
+        parsedIsTemp = map['is_temp'];
+      } else if (map['is_temp'] is int) {
+        parsedIsTemp = map['is_temp'] == 1;
+      } else if (map['is_temp'] is String) {
+        parsedIsTemp = map['is_temp'] == 'true' || map['is_temp'] == '1';
+      }
+    }
+
     return DailyStudyLogModel(
       id: map['id'] ?? '',
       goalId: map['goal_id'] ?? '',
       date: parsedDate,
       totalSeconds: parsedTotalSeconds,
+      createdAt: parsedCreatedAt,
       updatedAt: parsedUpdatedAt,
       syncUpdatedAt: parsedSyncUpdatedAt,
       isSynced: parsedIsSynced,
+      isTemp: parsedIsTemp,
+      tempUserId: map['temp_user_id'],
     );
   }
 }
@@ -132,13 +167,17 @@ extension DailyStudyLogModelExtension on DailyStudyLogModel {
     }
   }
 
-  /// SupabaseへのInsert/Update用のMapに変換
+  /// SupabaseへのInsert/Update用のMapに変換（新スキーマ対応）
   Map<String, dynamic> toMap() {
     return {
       'id': id,
       'goal_id': goalId,
-      'date': date.toIso8601String(),
+      'study_date': date.toIso8601String().split('T')[0], // 日付のみ（時間なし）
       'total_seconds': totalSeconds,
+      'created_at': createdAt?.toIso8601String(),
+      'updated_at': updatedAt?.toIso8601String(),
+      'sync_updated_at': syncUpdatedAt?.toIso8601String(),
+      // is_temp, temp_user_idはローカル専用のため、Supabaseには送信しない
     };
   }
 }

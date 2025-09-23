@@ -1130,28 +1130,16 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
         goalId: timerState.goalId!,
         date: DateTime(today.year, today.month, today.day), // 時間は0:00に正規化
         totalSeconds: studyTimeInSeconds,
+        createdAt: today, // 作成日時を設定
       );
 
       // 学習記録リポジトリに記録
       final repository = ref.read(hybridDailyStudyLogsRepositoryProvider);
       await repository.upsertDailyLog(dailyLog);
 
-      // 目標の累計時間も更新（分単位で保存）
-      try {
-        final goalsRepository = ref.read(hybridGoalsRepositoryProvider);
-        final currentGoal = await goalsRepository.getGoalById(
-          timerState.goalId!,
-        );
-        if (currentGoal != null) {
-          final studyMinutes = studyTimeInSeconds ~/ 60;
-          final updatedGoal = currentGoal.copyWith(
-            spentMinutes: currentGoal.spentMinutes + studyMinutes,
-          );
-          await goalsRepository.updateGoal(updatedGoal);
-        }
-      } catch (e) {
-        AppLogger.instance.w('目標の累計時間更新に失敗しました（記録は保存済み）: $e');
-      }
+      // 削除: goals更新処理は不要（累計時間はstudy_daily_logsから計算）
+      // 目標の累計時間はstudy_daily_logsから動的に計算するため、
+      // goalsテーブルのspent_minutesフィールドは更新しない
 
       // 目標データのキャッシュをクリアして最新状態を反映
       ref.invalidate(goalDetailListProvider);

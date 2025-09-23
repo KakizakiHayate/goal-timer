@@ -4,7 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
 class SupabaseDailyStudyLogsDatasource {
-  static const String _tableName = 'daily_study_logs';
+  static const String _tableName = 'study_daily_logs';
   final SupabaseClient _client;
 
   SupabaseDailyStudyLogsDatasource(this._client);
@@ -12,7 +12,10 @@ class SupabaseDailyStudyLogsDatasource {
   // 全学習記録を取得
   Future<List<DailyStudyLogModel>> getAllLogs() async {
     try {
-      final response = await _client.from(_tableName).select().order('date');
+      final response = await _client
+          .from(_tableName)
+          .select()
+          .order('study_date');
 
       return response.map((log) => DailyStudyLogModel.fromMap(log)).toList();
     } catch (e, stackTrace) {
@@ -29,7 +32,7 @@ class SupabaseDailyStudyLogsDatasource {
       final response = await _client
           .from(_tableName)
           .select()
-          .eq('date', formattedDate)
+          .eq('study_date', formattedDate)
           .order('goal_id');
 
       return response.map((log) => DailyStudyLogModel.fromMap(log)).toList();
@@ -51,9 +54,9 @@ class SupabaseDailyStudyLogsDatasource {
       final response = await _client
           .from(_tableName)
           .select()
-          .gte('date', startDateStr)
-          .lte('date', endDateStr)
-          .order('date');
+          .gte('study_date', startDateStr)
+          .lte('study_date', endDateStr)
+          .order('study_date');
 
       return response.map((log) => DailyStudyLogModel.fromMap(log)).toList();
     } catch (e, stackTrace) {
@@ -69,7 +72,7 @@ class SupabaseDailyStudyLogsDatasource {
           .from(_tableName)
           .select()
           .eq('goal_id', goalId)
-          .order('date');
+          .order('study_date');
 
       return response.map((log) => DailyStudyLogModel.fromMap(log)).toList();
     } catch (e, stackTrace) {

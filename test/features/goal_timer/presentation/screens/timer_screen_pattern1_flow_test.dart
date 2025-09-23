@@ -339,3 +339,4 @@ int _calculateStudyTime(TimerState timerState) {
   }
 }
 
+
