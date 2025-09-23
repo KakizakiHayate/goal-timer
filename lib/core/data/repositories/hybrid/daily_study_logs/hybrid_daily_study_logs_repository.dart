@@ -161,7 +161,9 @@ class HybridDailyStudyLogsRepository implements DailyStudyLogsRepository {
             if (latestLocalLog.isTemp || latestLocalLog.tempUserId != null) {
               logToSync = latestLocalLog.copyWith(
                 isTemp: true,
-                tempUserId: latestLocalLog.tempUserId ?? 'local_user_temp_${DateTime.now().millisecondsSinceEpoch}',
+                tempUserId:
+                    latestLocalLog.tempUserId ??
+                    'local_user_temp_${DateTime.now().millisecondsSinceEpoch}',
               );
             }
 
@@ -181,8 +183,10 @@ class HybridDailyStudyLogsRepository implements DailyStudyLogsRepository {
           AppLogger.instance.i('学習記録をSupabaseに同期しました');
         } catch (e) {
           // リモート保存失敗してもローカルは保持
+          print('保存が必要');
           _syncNotifier.setUnsynced();
           AppLogger.instance.w('Supabase同期失敗（後で再試行）: $e');
+          print('保存が必要2');
         }
       } else {
         _syncNotifier.setOffline();

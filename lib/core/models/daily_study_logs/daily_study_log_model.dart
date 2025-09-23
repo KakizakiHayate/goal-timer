@@ -174,7 +174,7 @@ extension DailyStudyLogModelExtension on DailyStudyLogModel {
       'goal_id': goalId,
       'study_date': date.toIso8601String().split('T')[0], // 日付のみ（時間なし）
       'total_seconds': totalSeconds,
-      'created_at': createdAt?.toIso8601String(),
+      // created_atはSupabase側のdefault now()で自動設定されるため送信しない
       'updated_at': updatedAt?.toIso8601String(),
       'sync_updated_at': syncUpdatedAt?.toIso8601String(),
       // is_temp, temp_user_idはローカル専用のため、Supabaseには送信しない
