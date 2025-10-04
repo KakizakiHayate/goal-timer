@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import './timer_view_model.dart';
-import '../../../../core/utils/app_logger.dart';
-import '../../../../core/utils/color_consts.dart';
-import '../../../../core/utils/text_consts.dart';
-import '../../../../core/utils/spacing_consts.dart';
-import '../../../../core/utils/animation_consts.dart';
-import '../../../../core/widgets/circular_progress_indicator.dart' as custom;
-import '../../../../core/widgets/animated_check_icon.dart';
-import '../../../../core/widgets/pressable_card.dart';
-import '../../../onboarding/presentation/view_models/tutorial_view_model.dart';
-import '../../../onboarding/presentation/widgets/tutorial_overlay.dart';
-import '../../../onboarding/presentation/widgets/tutorial_completion_dialog.dart';
-import '../../../../core/utils/route_names.dart';
-import '../../../../core/provider/providers.dart';
-import '../../../../core/models/daily_study_logs/daily_study_log_model.dart';
+import '../../../core/utils/app_logger.dart';
+import '../../../core/utils/color_consts.dart';
+import '../../../core/utils/text_consts.dart';
+import '../../../core/utils/spacing_consts.dart';
+import '../../../core/utils/animation_consts.dart';
+import '../../../core/widgets/circular_progress_indicator.dart' as custom;
+import '../../../core/widgets/animated_check_icon.dart';
+import '../../../core/widgets/pressable_card.dart';
+import '../../onboarding/presentation/view_models/tutorial_view_model.dart';
+import '../../onboarding/presentation/widgets/tutorial_overlay.dart';
+import '../../onboarding/presentation/widgets/tutorial_completion_dialog.dart';
+import '../../../core/utils/route_names.dart';
+import '../../../core/provider/providers.dart';
+import '../../../core/models/daily_study_logs/daily_study_log_model.dart';
 import 'package:uuid/uuid.dart';
-import '../../../goal_detail/presentation/viewmodels/goal_detail_view_model.dart';
+import '../../goal_detail/presentation/viewmodels/goal_detail_view_model.dart';
 
 /// 改善されたタイマー画面
 /// 集中力向上とモチベーション維持に焦点を当てたデザイン
