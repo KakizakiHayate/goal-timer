@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:uuid/uuid.dart';
 
 part 'daily_study_log_model.freezed.dart';
 part 'daily_study_log_model.g.dart';
@@ -36,6 +37,19 @@ class DailyStudyLogModel with _$DailyStudyLogModel {
     /// 仮ユーザーのID
     @Default(null) String? tempUserId,
   }) = _DailyStudyLogModel;
+
+  factory DailyStudyLogModel.create({
+    required String goalId,
+    required int totalSeconds,
+  }) {
+    final today = DateTime.now();
+    return DailyStudyLogModel(
+      id: const Uuid().v4(),
+      goalId: goalId,
+      date: DateTime(today.year, today.month, today.day),
+      totalSeconds: totalSeconds,
+    );
+  }
 
   /// Supabaseからのデータを元にDailyStudyLogModelを生成
   factory DailyStudyLogModel.fromJson(Map<String, dynamic> json) =>

@@ -14,16 +14,24 @@ class SaveStudyLogUseCase {
 
   /// 学習ログを保存する
   ///
-  /// [log]: 保存する学習ログ
-  /// 戻り値: 保存された学習ログ（IDが生成される場合あり）
+  /// [goalId]: 目標ID
+  /// [studyDurationInSeconds]: 学習時間（秒）
   /// throws: ArgumentError 学習時間が0以下の場合
-  Future<DailyStudyLogModel> execute(DailyStudyLogModel log) async {
+  Future<DailyStudyLogModel> execute({
+    required String goalId,
+    required int studyDurationInSeconds,
+  }) async {
     // バリデーション
-    if (log.studyDuration <= 0) {
+    if (studyDurationInSeconds <= 0) {
       throw ArgumentError('学習時間は0より大きい必要があります');
     }
 
+    final dailyStudyLogModel = DailyStudyLogModel.create(
+      goalId: goalId,
+      totalSeconds: studyDurationInSeconds,
+    );
+
     // Repositoryに委譲（Local/Remote切り替えはRepository内で処理）
-    return await _repository.upsertDailyLog(log);
+    return await _repository.upsertDailyLog(dailyStudyLogModel);
   }
 }

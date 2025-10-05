@@ -56,23 +56,23 @@ class StatisticsTestData {
       ...List.generate(7, (index) => DailyStudyLogModel(
         id: 'log-current-week-goal1-$index',
         goalId: goal1Id,
-        minutes: 60,
+        totalSeconds: 60 * 60,
         date: startOfWeek.add(Duration(days: index)),
       )),
-      
+
       // プログラミング - 平日のみ45分 (5日 × 45分 = 225分)
       ...List.generate(5, (index) => DailyStudyLogModel(
         id: 'log-current-week-goal2-$index',
         goalId: goal2Id,
-        minutes: 45,
+        totalSeconds: 45 * 60,
         date: startOfWeek.add(Duration(days: index)),
       )),
-      
+
       // 資格勉強 - 3日間のみ30分 (3日 × 30分 = 90分)
       ...List.generate(3, (index) => DailyStudyLogModel(
         id: 'log-current-week-goal3-$index',
         goalId: goal3Id,
-        minutes: 30,
+        totalSeconds: 30 * 60,
         date: startOfWeek.add(Duration(days: index)),
       )),
     ];
@@ -88,15 +88,15 @@ class StatisticsTestData {
       ...List.generate(7, (index) => DailyStudyLogModel(
         id: 'log-last-week-goal1-$index',
         goalId: goal1Id,
-        minutes: 30,
+        totalSeconds: 30 * 60,
         date: startOfLastWeek.add(Duration(days: index)),
       )),
-      
+
       // プログラミング - 4日間60分 (4日 × 60分 = 240分)
       ...List.generate(4, (index) => DailyStudyLogModel(
         id: 'log-last-week-goal2-$index',
         goalId: goal2Id,
-        minutes: 60,
+        totalSeconds: 60 * 60,
         date: startOfLastWeek.add(Duration(days: index)),
       )),
       
@@ -116,7 +116,7 @@ class StatisticsTestData {
     return List.generate(7, (index) => DailyStudyLogModel(
       id: 'consecutive-log-$index',
       goalId: goal1Id,
-      minutes: 30,
+      totalSeconds: 30 * 60,
       date: now.subtract(Duration(days: 6 - index)),
     ));
   }
@@ -129,7 +129,7 @@ class StatisticsTestData {
       DailyStudyLogModel(
         id: 'broken-streak-today',
         goalId: goal1Id,
-        minutes: 30,
+        totalSeconds: 30 * 60,
         date: now,
       ),
       // 昨日は記録なし
@@ -137,7 +137,7 @@ class StatisticsTestData {
       DailyStudyLogModel(
         id: 'broken-streak-2-days-ago',
         goalId: goal1Id,
-        minutes: 45,
+        totalSeconds: 45 * 60,
         date: now.subtract(const Duration(days: 2)),
       ),
     ];

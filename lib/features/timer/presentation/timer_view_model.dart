@@ -1,14 +1,12 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:goal_timer/core/utils/app_logger.dart';
-import 'package:goal_timer/core/provider/providers.dart';
-import 'package:goal_timer/core/models/daily_study_logs/daily_study_log_model.dart';
 import 'package:goal_timer/features/goal_detail/presentation/viewmodels/goal_detail_view_model.dart';
 import 'package:goal_timer/core/services/timer_restriction_service.dart';
 import 'package:goal_timer/features/settings/presentation/viewmodels/settings_view_model.dart';
 import 'package:goal_timer/core/usecases/daily_study_logs/save_study_log_usecase.dart';
 import 'package:goal_timer/core/usecases/daily_study_logs/providers.dart';
-import 'package:uuid/uuid.dart';
 
 // タイマー関連の定数
 class TimerConstants {
@@ -332,7 +330,6 @@ class TimerViewModel extends StateNotifier<TimerState> {
 
   Future<void> completeStudySession({
     required TimerState timerState,
-    required TimerViewModel timerViewModel,
     required int studyTimeInSeconds,
     required VoidCallback onGoalDataRefreshNeeded,
   }) async {
@@ -351,30 +348,24 @@ class TimerViewModel extends StateNotifier<TimerState> {
         '手動保存: 目標ID ${timerState.goalId} に $studyTimeInSeconds 秒を記録します',
       );
 
-      // 今日の日付で学習記録を作成
-      final today = DateTime.now();
-      final dailyLog = DailyStudyLogModel(
-        id: const Uuid().v4(),
+      // ✅ UseCaseを使用してデータ保存（non-nullを保証）
+      await _saveStudyLogUseCase.execute(
         goalId: timerState.goalId!,
-        date: DateTime(today.year, today.month, today.day), // 時間は0:00に正規化
-        totalSeconds: studyTimeInSeconds,
-        createdAt: today, // 作成日時を設定
+        studyDurationInSeconds: studyTimeInSeconds,
       );
-
-      // ✅ UseCaseを使用してデータ保存
-      await _saveStudyLogUseCase.execute(dailyLog);
-
-      // ✅ View層に通知（Providerの操作はViewで行う）
-      onGoalDataRefreshNeeded();
-
-      // タイマーを停止（データ保存は上記で完了済み）
-      timerViewModel.pauseTimer();
 
       AppLogger.instance.i('学習時間の手動記録が完了しました: $studyTimeInSeconds秒');
 
+      // ✅ 成功時のみ実行
+      onGoalDataRefreshNeeded();
+      pauseTimer();
       resetTimer();
-    } catch (error) {
-      AppLogger.instance.e('学習時間の手動記録に失敗しました: $error');
+    } catch (error, stackTrace) {
+      AppLogger.instance.e(
+        '学習時間の手動記録に失敗しました: $error',
+        error,
+        stackTrace,
+      );
       rethrow;
     }
   }
@@ -413,31 +404,22 @@ class TimerViewModel extends StateNotifier<TimerState> {
         'タイマー完了: 目標ID ${state.goalId} に $studyTimeInSeconds 秒（$studyMinutes分）を記録します',
       );
 
-      // 今日の日付で学習記録を作成
-      final today = DateTime.now();
-      final dailyLog = DailyStudyLogModel(
-        id: const Uuid().v4(),
+      // ✅ UseCaseを使用してデータ保存（non-nullを保証）
+      await _saveStudyLogUseCase.execute(
         goalId: state.goalId!,
-        date: DateTime(today.year, today.month, today.day), // 時間は0:00に正規化
-        totalSeconds: studyTimeInSeconds,
-        createdAt: today, // 作成日時を設定
+        studyDurationInSeconds: studyTimeInSeconds,
       );
 
-      // 学習記録リポジトリに記録
-      final repository = _ref.read(hybridDailyStudyLogsRepositoryProvider);
-      await repository.upsertDailyLog(dailyLog);
-
-      // 目標の累計時間も更新 - 一時的に無効化（HybridRepository対応が必要）
-      // 削除: goals更新処理は不要（累計時間はstudy_daily_logsから計算）
-      // 目標の累計時間はstudy_daily_logsから動的に計算するため、
-      // goalsテーブルのspent_minutesフィールドは更新しない
+      AppLogger.instance.i('学習時間の記録が完了しました: $studyMinutes分');
 
       // 目標データのキャッシュをクリアして最新状態を反映
       _ref.invalidate(goalDetailListProvider);
-
-      AppLogger.instance.i('学習時間の記録が完了しました: $studyMinutes分');
-    } catch (error) {
-      AppLogger.instance.e('学習時間の記録に失敗しました: $error');
+    } catch (error, stackTrace) {
+      AppLogger.instance.e(
+        '学習時間の記録に失敗しました: $error',
+        error,
+        stackTrace,
+      );
     }
   }
 
