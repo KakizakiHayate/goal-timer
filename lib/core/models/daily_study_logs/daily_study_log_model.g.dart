@@ -12,7 +12,10 @@ _$DailyStudyLogModelImpl _$$DailyStudyLogModelImplFromJson(
       id: json['id'] as String,
       goalId: json['goalId'] as String,
       date: DateTime.parse(json['date'] as String),
-      minutes: json['minutes'] as int,
+      totalSeconds: json['totalSeconds'] as int,
+      createdAt: json['createdAt'] == null
+          ? null
+          : DateTime.parse(json['createdAt'] as String),
       updatedAt: json['updatedAt'] == null
           ? null
           : DateTime.parse(json['updatedAt'] as String),
@@ -20,6 +23,8 @@ _$DailyStudyLogModelImpl _$$DailyStudyLogModelImplFromJson(
           ? null
           : DateTime.parse(json['syncUpdatedAt'] as String),
       isSynced: json['isSynced'] as bool? ?? false,
+      isTemp: json['isTemp'] as bool? ?? false,
+      tempUserId: json['tempUserId'] as String? ?? null,
     );
 
 Map<String, dynamic> _$$DailyStudyLogModelImplToJson(
@@ -28,8 +33,11 @@ Map<String, dynamic> _$$DailyStudyLogModelImplToJson(
       'id': instance.id,
       'goalId': instance.goalId,
       'date': instance.date.toIso8601String(),
-      'minutes': instance.minutes,
+      'totalSeconds': instance.totalSeconds,
+      'createdAt': instance.createdAt?.toIso8601String(),
       'updatedAt': instance.updatedAt?.toIso8601String(),
       'syncUpdatedAt': instance.syncUpdatedAt?.toIso8601String(),
       'isSynced': instance.isSynced,
+      'isTemp': instance.isTemp,
+      'tempUserId': instance.tempUserId,
     };

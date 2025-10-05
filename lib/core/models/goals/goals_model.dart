@@ -60,15 +60,21 @@ class GoalsModel with _$GoalsModel {
       throw ArgumentError('Invalid deadline format');
     }
 
-    // booleanの型変換処理を追加
+    // completed_at → isCompleted変換
     bool parsedIsCompleted;
-    final isCompletedValue = map['is_completed'];
-    if (isCompletedValue is bool) {
-      parsedIsCompleted = isCompletedValue;
-    } else if (isCompletedValue is String) {
-      parsedIsCompleted = isCompletedValue == 'true';
+    final completedAtValue = map['completed_at'];
+    if (completedAtValue != null) {
+      parsedIsCompleted = true; // completed_atに値があれば完了
     } else {
-      parsedIsCompleted = false;
+      // 後方互換性: 古いis_completedフィールドもサポート
+      final isCompletedValue = map['is_completed'];
+      if (isCompletedValue is bool) {
+        parsedIsCompleted = isCompletedValue;
+      } else if (isCompletedValue is String) {
+        parsedIsCompleted = isCompletedValue == 'true';
+      } else {
+        parsedIsCompleted = false;
+      }
     }
 
     // 整数値の安全な変換
@@ -161,13 +167,16 @@ extension GoalsModelExtension on GoalsModel {
       'user_id': userId,
       'title': title,
       'description': description,
-      'deadline': deadline.toIso8601String(),
-      'is_completed': isCompleted,
+      'deadline': deadline.toIso8601String().split('T')[0], // 日付のみ（時間なし）
       'avoid_message': avoidMessage,
       'target_minutes': targetMinutes,
-      'spent_minutes': spentMinutes,
-      // version フィールドを削除：Supabaseテーブルに存在しないため
+      // is_completed, spent_minutesは削除（Supabaseに存在しない）
     };
+
+    // isCompleted → completed_at変換
+    if (isCompleted) {
+      map['completed_at'] = DateTime.now().toIso8601String();
+    }
 
     // 同期関連フィールドを追加
     if (updatedAt != null) {

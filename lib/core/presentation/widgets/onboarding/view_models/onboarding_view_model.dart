@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import '../../../../core/services/temp_user_service.dart';
-import '../../../../core/services/startup_logic_service.dart';
-import '../../../../core/services/data_migration_service.dart';
+import '../../../../../core/services/temp_user_service.dart';
+import '../../../../../core/services/startup_logic_service.dart';
+import '../../../../../core/services/data_migration_service.dart';
 
 part 'onboarding_view_model.freezed.dart';
 

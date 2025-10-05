@@ -71,4 +71,4 @@ ai-rules/
 ios/Runner/GoogleService-Info.plist.backup
 ios/Runner.xcodeproj/project.pbxproj.backup
 
-
+.vscode

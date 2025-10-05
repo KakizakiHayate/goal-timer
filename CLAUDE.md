@@ -51,7 +51,9 @@
 
 ## アーキテクチャ
 
-- コードの実装や修正に関する作業を行う際は、必ず **@ai-rules/Architecture.md** を参照してください。
+- コードの実装や修正に関する作業を行う際は、必ず **@ai-rules/Architecture.md** と **@ai-rules/CLEAN_ARCHITECTURE_GUIDELINES.md** を参照してください。
+- **@ai-rules/Architecture.md**: プロジェクト全体のアーキテクチャパターンとディレクトリ構造
+- **@ai-rules/CLEAN_ARCHITECTURE_GUIDELINES.md**: Clean Architecture実装の具体的なガイドライン（Entity/UseCase/ViewModel/Repository層の実装ルール、データフロー、チェックリスト）
 - ここに記載されたアーキテクチャ指針に従って設計・実装を進めてください。
 
 ## デザイン

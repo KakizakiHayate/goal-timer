@@ -146,21 +146,56 @@ class HybridDailyStudyLogsRepository implements DailyStudyLogsRepository {
   @override
   Future<DailyStudyLogModel> upsertDailyLog(DailyStudyLogModel log) async {
     try {
-      // ローカルDBのみに保存（リアルタイム同期は削除）
+      // 1. ローカルDBに保存
       final localLog = await _localDatasource.upsertDailyLog(log);
 
-      // ネットワーク接続状態を確認して未同期状態を設定
+      // 2. ネットワーク接続があればSupabaseにも保存
       final connectivityResult = await _connectivity.checkConnectivity();
-      if (connectivityResult == ConnectivityResult.none) {
-        _syncNotifier.setOffline();
+      if (connectivityResult != ConnectivityResult.none) {
+        try {
+          // ローカルDBから最新のデータを取得（仮ユーザー情報を含む）
+          final latestLocalLog = await _localDatasource.getLogById(localLog.id);
+          if (latestLocalLog != null) {
+            // 仮ユーザー情報が設定されている場合は、Supabase用に仮ユーザー情報を追加
+            DailyStudyLogModel logToSync = latestLocalLog;
+            if (latestLocalLog.isTemp || latestLocalLog.tempUserId != null) {
+              logToSync = latestLocalLog.copyWith(
+                isTemp: true,
+                tempUserId:
+                    latestLocalLog.tempUserId ??
+                    'local_user_temp_${DateTime.now().millisecondsSinceEpoch}',
+              );
+            }
+
+            // Supabaseに同期
+            await _remoteDatasource.upsertDailyLog(logToSync);
+          } else {
+            // fallback: 元のlogを使用
+            await _remoteDatasource.upsertDailyLog(log);
+          }
+
+          // 同期成功したらフラグを更新
+          final syncedLog = localLog.copyWith(isSynced: true);
+          await _localDatasource.upsertDailyLog(syncedLog);
+          await _localDatasource.markAsSynced(localLog.id);
+
+          _syncNotifier.setSynced();
+          AppLogger.instance.i('学習記録をSupabaseに同期しました');
+        } catch (e) {
+          // リモート保存失敗してもローカルは保持
+          print('保存が必要');
+          _syncNotifier.setUnsynced();
+          AppLogger.instance.w('Supabase同期失敗（後で再試行）: $e');
+          print('保存が必要2');
+        }
       } else {
-        _syncNotifier.setUnsynced(); // 未同期データありとして記録
+        _syncNotifier.setOffline();
+        AppLogger.instance.i('オフラインのためローカルのみに保存');
       }
 
-      AppLogger.instance.i('学習記録をローカルに保存しました（手動同期が必要）');
       return localLog;
     } catch (e) {
-      AppLogger.instance.e('学習記録の作成に失敗しました', e);
+      AppLogger.instance.e('学習記録の保存に失敗', e);
       _syncNotifier.setError(e.toString());
       rethrow;
     }

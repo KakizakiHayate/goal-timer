@@ -121,7 +121,7 @@ void main() {
           id: 'test-id',
           goalId: 'goal-id',
           date: now,
-          minutes: 60,
+          totalSeconds: 60 * 60,
           syncUpdatedAt: now,
           isSynced: true,
         );

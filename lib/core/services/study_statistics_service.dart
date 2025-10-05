@@ -100,7 +100,7 @@ class StudyStatisticsService {
 
       final todayMinutes = dailyLogs
           .where((log) => userGoalIds.contains(log.goalId))
-          .fold<int>(0, (sum, log) => sum + log.minutes);
+          .fold<int>(0, (sum, log) => sum + (log.totalSeconds ~/ 60));
 
       AppLogger.instance.d('今日の学習時間: $todayMinutes分');
       return todayMinutes;
@@ -161,7 +161,7 @@ class StudyStatisticsService {
       final dailyMinutes = <String, int>{};
       for (final log in userLogs) {
         final dateKey = _formatDate(log.date);
-        dailyMinutes[dateKey] = (dailyMinutes[dateKey] ?? 0) + log.minutes;
+        dailyMinutes[dateKey] = (dailyMinutes[dateKey] ?? 0) + (log.totalSeconds ~/ 60);
       }
 
       // 連続学習日数を計算
@@ -222,7 +222,7 @@ class StudyStatisticsService {
       final dailyMinutes = <String, int>{};
       for (final log in goalLogs) {
         final dateKey = _formatDate(log.date);
-        dailyMinutes[dateKey] = (dailyMinutes[dateKey] ?? 0) + log.minutes;
+        dailyMinutes[dateKey] = (dailyMinutes[dateKey] ?? 0) + (log.totalSeconds ~/ 60);
       }
 
       // 連続学習日数を計算

@@ -102,6 +102,14 @@ class LocalDailyStudyLogsDatasource {
       final db = await _database.database;
       final now = DateTime.now().toUtc();
 
+      // データ検証
+      if (log.goalId.isEmpty) {
+        throw Exception('目標IDが指定されていません');
+      }
+      if (log.totalSeconds < 0) {
+        throw Exception('学習時間が不正です: ${log.totalSeconds}秒');
+      }
+
       // 新しいログの場合はIDを生成
       final newLog =
           log.id.isEmpty
@@ -109,7 +117,7 @@ class LocalDailyStudyLogsDatasource {
                 id: const Uuid().v4(),
                 goalId: log.goalId,
                 date: log.date,
-                minutes: log.minutes,
+                totalSeconds: log.totalSeconds,
               )
               : log;
 
@@ -121,7 +129,7 @@ class LocalDailyStudyLogsDatasource {
         'id': newLog.id,
         'goal_id': newLog.goalId,
         'date': newLog.date.toIso8601String().split('T')[0],
-        'minutes': newLog.minutes,
+        'total_seconds': newLog.totalSeconds,
         'updated_at': now.toIso8601String(),
         'sync_updated_at': now.toIso8601String(),
         'is_synced': 0,
@@ -146,8 +154,19 @@ class LocalDailyStudyLogsDatasource {
 
       return _convertToDailyStudyLogModel(map);
     } catch (e) {
-      AppLogger.instance.e('ローカルでの学習記録作成/更新に失敗しました: $e');
-      rethrow;
+      if (e.toString().contains('no column named total_seconds')) {
+        AppLogger.instance.e(
+          'データベーススキーマが古い可能性があります。アプリを再起動してマイグレーションを実行してください。',
+          e,
+        );
+        throw Exception('データベースの構造が古いため、学習記録を保存できません。アプリを再起動してください。');
+      } else if (e.toString().contains('FOREIGN KEY constraint failed')) {
+        AppLogger.instance.e('指定された目標IDが存在しません: ${log.goalId}', e);
+        throw Exception('指定された目標が見つかりません。目標を確認してください。');
+      } else {
+        AppLogger.instance.e('ローカルでの学習記録作成/更新に失敗しました: $e');
+        throw Exception('学習記録の保存に失敗しました。しばらく時間をおいて再試行してください。');
+      }
     }
   }
 
@@ -226,14 +245,97 @@ class LocalDailyStudyLogsDatasource {
 
   // SQLiteのマップからDailyStudyLogModelに変換
   DailyStudyLogModel _convertToDailyStudyLogModel(Map<String, dynamic> map) {
-    return DailyStudyLogModel(
-      id: map['id'] as String,
-      goalId: map['goal_id'] as String,
-      date:
-          map['date'] is String
-              ? DateTime.parse(map['date'])
-              : (map['date'] as DateTime),
-      minutes: map['minutes'] as int,
-    );
+    try {
+      // 必須フィールドの存在チェック
+      if (!map.containsKey('id') || map['id'] == null) {
+        throw Exception('学習記録のIDが見つかりません');
+      }
+      if (!map.containsKey('goal_id') || map['goal_id'] == null) {
+        throw Exception('目標IDが見つかりません');
+      }
+      if (!map.containsKey('date') || map['date'] == null) {
+        throw Exception('日付情報が見つかりません');
+      }
+
+      // 学習時間の取得（後方互換性対応）
+      int totalSeconds = 0;
+      if (map.containsKey('total_seconds') && map['total_seconds'] != null) {
+        totalSeconds = map['total_seconds'] as int;
+      } else if (map.containsKey('minutes') && map['minutes'] != null) {
+        // 古いデータ形式からの変換
+        totalSeconds = (map['minutes'] as int) * 60;
+        AppLogger.instance.d(
+          '古いminutes形式から変換: ${map['minutes']}分 → ${totalSeconds}秒',
+        );
+      }
+
+      // 追加フィールドの取得
+      DateTime? createdAt;
+      if (map.containsKey('created_at') && map['created_at'] != null) {
+        createdAt =
+            map['created_at'] is String
+                ? DateTime.parse(map['created_at'])
+                : (map['created_at'] as DateTime?);
+      }
+
+      DateTime? updatedAt;
+      if (map.containsKey('updated_at') && map['updated_at'] != null) {
+        updatedAt =
+            map['updated_at'] is String
+                ? DateTime.parse(map['updated_at'])
+                : (map['updated_at'] as DateTime?);
+      }
+
+      DateTime? syncUpdatedAt;
+      if (map.containsKey('sync_updated_at') &&
+          map['sync_updated_at'] != null) {
+        syncUpdatedAt =
+            map['sync_updated_at'] is String
+                ? DateTime.parse(map['sync_updated_at'])
+                : (map['sync_updated_at'] as DateTime?);
+      }
+
+      bool isSynced = false;
+      if (map.containsKey('is_synced') && map['is_synced'] != null) {
+        if (map['is_synced'] is bool) {
+          isSynced = map['is_synced'];
+        } else if (map['is_synced'] is int) {
+          isSynced = map['is_synced'] == 1;
+        }
+      }
+
+      bool isTemp = false;
+      if (map.containsKey('is_temp') && map['is_temp'] != null) {
+        if (map['is_temp'] is bool) {
+          isTemp = map['is_temp'];
+        } else if (map['is_temp'] is int) {
+          isTemp = map['is_temp'] == 1;
+        }
+      }
+
+      String? tempUserId;
+      if (map.containsKey('temp_user_id')) {
+        tempUserId = map['temp_user_id'] as String?;
+      }
+
+      return DailyStudyLogModel(
+        id: map['id'] as String,
+        goalId: map['goal_id'] as String,
+        date:
+            map['date'] is String
+                ? DateTime.parse(map['date'])
+                : (map['date'] as DateTime),
+        totalSeconds: totalSeconds,
+        createdAt: createdAt,
+        updatedAt: updatedAt,
+        syncUpdatedAt: syncUpdatedAt,
+        isSynced: isSynced,
+        isTemp: isTemp,
+        tempUserId: tempUserId,
+      );
+    } catch (e) {
+      AppLogger.instance.e('学習記録データの変換に失敗しました: $map', e);
+      rethrow;
+    }
   }
 }
