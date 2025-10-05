@@ -6,6 +6,8 @@ import 'package:goal_timer/core/models/daily_study_logs/daily_study_log_model.da
 import 'package:goal_timer/features/goal_detail/presentation/viewmodels/goal_detail_view_model.dart';
 import 'package:goal_timer/core/services/timer_restriction_service.dart';
 import 'package:goal_timer/features/settings/presentation/viewmodels/settings_view_model.dart';
+import 'package:goal_timer/core/usecases/daily_study_logs/save_study_log_usecase.dart';
+import 'package:goal_timer/core/usecases/daily_study_logs/providers.dart';
 import 'package:uuid/uuid.dart';
 
 // タイマー関連の定数
@@ -26,7 +28,11 @@ final timerRestrictionServiceProvider = Provider<TimerRestrictionService>((
 // タイマーの状態を管理するプロバイダー
 final timerViewModelProvider =
     StateNotifierProvider<TimerViewModel, TimerState>((ref) {
-      return TimerViewModel(ref);
+      final saveStudyLogUseCase = ref.watch(saveStudyLogUseCaseProvider);
+      return TimerViewModel(
+        ref: ref,
+        saveStudyLogUseCase: saveStudyLogUseCase,
+      );
     });
 
 // タイマーの状態
@@ -110,10 +116,16 @@ class TimerState {
 class TimerViewModel extends StateNotifier<TimerState> {
   Timer? _timer;
   final Ref _ref;
+  final SaveStudyLogUseCase _saveStudyLogUseCase;
   int _elapsedSeconds = 0; // タイマー実行中の経過秒数
   bool _isTutorialMode = false; // チュートリアルモードフラグ
 
-  TimerViewModel(this._ref) : super(TimerState()) {
+  TimerViewModel({
+    required Ref ref,
+    required SaveStudyLogUseCase saveStudyLogUseCase,
+  })  : _ref = ref,
+        _saveStudyLogUseCase = saveStudyLogUseCase,
+        super(TimerState()) {
     // タイマー制限サービスを初期化
     _initializeRestrictions();
   }
@@ -315,6 +327,55 @@ class TimerViewModel extends StateNotifier<TimerState> {
       );
 
       AppLogger.instance.i('${breakMinutes}分の休憩時間に入ります');
+    }
+  }
+
+  Future<void> completeStudySession({
+    required TimerState timerState,
+    required TimerViewModel timerViewModel,
+    required int studyTimeInSeconds,
+    required VoidCallback onGoalDataRefreshNeeded,
+  }) async {
+    if (!timerState.hasGoal) {
+      AppLogger.instance.e('目標IDが設定されていないため、学習時間を記録できません');
+      return;
+    }
+
+    if (studyTimeInSeconds <= 0) {
+      AppLogger.instance.w('学習時間が0秒のため記録しません');
+      return;
+    }
+
+    try {
+      AppLogger.instance.i(
+        '手動保存: 目標ID ${timerState.goalId} に $studyTimeInSeconds 秒を記録します',
+      );
+
+      // 今日の日付で学習記録を作成
+      final today = DateTime.now();
+      final dailyLog = DailyStudyLogModel(
+        id: const Uuid().v4(),
+        goalId: timerState.goalId!,
+        date: DateTime(today.year, today.month, today.day), // 時間は0:00に正規化
+        totalSeconds: studyTimeInSeconds,
+        createdAt: today, // 作成日時を設定
+      );
+
+      // ✅ UseCaseを使用してデータ保存
+      await _saveStudyLogUseCase.execute(dailyLog);
+
+      // ✅ View層に通知（Providerの操作はViewで行う）
+      onGoalDataRefreshNeeded();
+
+      // タイマーを停止（データ保存は上記で完了済み）
+      timerViewModel.pauseTimer();
+
+      AppLogger.instance.i('学習時間の手動記録が完了しました: $studyTimeInSeconds秒');
+
+      resetTimer();
+    } catch (error) {
+      AppLogger.instance.e('学習時間の手動記録に失敗しました: $error');
+      rethrow;
     }
   }
 

@@ -1035,50 +1035,34 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
               ),
               ElevatedButton(
                 onPressed: () async {
-                  try {
-                    // パターン1: タイマー画面に留まる学習完了フロー
+                  await timerViewModel.completeStudySession(
+                    timerState: timerState,
+                    timerViewModel: timerViewModel,
+                    studyTimeInSeconds: studyTimeInSeconds,
+                    onGoalDataRefreshNeeded: () {
+                      ref.invalidate(goalDetailListProvider);
+                    },
+                  );
 
-                    // 学習記録を保存（タイマー停止も含む）
-                    await _saveStudyTimeManually(
-                      timerState,
-                      timerViewModel,
-                      studyTimeInSeconds,
-                    );
-
-                    // 3. タイマーを初期状態にリセット
-                    timerViewModel.resetTimer();
-
-                    // 4. ダイアログを閉じる
-                    Navigator.pop(context);
-
-                    // 5. 成功フィードバック（継続促進アクション付き）
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('🎉 $studyTimeTextの学習を記録しました！'),
-                        backgroundColor: ColorConsts.success,
-                        behavior: SnackBarBehavior.floating,
-                        duration: const Duration(seconds: 4), // 少し長めに表示
-                        action: SnackBarAction(
-                          label: 'もう1回',
-                          textColor: Colors.white,
-                          onPressed: () {
-                            // SnackBarを閉じてすぐにタイマー開始
-                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                            timerViewModel.startTimer();
-                          },
-                        ),
+                  if (!context.mounted) return;
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('🎉 $studyTimeTextの学習を記録しました！'),
+                      backgroundColor: ColorConsts.success,
+                      behavior: SnackBarBehavior.floating,
+                      duration: const Duration(seconds: 4), // 少し長めに表示
+                      action: SnackBarAction(
+                        label: 'もう1回',
+                        textColor: Colors.white,
+                        onPressed: () {
+                          // SnackBarを閉じてすぐにタイマー開始
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                          timerViewModel.startTimer();
+                        },
                       ),
-                    );
-                  } catch (e) {
-                    // エラーハンドリング
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('保存に失敗しました: $e'),
-                        backgroundColor: ColorConsts.error,
-                      ),
-                    );
-                  }
+                    ),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: ColorConsts.success,
