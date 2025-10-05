@@ -37,7 +37,7 @@ class AppDatabase {
 
       return await openDatabase(
         path,
-        version: 5,
+        version: 6,
         onCreate: _createDB,
         onUpgrade: _upgradeDB,
       );
@@ -136,7 +136,7 @@ class AppDatabase {
         id TEXT PRIMARY KEY,
         goal_id TEXT NOT NULL,
         date TEXT NOT NULL,
-        minutes INTEGER NOT NULL DEFAULT 0,
+        total_seconds INTEGER NOT NULL DEFAULT 0,
         updated_at TEXT NOT NULL,
         sync_updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
         is_synced INTEGER DEFAULT 0,
@@ -360,6 +360,77 @@ class AppDatabase {
         await db.execute('DROP TABLE goals_old');
 
         AppLogger.instance.i('バージョン5へのマイグレーションが完了しました');
+      }
+
+      if (oldVersion < 6) {
+        // バージョン6へのマイグレーション: minutes -> total_seconds
+        AppLogger.instance.i('daily_study_logsテーブルのminutes → total_secondsへの移行を開始します...');
+
+        // まず既存のカラムが存在するか確認
+        final result = await db.rawQuery("PRAGMA table_info(daily_study_logs)");
+        final columns = result.map((row) => row['name']).toSet();
+
+        if (columns.contains('minutes') && !columns.contains('total_seconds')) {
+          AppLogger.instance.i('minutesカラムが見つかりました。total_secondsに変換します...');
+
+          // 1. total_seconds カラムを追加
+          await db.execute(
+            'ALTER TABLE daily_study_logs ADD COLUMN total_seconds INTEGER NOT NULL DEFAULT 0',
+          );
+
+          // 2. 既存データを変換（分 → 秒）
+          await db.execute('''
+            UPDATE daily_study_logs
+            SET total_seconds = minutes * 60
+            WHERE minutes IS NOT NULL
+          ''');
+
+          // 3. 既存のminutesカラムを削除するため、テーブルを再作成
+          await db.execute('ALTER TABLE daily_study_logs RENAME TO daily_study_logs_old');
+
+          // 4. 新しい構造でdaily_study_logsテーブルを再作成
+          await db.execute('''
+            CREATE TABLE daily_study_logs (
+              id TEXT PRIMARY KEY,
+              goal_id TEXT NOT NULL,
+              date TEXT NOT NULL,
+              total_seconds INTEGER NOT NULL DEFAULT 0,
+              updated_at TEXT NOT NULL,
+              sync_updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              is_synced INTEGER DEFAULT 0,
+              is_temp INTEGER DEFAULT 0,
+              temp_user_id TEXT,
+              FOREIGN KEY (goal_id) REFERENCES goals (id)
+            )
+          ''');
+
+          // 5. データを新しいテーブルにコピー
+          await db.execute('''
+            INSERT INTO daily_study_logs (
+              id, goal_id, date, total_seconds, updated_at,
+              sync_updated_at, is_synced, is_temp, temp_user_id
+            )
+            SELECT
+              id, goal_id, date, total_seconds, updated_at,
+              sync_updated_at, COALESCE(is_synced, 0), COALESCE(is_temp, 0), temp_user_id
+            FROM daily_study_logs_old
+          ''');
+
+          // 6. 古いテーブルを削除
+          await db.execute('DROP TABLE daily_study_logs_old');
+
+          AppLogger.instance.i('minutes → total_secondsへの変換が完了しました');
+        } else if (!columns.contains('total_seconds')) {
+          // total_seconds カラムが存在しない場合のみ追加
+          AppLogger.instance.i('total_seconds カラムを追加します...');
+          await db.execute(
+            'ALTER TABLE daily_study_logs ADD COLUMN total_seconds INTEGER NOT NULL DEFAULT 0',
+          );
+        } else {
+          AppLogger.instance.i('total_seconds カラムは既に存在します');
+        }
+
+        AppLogger.instance.i('バージョン6へのマイグレーションが完了しました');
       }
     } catch (e) {
       AppLogger.instance.e('データベースアップグレードエラー: $e');

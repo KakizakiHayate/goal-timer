@@ -178,7 +178,7 @@ class HomeViewModel extends StateNotifier<HomeState> {
     AppLogger.instance.i('フィルターを変更しました: $filterType');
   }
 
-  // フィルター済みの目標リストを取得
+  // 進行中の目標のみを表示するためフィルタリングをする
   List<GoalsModel> get filteredGoals {
     if (state.filterType == '全て') {
       return state.goals;

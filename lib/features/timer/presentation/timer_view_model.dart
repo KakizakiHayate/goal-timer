@@ -1,12 +1,12 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:goal_timer/core/utils/app_logger.dart';
-import 'package:goal_timer/core/provider/providers.dart';
-import 'package:goal_timer/core/models/daily_study_logs/daily_study_log_model.dart';
 import 'package:goal_timer/features/goal_detail/presentation/viewmodels/goal_detail_view_model.dart';
 import 'package:goal_timer/core/services/timer_restriction_service.dart';
 import 'package:goal_timer/features/settings/presentation/viewmodels/settings_view_model.dart';
-import 'package:uuid/uuid.dart';
+import 'package:goal_timer/core/usecases/daily_study_logs/save_study_log_usecase.dart';
+import 'package:goal_timer/core/usecases/daily_study_logs/providers.dart';
 
 // タイマー関連の定数
 class TimerConstants {
@@ -26,7 +26,11 @@ final timerRestrictionServiceProvider = Provider<TimerRestrictionService>((
 // タイマーの状態を管理するプロバイダー
 final timerViewModelProvider =
     StateNotifierProvider<TimerViewModel, TimerState>((ref) {
-      return TimerViewModel(ref);
+      final saveStudyLogUseCase = ref.watch(saveStudyLogUseCaseProvider);
+      return TimerViewModel(
+        ref: ref,
+        saveStudyLogUseCase: saveStudyLogUseCase,
+      );
     });
 
 // タイマーの状態
@@ -110,10 +114,16 @@ class TimerState {
 class TimerViewModel extends StateNotifier<TimerState> {
   Timer? _timer;
   final Ref _ref;
+  final SaveStudyLogUseCase _saveStudyLogUseCase;
   int _elapsedSeconds = 0; // タイマー実行中の経過秒数
   bool _isTutorialMode = false; // チュートリアルモードフラグ
 
-  TimerViewModel(this._ref) : super(TimerState()) {
+  TimerViewModel({
+    required Ref ref,
+    required SaveStudyLogUseCase saveStudyLogUseCase,
+  })  : _ref = ref,
+        _saveStudyLogUseCase = saveStudyLogUseCase,
+        super(TimerState()) {
     // タイマー制限サービスを初期化
     _initializeRestrictions();
   }
@@ -318,6 +328,48 @@ class TimerViewModel extends StateNotifier<TimerState> {
     }
   }
 
+  Future<void> completeStudySession({
+    required TimerState timerState,
+    required int studyTimeInSeconds,
+    required VoidCallback onGoalDataRefreshNeeded,
+  }) async {
+    if (!timerState.hasGoal) {
+      AppLogger.instance.e('目標IDが設定されていないため、学習時間を記録できません');
+      return;
+    }
+
+    if (studyTimeInSeconds <= 0) {
+      AppLogger.instance.w('学習時間が0秒のため記録しません');
+      return;
+    }
+
+    try {
+      AppLogger.instance.i(
+        '手動保存: 目標ID ${timerState.goalId} に $studyTimeInSeconds 秒を記録します',
+      );
+
+      // ✅ UseCaseを使用してデータ保存（non-nullを保証）
+      await _saveStudyLogUseCase.execute(
+        goalId: timerState.goalId!,
+        studyDurationInSeconds: studyTimeInSeconds,
+      );
+
+      AppLogger.instance.i('学習時間の手動記録が完了しました: $studyTimeInSeconds秒');
+
+      // ✅ 成功時のみ実行
+      onGoalDataRefreshNeeded();
+      pauseTimer();
+      resetTimer();
+    } catch (error, stackTrace) {
+      AppLogger.instance.e(
+        '学習時間の手動記録に失敗しました: $error',
+        error,
+        stackTrace,
+      );
+      rethrow;
+    }
+  }
+
   // 学習時間を記録する
   Future<void> _recordStudyTime([bool isTutorialMode = false]) async {
     // チュートリアルモードの場合はデータを保存しない
@@ -352,31 +404,22 @@ class TimerViewModel extends StateNotifier<TimerState> {
         'タイマー完了: 目標ID ${state.goalId} に $studyTimeInSeconds 秒（$studyMinutes分）を記録します',
       );
 
-      // 今日の日付で学習記録を作成
-      final today = DateTime.now();
-      final dailyLog = DailyStudyLogModel(
-        id: const Uuid().v4(),
+      // ✅ UseCaseを使用してデータ保存（non-nullを保証）
+      await _saveStudyLogUseCase.execute(
         goalId: state.goalId!,
-        date: DateTime(today.year, today.month, today.day), // 時間は0:00に正規化
-        totalSeconds: studyTimeInSeconds,
-        createdAt: today, // 作成日時を設定
+        studyDurationInSeconds: studyTimeInSeconds,
       );
 
-      // 学習記録リポジトリに記録
-      final repository = _ref.read(hybridDailyStudyLogsRepositoryProvider);
-      await repository.upsertDailyLog(dailyLog);
-
-      // 目標の累計時間も更新 - 一時的に無効化（HybridRepository対応が必要）
-      // 削除: goals更新処理は不要（累計時間はstudy_daily_logsから計算）
-      // 目標の累計時間はstudy_daily_logsから動的に計算するため、
-      // goalsテーブルのspent_minutesフィールドは更新しない
+      AppLogger.instance.i('学習時間の記録が完了しました: $studyMinutes分');
 
       // 目標データのキャッシュをクリアして最新状態を反映
       _ref.invalidate(goalDetailListProvider);
-
-      AppLogger.instance.i('学習時間の記録が完了しました: $studyMinutes分');
-    } catch (error) {
-      AppLogger.instance.e('学習時間の記録に失敗しました: $error');
+    } catch (error, stackTrace) {
+      AppLogger.instance.e(
+        '学習時間の記録に失敗しました: $error',
+        error,
+        stackTrace,
+      );
     }
   }
 
