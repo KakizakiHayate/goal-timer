@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/utils/color_consts.dart';
 import '../../../../core/utils/spacing_consts.dart';
 import '../../../../core/utils/text_consts.dart';
+import '../../../../core/utils/app_logger.dart';
 import '../../../../core/widgets/common_button.dart';
 import '../widgets/onboarding_progress_bar.dart';
 import '../widgets/migration_progress_dialog.dart';
@@ -671,16 +672,20 @@ class _AccountPromotionScreenState
     final onboardingViewModel = ref.read(onboardingViewModelProvider.notifier);
     final tutorialViewModel = ref.read(tutorialViewModelProvider.notifier);
     final tutorialState = ref.read(tutorialViewModelProvider);
+    final authViewModel = ref.read(authViewModelProvider.notifier);
 
     try {
+      // 認証状態をゲスト状態にリセット（エラー状態をクリア）
+      authViewModel.setGuestState();
+
       // ゲストとして続行
       await onboardingViewModel.continueAsGuest();
 
       // チュートリアルが既に開始されているかチェック
       // goal_creation_screen.dartで既にstartTutorialが呼ばれているはず
       if (!tutorialState.isTutorialActive && !tutorialState.isCompleted) {
-        print(
-          '⚠️ Tutorial not active after goal creation, restarting tutorial',
+        AppLogger.instance.w(
+          'Tutorial not active after goal creation, restarting tutorial',
         );
         final onboardingState = ref.read(onboardingViewModelProvider);
         await tutorialViewModel.startTutorial(
@@ -693,11 +698,16 @@ class _AccountPromotionScreenState
       if (mounted) {
         Navigator.pushReplacementNamed(context, '/home');
       }
-    } catch (e) {
+    } catch (error, stackTrace) {
+      AppLogger.instance.e(
+        'ゲストモード開始に失敗しました',
+        error,
+        stackTrace,
+      );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('ゲストモード開始に失敗しました: $e'),
+            content: Text('ゲストモード開始に失敗しました: $error'),
             backgroundColor: ColorConsts.error,
           ),
         );
