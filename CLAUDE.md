@@ -42,6 +42,7 @@
 
 ## 動作確認・テスト時の必須確認事項（コミット前に必ず実施されるべきです）
 - 以下のコマンドを実行してエラーが出ないことを確認してください
+    - flutter analyze
     - flutter build ios --debug
     - flutter build apk --debug
 - 実装前に作成したテストコードを必ず実行してください。
