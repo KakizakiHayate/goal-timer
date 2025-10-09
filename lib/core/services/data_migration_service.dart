@@ -1,6 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../data/local/database/app_database.dart';
+import '../utils/app_logger.dart';
 
 /// Service for migrating temporary user data to authenticated user
 class DataMigrationService {
@@ -15,9 +16,9 @@ class DataMigrationService {
 
     try {
       return await executeMigrationTransaction(tempUserId, realUserId);
-    } catch (e) {
+    } catch (e, stackTrace) {
       // Log error for debugging
-      print('Migration failed for $tempUserId -> $realUserId: $e');
+      AppLogger.instance.e('Migration failed for $tempUserId -> $realUserId', e, stackTrace);
       return false;
     }
   }
@@ -78,8 +79,8 @@ class DataMigrationService {
       );
 
       return true;
-    } catch (e) {
-      print('Goal data migration failed: $e');
+    } catch (e, stackTrace) {
+      AppLogger.instance.e('Goal data migration failed', e, stackTrace);
       return false;
     }
   }
@@ -103,8 +104,8 @@ class DataMigrationService {
       );
 
       return true;
-    } catch (e) {
-      print('Study log data migration failed: $e');
+    } catch (e, stackTrace) {
+      AppLogger.instance.e('Study log data migration failed', e, stackTrace);
       return false;
     }
   }
@@ -118,16 +119,24 @@ class DataMigrationService {
     try {
       final db = await AppDatabase.instance.database;
 
-      // Delete any remaining temp data (should be none after migration)
+      // Delete all temp user data
+      // Use user_id instead of temp_user_id for consistent cleanup
       await db.delete(
         'goals',
-        where: 'temp_user_id = ? AND is_temp = 1',
+        where: 'user_id = ?',
         whereArgs: [tempUserId],
       );
 
       await db.delete(
-        'study_logs',
-        where: 'temp_user_id = ? AND is_temp = 1',
+        'daily_study_logs',
+        where: 'user_id = ?',
+        whereArgs: [tempUserId],
+      );
+
+      // Delete the temp user record
+      await db.delete(
+        'users',
+        where: 'id = ?',
         whereArgs: [tempUserId],
       );
 
@@ -137,9 +146,10 @@ class DataMigrationService {
       await prefs.remove('temp_user_created_at');
       await prefs.remove('temp_onboarding_step');
 
+      AppLogger.instance.i('一時ユーザーデータの削除が完了しました: $tempUserId');
       return true;
-    } catch (e) {
-      print('Temp data cleanup failed: $e');
+    } catch (e, stackTrace) {
+      AppLogger.instance.e('一時ユーザーデータの削除に失敗しました', e, stackTrace);
       return false;
     }
   }
@@ -162,20 +172,20 @@ class DataMigrationService {
             'temp_user_id': null,
             'updated_at': DateTime.now().toIso8601String(),
           },
-          where: 'temp_user_id = ? AND is_temp = 1',
+          where: 'user_id = ?',
           whereArgs: [tempUserId],
         );
 
         // Migrate study logs
         await txn.update(
-          'study_logs',
+          'daily_study_logs',
           {
             'user_id': realUserId,
             'is_temp': 0,
             'temp_user_id': null,
             'updated_at': DateTime.now().toIso8601String(),
           },
-          where: 'temp_user_id = ? AND is_temp = 1',
+          where: 'user_id = ?',
           whereArgs: [tempUserId],
         );
       });
@@ -183,9 +193,10 @@ class DataMigrationService {
       // Clear SharedPreferences after successful database migration
       await _clearTempUserSharedPreferences();
 
+      AppLogger.instance.i('データ移行が完了しました: $tempUserId → $realUserId');
       return true;
-    } catch (e) {
-      print('Migration transaction failed: $e');
+    } catch (e, stackTrace) {
+      AppLogger.instance.e('データ移行に失敗しました', e, stackTrace);
       return false;
     }
   }
@@ -198,7 +209,7 @@ class DataMigrationService {
       final goalCount =
           Sqflite.firstIntValue(
             await db.rawQuery(
-              'SELECT COUNT(*) FROM goals WHERE temp_user_id = ? AND is_temp = 1',
+              'SELECT COUNT(*) FROM goals WHERE user_id = ?',
               [tempUserId],
             ),
           ) ??
@@ -207,15 +218,15 @@ class DataMigrationService {
       final studyLogCount =
           Sqflite.firstIntValue(
             await db.rawQuery(
-              'SELECT COUNT(*) FROM study_logs WHERE temp_user_id = ? AND is_temp = 1',
+              'SELECT COUNT(*) FROM daily_study_logs WHERE user_id = ?',
               [tempUserId],
             ),
           ) ??
           0;
 
       return {'goals': goalCount, 'study_logs': studyLogCount};
-    } catch (e) {
-      print('Failed to get temp data counts: $e');
+    } catch (e, stackTrace) {
+      AppLogger.instance.e('一時データ件数の取得に失敗しました', e, stackTrace);
       return {'goals': 0, 'study_logs': 0};
     }
   }

@@ -1,4 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:goal_timer/core/services/data_migration_service.dart';
+import 'package:goal_timer/core/utils/app_logger.dart';
 
 /// Service for managing temporary user data during onboarding
 class TempUserService {
@@ -88,32 +90,22 @@ class TempUserService {
       final tempUserId = await getTempUserId();
 
       if (tempUserId != null) {
-        // Import the migration service dynamically to avoid circular dependency
-        final migrationService = await _getMigrationService();
-        if (migrationService != null) {
-          await migrationService.cleanupTempData(tempUserId);
+        // ✅ Providerを使わず、直接DataMigrationServiceをインスタンス化
+        final migrationService = DataMigrationService();
+        final success = await migrationService.cleanupTempData(tempUserId);
+
+        if (!success) {
+          AppLogger.instance.w('DataMigrationService.cleanupTempDataが失敗しました');
         }
       }
 
       // Clear SharedPreferences data
       await deleteTempUserData();
-    } catch (e) {
+    } catch (e, stackTrace) {
       // Log error but don't throw to ensure UI remains functional
-      print('Error during clearAllData: $e');
+      AppLogger.instance.e('一時ユーザーデータの削除中にエラーが発生しました', e, stackTrace);
       // Still attempt to clear SharedPreferences as fallback
       await deleteTempUserData();
-    }
-  }
-
-  /// Get migration service instance dynamically to avoid circular dependency
-  Future<dynamic> _getMigrationService() async {
-    try {
-      // This will be properly injected via Riverpod in the actual implementation
-      // For now, return null to prevent compilation errors
-      return null;
-    } catch (e) {
-      print('Migration service not available: $e');
-      return null;
     }
   }
 }
