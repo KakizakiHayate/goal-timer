@@ -793,68 +793,85 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
                     color: ColorConsts.textSecondary,
                   ),
                 ),
+                const SizedBox(height: SpacingConsts.md),
+                // ボタンを縦並びで配置
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: Text(
+                      '戻る',
+                      style: TextConsts.body.copyWith(
+                        color: ColorConsts.textSecondary,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: SpacingConsts.sm),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      timerViewModel.resetTimer();
+                      Navigator.pop(context);
+                    },
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: Text(
+                      '⭐ 保存しない',
+                      style: TextConsts.body.copyWith(
+                        color: ColorConsts.textSecondary,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: SpacingConsts.sm),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      await _saveStudyTimeManually(
+                        timerState,
+                        timerViewModel,
+                        studyTimeInSeconds,
+                      );
+
+                      if (!context.mounted) return;
+
+                      Navigator.pop(context);
+                      Navigator.pop(context);
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('$studyTimeTextの学習を記録しました'),
+                          backgroundColor: ColorConsts.success,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: ColorConsts.primary,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      '💾 保存する',
+                      style: TextConsts.body.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context), // ダイアログを閉じて戻る
-                child: Text(
-                  '戻る',
-                  style: TextConsts.body.copyWith(
-                    color: ColorConsts.textSecondary,
-                  ),
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  // 保存しないで戻る
-                  Navigator.pop(context); // ダイアログを閉じる
-                  timerViewModel.resetTimer(); // タイマーをリセット
-                  Navigator.pop(context); // 画面を戻る
-                },
-                child: Text(
-                  '⭐ 保存しない',
-                  style: TextConsts.body.copyWith(
-                    color: ColorConsts.textSecondary,
-                  ),
-                ),
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  // 学習記録を手動保存（completeTimerと同じロジック）
-                  await _saveStudyTimeManually(
-                    timerState,
-                    timerViewModel,
-                    studyTimeInSeconds,
-                  );
-
-                  Navigator.pop(context); // ダイアログを閉じる
-                  Navigator.pop(context); // 画面を戻る
-
-                  // 保存完了フィードバックを表示
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('$studyTimeTextの学習を記録しました'),
-                      backgroundColor: ColorConsts.success,
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: ColorConsts.primary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: Text(
-                  '💾 保存する',
-                  style: TextConsts.body.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
           ),
     );
   }
