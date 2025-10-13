@@ -768,111 +768,104 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
 
     showDialog(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: Text(
+          '学習時間の保存',
+          style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '$studyTimeTextの学習時間が記録されています。',
+              style: TextConsts.body.copyWith(
+                color: ColorConsts.textPrimary,
+              ),
             ),
-            title: Text(
-              '学習時間の保存',
-              style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
+            const SizedBox(height: SpacingConsts.sm),
+            Text(
+              '次回から学習から離れる場合は、学習完了のチェックマークボタンを押してください',
+              style: TextConsts.caption.copyWith(
+                color: ColorConsts.textSecondary,
+              ),
             ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  '$studyTimeTextの学習時間が記録されています。',
-                  style: TextConsts.body.copyWith(
-                    color: ColorConsts.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: SpacingConsts.sm),
-                Text(
-                  '次回から学習から離れる場合は、学習完了のチェックマークボタンを押してください',
-                  style: TextConsts.caption.copyWith(
-                    color: ColorConsts.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: SpacingConsts.md),
-                // ボタンを縦並びで配置
-                SizedBox(
-                  width: double.infinity,
-                  child: TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                    child: Text(
-                      '戻る',
-                      style: TextConsts.body.copyWith(
-                        color: ColorConsts.textSecondary,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: SpacingConsts.sm),
-                SizedBox(
-                  width: double.infinity,
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      timerViewModel.resetTimer();
-                      Navigator.pop(context);
-                    },
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                    child: Text(
-                      '⭐ 保存しない',
-                      style: TextConsts.body.copyWith(
-                        color: ColorConsts.textSecondary,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: SpacingConsts.sm),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      await _saveStudyTimeManually(
-                        timerState,
-                        timerViewModel,
-                        studyTimeInSeconds,
-                      );
+          ],
+        ),
 
-                      if (!context.mounted) return;
+        actionsAlignment: MainAxisAlignment.center,
+        actionsOverflowDirection: VerticalDirection.down,
+        actionsOverflowAlignment: OverflowBarAlignment.center,
 
-                      Navigator.pop(context);
-                      Navigator.pop(context);
-
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('$studyTimeTextの学習を記録しました'),
-                          backgroundColor: ColorConsts.success,
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: ColorConsts.primary,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Text(
-                      '💾 保存する',
-                      style: TextConsts.body.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+            ),
+            child: Text(
+              '戻る',
+              style: TextConsts.body.copyWith(
+                color: ColorConsts.textSecondary,
+              ),
             ),
           ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              timerViewModel.resetTimer();
+              Navigator.pop(context);
+            },
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+            ),
+            child: Text(
+              '⭐ 保存しない',
+              style: TextConsts.body.copyWith(
+                color: ColorConsts.textSecondary,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              await _saveStudyTimeManually(
+                timerState,
+                timerViewModel,
+                studyTimeInSeconds,
+              );
+
+              if (!context.mounted) return;
+
+              Navigator.pop(context);
+              Navigator.pop(context);
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('$studyTimeTextの学習を記録しました'),
+                  backgroundColor: ColorConsts.success,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ColorConsts.primary,
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              '💾 保存する',
+              style: TextConsts.body.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -928,6 +921,8 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
             await tutorialViewModel.completeTutorial();
             AppLogger.instance.i('✅ チュートリアル完了処理が完了しました');
 
+            if (!mounted) return;
+
             Navigator.of(context).pop(); // ダイアログを閉じる
             AppLogger.instance.i('🚀 AccountPromotionScreenへ遷移中...');
             Navigator.pushReplacementNamed(
@@ -957,6 +952,8 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
             );
             await tutorialViewModel.completeTutorial();
             AppLogger.instance.i('✅ チュートリアル完了処理が完了しました（エラー時）');
+
+            if (!mounted) return;
 
             Navigator.of(context).pop(); // ダイアログを閉じる
             AppLogger.instance.i('🚀 AccountPromotionScreenへ遷移中...（エラー時）');

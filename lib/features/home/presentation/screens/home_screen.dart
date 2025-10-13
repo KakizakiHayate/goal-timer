@@ -8,7 +8,7 @@ import '../../../../core/widgets/goal_card.dart';
 import '../widgets/today_progress_widget.dart';
 import '../view_models/home_view_model.dart';
 import '../../provider/home_provider.dart';
-import '../../../goal_timer/presentation/screens/timer_screen.dart';
+import '../../../timer/presentation/timer_screen.dart';
 import '../../../statistics/presentation/screens/statistics_screen.dart';
 import '../../../settings/presentation/screens/settings_screen.dart';
 import '../../../../core/provider/providers.dart';

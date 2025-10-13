@@ -9,7 +9,7 @@ import '../../../../core/widgets/circular_progress_indicator.dart' as custom;
 import '../../../../core/widgets/streak_indicator.dart';
 import '../../../../core/widgets/pressable_card.dart';
 import '../../../../core/models/goals/goals_model.dart';
-import '../../../goal_timer/presentation/screens/timer_screen.dart';
+import '../../../timer/presentation/timer_screen.dart';
 import '../viewmodels/goal_detail_view_model.dart';
 import 'goal_create_modal.dart';
 
