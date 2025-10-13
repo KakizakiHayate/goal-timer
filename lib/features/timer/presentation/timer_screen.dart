@@ -14,8 +14,6 @@ import '../../onboarding/presentation/widgets/tutorial_overlay.dart';
 import '../../onboarding/presentation/widgets/tutorial_completion_dialog.dart';
 import '../../../core/utils/route_names.dart';
 import '../../../core/provider/providers.dart';
-import '../../../core/models/daily_study_logs/daily_study_log_model.dart';
-import 'package:uuid/uuid.dart';
 import '../../goal_detail/presentation/viewmodels/goal_detail_view_model.dart';
 
 /// 改善されたタイマー画面
@@ -795,68 +793,85 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
                     color: ColorConsts.textSecondary,
                   ),
                 ),
+                const SizedBox(height: SpacingConsts.md),
+                // ボタンを縦並びで配置
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: Text(
+                      '戻る',
+                      style: TextConsts.body.copyWith(
+                        color: ColorConsts.textSecondary,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: SpacingConsts.sm),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      timerViewModel.resetTimer();
+                      Navigator.pop(context);
+                    },
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: Text(
+                      '⭐ 保存しない',
+                      style: TextConsts.body.copyWith(
+                        color: ColorConsts.textSecondary,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: SpacingConsts.sm),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      await _saveStudyTimeManually(
+                        timerState,
+                        timerViewModel,
+                        studyTimeInSeconds,
+                      );
+
+                      if (!context.mounted) return;
+
+                      Navigator.pop(context);
+                      Navigator.pop(context);
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('$studyTimeTextの学習を記録しました'),
+                          backgroundColor: ColorConsts.success,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: ColorConsts.primary,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      '💾 保存する',
+                      style: TextConsts.body.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context), // ダイアログを閉じて戻る
-                child: Text(
-                  '戻る',
-                  style: TextConsts.body.copyWith(
-                    color: ColorConsts.textSecondary,
-                  ),
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  // 保存しないで戻る
-                  Navigator.pop(context); // ダイアログを閉じる
-                  timerViewModel.resetTimer(); // タイマーをリセット
-                  Navigator.pop(context); // 画面を戻る
-                },
-                child: Text(
-                  '⭐ 保存しない',
-                  style: TextConsts.body.copyWith(
-                    color: ColorConsts.textSecondary,
-                  ),
-                ),
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  // 学習記録を手動保存（completeTimerと同じロジック）
-                  await _saveStudyTimeManually(
-                    timerState,
-                    timerViewModel,
-                    studyTimeInSeconds,
-                  );
-
-                  Navigator.pop(context); // ダイアログを閉じる
-                  Navigator.pop(context); // 画面を戻る
-
-                  // 保存完了フィードバックを表示
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('$studyTimeTextの学習を記録しました'),
-                      backgroundColor: ColorConsts.success,
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: ColorConsts.primary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: Text(
-                  '💾 保存する',
-                  style: TextConsts.body.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
           ),
     );
   }
@@ -1037,7 +1052,6 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
                 onPressed: () async {
                   await timerViewModel.completeStudySession(
                     timerState: timerState,
-                    timerViewModel: timerViewModel,
                     studyTimeInSeconds: studyTimeInSeconds,
                     onGoalDataRefreshNeeded: () {
                       ref.invalidate(goalDetailListProvider);
@@ -1089,49 +1103,13 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
     TimerViewModel timerViewModel,
     int studyTimeInSeconds,
   ) async {
-    if (!timerState.hasGoal) {
-      AppLogger.instance.e('目標IDが設定されていないため、学習時間を記録できません');
-      return;
-    }
-
-    if (studyTimeInSeconds <= 0) {
-      AppLogger.instance.w('学習時間が0秒のため記録しません');
-      return;
-    }
-
-    try {
-      AppLogger.instance.i(
-        '手動保存: 目標ID ${timerState.goalId} に $studyTimeInSeconds 秒を記録します',
-      );
-
-      // 今日の日付で学習記録を作成
-      final today = DateTime.now();
-      final dailyLog = DailyStudyLogModel(
-        id: const Uuid().v4(),
-        goalId: timerState.goalId!,
-        date: DateTime(today.year, today.month, today.day), // 時間は0:00に正規化
-        totalSeconds: studyTimeInSeconds,
-        createdAt: today, // 作成日時を設定
-      );
-
-      // 学習記録リポジトリに記録
-      final repository = ref.read(hybridDailyStudyLogsRepositoryProvider);
-      await repository.upsertDailyLog(dailyLog);
-
-      // 削除: goals更新処理は不要（累計時間はstudy_daily_logsから計算）
-      // 目標の累計時間はstudy_daily_logsから動的に計算するため、
-      // goalsテーブルのspent_minutesフィールドは更新しない
-
-      // 目標データのキャッシュをクリアして最新状態を反映
-      ref.invalidate(goalDetailListProvider);
-
-      // タイマーを停止（データ保存は上記で完了済み）
-      timerViewModel.pauseTimer();
-
-      AppLogger.instance.i('学習時間の手動記録が完了しました: $studyTimeInSeconds秒');
-    } catch (error) {
-      AppLogger.instance.e('学習時間の手動記録に失敗しました: $error');
-      rethrow;
-    }
+    // ✅ ViewModelのメソッドを使用（Clean Architecture準拠）
+    await timerViewModel.completeStudySession(
+      timerState: timerState,
+      studyTimeInSeconds: studyTimeInSeconds,
+      onGoalDataRefreshNeeded: () {
+        ref.invalidate(goalDetailListProvider);
+      },
+    );
   }
 }
