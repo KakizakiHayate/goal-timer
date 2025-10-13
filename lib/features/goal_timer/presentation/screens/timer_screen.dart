@@ -277,20 +277,21 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
                   Icons.all_inclusive,
                 ),
 
-              // ポモドーロ（プレミアム機能）
-              if (availableModes.contains(TimerMode.pomodoro))
-                _buildModeButton(
-                  'ポモドーロ',
-                  timerState.mode == TimerMode.pomodoro,
-                  () => timerViewModel.changeMode(TimerMode.pomodoro),
-                  Icons.spa,
-                )
-              else if (TimerMode.values.contains(TimerMode.pomodoro))
-                _buildLockedModeButton(
-                  'ポモドーロ',
-                  Icons.spa,
-                  timerViewModel.getModeRestrictionMessage(TimerMode.pomodoro),
-                ),
+              // [初回リリース非表示] ポモドーロタイマー（プレミアム機能）
+              // 初回リリース後に実装予定
+              // if (availableModes.contains(TimerMode.pomodoro))
+              //   _buildModeButton(
+              //     'ポモドーロ',
+              //     timerState.mode == TimerMode.pomodoro,
+              //     () => timerViewModel.changeMode(TimerMode.pomodoro),
+              //     Icons.spa,
+              //   )
+              // else if (TimerMode.values.contains(TimerMode.pomodoro))
+              //   _buildLockedModeButton(
+              //     'ポモドーロ',
+              //     Icons.spa,
+              //     timerViewModel.getModeRestrictionMessage(TimerMode.pomodoro),
+              //   ),
             ],
           ),
         ),
