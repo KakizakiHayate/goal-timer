@@ -7,6 +7,7 @@ import 'package:goal_timer/core/services/study_statistics_service.dart';
 import 'package:goal_timer/core/utils/app_logger.dart';
 import 'package:goal_timer/features/auth/domain/entities/auth_state.dart'
     as app_auth;
+import 'package:goal_timer/features/goal_detail/presentation/viewmodels/goal_detail_view_model.dart';
 
 class HomeState {
   final List<GoalsModel> goals;
@@ -92,8 +93,17 @@ class HomeViewModel extends StateNotifier<HomeState> {
     state = state.copyWith(isLoading: true);
 
     try {
+      AppLogger.instance.i('========== ホーム画面: 目標データ取得開始 ==========');
+      AppLogger.instance.i('使用UseCase: fetchGoalsUseCaseProvider (HybridRepository経由)');
+
       // UseCaseを通じて目標データを取得（クリーンアーキテクチャに準拠）
       final goals = await _ref.read(fetchGoalsUseCaseProvider).call();
+
+      AppLogger.instance.i('========== ホーム画面: 目標データ取得完了 ==========');
+      AppLogger.instance.i('取得件数: ${goals.length}件');
+      for (var i = 0; i < goals.length; i++) {
+        AppLogger.instance.i('  [$i] ID: ${goals[i].id}, タイトル: ${goals[i].title}');
+      }
 
       state = state.copyWith(goals: goals, isLoading: false);
 
@@ -128,6 +138,8 @@ class HomeViewModel extends StateNotifier<HomeState> {
   // 同期後のデータ再読み込み
   void _reloadGoalsAfterSync() async {
     try {
+      AppLogger.instance.i('========== 同期後のデータ再読み込み開始 ==========');
+
       // 同期後の再読み込みでは同期を避けるため、直接ローカルから取得
       final repository = _ref.read(goalsRepositoryProvider);
 
@@ -135,12 +147,21 @@ class HomeViewModel extends StateNotifier<HomeState> {
       final goals = await repository.getLocalGoalsOnly();
 
       state = state.copyWith(goals: goals);
-      AppLogger.instance.i('同期後のデータ再読み込みが完了しました: ${goals.length}件');
+      AppLogger.instance.i('HomeViewModel: 状態を更新しました（${goals.length}件）');
+
+      // タイマータブで使用されるFutureProviderを無効化
+      // これにより、タイマータブが次回表示されたときに最新データが取得される
+      _ref.invalidate(goalDetailListProvider);
+      AppLogger.instance.i(
+        'goalDetailListProviderを無効化しました（タイマータブのキャッシュをクリア）',
+      );
+
+      AppLogger.instance.i('========== 同期後のデータ再読み込み完了: ${goals.length}件 ==========');
 
       // ストリーク情報も再読み込み
       _loadGoalStreaks();
-    } catch (e) {
-      AppLogger.instance.e('同期後のデータ再読み込みに失敗しました', e);
+    } catch (e, stackTrace) {
+      AppLogger.instance.e('同期後のデータ再読み込みに失敗しました', e, stackTrace);
     }
   }
 
