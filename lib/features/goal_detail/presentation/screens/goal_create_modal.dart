@@ -135,6 +135,7 @@ class _GoalCreateModalContentState
   String _description = '';
   String _avoidMessage = '';
   int _targetMinutes = 30;
+  late DateTime _deadline;
   bool _isLoading = false;
 
   String? _titleError;
@@ -149,6 +150,10 @@ class _GoalCreateModalContentState
       _description = widget.existingGoal!.description;
       _avoidMessage = widget.existingGoal!.avoidMessage;
       _targetMinutes = widget.existingGoal!.targetMinutes;
+      _deadline = widget.existingGoal!.deadline;
+    } else {
+      // 新規作成の場合は30日後をデフォルトに設定
+      _deadline = DateTime.now().add(const Duration(days: 30));
     }
   }
 
@@ -285,6 +290,11 @@ class _GoalCreateModalContentState
 
         const SizedBox(height: SpacingConsts.l),
 
+        // デッドライン設定
+        _buildDeadlineSelector(),
+
+        const SizedBox(height: SpacingConsts.l),
+
         // ネガティブ回避メッセージ
         CustomTextField(
           labelText: 'やらないとどうなる？',
@@ -399,6 +409,161 @@ class _GoalCreateModalContentState
     );
   }
 
+  Widget _buildDeadlineSelector() {
+    final bool isEditMode = widget.existingGoal != null;
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '目標期限',
+          style: TextConsts.body.copyWith(
+            color: ColorConsts.textSecondary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: SpacingConsts.s),
+        Container(
+          padding: const EdgeInsets.all(SpacingConsts.l),
+          decoration: BoxDecoration(
+            color: isEditMode 
+                ? ColorConsts.backgroundSecondary.withValues(alpha: 0.5)
+                : ColorConsts.backgroundSecondary,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isEditMode 
+                  ? ColorConsts.border.withValues(alpha: 0.5)
+                  : ColorConsts.border,
+              width: 1.5,
+            ),
+          ),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    isEditMode ? Icons.lock_outlined : Icons.calendar_today_outlined,
+                    color: isEditMode 
+                        ? ColorConsts.textTertiary
+                        : ColorConsts.primary,
+                    size: 24,
+                  ),
+                  const SizedBox(width: SpacingConsts.s),
+                  Text(
+                    '${_deadline.year}年${_deadline.month}月${_deadline.day}日',
+                    style: TextConsts.h3.copyWith(
+                      color: isEditMode 
+                          ? ColorConsts.textTertiary
+                          : ColorConsts.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              if (!isEditMode) ...[
+                const SizedBox(height: SpacingConsts.m),
+                GestureDetector(
+                  onTap: () async {
+                    final DateTime tomorrow = DateTime.now().add(const Duration(days: 1));
+                    final DateTime? picked = await showDatePicker(
+                      context: context,
+                      initialDate: _deadline.isBefore(tomorrow) ? tomorrow : _deadline,
+                      firstDate: tomorrow,
+                      lastDate: DateTime(2100),
+                      locale: const Locale('ja', 'JP'),
+                      builder: (context, child) {
+                        return Theme(
+                          data: Theme.of(context).copyWith(
+                            colorScheme: const ColorScheme.light(
+                              primary: ColorConsts.primary,
+                              onPrimary: Colors.white,
+                              surface: Colors.white,
+                              onSurface: ColorConsts.textPrimary,
+                            ),
+                          ),
+                          child: child!,
+                        );
+                      },
+                    );
+                    if (picked != null) {
+                      setState(() {
+                        _deadline = picked;
+                      });
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: SpacingConsts.l,
+                      vertical: SpacingConsts.m,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: ColorConsts.primary, width: 1.5),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.edit_calendar,
+                          color: ColorConsts.primary,
+                          size: 20,
+                        ),
+                        const SizedBox(width: SpacingConsts.s),
+                        Text(
+                          '日付を変更',
+                          style: TextConsts.body.copyWith(
+                            color: ColorConsts.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ] else ...[
+                const SizedBox(height: SpacingConsts.m),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: SpacingConsts.l,
+                    vertical: SpacingConsts.m,
+                  ),
+                  decoration: BoxDecoration(
+                    color: ColorConsts.backgroundSecondary,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: ColorConsts.border.withValues(alpha: 0.5),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.lock,
+                        color: ColorConsts.textTertiary,
+                        size: 20,
+                      ),
+                      const SizedBox(width: SpacingConsts.s),
+                      Text(
+                        '期限は変更できません',
+                        style: TextConsts.body.copyWith(
+                          color: ColorConsts.textTertiary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildCreateButton() {
     return Column(
       children: [
@@ -482,7 +647,7 @@ class _GoalCreateModalContentState
         description: _description,
         avoidMessage: _avoidMessage,
         targetMinutes: _targetMinutes,
-        deadline: DateTime.now().add(const Duration(days: 30)),
+        deadline: _deadline,
       );
 
       if (mounted) {
