@@ -5,7 +5,7 @@ import 'package:goal_timer/features/debug/sync_debug_view.dart';
 import 'package:goal_timer/features/debug/sqlite_viewer.dart';
 import 'package:goal_timer/features/goal_detail/presentation/screens/goal_detail_setting_screen.dart';
 import 'package:goal_timer/features/goal_detail/presentation/screens/goal_detail_screen.dart';
-import 'package:goal_timer/features/goal_timer/presentation/screens/timer_screen.dart';
+import 'package:goal_timer/features/timer/presentation/timer_screen.dart';
 
 import 'package:goal_timer/features/memo_record/presentation/screens/memo_record_screen.dart';
 import 'package:goal_timer/features/statistics/presentation/screens/statistics_screen.dart';
