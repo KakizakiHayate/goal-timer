@@ -40,10 +40,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
-  // 通知設定の状態変数
-  bool _notificationsEnabled = true;
-  bool _soundEnabled = true;
-  bool _vibrationEnabled = true;
+  // [初回リリース非表示] 通知設定の状態変数
+  // 初回リリース後にローカルプッシュ通知機能と共に実装予定
+  // bool _notificationsEnabled = true;
+  // bool _soundEnabled = true;
+  // bool _vibrationEnabled = true;
 
   @override
   void initState() {
@@ -93,15 +94,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
 
               const SizedBox(height: SpacingConsts.l),
 
-              // プレミアムプラン
-              _buildPremiumSection(),
+              // [初回リリース非表示] プレミアムプラン
+              // 初回リリース後に実装予定
+              // _buildPremiumSection(),
+              //
+              // const SizedBox(height: SpacingConsts.l),
 
-              const SizedBox(height: SpacingConsts.l),
-
-              // 通知設定
-              _buildNotificationSection(),
-
-              const SizedBox(height: SpacingConsts.l),
+              // [初回リリース非表示] 通知設定
+              // 初回リリース後にローカルプッシュ通知機能と共に実装予定
+              // _buildNotificationSection(),
+              //
+              // const SizedBox(height: SpacingConsts.l),
 
               // アプリ設定
               _buildAppSection(),
@@ -198,23 +201,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                   ),
                 ],
                 const SizedBox(height: SpacingConsts.s),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: SpacingConsts.s,
-                    vertical: SpacingConsts.xs,
-                  ),
-                  decoration: BoxDecoration(
-                    color: ColorConsts.success.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    'プレミアム会員',
-                    style: TextConsts.caption.copyWith(
-                      color: ColorConsts.success,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
+                // [初回リリース非表示] プレミアム会員バッジ
+                // 初回リリース後に実装予定
+                // Container(
+                //   padding: const EdgeInsets.symmetric(
+                //     horizontal: SpacingConsts.s,
+                //     vertical: SpacingConsts.xs,
+                //   ),
+                //   decoration: BoxDecoration(
+                //     color: ColorConsts.success.withOpacity(0.1),
+                //     borderRadius: BorderRadius.circular(6),
+                //   ),
+                //   child: Text(
+                //     'プレミアム会員',
+                //     style: TextConsts.caption.copyWith(
+                //       color: ColorConsts.success,
+                //       fontWeight: FontWeight.w600,
+                //     ),
+                //   ),
+                // ),
               ],
             ),
           ),
@@ -296,6 +301,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     );
   }
 
+  /* [初回リリース非表示] 通知設定メソッド
+   * 初回リリース後にローカルプッシュ通知機能と共に実装予定
+   * タイマー完了後のダイアログ表示は削除対象外
+   */
+  /*
   Widget _buildNotificationSection() {
     return _buildSection(
       title: '通知設定',
@@ -356,6 +366,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
       ],
     );
   }
+  */
 
   Widget _buildAppSection() {
     return _buildSection(
@@ -425,13 +436,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
           ),
         ),
 
-        SettingItem(
-          title: 'データのエクスポート',
-          subtitle: '学習データをエクスポート',
-          icon: Icons.download_outlined,
-          iconColor: ColorConsts.primary,
-          onTap: _exportData,
-        ),
+        // [初回リリース非表示] データのエクスポート
+        // 初回リリース後に実装予定
+        // SettingItem(
+        //   title: 'データのエクスポート',
+        //   subtitle: '学習データをエクスポート',
+        //   icon: Icons.download_outlined,
+        //   iconColor: ColorConsts.primary,
+        //   onTap: _exportData,
+        // ),
         SettingItem(
           title: 'データのバックアップ',
           subtitle: 'クラウドにデータを同期',
@@ -653,9 +666,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     _showComingSoonDialog('タイマー設定');
   }
 
-  void _exportData() {
-    _showComingSoonDialog('データエクスポート');
-  }
+  // [初回リリース非表示] データエクスポート処理
+  // 初回リリース後に実装予定
+  // void _exportData() {
+  //   _showComingSoonDialog('データエクスポート');
+  // }
 
   void _showBackupSettings() {
     _showComingSoonDialog('バックアップ設定');
@@ -741,6 +756,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     );
   }
 
+  /* [初回リリース非表示] プレミアムプラン関連メソッド
+   * 初回リリース後に実装予定
+   * - _buildPremiumSection()
+   * - _buildPlanLimitationItem()
+   * - _showUpgradeScreen()
+   */
+  /*
   Widget _buildPremiumSection() {
     final restrictionService = ref.read(timerRestrictionServiceProvider);
     final currentPlan = restrictionService.getCurrentPlan();
@@ -1013,6 +1035,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
       context,
     ).push(MaterialPageRoute(builder: (context) => const UpgradeScreen()));
   }
+  */
 
   // アカウント連携画面への遷移
   void _navigateToAccountLinking() {
