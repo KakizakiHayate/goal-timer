@@ -201,23 +201,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                   ),
                 ],
                 const SizedBox(height: SpacingConsts.s),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: SpacingConsts.s,
-                    vertical: SpacingConsts.xs,
-                  ),
-                  decoration: BoxDecoration(
-                    color: ColorConsts.success.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    'プレミアム会員',
-                    style: TextConsts.caption.copyWith(
-                      color: ColorConsts.success,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
+                // [初回リリース非表示] プレミアム会員バッジ
+                // 初回リリース後に実装予定
+                // Container(
+                //   padding: const EdgeInsets.symmetric(
+                //     horizontal: SpacingConsts.s,
+                //     vertical: SpacingConsts.xs,
+                //   ),
+                //   decoration: BoxDecoration(
+                //     color: ColorConsts.success.withOpacity(0.1),
+                //     borderRadius: BorderRadius.circular(6),
+                //   ),
+                //   child: Text(
+                //     'プレミアム会員',
+                //     style: TextConsts.caption.copyWith(
+                //       color: ColorConsts.success,
+                //       fontWeight: FontWeight.w600,
+                //     ),
+                //   ),
+                // ),
               ],
             ),
           ),
