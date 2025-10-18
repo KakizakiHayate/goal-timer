@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:goal_timer/core/config/env_config.dart';
 import 'package:goal_timer/core/utils/app_logger.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -83,6 +84,18 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      // ローカライゼーション設定
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('ja', 'JP'),
+        Locale('en', 'US'),
+      ],
+      locale: const Locale('ja', 'JP'),
+
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
