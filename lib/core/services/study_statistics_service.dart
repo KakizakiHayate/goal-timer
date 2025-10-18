@@ -111,25 +111,46 @@ class StudyStatisticsService {
   }
 
   /// 今日の目標時間を取得（分）
+  ///
+  /// 各目標の残り時間を残り日数で割った「1日あたりの推奨時間」を合計
   Future<int> _getTodayTargetMinutes(
     String userId,
     List<dynamic> userGoals,
   ) async {
     try {
       final activeGoals = userGoals.where((goal) => !goal.isCompleted).toList();
+      final now = DateTime.now();
 
       // 1日あたりの目標時間を計算（目標時間 ÷ 残り日数）
       final todayTargetMinutes = activeGoals.fold<int>(0, (sum, goal) {
-        final remainingDays = goal.deadline.difference(DateTime.now()).inDays;
-        if (remainingDays <= 0) return sum;
+        final remainingDays = goal.deadline.difference(now).inDays;
 
-        final dailyTargetMinutes =
-            goal.targetMinutes.toDouble() / remainingDays;
+        // 期限が過去または今日の場合の処理
+        if (remainingDays <= 0) {
+          // 期限が完全に過去（昨日以前）の場合はスキップ
+          final deadlineDate = DateTime(
+            goal.deadline.year,
+            goal.deadline.month,
+            goal.deadline.day,
+          );
+          final todayDate = DateTime(now.year, now.month, now.day);
+
+          if (deadlineDate.isBefore(todayDate)) {
+            // 期限切れの目標はカウントしない
+            return sum;
+          }
+
+          // 期限が今日の場合は、残り時間全体を今日の目標とする
+          return (sum + goal.targetMinutes) as int;
+        }
+
+        // 通常の計算: 残り時間 ÷ 残り日数
+        final dailyTargetMinutes = goal.targetMinutes.toDouble() / remainingDays;
         final dailyMinutes = dailyTargetMinutes.toInt();
         return (sum + dailyMinutes) as int;
       });
 
-      AppLogger.instance.d('今日の目標時間: $todayTargetMinutes分');
+      AppLogger.instance.d('今日の目標時間: $todayTargetMinutes分（アクティブな目標数: ${activeGoals.length}）');
       return todayTargetMinutes;
     } catch (e) {
       AppLogger.instance.e('今日の目標時間取得エラー', e);
