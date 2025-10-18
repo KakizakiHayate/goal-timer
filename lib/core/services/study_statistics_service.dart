@@ -125,6 +125,9 @@ class StudyStatisticsService {
       final todayTargetMinutes = activeGoals.fold<int>(0, (sum, goal) {
         final remainingDays = goal.deadline.difference(now).inDays;
 
+        // 残りの学習時間を計算（学習済み時間を考慮）
+        final remainingMinutes = (goal.targetMinutes - goal.spentMinutes).clamp(0, goal.targetMinutes) as int;
+
         // 期限が過去または今日の場合の処理
         if (remainingDays <= 0) {
           // 期限が完全に過去（昨日以前）の場合はスキップ
@@ -140,14 +143,14 @@ class StudyStatisticsService {
             return sum;
           }
 
-          // 期限が今日の場合は、残り時間全体を今日の目標とする
-          return (sum + goal.targetMinutes) as int;
+          // 期限が今日の場合は、残りの学習時間全体を今日の目標とする
+          return sum + remainingMinutes;
         }
 
-        // 通常の計算: 残り時間 ÷ 残り日数
-        final dailyTargetMinutes = goal.targetMinutes.toDouble() / remainingDays;
+        // 通常の計算: 残りの学習時間 ÷ 残り日数
+        final dailyTargetMinutes = remainingMinutes.toDouble() / remainingDays;
         final dailyMinutes = dailyTargetMinutes.toInt();
-        return (sum + dailyMinutes) as int;
+        return sum + dailyMinutes;
       });
 
       AppLogger.instance.d('今日の目標時間: $todayTargetMinutes分（アクティブな目標数: ${activeGoals.length}）');
