@@ -55,10 +55,11 @@ class TodayProgressWidget extends StatelessWidget {
           // メインプログレス
           _buildMainProgress(),
 
-          const SizedBox(height: SpacingConsts.l),
+          // TODO: 次回リリースで再表示予定
+          // const SizedBox(height: SpacingConsts.l),
 
-          // 統計情報
-          _buildStats(),
+          // 統計情報（一時的に非表示）
+          // _buildStats(),
         ],
       ),
     );
@@ -131,9 +132,9 @@ class TodayProgressWidget extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildTimeInfo('今日の勉強時間', '${totalMinutes}分'),
+              _buildTimeInfo('今日の勉強時間', '$totalMinutes分'),
               const SizedBox(height: SpacingConsts.m),
-              _buildTimeInfo('目標時間', '${targetMinutes}分'),
+              _buildTimeInfo('目標時間', '$targetMinutes分'),
               const SizedBox(height: SpacingConsts.m),
               _buildTimeInfo(
                 '残り時間',
@@ -174,7 +175,13 @@ class TodayProgressWidget extends StatelessWidget {
     );
   }
 
+  // ignore: unused_element
   Widget _buildStats() {
+    // TODO: 次回リリースで再表示予定
+    // 目標達成と平均集中時間のメトリクス表示
+    return const SizedBox.shrink(); // 一時的に非表示
+
+    /* 元のコード（再表示時にコメント解除）
     return Row(
       children: [
         Expanded(
@@ -199,8 +206,10 @@ class TodayProgressWidget extends StatelessWidget {
         ),
       ],
     );
+    */
   }
 
+  // ignore: unused_element
   Widget _buildStatItem({
     required IconData icon,
     required String label,
