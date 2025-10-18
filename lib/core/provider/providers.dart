@@ -28,6 +28,13 @@ import 'package:goal_timer/core/usecases/goals/delete_goal_usecase.dart';
 // SyncCheckerのインポート
 import 'package:goal_timer/core/services/sync_checker.dart';
 
+// StudyStatisticsServiceのインポート
+import 'package:goal_timer/core/services/study_statistics_service.dart';
+
+// GlobalStatisticsNotifierのインポート
+import 'package:goal_timer/core/provider/global_statistics_notifier.dart';
+import 'package:goal_timer/core/models/study_statistics.dart';
+
 // 認証関連のインポートを追加
 import 'package:goal_timer/features/auth/domain/entities/app_user.dart';
 import 'package:goal_timer/features/auth/domain/entities/auth_state.dart'
@@ -221,6 +228,28 @@ final syncCheckerProvider = Provider<SyncChecker>((ref) {
     dailyStudyLogsRepository: dailyStudyLogsRepository,
     syncNotifier: syncNotifier,
   );
+});
+
+// ===== 統計情報プロバイダー =====
+
+/// 学習統計サービスプロバイダー
+final studyStatisticsServiceProvider = Provider<StudyStatisticsService>((ref) {
+  return StudyStatisticsService(
+    usersRepository: ref.watch(hybridUsersRepositoryProvider),
+    dailyStudyLogsRepository: ref.watch(hybridDailyStudyLogsRepositoryProvider),
+    goalsRepository: ref.watch(hybridGoalsRepositoryProvider),
+  );
+});
+
+/// グローバル統計データプロバイダー
+///
+/// アプリ全体で統計データを共有し、重複取得を避ける。
+/// 起動時にローカルDBから統計を計算し、必要に応じて手動でリフレッシュ可能。
+final globalStatisticsProvider =
+    StateNotifierProvider<GlobalStatisticsNotifier, StudyStatistics>((ref) {
+  final statisticsService = ref.watch(studyStatisticsServiceProvider);
+  final syncChecker = ref.watch(syncCheckerProvider);
+  return GlobalStatisticsNotifier(statisticsService, syncChecker);
 });
 
 // ===== 認証統合プロバイダー =====

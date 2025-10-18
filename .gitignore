@@ -72,3 +72,9 @@ ios/Runner/GoogleService-Info.plist.backup
 ios/Runner.xcodeproj/project.pbxproj.backup
 
 .vscode
+# プランニング・メモファイル
+*.md
+!README.md
+!CHANGELOG.md
+!CONTRIBUTING.md
+!LICENSE.md

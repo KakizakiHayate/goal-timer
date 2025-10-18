@@ -234,7 +234,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
             const SizedBox(height: SpacingConsts.l),
 
             // 統計情報
-            _buildStatsCard(timerState),
+            _buildStatsCard(timerState, ref),
           ],
         ),
       ),
@@ -590,7 +590,13 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
     );
   }
 
-  Widget _buildStatsCard(TimerState timerState) {
+  Widget _buildStatsCard(
+    TimerState timerState,
+    WidgetRef ref,
+  ) {
+    // globalStatisticsProviderから統計データを取得
+    final statistics = ref.watch(globalStatisticsProvider);
+
     return PressableCard(
       margin: EdgeInsets.zero,
       padding: const EdgeInsets.all(SpacingConsts.l),
@@ -602,7 +608,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
             child: _buildStatItem(
               icon: Icons.schedule_rounded,
               label: '今日の総時間',
-              value: '2時間 30分', // TODO: 実際のデータに置き換え
+              value: _formatMinutes(statistics.totalMinutes),
             ),
           ),
           Container(width: 1, height: 40, color: Colors.white.withOpacity(0.3)),
@@ -610,12 +616,30 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
             child: _buildStatItem(
               icon: Icons.whatshot_rounded,
               label: '連続日数',
-              value: '5日', // TODO: 実際のデータに置き換え
+              value: '${statistics.currentStreak}日',
             ),
           ),
         ],
       ),
     );
+  }
+
+  /// 分を「X時間 Y分」形式にフォーマット
+  String _formatMinutes(int minutes) {
+    if (minutes == 0) {
+      return '0分';
+    }
+
+    final hours = minutes ~/ 60;
+    final remainingMinutes = minutes % 60;
+
+    if (hours == 0) {
+      return '$remainingMinutes分';
+    } else if (remainingMinutes == 0) {
+      return '$hours時間';
+    } else {
+      return '$hours時間 $remainingMinutes分';
+    }
   }
 
   Widget _buildStatItem({
@@ -1053,6 +1077,10 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
                     studyTimeInSeconds: studyTimeInSeconds,
                     onGoalDataRefreshNeeded: () {
                       ref.invalidate(goalDetailListProvider);
+                      // 統計データを更新
+                      ref
+                          .read(globalStatisticsProvider.notifier)
+                          .refresh(forceSync: false);
                     },
                   );
 
@@ -1107,6 +1135,8 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
       studyTimeInSeconds: studyTimeInSeconds,
       onGoalDataRefreshNeeded: () {
         ref.invalidate(goalDetailListProvider);
+        // 統計データを更新
+        ref.read(globalStatisticsProvider.notifier).refresh(forceSync: false);
       },
     );
   }
