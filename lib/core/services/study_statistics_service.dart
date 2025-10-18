@@ -112,7 +112,7 @@ class StudyStatisticsService {
 
   /// 今日の目標時間を取得（分）
   ///
-  /// 各目標の残り時間を残り日数で割った「1日あたりの推奨時間」を合計
+  /// 各目標の残りの学習時間（学習済み時間を除く）を残り日数で割った「1日あたりの推奨時間」を合計
   Future<int> _getTodayTargetMinutes(
     String userId,
     List<dynamic> userGoals,
@@ -121,7 +121,7 @@ class StudyStatisticsService {
       final activeGoals = userGoals.where((goal) => !goal.isCompleted).toList();
       final now = DateTime.now();
 
-      // 1日あたりの目標時間を計算（目標時間 ÷ 残り日数）
+      // 1日あたりの目標時間を計算（残りの学習時間 ÷ 残り日数）
       final todayTargetMinutes = activeGoals.fold<int>(0, (sum, goal) {
         final remainingDays = goal.deadline.difference(now).inDays;
 
@@ -131,12 +131,8 @@ class StudyStatisticsService {
         // 期限が過去または今日の場合の処理
         if (remainingDays <= 0) {
           // 期限が完全に過去（昨日以前）の場合はスキップ
-          final deadlineDate = DateTime(
-            goal.deadline.year,
-            goal.deadline.month,
-            goal.deadline.day,
-          );
-          final todayDate = DateTime(now.year, now.month, now.day);
+          final deadlineDate = _startOfDay(goal.deadline);
+          final todayDate = _startOfDay(now);
 
           if (deadlineDate.isBefore(todayDate)) {
             // 期限切れの目標はカウントしない
