@@ -529,6 +529,7 @@ class _HomeTabContent extends ConsumerWidget {
     final homeState = ref.watch(homeViewModelProvider);
     final homeViewModel = ref.read(homeViewModelProvider.notifier);
     final tutorialState = ref.watch(tutorialViewModelProvider);
+    final statistics = ref.watch(globalStatisticsProvider);
 
     // ローディング中の表示
     if (homeState.isLoading) {
@@ -553,12 +554,12 @@ class _HomeTabContent extends ConsumerWidget {
         // 今日の進捗
         SliverToBoxAdapter(
           child: TodayProgressWidget(
-            todayProgress: homeViewModel.statistics.todayProgress,
-            totalMinutes: homeViewModel.statistics.totalMinutes,
-            targetMinutes: homeViewModel.statistics.targetMinutes,
-            currentStreak: homeViewModel.statistics.currentStreak,
-            totalGoals: homeViewModel.statistics.totalGoals,
-            completedGoals: homeViewModel.statistics.completedGoals,
+            todayProgress: statistics.todayProgress,
+            totalMinutes: statistics.totalMinutes,
+            targetMinutes: statistics.targetMinutes,
+            currentStreak: statistics.currentStreak,
+            totalGoals: statistics.totalGoals,
+            completedGoals: statistics.completedGoals,
           ),
         ),
 

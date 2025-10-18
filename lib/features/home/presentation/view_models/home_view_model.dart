@@ -1,9 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:goal_timer/core/models/goals/goals_model.dart';
-import 'package:goal_timer/core/models/study_statistics.dart';
 import 'package:goal_timer/core/provider/providers.dart';
 import 'package:goal_timer/core/provider/sync_state_provider.dart';
-import 'package:goal_timer/core/services/study_statistics_service.dart';
 import 'package:goal_timer/core/utils/app_logger.dart';
 import 'package:goal_timer/features/auth/domain/entities/auth_state.dart'
     as app_auth;
@@ -14,8 +12,6 @@ class HomeState {
   final bool isLoading;
   final bool isSyncing;
   final SyncStatus syncStatus;
-  final StudyStatistics statistics;
-  final bool isStatisticsLoading;
   final Map<String, int> goalStreaks;
 
   HomeState({
@@ -24,10 +20,8 @@ class HomeState {
     this.isLoading = false,
     this.isSyncing = false,
     this.syncStatus = SyncStatus.synced,
-    StudyStatistics? statistics,
-    this.isStatisticsLoading = false,
     this.goalStreaks = const {},
-  }) : statistics = statistics ?? StudyStatistics.empty();
+  });
 
   HomeState copyWith({
     List<GoalsModel>? goals,
@@ -35,8 +29,6 @@ class HomeState {
     bool? isLoading,
     bool? isSyncing,
     SyncStatus? syncStatus,
-    StudyStatistics? statistics,
-    bool? isStatisticsLoading,
     Map<String, int>? goalStreaks,
   }) {
     return HomeState(
@@ -45,8 +37,6 @@ class HomeState {
       isLoading: isLoading ?? this.isLoading,
       isSyncing: isSyncing ?? this.isSyncing,
       syncStatus: syncStatus ?? this.syncStatus,
-      statistics: statistics ?? this.statistics,
-      isStatisticsLoading: isStatisticsLoading ?? this.isStatisticsLoading,
       goalStreaks: goalStreaks ?? this.goalStreaks,
     );
   }
@@ -54,12 +44,10 @@ class HomeState {
 
 class HomeViewModel extends StateNotifier<HomeState> {
   final Ref _ref;
-  final StudyStatisticsService _statisticsService;
 
-  HomeViewModel(this._ref, this._statisticsService) : super(HomeState()) {
+  HomeViewModel(this._ref) : super(HomeState()) {
     // 初期データの読み込み
     _loadGoals();
-    _loadStatistics();
     // 同期状態の監視
     _listenToSyncState();
     // アプリ起動時の同期チェック実行
@@ -120,7 +108,6 @@ class HomeViewModel extends StateNotifier<HomeState> {
           next.status == SyncStatus.synced) {
         AppLogger.instance.i('真の同期完了 - データを再読み込みします');
         _reloadGoalsAfterSync();
-        _loadStatistics(); // 統計も再読み込み
       }
     });
   }
@@ -147,7 +134,6 @@ class HomeViewModel extends StateNotifier<HomeState> {
   // 外部から呼び出せる目標データのリロードメソッド
   void reloadGoals() {
     _loadGoals();
-    _loadStatistics(); // 統計も更新
   }
 
   // 手動同期の実行
@@ -191,39 +177,13 @@ class HomeViewModel extends StateNotifier<HomeState> {
     }
   }
 
-  // 統計データの読み込み
-  void _loadStatistics() async {
-    state = state.copyWith(isStatisticsLoading: true);
-
-    try {
-      final statistics = await _statisticsService.getCurrentUserStatistics();
-
-      state = state.copyWith(
-        statistics: statistics,
-        isStatisticsLoading: false,
-      );
-
-      AppLogger.instance.i('統計データを更新しました');
-    } catch (e) {
-      AppLogger.instance.e('統計データの読み込みに失敗しました', e);
-      state = state.copyWith(
-        statistics: StudyStatistics.empty(),
-        isStatisticsLoading: false,
-      );
-    }
-  }
-
-  // 統計データのリロード
-  void reloadStatistics() {
-    _loadStatistics();
-  }
-
   // 目標のストリーク情報を一括読み込み
   void _loadGoalStreaks() async {
     try {
+      final statisticsService = _ref.read(studyStatisticsServiceProvider);
       final streaks = <String, int>{};
       for (final goal in state.goals) {
-        final streak = await _statisticsService.getGoalStreak(goal.id);
+        final streak = await statisticsService.getGoalStreak(goal.id);
         streaks[goal.id] = streak;
       }
       state = state.copyWith(goalStreaks: streaks);
@@ -241,7 +201,8 @@ class HomeViewModel extends StateNotifier<HomeState> {
   // 特定の目標のストリーク日数を取得（後方互換性のため残す）
   Future<int> getGoalStreak(String goalId) async {
     try {
-      return await _statisticsService.getGoalStreak(goalId);
+      final statisticsService = _ref.read(studyStatisticsServiceProvider);
+      return await statisticsService.getGoalStreak(goalId);
     } catch (e) {
       AppLogger.instance.e('目標ストリーク取得に失敗しました: $goalId', e);
       return 0;
@@ -251,8 +212,4 @@ class HomeViewModel extends StateNotifier<HomeState> {
   // 同期状態の取得
   bool get isSyncing => state.isSyncing;
   SyncStatus get syncStatus => state.syncStatus;
-
-  // 統計データの取得
-  StudyStatistics get statistics => state.statistics;
-  bool get isStatisticsLoading => state.isStatisticsLoading;
 }
