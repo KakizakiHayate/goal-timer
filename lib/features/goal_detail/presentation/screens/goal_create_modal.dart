@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/utils/color_consts.dart';
 import '../../../../core/utils/text_consts.dart';
 import '../../../../core/utils/spacing_consts.dart';
-import '../../../../core/widgets/custom_text_field.dart';
+import '../../../../core/widgets/goal_form/goal_form_widget.dart';
+import '../../../../core/widgets/goal_form/goal_form_data.dart';
 import '../../../../features/auth/presentation/widgets/auth_button.dart';
 import '../../../../core/models/goals/goals_model.dart';
 import '../../../../core/provider/providers.dart';
@@ -129,31 +130,22 @@ class _GoalCreateModalContent extends ConsumerStatefulWidget {
 
 class _GoalCreateModalContentState
     extends ConsumerState<_GoalCreateModalContent> {
-  final _formKey = GlobalKey<FormState>();
-
-  String _title = '';
-  String _description = '';
-  String _avoidMessage = '';
-  int _targetMinutes = 30;
-  late DateTime _deadline;
+  GoalFormData _formData = GoalFormData.empty();
   bool _isLoading = false;
-
-  String? _titleError;
-  String? _avoidMessageError;
 
   @override
   void initState() {
     super.initState();
-    // 編集モードの場合は既存の値を設定
+    // 編集モードの場合は初期値を設定
     if (widget.existingGoal != null) {
-      _title = widget.existingGoal!.title;
-      _description = widget.existingGoal!.description;
-      _avoidMessage = widget.existingGoal!.avoidMessage;
-      _targetMinutes = widget.existingGoal!.targetMinutes;
-      _deadline = widget.existingGoal!.deadline;
-    } else {
-      // 新規作成の場合は30日後をデフォルトに設定
-      _deadline = DateTime.now().add(const Duration(days: 30));
+      _formData = GoalFormData(
+        title: widget.existingGoal!.title,
+        description: widget.existingGoal!.description,
+        avoidMessage: widget.existingGoal!.avoidMessage,
+        targetMinutes: widget.existingGoal!.targetMinutes,
+        deadline: widget.existingGoal!.deadline,
+        isValid: true, // 既存データは有効とみなす
+      );
     }
   }
 
@@ -161,26 +153,32 @@ class _GoalCreateModalContentState
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: SpacingConsts.l),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          children: [
-            // 説明テキスト
-            _buildDescription(),
+      child: Column(
+        children: [
+          // 説明テキスト
+          _buildDescription(),
 
-            const SizedBox(height: SpacingConsts.l),
+          const SizedBox(height: SpacingConsts.l),
 
-            // フォーム
-            _buildForm(),
+          // 共通フォーム
+          GoalFormWidget(
+            existingGoal: widget.existingGoal,
+            onFormChanged: (formData) {
+              setState(() {
+                _formData = formData;
+              });
+            },
+            showDeadlineField: true,
+            isDeadlineEditable: true,
+          ),
 
-            const SizedBox(height: SpacingConsts.l),
+          const SizedBox(height: SpacingConsts.l),
 
-            // 作成ボタン
-            _buildCreateButton(),
+          // 作成ボタン
+          _buildCreateButton(),
 
-            const SizedBox(height: SpacingConsts.l),
-          ],
-        ),
+          const SizedBox(height: SpacingConsts.l),
+        ],
       ),
     );
   }
@@ -245,312 +243,6 @@ class _GoalCreateModalContentState
     );
   }
 
-  Widget _buildForm() {
-    return Column(
-      children: [
-        // 目標タイトル
-        CustomTextField(
-          labelText: '目標タイトル',
-          hintText: '例：英語の勉強',
-          initialValue: _title,
-          maxLength: 50,
-          prefixIcon: Icons.flag_outlined,
-          onChanged: (value) {
-            setState(() {
-              _title = value;
-              _titleError = _validateTitle(value);
-            });
-          },
-          validator: _validateTitle,
-          textInputAction: TextInputAction.next,
-        ),
-
-        const SizedBox(height: SpacingConsts.l),
-
-        // 目標説明
-        CustomTextField(
-          labelText: '目標の詳細（任意）',
-          hintText: '例：TOEICで800点を取るために毎日英単語を覚える',
-          initialValue: _description,
-          maxLines: 3,
-          maxLength: 200,
-          prefixIcon: Icons.description_outlined,
-          onChanged: (value) {
-            setState(() {
-              _description = value;
-            });
-          },
-          textInputAction: TextInputAction.next,
-        ),
-
-        const SizedBox(height: SpacingConsts.l),
-
-        // 目標時間設定
-        _buildTargetTimeSelector(),
-
-        const SizedBox(height: SpacingConsts.l),
-
-        // デッドライン設定
-        _buildDeadlineSelector(),
-
-        const SizedBox(height: SpacingConsts.l),
-
-        // ネガティブ回避メッセージ
-        CustomTextField(
-          labelText: 'やらないとどうなる？',
-          hintText: '例：将来の仕事で困る、自分に失望する',
-          initialValue: _avoidMessage,
-          maxLines: 2,
-          maxLength: 100,
-          prefixIcon: Icons.warning_amber_outlined,
-          onChanged: (value) {
-            setState(() {
-              _avoidMessage = value;
-              _avoidMessageError = _validateAvoidMessage(value);
-            });
-          },
-          validator: _validateAvoidMessage,
-          textInputAction: TextInputAction.done,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTargetTimeSelector() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '1日の目標時間',
-          style: TextConsts.body.copyWith(
-            color: ColorConsts.textSecondary,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: SpacingConsts.s),
-        Container(
-          padding: const EdgeInsets.all(SpacingConsts.l),
-          decoration: BoxDecoration(
-            color: ColorConsts.backgroundSecondary,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: ColorConsts.border, width: 1.5),
-          ),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.schedule_outlined,
-                    color: ColorConsts.primary,
-                    size: 24,
-                  ),
-                  const SizedBox(width: SpacingConsts.s),
-                  Text(
-                    '${_targetMinutes ~/ 60}時間${_targetMinutes % 60}分',
-                    style: TextConsts.h3.copyWith(
-                      color: ColorConsts.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: SpacingConsts.m),
-              GestureDetector(
-                onTap: () async {
-                  await showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return _TimePickerDialog(
-                        initialMinutes: _targetMinutes,
-                        onTimeSelected: (minutes) {
-                          setState(() {
-                            _targetMinutes = minutes;
-                          });
-                        },
-                      );
-                    },
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: SpacingConsts.l,
-                    vertical: SpacingConsts.m,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: ColorConsts.primary, width: 1.5),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.access_time,
-                        color: ColorConsts.primary,
-                        size: 20,
-                      ),
-                      const SizedBox(width: SpacingConsts.s),
-                      Text(
-                        '時間を変更',
-                        style: TextConsts.body.copyWith(
-                          color: ColorConsts.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDeadlineSelector() {
-    final bool isEditMode = widget.existingGoal != null;
-    
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '目標期限',
-          style: TextConsts.body.copyWith(
-            color: ColorConsts.textSecondary,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: SpacingConsts.s),
-        Container(
-          padding: const EdgeInsets.all(SpacingConsts.l),
-          decoration: BoxDecoration(
-            color: isEditMode 
-                ? ColorConsts.backgroundSecondary.withOpacity(0.5)
-                : ColorConsts.backgroundSecondary,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isEditMode 
-                  ? ColorConsts.border.withOpacity(0.5)
-                  : ColorConsts.border,
-              width: 1.5,
-            ),
-          ),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    isEditMode ? Icons.lock_outlined : Icons.calendar_today_outlined,
-                    color: isEditMode 
-                        ? ColorConsts.textTertiary
-                        : ColorConsts.primary,
-                    size: 24,
-                  ),
-                  const SizedBox(width: SpacingConsts.s),
-                  Text(
-                    '${_deadline.year}年${_deadline.month}月${_deadline.day}日',
-                    style: TextConsts.h3.copyWith(
-                      color: isEditMode 
-                          ? ColorConsts.textTertiary
-                          : ColorConsts.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-              if (!isEditMode) ...[
-                const SizedBox(height: SpacingConsts.m),
-                GestureDetector(
-                  onTap: () async {
-                    final DateTime tomorrow = DateTime.now().add(const Duration(days: 1));
-                    final DateTime? picked = await showDatePicker(
-                      context: context,
-                      initialDate: _deadline.isBefore(tomorrow) ? tomorrow : _deadline,
-                      firstDate: tomorrow,
-                      lastDate: DateTime(2100),
-                      locale: const Locale('ja', 'JP'),
-                    );
-                    if (picked != null) {
-                      setState(() {
-                        _deadline = picked;
-                      });
-                    }
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: SpacingConsts.l,
-                      vertical: SpacingConsts.m,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: ColorConsts.primary, width: 1.5),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.edit_calendar,
-                          color: ColorConsts.primary,
-                          size: 20,
-                        ),
-                        const SizedBox(width: SpacingConsts.s),
-                        Text(
-                          '日付を変更',
-                          style: TextConsts.body.copyWith(
-                            color: ColorConsts.primary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ] else ...[
-                const SizedBox(height: SpacingConsts.m),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: SpacingConsts.l,
-                    vertical: SpacingConsts.m,
-                  ),
-                  decoration: BoxDecoration(
-                    color: ColorConsts.backgroundSecondary,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: ColorConsts.border.withOpacity(0.5),
-                      width: 1.5,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.lock,
-                        color: ColorConsts.textTertiary,
-                        size: 20,
-                      ),
-                      const SizedBox(width: SpacingConsts.s),
-                      Text(
-                        '期限は変更できません',
-                        style: TextConsts.body.copyWith(
-                          color: ColorConsts.textTertiary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildCreateButton() {
     return Column(
       children: [
@@ -558,14 +250,14 @@ class _GoalCreateModalContentState
           type: AuthButtonType.email,
           text: widget.existingGoal != null ? '変更を保存' : '目標を作成',
           isLoading: _isLoading,
-          onPressed: _isFormValid() ? _handleSubmit : null,
+          onPressed: _formData.isValid ? _handleSubmit : null,
         ),
 
         // 編集モード時のみ削除ボタンを表示
         if (widget.existingGoal != null) ...[
           const SizedBox(height: SpacingConsts.m),
           TextButton.icon(
-            icon: Icon(Icons.delete_outline, color: ColorConsts.error),
+            icon: const Icon(Icons.delete_outline, color: ColorConsts.error),
             label: Text(
               'この目標を削除',
               style: TextConsts.body.copyWith(
@@ -580,26 +272,6 @@ class _GoalCreateModalContentState
     );
   }
 
-  // バリデーション
-  String? _validateTitle(String? value) {
-    if (value == null || value.isEmpty) return 'タイトルを入力してください';
-    if (value.length < 2) return 'タイトルは2文字以上で入力してください';
-    return null;
-  }
-
-  String? _validateAvoidMessage(String? value) {
-    if (value == null || value.isEmpty) return 'ネガティブ回避メッセージを入力してください';
-    if (value.length < 5) return '5文字以上で入力してください';
-    return null;
-  }
-
-  bool _isFormValid() {
-    return _title.isNotEmpty &&
-        _avoidMessage.isNotEmpty &&
-        _titleError == null &&
-        _avoidMessageError == null;
-  }
-
   Future<void> _handleSubmit() async {
     if (widget.existingGoal != null) {
       await _handleUpdateGoal();
@@ -609,7 +281,7 @@ class _GoalCreateModalContentState
   }
 
   Future<void> _handleCreateGoal() async {
-    if (!_isFormValid()) return;
+    if (!_formData.isValid) return;
 
     setState(() {
       _isLoading = true;
@@ -630,11 +302,11 @@ class _GoalCreateModalContentState
       // 目標を作成
       final newGoal = await createGoalUseCase(
         userId: currentUserId,
-        title: _title,
-        description: _description,
-        avoidMessage: _avoidMessage,
-        targetMinutes: _targetMinutes,
-        deadline: _deadline,
+        title: _formData.title,
+        description: _formData.description,
+        avoidMessage: _formData.avoidMessage,
+        targetMinutes: _formData.targetMinutes,
+        deadline: _formData.deadline,
       );
 
       if (mounted) {
@@ -644,7 +316,7 @@ class _GoalCreateModalContentState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              '目標「$_title」を作成しました！',
+              '目標「${_formData.title}」を作成しました！',
               style: const TextStyle(fontWeight: FontWeight.w500),
             ),
             backgroundColor: ColorConsts.success,
@@ -683,7 +355,7 @@ class _GoalCreateModalContentState
   }
 
   Future<void> _handleUpdateGoal() async {
-    if (!_isFormValid()) return;
+    if (!_formData.isValid) return;
 
     setState(() {
       _isLoading = true;
@@ -695,7 +367,7 @@ class _GoalCreateModalContentState
         '📝 更新対象目標: ${widget.existingGoal!.title} (ID: ${widget.existingGoal!.id})',
       );
       AppLogger.instance.i(
-        '📝 更新内容: タイトル=$_title, 説明=$_description, 回避メッセージ=$_avoidMessage, 目標時間=$_targetMinutes分',
+        '📝 更新内容: タイトル=${_formData.title}, 説明=${_formData.description}, 回避メッセージ=${_formData.avoidMessage}, 目標時間=${_formData.targetMinutes}分',
       );
 
       // UpdateGoalUseCaseを使用
@@ -706,10 +378,10 @@ class _GoalCreateModalContentState
       AppLogger.instance.i('🚀 UseCase.call()を呼び出します...');
       final updatedGoal = await updateGoalUseCase(
         originalGoal: widget.existingGoal!,
-        title: _title,
-        description: _description,
-        avoidMessage: _avoidMessage,
-        targetMinutes: _targetMinutes,
+        title: _formData.title,
+        description: _formData.description,
+        avoidMessage: _formData.avoidMessage,
+        targetMinutes: _formData.targetMinutes,
       );
 
       AppLogger.instance.i('✅ UseCase.call()が完了しました');
@@ -726,7 +398,7 @@ class _GoalCreateModalContentState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              '目標「$_title」を更新しました！',
+              '目標「${_formData.title}」を更新しました！',
               style: const TextStyle(fontWeight: FontWeight.w500),
             ),
             backgroundColor: ColorConsts.success,
@@ -885,196 +557,5 @@ class _GoalCreateModalContentState
         AppLogger.instance.i('🏁 目標削除処理が終了しました');
       }
     }
-  }
-}
-
-// タイムピッカーダイアログ
-class _TimePickerDialog extends StatefulWidget {
-  final int initialMinutes;
-  final Function(int) onTimeSelected;
-
-  const _TimePickerDialog({
-    required this.initialMinutes,
-    required this.onTimeSelected,
-  });
-
-  @override
-  State<_TimePickerDialog> createState() => _TimePickerDialogState();
-}
-
-class _TimePickerDialogState extends State<_TimePickerDialog> {
-  late int _selectedHours;
-  late int _selectedMinutes;
-  late FixedExtentScrollController _hoursController;
-  late FixedExtentScrollController _minutesController;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedHours = widget.initialMinutes ~/ 60;
-    _selectedMinutes = widget.initialMinutes % 60;
-    _hoursController = FixedExtentScrollController(initialItem: _selectedHours);
-    _minutesController = FixedExtentScrollController(
-      initialItem: _selectedMinutes,
-    );
-  }
-
-  @override
-  void dispose() {
-    _hoursController.dispose();
-    _minutesController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      child: Container(
-        padding: const EdgeInsets.all(SpacingConsts.l),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              '目標時間を設定',
-              style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: SpacingConsts.l),
-            Container(
-              height: 200,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // 時間ピッカー
-                  Container(
-                    width: 80,
-                    child: ListWheelScrollView.useDelegate(
-                      controller: _hoursController,
-                      itemExtent: 40,
-                      physics: const FixedExtentScrollPhysics(),
-                      onSelectedItemChanged: (index) {
-                        setState(() {
-                          _selectedHours = index;
-                        });
-                      },
-                      childDelegate: ListWheelChildBuilderDelegate(
-                        childCount: 24,
-                        builder: (context, index) {
-                          return Center(
-                            child: Text(
-                              '$index',
-                              style: TextConsts.h3.copyWith(
-                                color:
-                                    _selectedHours == index
-                                        ? ColorConsts.primary
-                                        : ColorConsts.textTertiary,
-                                fontWeight:
-                                    _selectedHours == index
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                  Text(
-                    '時間',
-                    style: TextConsts.body.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(width: SpacingConsts.l),
-                  // 分ピッカー
-                  Container(
-                    width: 80,
-                    child: ListWheelScrollView.useDelegate(
-                      controller: _minutesController,
-                      itemExtent: 40,
-                      physics: const FixedExtentScrollPhysics(),
-                      onSelectedItemChanged: (index) {
-                        setState(() {
-                          _selectedMinutes = index;
-                        });
-                      },
-                      childDelegate: ListWheelChildBuilderDelegate(
-                        childCount: 60,
-                        builder: (context, index) {
-                          return Center(
-                            child: Text(
-                              '$index',
-                              style: TextConsts.h3.copyWith(
-                                color:
-                                    _selectedMinutes == index
-                                        ? ColorConsts.primary
-                                        : ColorConsts.textTertiary,
-                                fontWeight:
-                                    _selectedMinutes == index
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                  Text(
-                    '分',
-                    style: TextConsts.body.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: SpacingConsts.l),
-            Row(
-              children: [
-                Expanded(
-                  child: TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: Text(
-                      'キャンセル',
-                      style: TextConsts.body.copyWith(
-                        color: ColorConsts.textSecondary,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: SpacingConsts.m),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      final totalMinutes =
-                          _selectedHours * 60 + _selectedMinutes;
-                      if (totalMinutes > 0) {
-                        widget.onTimeSelected(totalMinutes);
-                        Navigator.of(context).pop();
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: ColorConsts.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        vertical: SpacingConsts.m,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text(
-                      '決定',
-                      style: TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }
