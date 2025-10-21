@@ -322,7 +322,7 @@ class _GoalCreateModalContentState
       children: [
         Text(
           '総目標時間',
-          style: TextConsts.body.copyWith(
+          style: TextConsts.labelLarge.copyWith(
             color: ColorConsts.textSecondary,
             fontWeight: FontWeight.w600,
           ),
