@@ -252,8 +252,8 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '1日の目標時間',
-          style: TextConsts.body.copyWith(
+          '総目標時間',
+          style: TextConsts.labelLarge.copyWith(
             color: ColorConsts.textSecondary,
             fontWeight: FontWeight.w600,
           ),

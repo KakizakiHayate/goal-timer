@@ -180,6 +180,192 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
     );
   }
 
+  Widget _buildForm() {
+    return Column(
+      children: [
+        // 目標タイトル
+        CustomTextField(
+          labelText: '目標タイトル',
+          hintText: '例：英語の勉強、プログラミング学習',
+          initialValue: _title,
+          maxLength: 50,
+          prefixIcon: Icons.flag_outlined,
+          onChanged: (value) {
+            setState(() {
+              _title = value;
+              _titleError = _validateTitle(value);
+            });
+          },
+          validator: _validateTitle,
+          textInputAction: TextInputAction.next,
+        ),
+
+        const SizedBox(height: SpacingConsts.l),
+
+        // 目標の詳細説明
+        CustomTextField(
+          labelText: '目標の詳細（任意）',
+          hintText: '例：TOEICで800点を取るために毎日英単語を覚える',
+          initialValue: _description,
+          maxLength: 200,
+          maxLines: 3,
+          prefixIcon: Icons.description_outlined,
+          onChanged: (value) {
+            setState(() {
+              _description = value;
+            });
+          },
+          textInputAction: TextInputAction.next,
+        ),
+
+        const SizedBox(height: SpacingConsts.l),
+
+        // 目標時間設定
+        _buildTargetTimeSelector(),
+
+        const SizedBox(height: SpacingConsts.l),
+
+        // やらないとどうなる？
+        CustomTextField(
+          labelText: 'やらないとどうなる？',
+          hintText: '例：将来の仕事で困る、自分に失望する',
+          initialValue: _avoidMessage,
+          maxLength: 100,
+          maxLines: 2,
+          prefixIcon: Icons.warning_amber_outlined,
+          onChanged: (value) {
+            setState(() {
+              _avoidMessage = value;
+              _avoidMessageError = _validateAvoidMessage(value);
+            });
+          },
+          validator: _validateAvoidMessage,
+          textInputAction: TextInputAction.done,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTargetTimeSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '総目標時間',
+          style: TextConsts.labelLarge.copyWith(
+            color: ColorConsts.textSecondary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: SpacingConsts.s),
+        Container(
+          padding: const EdgeInsets.all(SpacingConsts.l),
+          decoration: BoxDecoration(
+            color: ColorConsts.backgroundSecondary,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: ColorConsts.border, width: 1.5),
+          ),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.schedule_outlined,
+                    color: ColorConsts.primary,
+                    size: 24,
+                  ),
+                  const SizedBox(width: SpacingConsts.s),
+                  Text(
+                    '${_targetMinutes ~/ 60}時間${_targetMinutes % 60}分',
+                    style: TextConsts.h3.copyWith(
+                      color: ColorConsts.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: SpacingConsts.m),
+              GestureDetector(
+                onTap: () async {
+                  await showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return _TimePickerDialog(
+                        initialMinutes: _targetMinutes,
+                        onTimeSelected: (minutes) {
+                          setState(() {
+                            _targetMinutes = minutes;
+                          });
+                        },
+                      );
+                    },
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: SpacingConsts.l,
+                    vertical: SpacingConsts.m,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: ColorConsts.primary, width: 1.5),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.access_time,
+                        color: ColorConsts.primary,
+                        size: 20,
+                      ),
+                      const SizedBox(width: SpacingConsts.s),
+                      Text(
+                        '時間を変更',
+                        style: TextConsts.body.copyWith(
+                          color: ColorConsts.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // バリデーションメソッド
+  String? _validateTitle(String? value) {
+    if (value == null || value.isEmpty) {
+      return '目標タイトルを入力してください';
+    }
+    if (value.length < 2) {
+      return '目標タイトルは2文字以上で入力してください';
+    }
+    return null;
+  }
+
+  String? _validateAvoidMessage(String? value) {
+    if (value == null || value.isEmpty) {
+      return '回避したいことを入力してください';
+    }
+    if (value.length < 5) {
+      return '回避したいことは5文字以上で入力してください';
+    }
+    return null;
+  }
+
+  bool get _isFormComplete {
+    return _title.isNotEmpty &&
+        _title.length >= 2 &&
+        _avoidMessage.isNotEmpty &&
+        _avoidMessage.length >= 5;
+  }
 
   Future<void> _onNextPressed() async {
     final onboardingViewModel = ref.read(onboardingViewModelProvider.notifier);
