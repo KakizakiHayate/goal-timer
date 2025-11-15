@@ -27,11 +27,6 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
   void initState() {
     super.initState();
     AppLogger.instance.i('TimerScreen: goalId=${widget.goalId}');
-
-    // 画面表示後にgoalIdを設定
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(timerViewModelProvider.notifier).setGoalId(widget.goalId);
-    });
   }
 
   @override

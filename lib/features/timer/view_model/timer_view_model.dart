@@ -37,7 +37,6 @@ class TimerState {
   final int currentSeconds;
   final TimerStatus status;
   final TimerMode mode;
-  final String? goalId;
   final bool isPomodoroBreak;
   final int pomodoroRound;
 
@@ -46,7 +45,6 @@ class TimerState {
     this.currentSeconds = 25 * 60,
     this.status = TimerStatus.initial,
     this.mode = TimerMode.countdown,
-    this.goalId,
     this.isPomodoroBreak = false,
     this.pomodoroRound = 1,
   });
@@ -56,7 +54,6 @@ class TimerState {
     int? currentSeconds,
     TimerStatus? status,
     TimerMode? mode,
-    String? goalId,
     bool? isPomodoroBreak,
     int? pomodoroRound,
   }) {
@@ -65,7 +62,6 @@ class TimerState {
       currentSeconds: currentSeconds ?? this.currentSeconds,
       status: status ?? this.status,
       mode: mode ?? this.mode,
-      goalId: goalId ?? this.goalId,
       isPomodoroBreak: isPomodoroBreak ?? this.isPomodoroBreak,
       pomodoroRound: pomodoroRound ?? this.pomodoroRound,
     );
@@ -78,8 +74,6 @@ class TimerState {
       return (currentSeconds / 3600).clamp(0.0, 1.0);
     }
   }
-
-  bool get hasGoal => goalId != null && goalId!.isNotEmpty;
 
   String formatTime() {
     final hours = currentSeconds ~/ 3600;
@@ -105,10 +99,6 @@ class TimerViewModel extends StateNotifier<TimerState> {
 
   TimerViewModel({required Ref ref})
       : super(TimerState());
-
-  void setGoalId(String goalId) {
-    state = state.copyWith(goalId: goalId);
-  }
 
   void setMode(TimerMode mode) {
     state = state.copyWith(mode: mode);
