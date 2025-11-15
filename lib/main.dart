@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'features/home/view/home_screen.dart';
+import 'core/utils/color_consts.dart';
 
 void main() {
   runApp(
-    const MyApp(),
+    const ProviderScope(
+      child: MyApp(),
+    ),
   );
 }
 
@@ -14,14 +19,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Goal Timer',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        colorScheme: ColorScheme.fromSeed(seedColor: ColorConsts.primary),
         useMaterial3: true,
       ),
-      home: const Scaffold(
-        body: Center(
-          child: Text('Goal Timer - MVVM移行中'),
-        ),
-      ),
+      home: const HomeScreen(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
