@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:goal_timer/backup/core/utils/time_utils.dart';
+import 'package:goal_timer/core/utils/time_utils.dart';
 
 part 'goals_model.freezed.dart';
 part 'goals_model.g.dart';
