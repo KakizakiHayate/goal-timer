@@ -79,7 +79,8 @@
       "Bash(git reset:*)",
       "mcp__serena__think_about_task_adherence",
       "Bash(gh pr comment:*)",
-      "Read(//Users/a8810/Documents/my-app/goal_timer_pr53/**)"
+      "Read(//Users/a8810/Documents/my-app/goal_timer_pr53/**)",
+      "Bash(xargs:*)"
     ],
     "deny": []
   },
