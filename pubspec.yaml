@@ -65,6 +65,7 @@ dependencies:
   
   # 課金機能（RevenueCat）
   purchases_flutter: ^8.1.2
+  get: 4.7.2
 
 dev_dependencies:
   flutter_test:
