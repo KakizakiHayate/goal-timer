@@ -19,6 +19,8 @@ analyzer:
     # Exclude generated files from analysis
     - "**.freezed.dart"
     - "**.g.dart"
+    # Exclude backup directory
+    - "lib/backup/**"
 
 linter:
   # The lint rules applied to this project can be customized in the
