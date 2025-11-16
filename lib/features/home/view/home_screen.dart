@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
 import '../../../core/utils/color_consts.dart';
 import '../../../core/utils/text_consts.dart';
 import '../../../core/utils/spacing_consts.dart';
@@ -12,14 +12,14 @@ import '../../settings/view/settings_screen.dart';
 import '../../timer/view/timer_screen.dart';
 
 /// ホーム画面
-class HomeScreen extends ConsumerStatefulWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen>
+class _HomeScreenState extends State<HomeScreen>
     with TickerProviderStateMixin {
   late TabController _tabController;
   late AnimationController _fabAnimationController;
@@ -29,6 +29,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    Get.put(HomeViewModel());
 
     _fabAnimationController = AnimationController(
       duration: AnimationConsts.medium,
@@ -49,6 +50,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   void dispose() {
     _tabController.dispose();
     _fabAnimationController.dispose();
+    Get.delete<HomeViewModel>();
     super.dispose();
   }
 
@@ -179,63 +181,66 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 }
 
-class _HomeTabContent extends ConsumerWidget {
+class _HomeTabContent extends StatelessWidget {
   const _HomeTabContent();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final homeState = ref.watch(homeViewModelProvider);
-    final homeViewModel = ref.read(homeViewModelProvider.notifier);
+  Widget build(BuildContext context) {
+    return GetBuilder<HomeViewModel>(
+      builder: (homeViewModel) {
+        final homeState = homeViewModel.state;
 
-    if (homeState.isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
-    }
+        if (homeState.isLoading) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
 
-    return CustomScrollView(
-      slivers: [
-        // ユーザー挨拶
-        SliverToBoxAdapter(
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(
-                SpacingConsts.l,
-                SpacingConsts.m,
-                SpacingConsts.l,
-                SpacingConsts.s,
-              ),
-              child: Text(
-                '${_getGreeting()}、ゲストユーザー さん',
-                style: TextConsts.h3.copyWith(
-                  color: ColorConsts.textPrimary,
-                  fontWeight: FontWeight.bold,
+        return CustomScrollView(
+          slivers: [
+            // ユーザー挨拶
+            SliverToBoxAdapter(
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    SpacingConsts.l,
+                    SpacingConsts.m,
+                    SpacingConsts.l,
+                    SpacingConsts.s,
+                  ),
+                  child: Text(
+                    '${_getGreeting()}、ゲストユーザー さん',
+                    style: TextConsts.h3.copyWith(
+                      color: ColorConsts.textPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-        ),
 
-        // セクションヘッダー
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: SpacingConsts.l,
-              vertical: SpacingConsts.m,
-            ),
-            child: Text(
-              'マイ目標',
-              style: TextConsts.h3.copyWith(
-                color: ColorConsts.textPrimary,
-                fontWeight: FontWeight.bold,
+            // セクションヘッダー
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: SpacingConsts.l,
+                  vertical: SpacingConsts.m,
+                ),
+                child: Text(
+                  'マイ目標',
+                  style: TextConsts.h3.copyWith(
+                    color: ColorConsts.textPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
-          ),
-        ),
 
-        // 目標リスト
-        _buildGoalList(homeViewModel),
-      ],
+            // 目標リスト
+            _buildGoalList(homeViewModel),
+          ],
+        );
+      },
     );
   }
 
@@ -326,71 +331,74 @@ class _HomeTabContent extends ConsumerWidget {
   }
 }
 
-class _TimerTabContent extends ConsumerWidget {
+class _TimerTabContent extends StatelessWidget {
   const _TimerTabContent();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final homeState = ref.watch(homeViewModelProvider);
-    final goals = homeState.goals;
+  Widget build(BuildContext context) {
+    return GetBuilder<HomeViewModel>(
+      builder: (homeViewModel) {
+        final goals = homeViewModel.state.goals;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('タイマー'),
-        backgroundColor: ColorConsts.primary,
-        foregroundColor: Colors.white,
-      ),
-      body: goals.isEmpty
-          ? Center(
-              child: Padding(
-                padding: const EdgeInsets.all(SpacingConsts.l),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.flag,
-                      size: 80,
-                      color: ColorConsts.textTertiary,
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('タイマー'),
+            backgroundColor: ColorConsts.primary,
+            foregroundColor: Colors.white,
+          ),
+          body: goals.isEmpty
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(SpacingConsts.l),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.flag,
+                          size: 80,
+                          color: ColorConsts.textTertiary,
+                        ),
+                        const SizedBox(height: SpacingConsts.l),
+                        Text(
+                          'タイマーを使用するには\n目標を作成してください',
+                          textAlign: TextAlign.center,
+                          style: TextConsts.h3.copyWith(
+                            color: ColorConsts.textSecondary,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: SpacingConsts.l),
-                    Text(
-                      'タイマーを使用するには\n目標を作成してください',
-                      textAlign: TextAlign.center,
-                      style: TextConsts.h3.copyWith(
-                        color: ColorConsts.textSecondary,
+                  ),
+                )
+              : Padding(
+                  padding: const EdgeInsets.all(SpacingConsts.l),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'タイマーを開始する目標を選択してください',
+                        style: TextConsts.h4.copyWith(
+                          color: ColorConsts.textPrimary,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: SpacingConsts.l),
+                      Expanded(
+                        child: ListView.separated(
+                          itemCount: goals.length,
+                          separatorBuilder: (context, index) =>
+                              const SizedBox(height: SpacingConsts.m),
+                          itemBuilder: (context, index) {
+                            final goal = goals[index];
+                            return _buildGoalTimerCard(context, goal);
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            )
-          : Padding(
-              padding: const EdgeInsets.all(SpacingConsts.l),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'タイマーを開始する目標を選択してください',
-                    style: TextConsts.h4.copyWith(
-                      color: ColorConsts.textPrimary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: SpacingConsts.l),
-                  Expanded(
-                    child: ListView.separated(
-                      itemCount: goals.length,
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(height: SpacingConsts.m),
-                      itemBuilder: (context, index) {
-                        final goal = goals[index];
-                        return _buildGoalTimerCard(context, goal);
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
+        );
+      },
     );
   }
 

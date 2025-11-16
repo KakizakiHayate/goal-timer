@@ -1,11 +1,5 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
 import '../../../core/models/goals/goals_model.dart';
-
-// Home画面の状態を管理するプロバイダー
-final homeViewModelProvider =
-    StateNotifierProvider<HomeViewModel, HomeState>((ref) {
-  return HomeViewModel();
-});
 
 // Home画面の状態
 class HomeState {
@@ -29,14 +23,20 @@ class HomeState {
 }
 
 // Home画面のViewModel
-class HomeViewModel extends StateNotifier<HomeState> {
-  HomeViewModel() : super(HomeState()) {
+class HomeViewModel extends GetxController {
+  // リアクティブな状態
+  final Rx<HomeState> _state = HomeState().obs;
+  HomeState get state => _state.value;
+
+  @override
+  void onInit() {
+    super.onInit();
     _loadDummyGoals();
   }
 
   // ダミーデータをロード
   void _loadDummyGoals() {
-    state = state.copyWith(isLoading: true);
+    _state.value = state.copyWith(isLoading: true);
 
     // 固定のダミー目標データ
     final dummyGoals = [
@@ -66,7 +66,7 @@ class HomeViewModel extends StateNotifier<HomeState> {
       ),
     ];
 
-    state = state.copyWith(
+    _state.value = state.copyWith(
       goals: dummyGoals,
       isLoading: false,
     );

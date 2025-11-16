@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
 import '../view_model/timer_view_model.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/color_consts.dart';
@@ -8,7 +8,7 @@ import '../../../core/utils/spacing_consts.dart';
 import '../../../core/widgets/circular_progress_indicator.dart' as custom;
 
 /// タイマー画面
-class TimerScreen extends ConsumerStatefulWidget {
+class TimerScreen extends StatefulWidget {
   final String goalId;
   final bool isTutorialMode;
 
@@ -19,86 +19,96 @@ class TimerScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<TimerScreen> createState() => _TimerScreenState();
+  State<TimerScreen> createState() => _TimerScreenState();
 }
 
-class _TimerScreenState extends ConsumerState<TimerScreen> {
+class _TimerScreenState extends State<TimerScreen> {
   @override
   void initState() {
     super.initState();
     AppLogger.instance.i('TimerScreen: goalId=${widget.goalId}');
+    Get.put(TimerViewModel());
+  }
+
+  @override
+  void dispose() {
+    Get.delete<TimerViewModel>();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final timerState = ref.watch(timerViewModelProvider);
-    final timerViewModel = ref.read(timerViewModelProvider.notifier);
+    return GetBuilder<TimerViewModel>(
+      builder: (timerViewModel) {
+        final timerState = timerViewModel.state;
 
-    return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [ColorConsts.primary, ColorConsts.primaryDark],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              // AppBar
-              Padding(
-                padding: const EdgeInsets.all(SpacingConsts.m),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                    Expanded(
-                      child: Text(
-                        'タイマー',
-                        style: TextConsts.h3.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    const SizedBox(width: 48), // AppBarの中央揃え用
-                  ],
-                ),
+        return Scaffold(
+          body: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [ColorConsts.primary, ColorConsts.primaryDark],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
               ),
-
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.all(SpacingConsts.l),
-                    child: Column(
+            ),
+            child: SafeArea(
+              child: Column(
+                children: [
+                  // AppBar
+                  Padding(
+                    padding: const EdgeInsets.all(SpacingConsts.m),
+                    child: Row(
                       children: [
-                        const SizedBox(height: SpacingConsts.l),
-
-                        // モード切り替え
-                        _buildModeSwitcher(timerState, timerViewModel),
-
-                        const SizedBox(height: SpacingConsts.xl),
-
-                        // タイマー表示
-                        _buildTimerDisplay(timerState),
-
-                        const SizedBox(height: SpacingConsts.xl),
-
-                        // コントロールボタン
-                        _buildControlButtons(timerState, timerViewModel),
+                        IconButton(
+                          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                        Expanded(
+                          child: Text(
+                            'タイマー',
+                            style: TextConsts.h3.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        const SizedBox(width: 48), // AppBarの中央揃え用
                       ],
                     ),
                   ),
-                ),
+
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.all(SpacingConsts.l),
+                        child: Column(
+                          children: [
+                            const SizedBox(height: SpacingConsts.l),
+
+                            // モード切り替え
+                            _buildModeSwitcher(timerState, timerViewModel),
+
+                            const SizedBox(height: SpacingConsts.xl),
+
+                            // タイマー表示
+                            _buildTimerDisplay(timerState),
+
+                            const SizedBox(height: SpacingConsts.xl),
+
+                            // コントロールボタン
+                            _buildControlButtons(timerState, timerViewModel),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
