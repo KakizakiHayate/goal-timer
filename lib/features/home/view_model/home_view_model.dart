@@ -24,9 +24,9 @@ class HomeState {
 
 // Home画面のViewModel
 class HomeViewModel extends GetxController {
-  // リアクティブな状態
-  final Rx<HomeState> _state = HomeState().obs;
-  HomeState get state => _state.value;
+  // 状態（Rxを使わない）
+  HomeState _state = HomeState();
+  HomeState get state => _state;
 
   @override
   void onInit() {
@@ -36,7 +36,8 @@ class HomeViewModel extends GetxController {
 
   // ダミーデータをロード
   void _loadDummyGoals() {
-    _state.value = state.copyWith(isLoading: true);
+    _state = state.copyWith(isLoading: true);
+    update(); // GetBuilderに通知
 
     // 固定のダミー目標データ
     final dummyGoals = [
@@ -66,10 +67,11 @@ class HomeViewModel extends GetxController {
       ),
     ];
 
-    _state.value = state.copyWith(
+    _state = state.copyWith(
       goals: dummyGoals,
       isLoading: false,
     );
+    update(); // GetBuilderに通知
   }
 
   // 目標リストを再読み込み

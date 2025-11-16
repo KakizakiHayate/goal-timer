@@ -82,31 +82,33 @@ class TimerViewModel extends GetxController {
   Timer? _timer;
   int _elapsedSeconds = 0;
 
-  // リアクティブな状態
-  final Rx<TimerState> _state = TimerState().obs;
-  TimerState get state => _state.value;
+  // 状態（Rxを使わない）
+  TimerState _state = TimerState();
+  TimerState get state => _state;
 
   void setMode(TimerMode mode) {
-    _state.value = state.copyWith(mode: mode);
+    _state = state.copyWith(mode: mode);
     if (mode == TimerMode.countdown) {
-      _state.value = state.copyWith(
+      _state = state.copyWith(
         totalSeconds: 25 * 60,
         currentSeconds: 25 * 60,
       );
     } else if (mode == TimerMode.countup) {
-      _state.value = state.copyWith(totalSeconds: 60 * 60, currentSeconds: 0);
+      _state = state.copyWith(totalSeconds: 60 * 60, currentSeconds: 0);
     } else if (mode == TimerMode.pomodoro) {
-      _state.value = state.copyWith(
+      _state = state.copyWith(
         totalSeconds: TimerConstants.pomodoroWorkMinutes * 60,
         currentSeconds: TimerConstants.pomodoroWorkMinutes * 60,
       );
     }
+    update(); // GetBuilderに通知
   }
 
   void startTimer() {
     if (state.status == TimerStatus.running) return;
 
-    _state.value = state.copyWith(status: TimerStatus.running);
+    _state = state.copyWith(status: TimerStatus.running);
+    update(); // GetBuilderに通知
     _elapsedSeconds = 0;
 
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
@@ -115,40 +117,45 @@ class TimerViewModel extends GetxController {
       if (state.mode == TimerMode.countdown ||
           state.mode == TimerMode.pomodoro) {
         if (state.currentSeconds > 0) {
-          _state.value = state.copyWith(
+          _state = state.copyWith(
             currentSeconds: state.currentSeconds - 1,
           );
+          update(); // GetBuilderに通知
         } else {
           completeTimer();
         }
       } else {
-        _state.value = state.copyWith(currentSeconds: state.currentSeconds + 1);
+        _state = state.copyWith(currentSeconds: state.currentSeconds + 1);
+        update(); // GetBuilderに通知
       }
     });
   }
 
   void pauseTimer() {
     _timer?.cancel();
-    _state.value = state.copyWith(status: TimerStatus.paused);
+    _state = state.copyWith(status: TimerStatus.paused);
+    update(); // GetBuilderに通知
     AppLogger.instance.i('タイマーを一時停止しました');
   }
 
   void resetTimer() {
     _timer?.cancel();
     _elapsedSeconds = 0;
-    _state.value = state.copyWith(
+    _state = state.copyWith(
       currentSeconds: state.totalSeconds,
       status: TimerStatus.initial,
     );
+    update(); // GetBuilderに通知
     AppLogger.instance.i('タイマーをリセットしました');
   }
 
   void completeTimer() {
     _timer?.cancel();
-    _state.value = state.copyWith(
+    _state = state.copyWith(
       status: TimerStatus.completed,
       currentSeconds: 0,
     );
+    update(); // GetBuilderに通知
     AppLogger.instance.i('タイマーが完了しました: $_elapsedSeconds秒');
   }
 
