@@ -47,10 +47,9 @@ class HomeViewModel extends GetxController {
         title: '英語学習',
         description: '毎日30分の英語学習',
         targetMinutes: 1500,
-        spentMinutes: 750,
         avoidMessage: '',
         deadline: DateTime.now().add(const Duration(days: 30)),
-        isCompleted: false,
+        completedAt: null,
         updatedAt: DateTime.now(),
       ),
       GoalsModel(
@@ -59,10 +58,9 @@ class HomeViewModel extends GetxController {
         title: 'プログラミング学習',
         description: 'Flutterアプリ開発',
         targetMinutes: 2000,
-        spentMinutes: 400,
         avoidMessage: 'スマホを見すぎない',
         deadline: DateTime.now().add(const Duration(days: 40)),
-        isCompleted: false,
+        completedAt: null,
         updatedAt: DateTime.now(),
       ),
     ];

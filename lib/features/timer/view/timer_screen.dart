@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:goal_timer/core/models/goals/goals_model.dart';
 import '../view_model/timer_view_model.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/color_consts.dart';
@@ -9,11 +10,13 @@ import '../../../core/widgets/circular_progress_indicator.dart' as custom;
 
 /// タイマー画面
 class TimerScreen extends StatefulWidget {
+  final GoalsModel goal;
   final String goalId;
   final bool isTutorialMode;
 
   const TimerScreen({
     super.key,
+    required this.goal,
     required this.goalId,
     this.isTutorialMode = false,
   });
@@ -27,7 +30,9 @@ class _TimerScreenState extends State<TimerScreen> {
   void initState() {
     super.initState();
     AppLogger.instance.i('TimerScreen: goalId=${widget.goalId}');
-    Get.put(TimerViewModel());
+
+    // ViewModel の生成と注入（goal全体を渡す）
+    Get.put(TimerViewModel(goal: widget.goal));
   }
 
   @override
@@ -60,7 +65,10 @@ class _TimerScreenState extends State<TimerScreen> {
                     child: Row(
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                          icon: const Icon(
+                            Icons.arrow_back_ios,
+                            color: Colors.white,
+                          ),
                           onPressed: () => Navigator.pop(context),
                         ),
                         Expanded(
@@ -112,7 +120,10 @@ class _TimerScreenState extends State<TimerScreen> {
     );
   }
 
-  Widget _buildModeSwitcher(TimerState timerState, TimerViewModel timerViewModel) {
+  Widget _buildModeSwitcher(
+    TimerState timerState,
+    TimerViewModel timerViewModel,
+  ) {
     return Container(
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
@@ -159,15 +170,16 @@ class _TimerScreenState extends State<TimerScreen> {
         decoration: BoxDecoration(
           color: isActive ? Colors.white : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: isActive
-              ? [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    offset: const Offset(0, 2),
-                    blurRadius: 8,
-                  ),
-                ]
-              : null,
+          boxShadow:
+              isActive
+                  ? [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      offset: const Offset(0, 2),
+                      blurRadius: 8,
+                    ),
+                  ]
+                  : null,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -197,9 +209,10 @@ class _TimerScreenState extends State<TimerScreen> {
     final timeText =
         '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
 
-    final progressValue = timerState.mode == TimerMode.countdown
-        ? timerState.currentSeconds / (25 * 60)
-        : (timerState.currentSeconds % (60 * 60)) / (60 * 60);
+    final progressValue =
+        timerState.mode == TimerMode.countdown
+            ? timerState.currentSeconds / (25 * 60)
+            : (timerState.currentSeconds % (60 * 60)) / (60 * 60);
 
     return Container(
       width: 280,
@@ -221,9 +234,10 @@ class _TimerScreenState extends State<TimerScreen> {
         children: [
           // プログレスリング
           custom.CircularProgressIndicator(
-            progress: timerState.mode == TimerMode.countdown
-                ? 1 - progressValue
-                : progressValue,
+            progress:
+                timerState.mode == TimerMode.countdown
+                    ? 1 - progressValue
+                    : progressValue,
             size: 260.0,
             strokeWidth: 12.0,
             progressColor: Colors.white,
@@ -268,7 +282,10 @@ class _TimerScreenState extends State<TimerScreen> {
     }
   }
 
-  Widget _buildControlButtons(TimerState timerState, TimerViewModel timerViewModel) {
+  Widget _buildControlButtons(
+    TimerState timerState,
+    TimerViewModel timerViewModel,
+  ) {
     final isRunning = timerState.status == TimerStatus.running;
 
     return Row(
@@ -299,15 +316,15 @@ class _TimerScreenState extends State<TimerScreen> {
         const SizedBox(width: SpacingConsts.l),
 
         // 完了ボタン（経過時間がある場合のみ表示）
-        timerState.currentSeconds > 0 && timerState.mode == TimerMode.countup
+        timerState.isShowTimerFinishButton
             ? _buildControlButton(
-                icon: Icons.check_rounded,
-                onPressed: () {
-                  // 完了処理（将来実装）
-                },
-                backgroundColor: Colors.green.withOpacity(0.2),
-                iconColor: Colors.white,
-              )
+              icon: Icons.check_rounded,
+              onPressed: () {
+                _showCompleteConfirmDialog(context, timerState, timerViewModel);
+              },
+              backgroundColor: Colors.green.withOpacity(0.2),
+              iconColor: Colors.white,
+            )
             : const SizedBox(width: 64), // ボタンサイズ分のスペースを確保
       ],
     );
@@ -363,6 +380,59 @@ class _TimerScreenState extends State<TimerScreen> {
         ),
         child: Icon(icon, color: ColorConsts.textPrimary, size: 40),
       ),
+    );
+  }
+
+  void _showCompleteConfirmDialog(
+    BuildContext context,
+    TimerState timerState,
+    TimerViewModel timerViewModel,
+  ) {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            title: Text(
+              '学習完了',
+              style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
+            ),
+            content: Text(
+              '5を学習完了として記録しますか？',
+              style: TextConsts.body.copyWith(color: ColorConsts.textSecondary),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  'キャンセル',
+                  style: TextConsts.body.copyWith(
+                    color: ColorConsts.textSecondary,
+                  ),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  await timerViewModel.onTappedTimerFinishButton();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: ColorConsts.success,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  '完了',
+                  style: TextConsts.body.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
     );
   }
 }

@@ -6,7 +6,6 @@ import '../../../core/utils/spacing_consts.dart';
 import '../../../core/utils/animation_consts.dart';
 import '../../../core/widgets/goal_card.dart';
 import '../../../core/widgets/pressable_card.dart';
-import '../../../core/models/goals/goals_model.dart';
 import '../view_model/home_view_model.dart';
 import '../../settings/view/settings_screen.dart';
 import '../../timer/view/timer_screen.dart';
@@ -304,8 +303,8 @@ class _HomeTabContent extends StatelessWidget {
 
           return GoalCard(
             title: goal.title,
-            description: goal.description.isNotEmpty ? goal.description : null,
-            progress: goal.getProgressRate(),
+            description: goal.description?.isNotEmpty == true ? goal.description : null,
+            progress: 0.0, // TODO: 進捗率の計算ロジックを実装
             streakDays: 0,
             avoidMessage:
                 goal.avoidMessage.isNotEmpty ? goal.avoidMessage : null,
@@ -316,7 +315,10 @@ class _HomeTabContent extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => TimerScreen(goalId: goal.id),
+                  builder: (context) => TimerScreen(
+                    goal: goal,
+                    goalId: goal.id
+                  ),
                 ),
               );
             },
@@ -408,7 +410,7 @@ class _TimerTabContent extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => TimerScreen(goalId: goal.id),
+            builder: (context) => TimerScreen(goal: goal, goalId: goal.id),
           ),
         );
       },
@@ -456,7 +458,7 @@ class _TimerTabContent extends StatelessWidget {
 
             // 進捗率
             Text(
-              '${(goal.getProgressRate() * 100).toInt()}%',
+              '0%', // TODO: 進捗率の計算ロジックを実装
               style: TextConsts.body.copyWith(
                 color: ColorConsts.primary,
                 fontWeight: FontWeight.bold,
