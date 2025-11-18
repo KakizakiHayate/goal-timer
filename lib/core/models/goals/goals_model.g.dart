@@ -9,35 +9,37 @@ part of 'goals_model.dart';
 _$GoalsModelImpl _$$GoalsModelImplFromJson(Map<String, dynamic> json) =>
     _$GoalsModelImpl(
       id: json['id'] as String,
-      userId: json['userId'] as String,
+      userId: json['user_id'] as String?,
       title: json['title'] as String,
-      description: json['description'] as String,
+      description: json['description'] as String?,
       deadline: DateTime.parse(json['deadline'] as String),
-      isCompleted: json['isCompleted'] as bool,
-      avoidMessage: json['avoidMessage'] as String,
-      targetMinutes: json['targetMinutes'] as int,
-      spentMinutes: json['spentMinutes'] as int,
-      updatedAt: json['updatedAt'] == null
+      avoidMessage: json['avoid_message'] as String,
+      updatedAt: json['updated_at'] == null
           ? null
-          : DateTime.parse(json['updatedAt'] as String),
-      syncUpdatedAt: json['syncUpdatedAt'] == null
+          : DateTime.parse(json['updated_at'] as String),
+      syncUpdatedAt: json['sync_updated_at'] == null
           ? null
-          : DateTime.parse(json['syncUpdatedAt'] as String),
-      isSynced: json['isSynced'] as bool? ?? false,
+          : DateTime.parse(json['sync_updated_at'] as String),
+      targetMinutes: json['target_minutes'] as int,
+      createdAt: json['created_at'] == null
+          ? null
+          : DateTime.parse(json['created_at'] as String),
+      completedAt: json['completed_at'] == null
+          ? null
+          : DateTime.parse(json['completed_at'] as String),
     );
 
 Map<String, dynamic> _$$GoalsModelImplToJson(_$GoalsModelImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'userId': instance.userId,
+      'user_id': instance.userId,
       'title': instance.title,
       'description': instance.description,
       'deadline': instance.deadline.toIso8601String(),
-      'isCompleted': instance.isCompleted,
-      'avoidMessage': instance.avoidMessage,
-      'targetMinutes': instance.targetMinutes,
-      'spentMinutes': instance.spentMinutes,
-      'updatedAt': instance.updatedAt?.toIso8601String(),
-      'syncUpdatedAt': instance.syncUpdatedAt?.toIso8601String(),
-      'isSynced': instance.isSynced,
+      'avoid_message': instance.avoidMessage,
+      'updated_at': instance.updatedAt?.toIso8601String(),
+      'sync_updated_at': instance.syncUpdatedAt?.toIso8601String(),
+      'target_minutes': instance.targetMinutes,
+      'created_at': instance.createdAt?.toIso8601String(),
+      'completed_at': instance.completedAt?.toIso8601String(),
     };

@@ -20,41 +20,24 @@ GoalsModel _$GoalsModelFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$GoalsModel {
-  /// 各目標のid管理
   String get id => throw _privateConstructorUsedError;
-
-  /// users tableのidとリレーション
-  String get userId => throw _privateConstructorUsedError;
-
-  /// 目標名
+  @JsonKey(name: 'user_id')
+  String? get userId => throw _privateConstructorUsedError; // nullable
   String get title => throw _privateConstructorUsedError;
-
-  /// 目標の詳細説明
-  String get description => throw _privateConstructorUsedError;
-
-  /// いつまで(日付)に達成するのか？
+  String? get description => throw _privateConstructorUsedError; // nullable
   DateTime get deadline => throw _privateConstructorUsedError;
-
-  /// 目標を完了したかの判定フラグ
-  bool get isCompleted => throw _privateConstructorUsedError;
-
-  /// 目標達成しなかったら自分に課すこと
+  @JsonKey(name: 'avoid_message')
   String get avoidMessage => throw _privateConstructorUsedError;
-
-  /// 目標達成に必要な時間（分単位）
-  int get targetMinutes => throw _privateConstructorUsedError;
-
-  /// 実際に使った時間（分単位）
-  int get spentMinutes => throw _privateConstructorUsedError;
-
-  /// 最終更新日時
+  @JsonKey(name: 'updated_at')
   DateTime? get updatedAt => throw _privateConstructorUsedError;
-
-  /// 同期時の最終更新日時（同期処理で使用）
+  @JsonKey(name: 'sync_updated_at')
   DateTime? get syncUpdatedAt => throw _privateConstructorUsedError;
-
-  /// 同期状態（ローカルDBのみで使用）
-  bool get isSynced => throw _privateConstructorUsedError;
+  @JsonKey(name: 'target_minutes')
+  int get targetMinutes => throw _privateConstructorUsedError;
+  @JsonKey(name: 'created_at')
+  DateTime? get createdAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'completed_at')
+  DateTime? get completedAt => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -70,17 +53,16 @@ abstract class $GoalsModelCopyWith<$Res> {
   @useResult
   $Res call(
       {String id,
-      String userId,
+      @JsonKey(name: 'user_id') String? userId,
       String title,
-      String description,
+      String? description,
       DateTime deadline,
-      bool isCompleted,
-      String avoidMessage,
-      int targetMinutes,
-      int spentMinutes,
-      DateTime? updatedAt,
-      DateTime? syncUpdatedAt,
-      bool isSynced});
+      @JsonKey(name: 'avoid_message') String avoidMessage,
+      @JsonKey(name: 'updated_at') DateTime? updatedAt,
+      @JsonKey(name: 'sync_updated_at') DateTime? syncUpdatedAt,
+      @JsonKey(name: 'target_minutes') int targetMinutes,
+      @JsonKey(name: 'created_at') DateTime? createdAt,
+      @JsonKey(name: 'completed_at') DateTime? completedAt});
 }
 
 /// @nodoc
@@ -97,55 +79,42 @@ class _$GoalsModelCopyWithImpl<$Res, $Val extends GoalsModel>
   @override
   $Res call({
     Object? id = null,
-    Object? userId = null,
+    Object? userId = freezed,
     Object? title = null,
-    Object? description = null,
+    Object? description = freezed,
     Object? deadline = null,
-    Object? isCompleted = null,
     Object? avoidMessage = null,
-    Object? targetMinutes = null,
-    Object? spentMinutes = null,
     Object? updatedAt = freezed,
     Object? syncUpdatedAt = freezed,
-    Object? isSynced = null,
+    Object? targetMinutes = null,
+    Object? createdAt = freezed,
+    Object? completedAt = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
-      userId: null == userId
+      userId: freezed == userId
           ? _value.userId
           : userId // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       title: null == title
           ? _value.title
           : title // ignore: cast_nullable_to_non_nullable
               as String,
-      description: null == description
+      description: freezed == description
           ? _value.description
           : description // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       deadline: null == deadline
           ? _value.deadline
           : deadline // ignore: cast_nullable_to_non_nullable
               as DateTime,
-      isCompleted: null == isCompleted
-          ? _value.isCompleted
-          : isCompleted // ignore: cast_nullable_to_non_nullable
-              as bool,
       avoidMessage: null == avoidMessage
           ? _value.avoidMessage
           : avoidMessage // ignore: cast_nullable_to_non_nullable
               as String,
-      targetMinutes: null == targetMinutes
-          ? _value.targetMinutes
-          : targetMinutes // ignore: cast_nullable_to_non_nullable
-              as int,
-      spentMinutes: null == spentMinutes
-          ? _value.spentMinutes
-          : spentMinutes // ignore: cast_nullable_to_non_nullable
-              as int,
       updatedAt: freezed == updatedAt
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
@@ -154,10 +123,18 @@ class _$GoalsModelCopyWithImpl<$Res, $Val extends GoalsModel>
           ? _value.syncUpdatedAt
           : syncUpdatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime?,
-      isSynced: null == isSynced
-          ? _value.isSynced
-          : isSynced // ignore: cast_nullable_to_non_nullable
-              as bool,
+      targetMinutes: null == targetMinutes
+          ? _value.targetMinutes
+          : targetMinutes // ignore: cast_nullable_to_non_nullable
+              as int,
+      createdAt: freezed == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      completedAt: freezed == completedAt
+          ? _value.completedAt
+          : completedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
     ) as $Val);
   }
 }
@@ -172,17 +149,16 @@ abstract class _$$GoalsModelImplCopyWith<$Res>
   @useResult
   $Res call(
       {String id,
-      String userId,
+      @JsonKey(name: 'user_id') String? userId,
       String title,
-      String description,
+      String? description,
       DateTime deadline,
-      bool isCompleted,
-      String avoidMessage,
-      int targetMinutes,
-      int spentMinutes,
-      DateTime? updatedAt,
-      DateTime? syncUpdatedAt,
-      bool isSynced});
+      @JsonKey(name: 'avoid_message') String avoidMessage,
+      @JsonKey(name: 'updated_at') DateTime? updatedAt,
+      @JsonKey(name: 'sync_updated_at') DateTime? syncUpdatedAt,
+      @JsonKey(name: 'target_minutes') int targetMinutes,
+      @JsonKey(name: 'created_at') DateTime? createdAt,
+      @JsonKey(name: 'completed_at') DateTime? completedAt});
 }
 
 /// @nodoc
@@ -197,55 +173,42 @@ class __$$GoalsModelImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? id = null,
-    Object? userId = null,
+    Object? userId = freezed,
     Object? title = null,
-    Object? description = null,
+    Object? description = freezed,
     Object? deadline = null,
-    Object? isCompleted = null,
     Object? avoidMessage = null,
-    Object? targetMinutes = null,
-    Object? spentMinutes = null,
     Object? updatedAt = freezed,
     Object? syncUpdatedAt = freezed,
-    Object? isSynced = null,
+    Object? targetMinutes = null,
+    Object? createdAt = freezed,
+    Object? completedAt = freezed,
   }) {
     return _then(_$GoalsModelImpl(
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
-      userId: null == userId
+      userId: freezed == userId
           ? _value.userId
           : userId // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       title: null == title
           ? _value.title
           : title // ignore: cast_nullable_to_non_nullable
               as String,
-      description: null == description
+      description: freezed == description
           ? _value.description
           : description // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       deadline: null == deadline
           ? _value.deadline
           : deadline // ignore: cast_nullable_to_non_nullable
               as DateTime,
-      isCompleted: null == isCompleted
-          ? _value.isCompleted
-          : isCompleted // ignore: cast_nullable_to_non_nullable
-              as bool,
       avoidMessage: null == avoidMessage
           ? _value.avoidMessage
           : avoidMessage // ignore: cast_nullable_to_non_nullable
               as String,
-      targetMinutes: null == targetMinutes
-          ? _value.targetMinutes
-          : targetMinutes // ignore: cast_nullable_to_non_nullable
-              as int,
-      spentMinutes: null == spentMinutes
-          ? _value.spentMinutes
-          : spentMinutes // ignore: cast_nullable_to_non_nullable
-              as int,
       updatedAt: freezed == updatedAt
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
@@ -254,88 +217,77 @@ class __$$GoalsModelImplCopyWithImpl<$Res>
           ? _value.syncUpdatedAt
           : syncUpdatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime?,
-      isSynced: null == isSynced
-          ? _value.isSynced
-          : isSynced // ignore: cast_nullable_to_non_nullable
-              as bool,
+      targetMinutes: null == targetMinutes
+          ? _value.targetMinutes
+          : targetMinutes // ignore: cast_nullable_to_non_nullable
+              as int,
+      createdAt: freezed == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      completedAt: freezed == completedAt
+          ? _value.completedAt
+          : completedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
     ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$GoalsModelImpl implements _GoalsModel {
+class _$GoalsModelImpl extends _GoalsModel {
   const _$GoalsModelImpl(
       {required this.id,
-      required this.userId,
+      @JsonKey(name: 'user_id') this.userId,
       required this.title,
-      required this.description,
+      this.description,
       required this.deadline,
-      required this.isCompleted,
-      required this.avoidMessage,
-      required this.targetMinutes,
-      required this.spentMinutes,
-      this.updatedAt = null,
-      this.syncUpdatedAt = null,
-      this.isSynced = false});
+      @JsonKey(name: 'avoid_message') required this.avoidMessage,
+      @JsonKey(name: 'updated_at') this.updatedAt,
+      @JsonKey(name: 'sync_updated_at') this.syncUpdatedAt,
+      @JsonKey(name: 'target_minutes') required this.targetMinutes,
+      @JsonKey(name: 'created_at') this.createdAt,
+      @JsonKey(name: 'completed_at') this.completedAt})
+      : super._();
 
   factory _$GoalsModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$GoalsModelImplFromJson(json);
 
-  /// 各目標のid管理
   @override
   final String id;
-
-  /// users tableのidとリレーション
   @override
-  final String userId;
-
-  /// 目標名
+  @JsonKey(name: 'user_id')
+  final String? userId;
+// nullable
   @override
   final String title;
-
-  /// 目標の詳細説明
   @override
-  final String description;
-
-  /// いつまで(日付)に達成するのか？
+  final String? description;
+// nullable
   @override
   final DateTime deadline;
-
-  /// 目標を完了したかの判定フラグ
   @override
-  final bool isCompleted;
-
-  /// 目標達成しなかったら自分に課すこと
-  @override
+  @JsonKey(name: 'avoid_message')
   final String avoidMessage;
-
-  /// 目標達成に必要な時間（分単位）
   @override
-  final int targetMinutes;
-
-  /// 実際に使った時間（分単位）
-  @override
-  final int spentMinutes;
-
-  /// 最終更新日時
-  @override
-  @JsonKey()
+  @JsonKey(name: 'updated_at')
   final DateTime? updatedAt;
-
-  /// 同期時の最終更新日時（同期処理で使用）
   @override
-  @JsonKey()
+  @JsonKey(name: 'sync_updated_at')
   final DateTime? syncUpdatedAt;
-
-  /// 同期状態（ローカルDBのみで使用）
   @override
-  @JsonKey()
-  final bool isSynced;
+  @JsonKey(name: 'target_minutes')
+  final int targetMinutes;
+  @override
+  @JsonKey(name: 'created_at')
+  final DateTime? createdAt;
+  @override
+  @JsonKey(name: 'completed_at')
+  final DateTime? completedAt;
 
   @override
   String toString() {
-    return 'GoalsModel(id: $id, userId: $userId, title: $title, description: $description, deadline: $deadline, isCompleted: $isCompleted, avoidMessage: $avoidMessage, targetMinutes: $targetMinutes, spentMinutes: $spentMinutes, updatedAt: $updatedAt, syncUpdatedAt: $syncUpdatedAt, isSynced: $isSynced)';
+    return 'GoalsModel(id: $id, userId: $userId, title: $title, description: $description, deadline: $deadline, avoidMessage: $avoidMessage, updatedAt: $updatedAt, syncUpdatedAt: $syncUpdatedAt, targetMinutes: $targetMinutes, createdAt: $createdAt, completedAt: $completedAt)';
   }
 
   @override
@@ -350,20 +302,18 @@ class _$GoalsModelImpl implements _GoalsModel {
                 other.description == description) &&
             (identical(other.deadline, deadline) ||
                 other.deadline == deadline) &&
-            (identical(other.isCompleted, isCompleted) ||
-                other.isCompleted == isCompleted) &&
             (identical(other.avoidMessage, avoidMessage) ||
                 other.avoidMessage == avoidMessage) &&
-            (identical(other.targetMinutes, targetMinutes) ||
-                other.targetMinutes == targetMinutes) &&
-            (identical(other.spentMinutes, spentMinutes) ||
-                other.spentMinutes == spentMinutes) &&
             (identical(other.updatedAt, updatedAt) ||
                 other.updatedAt == updatedAt) &&
             (identical(other.syncUpdatedAt, syncUpdatedAt) ||
                 other.syncUpdatedAt == syncUpdatedAt) &&
-            (identical(other.isSynced, isSynced) ||
-                other.isSynced == isSynced));
+            (identical(other.targetMinutes, targetMinutes) ||
+                other.targetMinutes == targetMinutes) &&
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt) &&
+            (identical(other.completedAt, completedAt) ||
+                other.completedAt == completedAt));
   }
 
   @JsonKey(ignore: true)
@@ -375,13 +325,12 @@ class _$GoalsModelImpl implements _GoalsModel {
       title,
       description,
       deadline,
-      isCompleted,
       avoidMessage,
-      targetMinutes,
-      spentMinutes,
       updatedAt,
       syncUpdatedAt,
-      isSynced);
+      targetMinutes,
+      createdAt,
+      completedAt);
 
   @JsonKey(ignore: true)
   @override
@@ -397,72 +346,54 @@ class _$GoalsModelImpl implements _GoalsModel {
   }
 }
 
-abstract class _GoalsModel implements GoalsModel {
+abstract class _GoalsModel extends GoalsModel {
   const factory _GoalsModel(
-      {required final String id,
-      required final String userId,
-      required final String title,
-      required final String description,
-      required final DateTime deadline,
-      required final bool isCompleted,
-      required final String avoidMessage,
-      required final int targetMinutes,
-      required final int spentMinutes,
-      final DateTime? updatedAt,
-      final DateTime? syncUpdatedAt,
-      final bool isSynced}) = _$GoalsModelImpl;
+          {required final String id,
+          @JsonKey(name: 'user_id') final String? userId,
+          required final String title,
+          final String? description,
+          required final DateTime deadline,
+          @JsonKey(name: 'avoid_message') required final String avoidMessage,
+          @JsonKey(name: 'updated_at') final DateTime? updatedAt,
+          @JsonKey(name: 'sync_updated_at') final DateTime? syncUpdatedAt,
+          @JsonKey(name: 'target_minutes') required final int targetMinutes,
+          @JsonKey(name: 'created_at') final DateTime? createdAt,
+          @JsonKey(name: 'completed_at') final DateTime? completedAt}) =
+      _$GoalsModelImpl;
+  const _GoalsModel._() : super._();
 
   factory _GoalsModel.fromJson(Map<String, dynamic> json) =
       _$GoalsModelImpl.fromJson;
 
   @override
-
-  /// 各目標のid管理
   String get id;
   @override
-
-  /// users tableのidとリレーション
-  String get userId;
-  @override
-
-  /// 目標名
+  @JsonKey(name: 'user_id')
+  String? get userId;
+  @override // nullable
   String get title;
   @override
-
-  /// 目標の詳細説明
-  String get description;
-  @override
-
-  /// いつまで(日付)に達成するのか？
+  String? get description;
+  @override // nullable
   DateTime get deadline;
   @override
-
-  /// 目標を完了したかの判定フラグ
-  bool get isCompleted;
-  @override
-
-  /// 目標達成しなかったら自分に課すこと
+  @JsonKey(name: 'avoid_message')
   String get avoidMessage;
   @override
-
-  /// 目標達成に必要な時間（分単位）
-  int get targetMinutes;
-  @override
-
-  /// 実際に使った時間（分単位）
-  int get spentMinutes;
-  @override
-
-  /// 最終更新日時
+  @JsonKey(name: 'updated_at')
   DateTime? get updatedAt;
   @override
-
-  /// 同期時の最終更新日時（同期処理で使用）
+  @JsonKey(name: 'sync_updated_at')
   DateTime? get syncUpdatedAt;
   @override
-
-  /// 同期状態（ローカルDBのみで使用）
-  bool get isSynced;
+  @JsonKey(name: 'target_minutes')
+  int get targetMinutes;
+  @override
+  @JsonKey(name: 'created_at')
+  DateTime? get createdAt;
+  @override
+  @JsonKey(name: 'completed_at')
+  DateTime? get completedAt;
   @override
   @JsonKey(ignore: true)
   _$$GoalsModelImplCopyWith<_$GoalsModelImpl> get copyWith =>
