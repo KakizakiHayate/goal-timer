@@ -320,6 +320,7 @@ class _TimerScreenState extends State<TimerScreen> {
             ? _buildControlButton(
               icon: Icons.check_rounded,
               onPressed: () {
+                timerViewModel.pauseTimer();
                 _showCompleteConfirmDialog(context, timerState, timerViewModel);
               },
               backgroundColor: Colors.green.withOpacity(0.2),

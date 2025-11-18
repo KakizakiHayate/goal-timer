@@ -184,7 +184,7 @@ class TimerViewModel extends GetxController {
   Future<void> onTappedTimerFinishButton() async {
     try {
       // バリデーション
-      if (state.goalId == null || state.goalId!.isEmpty) {
+      if (goal.id.isEmpty) {
         AppLogger.instance.e('目標IDが設定されていません');
         return;
       }
@@ -196,26 +196,33 @@ class TimerViewModel extends GetxController {
 
       AppLogger.instance.i('学習記録を保存します: $_elapsedSeconds秒');
 
-      // 学習ログを作成
-      final today = DateTime.now();
-      final log = StudyDailyLogsModel(
-        id: const Uuid().v4(),
-        goalId: state.goalId!,
-        studyDate: DateTime(today.year, today.month, today.day),
-        totalSeconds: _elapsedSeconds,
-        createdAt: today,
-      );
-
-      // DataSource経由で保存
-      await _datasource.saveLog(log, isSynced: false);
-
-      AppLogger.instance.i('学習記録を保存しました: ${log.id}');
+      await saveStudyDailyLogData();
 
       // 🔍 デバッグ: 保存後に全ログを表示
       await debugPrintAllLogs();
 
       // タイマーをリセット
       resetTimer();
+    } catch (error, stackTrace) {
+      AppLogger.instance.e('学習記録の保存に失敗しました', error, stackTrace);
+      rethrow;
+    }
+  }
+
+  Future<void> saveStudyDailyLogData() async {
+    try {
+      final today = DateTime.now();
+      final log = StudyDailyLogsModel(
+        id: const Uuid().v4(),
+        goalId: goal.id,
+        studyDate: DateTime(today.year, today.month, today.day),
+        totalSeconds: _elapsedSeconds,
+      );
+
+      // DataSource経由で保存
+      await _datasource.saveLog(log, isSynced: false);
+
+      AppLogger.instance.i('学習記録を保存しました: ${log.id}');
     } catch (error, stackTrace) {
       AppLogger.instance.e('学習記録の保存に失敗しました', error, stackTrace);
       rethrow;
