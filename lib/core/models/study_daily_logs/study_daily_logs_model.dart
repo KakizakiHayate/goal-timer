@@ -1,5 +1,4 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:goal_timer/core/utils/time_utils.dart';
 
 part 'study_daily_logs_model.freezed.dart';
 part 'study_daily_logs_model.g.dart';

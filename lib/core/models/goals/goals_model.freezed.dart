@@ -22,7 +22,7 @@ GoalsModel _$GoalsModelFromJson(Map<String, dynamic> json) {
 mixin _$GoalsModel {
   String get id => throw _privateConstructorUsedError;
   @JsonKey(name: 'user_id')
-  String? get userId => throw _privateConstructorUsedError; // nullable
+  String? get userId => throw _privateConstructorUsedError;
   String get title => throw _privateConstructorUsedError;
   String? get description => throw _privateConstructorUsedError; // nullable
   DateTime get deadline => throw _privateConstructorUsedError;
@@ -258,7 +258,6 @@ class _$GoalsModelImpl extends _GoalsModel {
   @override
   @JsonKey(name: 'user_id')
   final String? userId;
-// nullable
   @override
   final String title;
   @override
@@ -370,7 +369,7 @@ abstract class _GoalsModel extends GoalsModel {
   @override
   @JsonKey(name: 'user_id')
   String? get userId;
-  @override // nullable
+  @override
   String get title;
   @override
   String? get description;

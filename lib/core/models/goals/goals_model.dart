@@ -1,5 +1,4 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:goal_timer/core/utils/time_utils.dart';
 
 part 'goals_model.freezed.dart';
 part 'goals_model.g.dart';
@@ -10,7 +9,7 @@ class GoalsModel with _$GoalsModel {
 
   const factory GoalsModel({
     required String id,
-    @JsonKey(name: 'user_id') String? userId, // nullable
+    @JsonKey(name: 'user_id') String? userId,
     required String title,
     String? description, // nullable
     required DateTime deadline,
