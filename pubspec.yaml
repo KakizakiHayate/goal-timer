@@ -86,6 +86,8 @@ dev_dependencies:
   # アプリアイコン生成
   flutter_launcher_icons: ^0.13.1
   mocktail: ^1.0.4
+  
+  sqflite_common_ffi: ^2.3.0
 
 flutter:
   uses-material-design: true
