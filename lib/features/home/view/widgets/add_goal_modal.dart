@@ -98,8 +98,8 @@ class _AddGoalModalState extends State<AddGoalModal> {
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('目標の追加に失敗しました: $error'),
+          const SnackBar(
+            content: Text('目標の追加に失敗しました'),
             backgroundColor: ColorConsts.error,
           ),
         );

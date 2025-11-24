@@ -32,11 +32,11 @@ class LocalGoalsDatasource {
   }
 
   /// 目標を保存
-  Future<void> saveGoal(GoalsModel goal, {bool isSynced = false}) async {
+  Future<void> saveGoal(GoalsModel goal) async {
     final db = await _database.database;
     await db.insert(
       DatabaseConsts.tableGoals,
-      _modelToMap(goal, isSynced: isSynced),
+      _modelToMap(goal),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
@@ -44,9 +44,11 @@ class LocalGoalsDatasource {
   /// 目標を更新
   Future<void> updateGoal(GoalsModel goal) async {
     final db = await _database.database;
+    // 更新時は未同期状態にする
+    final goalToUpdate = goal.copyWith(syncUpdatedAt: null);
     await db.update(
       DatabaseConsts.tableGoals,
-      _modelToMap(goal, isSynced: false),
+      _modelToMap(goalToUpdate),
       where: '${DatabaseConsts.columnId} = ?',
       whereArgs: [goal.id],
     );
@@ -110,10 +112,7 @@ class LocalGoalsDatasource {
   }
 
   // ヘルパーメソッド: Model → Map
-  Map<String, dynamic> _modelToMap(
-    GoalsModel model, {
-    required bool isSynced,
-  }) {
+  Map<String, dynamic> _modelToMap(GoalsModel model) {
     return {
       DatabaseConsts.columnId: model.id,
       DatabaseConsts.columnUserId: model.userId,
@@ -125,8 +124,7 @@ class LocalGoalsDatasource {
       DatabaseConsts.columnCompletedAt: model.completedAt?.toIso8601String(),
       DatabaseConsts.columnCreatedAt: model.createdAt?.toIso8601String(),
       DatabaseConsts.columnUpdatedAt: model.updatedAt?.toIso8601String(),
-      DatabaseConsts.columnSyncUpdatedAt:
-          isSynced ? DateTime.now().toIso8601String() : null,
+      DatabaseConsts.columnSyncUpdatedAt: model.syncUpdatedAt?.toIso8601String(),
     };
   }
 }

@@ -19,11 +19,16 @@ void main() {
     // テスト用のデータベースインスタンスを作成
     database = AppDatabase();
     datasource = LocalGoalsDatasource(database: database);
+
+    // テストごとにgoalsテーブルをクリア
+    final db = await database.database;
+    await db.delete('goals');
   });
 
   tearDown(() async {
     // テスト後にデータベースをクローズ
-    await database.close();
+    // Note: AppDatabaseはシングルトンのため、テスト間でクローズしない
+    // await database.close();
   });
 
   group('LocalGoalsDatasource Tests', () {
@@ -42,7 +47,7 @@ void main() {
       );
 
       // Act
-      await datasource.saveGoal(goal, isSynced: false);
+      await datasource.saveGoal(goal);
 
       // Assert
       final savedGoal = await datasource.fetchGoalById(goal.id);
@@ -81,8 +86,8 @@ void main() {
       );
 
       // Act
-      await datasource.saveGoal(goal1, isSynced: false);
-      await datasource.saveGoal(goal2, isSynced: false);
+      await datasource.saveGoal(goal1);
+      await datasource.saveGoal(goal2);
 
       // Assert
       final goals = await datasource.fetchAllGoals();
@@ -105,7 +110,7 @@ void main() {
         updatedAt: DateTime.now(),
       );
 
-      await datasource.saveGoal(goal, isSynced: false);
+      await datasource.saveGoal(goal);
 
       // Act
       final updatedGoal = goal.copyWith(
@@ -135,7 +140,7 @@ void main() {
         updatedAt: DateTime.now(),
       );
 
-      await datasource.saveGoal(goal, isSynced: false);
+      await datasource.saveGoal(goal);
 
       // Act
       await datasource.deleteGoal(goal.id);
@@ -171,8 +176,8 @@ void main() {
         updatedAt: DateTime.now(),
       );
 
-      await datasource.saveGoal(syncedGoal, isSynced: true);
-      await datasource.saveGoal(unsyncedGoal, isSynced: false);
+      await datasource.saveGoal(syncedGoal.copyWith(syncUpdatedAt: DateTime.now()));
+      await datasource.saveGoal(unsyncedGoal);
 
       // Act
       final unsyncedGoals = await datasource.fetchUnsyncedGoals();
@@ -196,7 +201,7 @@ void main() {
         updatedAt: DateTime.now(),
       );
 
-      await datasource.saveGoal(goal, isSynced: false);
+      await datasource.saveGoal(goal);
 
       // Act
       await datasource.markAsSynced(goal.id);
@@ -221,7 +226,7 @@ void main() {
       );
 
       // Act
-      await datasource.saveGoal(goal, isSynced: false);
+      await datasource.saveGoal(goal);
 
       // Assert
       final savedGoal = await datasource.fetchGoalById(goal.id);

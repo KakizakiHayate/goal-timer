@@ -87,14 +87,17 @@ class HomeViewModel extends GetxController {
         updatedAt: now,
       );
 
-      await _datasource.saveGoal(goal, isSynced: false);
+      await _datasource.saveGoal(goal);
       AppLogger.instance.i('目標を保存しました: ${goal.id}');
 
       // 目標リストを再読み込み
       await loadGoals();
 
-      // デバッグ: 保存後に全目標を表示
-      await debugPrintAllGoals();
+      // デバッグ: 保存後に全目標を表示（デバッグビルドのみ）
+      assert(() {
+        debugPrintAllGoals();
+        return true;
+      }());
     } catch (error, stackTrace) {
       AppLogger.instance.e('目標の保存に失敗しました', error, stackTrace);
       rethrow;
