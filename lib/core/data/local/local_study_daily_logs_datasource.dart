@@ -31,11 +31,11 @@ class LocalStudyDailyLogsDatasource {
   }
 
   /// 学習ログを保存
-  Future<void> saveLog(StudyDailyLogsModel log, {bool isSynced = false}) async {
+  Future<void> saveLog(StudyDailyLogsModel log) async {
     final db = await _database.database;
     await db.insert(
       DatabaseConsts.tableStudyDailyLogs,
-      _modelToMap(log, isSynced: isSynced),
+      _modelToMap(log),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
@@ -74,29 +74,30 @@ class LocalStudyDailyLogsDatasource {
 
   // ヘルパーメソッド: Map → Model
   StudyDailyLogsModel _mapToModel(Map<String, dynamic> map) {
-    return StudyDailyLogsModel(
-      id: map[DatabaseConsts.columnId] as String,
-      goalId: map[DatabaseConsts.columnGoalId] as String,
-      studyDate: DateTime.parse(map[DatabaseConsts.columnStudyDate] as String),
-      totalSeconds: map[DatabaseConsts.columnTotalSeconds] as int,
-      userId: map[DatabaseConsts.columnUserId] as String?,
-      createdAt: map[DatabaseConsts.columnCreatedAt] != null
-          ? DateTime.parse(map[DatabaseConsts.columnCreatedAt] as String)
-          : null,
-      updatedAt: map[DatabaseConsts.columnUpdatedAt] != null
-          ? DateTime.parse(map[DatabaseConsts.columnUpdatedAt] as String)
-          : null,
-      syncUpdatedAt: map[DatabaseConsts.columnSyncUpdatedAt] != null
-          ? DateTime.parse(map[DatabaseConsts.columnSyncUpdatedAt] as String)
-          : null,
-    );
+    try {
+      return StudyDailyLogsModel(
+        id: map[DatabaseConsts.columnId] as String,
+        goalId: map[DatabaseConsts.columnGoalId] as String,
+        studyDate: DateTime.parse(map[DatabaseConsts.columnStudyDate] as String),
+        totalSeconds: map[DatabaseConsts.columnTotalSeconds] as int,
+        userId: map[DatabaseConsts.columnUserId] as String?,
+        createdAt: map[DatabaseConsts.columnCreatedAt] != null
+            ? DateTime.parse(map[DatabaseConsts.columnCreatedAt] as String)
+            : null,
+        updatedAt: map[DatabaseConsts.columnUpdatedAt] != null
+            ? DateTime.parse(map[DatabaseConsts.columnUpdatedAt] as String)
+            : null,
+        syncUpdatedAt: map[DatabaseConsts.columnSyncUpdatedAt] != null
+            ? DateTime.parse(map[DatabaseConsts.columnSyncUpdatedAt] as String)
+            : null,
+      );
+    } catch (e) {
+      throw Exception('データベースからのモデル変換に失敗しました: $e');
+    }
   }
 
   // ヘルパーメソッド: Model → Map
-  Map<String, dynamic> _modelToMap(
-    StudyDailyLogsModel model, {
-    required bool isSynced,
-  }) {
+  Map<String, dynamic> _modelToMap(StudyDailyLogsModel model) {
     return {
       DatabaseConsts.columnId: model.id,
       DatabaseConsts.columnGoalId: model.goalId,
@@ -105,8 +106,7 @@ class LocalStudyDailyLogsDatasource {
       DatabaseConsts.columnUserId: model.userId,
       DatabaseConsts.columnCreatedAt: model.createdAt?.toIso8601String(),
       DatabaseConsts.columnUpdatedAt: model.updatedAt?.toIso8601String(),
-      DatabaseConsts.columnSyncUpdatedAt:
-          isSynced ? DateTime.now().toIso8601String() : null,
+      DatabaseConsts.columnSyncUpdatedAt: model.syncUpdatedAt?.toIso8601String(),
     };
   }
 }

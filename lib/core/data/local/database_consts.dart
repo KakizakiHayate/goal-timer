@@ -2,7 +2,7 @@
 class DatabaseConsts {
   // データベース名
   static const String databaseName = 'goal_timer.db';
-  static const int databaseVersion = 1;
+  static const int databaseVersion = 2;
 
   // テーブル名
   static const String tableStudyDailyLogs = 'study_daily_logs';
