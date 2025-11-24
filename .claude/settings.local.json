@@ -82,7 +82,8 @@
       "Read(//Users/a8810/Documents/my-app/goal_timer_pr53/**)",
       "Bash(xargs:*)",
       "Bash(tree:*)",
-      "Bash(gh api:*)"
+      "Bash(gh api:*)",
+      "WebFetch(domain:zenn.dev)"
     ],
     "deny": []
   },
