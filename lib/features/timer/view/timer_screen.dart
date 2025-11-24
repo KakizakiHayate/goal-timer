@@ -43,81 +43,80 @@ class _TimerScreenState extends State<TimerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<TimerViewModel>(
-      builder: (timerViewModel) {
-        final timerState = timerViewModel.state;
+    return Obx(() {
+      final timerViewModel = Get.find<TimerViewModel>();
+      final timerState = timerViewModel.state;
 
-        return Scaffold(
-          body: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [ColorConsts.primary, ColorConsts.primaryDark],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
+      return Scaffold(
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [ColorConsts.primary, ColorConsts.primaryDark],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
             ),
-            child: SafeArea(
-              child: Column(
-                children: [
-                  // AppBar
-                  Padding(
-                    padding: const EdgeInsets.all(SpacingConsts.m),
-                    child: Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(
-                            Icons.arrow_back_ios,
+          ),
+          child: SafeArea(
+            child: Column(
+              children: [
+                // AppBar
+                Padding(
+                  padding: const EdgeInsets.all(SpacingConsts.m),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(
+                          Icons.arrow_back_ios,
+                          color: Colors.white,
+                        ),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                      Expanded(
+                        child: Text(
+                          'タイマー',
+                          style: TextConsts.h3.copyWith(
                             color: Colors.white,
+                            fontWeight: FontWeight.bold,
                           ),
-                          onPressed: () => Navigator.pop(context),
+                          textAlign: TextAlign.center,
                         ),
-                        Expanded(
-                          child: Text(
-                            'タイマー',
-                            style: TextConsts.h3.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        const SizedBox(width: 48), // AppBarの中央揃え用
-                      ],
-                    ),
+                      ),
+                      const SizedBox(width: 48), // AppBarの中央揃え用
+                    ],
                   ),
+                ),
 
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: Padding(
-                        padding: const EdgeInsets.all(SpacingConsts.l),
-                        child: Column(
-                          children: [
-                            const SizedBox(height: SpacingConsts.l),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.all(SpacingConsts.l),
+                      child: Column(
+                        children: [
+                          const SizedBox(height: SpacingConsts.l),
 
-                            // モード切り替え
-                            _buildModeSwitcher(timerState, timerViewModel),
+                          // モード切り替え
+                          _buildModeSwitcher(timerState, timerViewModel),
 
-                            const SizedBox(height: SpacingConsts.xl),
+                          const SizedBox(height: SpacingConsts.xl),
 
-                            // タイマー表示
-                            _buildTimerDisplay(timerState),
+                          // タイマー表示
+                          _buildTimerDisplay(timerState),
 
-                            const SizedBox(height: SpacingConsts.xl),
+                          const SizedBox(height: SpacingConsts.xl),
 
-                            // コントロールボタン
-                            _buildControlButtons(timerState, timerViewModel),
-                          ],
-                        ),
+                          // コントロールボタン
+                          _buildControlButtons(timerState, timerViewModel),
+                        ],
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-        );
-      },
-    );
+        ),
+      );
+    });
   }
 
   Widget _buildModeSwitcher(
@@ -401,7 +400,7 @@ class _TimerScreenState extends State<TimerScreen> {
               style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
             ),
             content: Text(
-              '5を学習完了として記録しますか？',
+              '5を学習完了として記録しますか？', // TODO: 動的な数字に変更する
               style: TextConsts.body.copyWith(color: ColorConsts.textSecondary),
             ),
             actions: [

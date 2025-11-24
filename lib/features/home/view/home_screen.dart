@@ -9,6 +9,7 @@ import '../../../core/widgets/pressable_card.dart';
 import '../view_model/home_view_model.dart';
 import '../../settings/view/settings_screen.dart';
 import '../../timer/view/timer_screen.dart';
+import '../../goal_detail/presentation/screens/goal_create_modal.dart';
 
 /// ホーム画面
 class HomeScreen extends StatefulWidget {
@@ -152,7 +153,7 @@ class _HomeScreenState extends State<HomeScreen>
               ],
             ),
             child: FloatingActionButton(
-              onPressed: _showComingSoonDialog,
+              onPressed: () => GoalCreateModal.show(context),
               backgroundColor: Colors.transparent,
               elevation: 0,
               child: const Icon(Icons.add, color: Colors.white, size: 32),
@@ -163,21 +164,6 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  void _showComingSoonDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('目標追加'),
-        content: const Text('この機能は開発中です。\n今後のアップデートをお待ちください。'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class _HomeTabContent extends StatelessWidget {
