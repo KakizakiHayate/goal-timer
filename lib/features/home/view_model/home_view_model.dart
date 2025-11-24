@@ -47,7 +47,7 @@ class HomeViewModel extends GetxController {
         title: '英語学習',
         description: '毎日30分の英語学習',
         targetMinutes: 1500,
-        avoidMessage: '',
+        avoidMessage: '怠けてしまう',
         deadline: DateTime.now().add(const Duration(days: 30)),
         completedAt: null,
         updatedAt: DateTime.now(),

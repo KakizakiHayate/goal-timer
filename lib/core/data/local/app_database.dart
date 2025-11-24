@@ -19,17 +19,12 @@ class AppDatabase {
     final databasesPath = await getDatabasesPath();
     final path = join(databasesPath, DatabaseConsts.databaseName);
 
-    final db = await openDatabase(
+    return openDatabase(
       path,
       version: DatabaseConsts.databaseVersion,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
-
-    // データベースを開いた後、必ずテーブル存在チェックを行う
-    await _ensureTablesExist(db);
-
-    return db;
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -37,8 +32,13 @@ class AppDatabase {
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    // テーブルが存在しない場合は作成
-    await _ensureTablesExist(db);
+    // 将来のマイグレーションロジックをここに記述
+    // 例: if (oldVersion < 2) {
+    //   await db.execute('ALTER TABLE ${DatabaseConsts.tableGoals} ADD COLUMN new_column TEXT');
+    // }
+
+    // 念のため、テーブルが存在しない場合に作成
+    await _createTables(db);
   }
 
   /// テーブルを作成
@@ -86,22 +86,6 @@ class AppDatabase {
         ${DatabaseConsts.columnSyncUpdatedAt} TEXT
       )
     ''');
-  }
-
-  /// テーブルが存在するか確認し、存在しない場合は作成
-  Future<void> _ensureTablesExist(Database db) async {
-    // テーブル一覧を取得
-    final tables = await db.rawQuery(
-      "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
-    );
-    final tableNames = tables.map((table) => table['name'] as String).toSet();
-
-    // 必要なテーブルが存在しない場合は作成
-    if (!tableNames.contains(DatabaseConsts.tableStudyDailyLogs) ||
-        !tableNames.contains(DatabaseConsts.tableGoals) ||
-        !tableNames.contains(DatabaseConsts.tableUsers)) {
-      await _createTables(db);
-    }
   }
 
   Future<void> close() async {

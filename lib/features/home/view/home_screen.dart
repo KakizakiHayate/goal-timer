@@ -433,7 +433,7 @@ class _TimerTabContent extends StatelessWidget {
                   ),
                   const SizedBox(height: SpacingConsts.xs),
                   Text(
-                    '${goal.spentMinutes}分 / ${goal.targetMinutes}分',
+                    '0分 / ${goal.targetMinutes}分', // TODO: 学習ログから消費時間を計算する
                     style: TextConsts.body.copyWith(
                       color: ColorConsts.textSecondary,
                     ),

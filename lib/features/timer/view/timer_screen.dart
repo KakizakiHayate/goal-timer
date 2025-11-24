@@ -400,7 +400,7 @@ class _TimerScreenState extends State<TimerScreen> {
               style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
             ),
             content: Text(
-              '5を学習完了として記録しますか？', // TODO: 動的な数字に変更する
+              '${timerViewModel.state.currentSeconds}秒を学習完了として記録しますか？',
               style: TextConsts.body.copyWith(color: ColorConsts.textSecondary),
             ),
             actions: [

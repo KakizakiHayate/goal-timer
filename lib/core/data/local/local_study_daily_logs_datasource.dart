@@ -74,22 +74,26 @@ class LocalStudyDailyLogsDatasource {
 
   // ヘルパーメソッド: Map → Model
   StudyDailyLogsModel _mapToModel(Map<String, dynamic> map) {
-    return StudyDailyLogsModel(
-      id: map[DatabaseConsts.columnId] as String,
-      goalId: map[DatabaseConsts.columnGoalId] as String,
-      studyDate: DateTime.parse(map[DatabaseConsts.columnStudyDate] as String),
-      totalSeconds: map[DatabaseConsts.columnTotalSeconds] as int,
-      userId: map[DatabaseConsts.columnUserId] as String?,
-      createdAt: map[DatabaseConsts.columnCreatedAt] != null
-          ? DateTime.parse(map[DatabaseConsts.columnCreatedAt] as String)
-          : null,
-      updatedAt: map[DatabaseConsts.columnUpdatedAt] != null
-          ? DateTime.parse(map[DatabaseConsts.columnUpdatedAt] as String)
-          : null,
-      syncUpdatedAt: map[DatabaseConsts.columnSyncUpdatedAt] != null
-          ? DateTime.parse(map[DatabaseConsts.columnSyncUpdatedAt] as String)
-          : null,
-    );
+    try {
+      return StudyDailyLogsModel(
+        id: map[DatabaseConsts.columnId] as String,
+        goalId: map[DatabaseConsts.columnGoalId] as String,
+        studyDate: DateTime.parse(map[DatabaseConsts.columnStudyDate] as String),
+        totalSeconds: map[DatabaseConsts.columnTotalSeconds] as int,
+        userId: map[DatabaseConsts.columnUserId] as String?,
+        createdAt: map[DatabaseConsts.columnCreatedAt] != null
+            ? DateTime.parse(map[DatabaseConsts.columnCreatedAt] as String)
+            : null,
+        updatedAt: map[DatabaseConsts.columnUpdatedAt] != null
+            ? DateTime.parse(map[DatabaseConsts.columnUpdatedAt] as String)
+            : null,
+        syncUpdatedAt: map[DatabaseConsts.columnSyncUpdatedAt] != null
+            ? DateTime.parse(map[DatabaseConsts.columnSyncUpdatedAt] as String)
+            : null,
+      );
+    } catch (e) {
+      throw Exception('データベースからのモデル変換に失敗しました: $e');
+    }
   }
 
   // ヘルパーメソッド: Model → Map
