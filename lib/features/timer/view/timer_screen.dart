@@ -210,7 +210,7 @@ class _TimerScreenState extends State<TimerScreen> {
 
     final progressValue =
         timerState.mode == TimerMode.countdown
-            ? timerState.currentSeconds / (25 * 60)
+            ? timerState.currentSeconds / timerState.totalSeconds
             : (timerState.currentSeconds % (60 * 60)) / (60 * 60);
 
     return Container(
@@ -400,7 +400,7 @@ class _TimerScreenState extends State<TimerScreen> {
               style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
             ),
             content: Text(
-              '${timerViewModel.state.currentSeconds}秒を学習完了として記録しますか？',
+              '${timerViewModel.elapsedSeconds}秒を学習完了として記録しますか？',
               style: TextConsts.body.copyWith(color: ColorConsts.textSecondary),
             ),
             actions: [

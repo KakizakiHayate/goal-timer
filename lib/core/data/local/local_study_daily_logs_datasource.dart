@@ -31,11 +31,11 @@ class LocalStudyDailyLogsDatasource {
   }
 
   /// 学習ログを保存
-  Future<void> saveLog(StudyDailyLogsModel log, {bool isSynced = false}) async {
+  Future<void> saveLog(StudyDailyLogsModel log) async {
     final db = await _database.database;
     await db.insert(
       DatabaseConsts.tableStudyDailyLogs,
-      _modelToMap(log, isSynced: isSynced),
+      _modelToMap(log),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
@@ -97,10 +97,7 @@ class LocalStudyDailyLogsDatasource {
   }
 
   // ヘルパーメソッド: Model → Map
-  Map<String, dynamic> _modelToMap(
-    StudyDailyLogsModel model, {
-    required bool isSynced,
-  }) {
+  Map<String, dynamic> _modelToMap(StudyDailyLogsModel model) {
     return {
       DatabaseConsts.columnId: model.id,
       DatabaseConsts.columnGoalId: model.goalId,
@@ -109,8 +106,7 @@ class LocalStudyDailyLogsDatasource {
       DatabaseConsts.columnUserId: model.userId,
       DatabaseConsts.columnCreatedAt: model.createdAt?.toIso8601String(),
       DatabaseConsts.columnUpdatedAt: model.updatedAt?.toIso8601String(),
-      DatabaseConsts.columnSyncUpdatedAt:
-          isSynced ? DateTime.now().toIso8601String() : null,
+      DatabaseConsts.columnSyncUpdatedAt: model.syncUpdatedAt?.toIso8601String(),
     };
   }
 }

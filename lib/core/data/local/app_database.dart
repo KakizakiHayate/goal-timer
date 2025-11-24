@@ -32,13 +32,13 @@ class AppDatabase {
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    // 将来のマイグレーションロジックをここに記述
-    // 例: if (oldVersion < 2) {
-    //   await db.execute('ALTER TABLE ${DatabaseConsts.tableGoals} ADD COLUMN new_column TEXT');
-    // }
-
-    // 念のため、テーブルが存在しない場合に作成
-    await _createTables(db);
+    // バージョンごとのマイグレーションロジック
+    if (oldVersion < 2) {
+      // バージョン2へのマイグレーション例（将来の拡張用）
+      // await db.execute('ALTER TABLE ${DatabaseConsts.tableGoals} ADD COLUMN new_column TEXT');
+    }
+    // 今後のバージョンアップ時は、ここに追加のマイグレーションロジックを記述
+    // if (oldVersion < 3) { ... }
   }
 
   /// テーブルを作成

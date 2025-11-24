@@ -241,7 +241,7 @@ class GoalCard extends StatelessWidget {
     if (progress >= 1.0) {
       return ColorConsts.success;
     } else if (progress >= 0.8) {
-      return const Color(0xFF10B981);
+      return ColorConsts.success;
     } else if (progress >= 0.5) {
       return ColorConsts.primary;
     } else if (progress >= 0.3) {

@@ -98,6 +98,9 @@ class TimerViewModel extends GetxController {
   final Rx<TimerState> _state = TimerState().obs;
   TimerState get state => _state.value;
 
+  // 経過時間を取得するgetter
+  int get elapsedSeconds => _elapsedSeconds;
+
   // ✅ コンストラクタでgoalを受け取る
   TimerViewModel({required this.goal}) {
     // ✅ DIコンテナから取得
@@ -134,7 +137,6 @@ class TimerViewModel extends GetxController {
     if (state.status == TimerStatus.running) return;
 
     _state.value = state.copyWith(status: TimerStatus.running);
-    _elapsedSeconds = 0;
 
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       _elapsedSeconds++;
@@ -218,7 +220,7 @@ class TimerViewModel extends GetxController {
       );
 
       // DataSource経由で保存
-      await _datasource.saveLog(log, isSynced: false);
+      await _datasource.saveLog(log);
 
       AppLogger.instance.i('学習記録を保存しました: ${log.id}');
     } catch (error, stackTrace) {

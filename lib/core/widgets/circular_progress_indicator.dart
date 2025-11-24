@@ -168,7 +168,7 @@ class _CustomCircularProgressIndicatorState extends State<CustomCircularProgress
     if (progress >= 1.0) {
       return ColorConsts.success;
     } else if (progress >= 0.8) {
-      return const Color(0xFF10B981); // 緑系
+      return ColorConsts.success; // 緑系
     } else if (progress >= 0.5) {
       return ColorConsts.primary;
     } else if (progress >= 0.3) {
