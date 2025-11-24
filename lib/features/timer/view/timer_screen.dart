@@ -232,7 +232,7 @@ class _TimerScreenState extends State<TimerScreen> {
         alignment: Alignment.center,
         children: [
           // プログレスリング
-          custom.CircularProgressIndicator(
+          custom.CustomCircularProgressIndicator(
             progress:
                 timerState.mode == TimerMode.countdown
                     ? 1 - progressValue

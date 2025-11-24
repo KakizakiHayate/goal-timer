@@ -9,7 +9,7 @@ import '../../../core/widgets/pressable_card.dart';
 import '../view_model/home_view_model.dart';
 import '../../settings/view/settings_screen.dart';
 import '../../timer/view/timer_screen.dart';
-import '../../goal_detail/presentation/screens/goal_create_modal.dart';
+import 'widgets/add_goal_modal.dart';
 
 /// ホーム画面
 class HomeScreen extends StatefulWidget {
@@ -153,7 +153,7 @@ class _HomeScreenState extends State<HomeScreen>
               ],
             ),
             child: FloatingActionButton(
-              onPressed: () => GoalCreateModal.show(context),
+              onPressed: _showAddGoalModal,
               backgroundColor: Colors.transparent,
               elevation: 0,
               child: const Icon(Icons.add, color: Colors.white, size: 32),
@@ -164,6 +164,19 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
+  void _showAddGoalModal() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return FractionallySizedBox(
+          heightFactor: 0.95,
+          child: const AddGoalModal(),
+        );
+      },
+    );
+  }
 }
 
 class _HomeTabContent extends StatelessWidget {

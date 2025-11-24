@@ -34,8 +34,11 @@ class AppDatabase {
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     // バージョンごとのマイグレーションロジック
     if (oldVersion < 2) {
-      // バージョン2へのマイグレーション例（将来の拡張用）
-      // await db.execute('ALTER TABLE ${DatabaseConsts.tableGoals} ADD COLUMN new_column TEXT');
+      // バージョン2へのマイグレーション: goalsテーブルにcompleted_atカラムを追加
+      await db.execute('''
+        ALTER TABLE ${DatabaseConsts.tableGoals}
+        ADD COLUMN ${DatabaseConsts.columnCompletedAt} TEXT
+      ''');
     }
     // 今後のバージョンアップ時は、ここに追加のマイグレーションロジックを記述
     // if (oldVersion < 3) { ... }
