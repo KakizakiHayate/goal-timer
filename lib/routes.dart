@@ -4,6 +4,7 @@ import 'package:goal_timer/core/utils/platform_route.dart';
 import 'package:goal_timer/features/home/presentation/screens/home_screen.dart';
 import 'package:goal_timer/features/goal_detail_setting/presentation/screens/goal_detail_setting_screen.dart';
 import 'package:goal_timer/core/utils/route_names.dart';
+import 'package:goal_timer/features/goal_timer/domain/entities/goal.dart';
 
 // TODO: 中規模・大規模になってきたら疎結合にすることを考える
 
@@ -14,8 +15,9 @@ Route<dynamic> generateRoute(
     case RouteNames.home:
       return platformPageRoute(builder: (context) => const HomeScreen());
     case RouteNames.goalDetailSetting:
+      final goal = settings.arguments as Goal?;
       return platformPageRoute(
-          builder: (context) => const GoalDetailSettingScreen());
+          builder: (context) => GoalDetailSettingScreen(goal: goal));
     default:
       return platformPageRoute(
         builder: (context) => const Scaffold(

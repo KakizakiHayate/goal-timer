@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:goal_timer/features/home/presentation/widgets/goal_list_cell_widget.dart';
+import 'package:goal_timer/features/goal_timer/presentation/viewmodels/goal_view_model.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Material(
       color: Colors.white,
       child: SafeArea(
@@ -96,18 +98,35 @@ class DeadlineFilter extends StatelessWidget {
 
 // MARK: - MainContents
 
-class MainContents extends StatelessWidget {
+class MainContents extends ConsumerWidget {
   const MainContents({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final goalsAsync = ref.watch(goalListProvider);
+
     return Expanded(
-      child: ListView.builder( 
-        shrinkWrap: true,
-        itemCount: 20,
-        itemBuilder: (context, index) {
-          return const GoalListCellWidget();
+      child: goalsAsync.when(
+        data: (goals) {
+          if (goals.isEmpty) {
+            return const Center(
+              child: Text('ゴールがありません'),
+            );
+          }
+          return ListView.builder(
+            shrinkWrap: true,
+            itemCount: goals.length,
+            itemBuilder: (context, index) {
+              return GoalListCellWidget(goal: goals[index]);
+            },
+          );
         },
+        loading: () => const Center(
+          child: CircularProgressIndicator(),
+        ),
+        error: (error, stack) => Center(
+          child: Text('エラーが発生しました: $error'),
+        ),
       ),
     );
   }
