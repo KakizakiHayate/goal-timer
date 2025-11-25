@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../core/models/goals/goals_model.dart';
 import '../../../core/utils/color_consts.dart';
 import '../../../core/utils/text_consts.dart';
 import '../../../core/utils/spacing_consts.dart';
@@ -403,7 +404,7 @@ class _TimerTabContent extends StatelessWidget {
     );
   }
 
-  Widget _buildGoalTimerCard(BuildContext context, goal) {
+  Widget _buildGoalTimerCard(BuildContext context, GoalsModel goal) {
     return PressableCard(
       onTap: () {
         Navigator.push(
