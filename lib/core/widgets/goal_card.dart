@@ -261,7 +261,72 @@ class GoalCard extends StatelessWidget {
   }
 }
 
-class _ActionButton extends StatefulWidget {
+/// タップ時のスケールアニメーションを提供する共通ラッパーウィジェット
+/// _ActionButtonと_IconButtonで共通のアニメーションロジックを再利用
+class _AnimatedTapWrapper extends StatefulWidget {
+  final Widget child;
+  final VoidCallback? onTap;
+
+  const _AnimatedTapWrapper({
+    required this.child,
+    this.onTap,
+  });
+
+  @override
+  State<_AnimatedTapWrapper> createState() => _AnimatedTapWrapperState();
+}
+
+class _AnimatedTapWrapperState extends State<_AnimatedTapWrapper>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: AnimationConsts.buttonTap,
+      vsync: this,
+    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: AnimationConsts.scalePressed,
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: AnimationConsts.sharpCurve,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _scaleAnimation,
+      builder: (context, child) {
+        return Transform.scale(
+          scale: _scaleAnimation.value,
+          child: GestureDetector(
+            onTapDown: (_) => _animationController.forward(),
+            onTapUp: (_) => _animationController.reverse(),
+            onTapCancel: () => _animationController.reverse(),
+            onTap: widget.onTap,
+            child: widget.child,
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// アクションボタン（タイマー開始、編集など）
+class _ActionButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final Color backgroundColor;
@@ -278,93 +343,48 @@ class _ActionButton extends StatefulWidget {
   });
 
   @override
-  State<_ActionButton> createState() => _ActionButtonState();
-}
-
-class _ActionButtonState extends State<_ActionButton>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _scaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      duration: AnimationConsts.buttonTap,
-      vsync: this,
-    );
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: AnimationConsts.scalePressed,
-    ).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: AnimationConsts.sharpCurve,
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _scaleAnimation,
-      builder: (context, child) {
-        return Transform.scale(
-          scale: _scaleAnimation.value,
-          child: GestureDetector(
-            onTapDown: (_) => _animationController.forward(),
-            onTapUp: (_) => _animationController.reverse(),
-            onTapCancel: () => _animationController.reverse(),
-            onTap: widget.onTap,
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: SpacingConsts.m,
-                vertical: SpacingConsts.s,
-              ),
-              decoration: BoxDecoration(
-                color: widget.backgroundColor,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow:
-                    widget.backgroundColor == ColorConsts.primary
-                        ? [
-                          BoxShadow(
-                            color: ColorConsts.primary.withOpacity(0.3),
-                            offset: const Offset(0, 2),
-                            blurRadius: 8,
-                          ),
-                        ]
-                        : null,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(widget.icon, color: widget.textColor, size: 18),
-                  const SizedBox(width: SpacingConsts.xs),
-                  Text(
-                    widget.label,
-                    style: TextConsts.caption.copyWith(
-                      color: widget.textColor,
-                      fontWeight: FontWeight.w600,
-                    ),
+    return _AnimatedTapWrapper(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: SpacingConsts.m,
+          vertical: SpacingConsts.s,
+        ),
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: backgroundColor == ColorConsts.primary
+              ? [
+                  BoxShadow(
+                    color: ColorConsts.primary.withOpacity(0.3),
+                    offset: const Offset(0, 2),
+                    blurRadius: 8,
                   ),
-                ],
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: textColor, size: 18),
+            const SizedBox(width: SpacingConsts.xs),
+            Text(
+              label,
+              style: TextConsts.caption.copyWith(
+                color: textColor,
+                fontWeight: FontWeight.w600,
               ),
             ),
-          ),
-        );
-      },
+          ],
+        ),
+      ),
     );
   }
 }
 
 /// アイコンのみのボタン（削除ボタン用）
-class _IconButton extends StatefulWidget {
+class _IconButton extends StatelessWidget {
   final IconData icon;
   final Color backgroundColor;
   final Color iconColor;
@@ -378,61 +398,17 @@ class _IconButton extends StatefulWidget {
   });
 
   @override
-  State<_IconButton> createState() => _IconButtonState();
-}
-
-class _IconButtonState extends State<_IconButton>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _scaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      duration: AnimationConsts.buttonTap,
-      vsync: this,
-    );
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: AnimationConsts.scalePressed,
-    ).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: AnimationConsts.sharpCurve,
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _scaleAnimation,
-      builder: (context, child) {
-        return Transform.scale(
-          scale: _scaleAnimation.value,
-          child: GestureDetector(
-            onTapDown: (_) => _animationController.forward(),
-            onTapUp: (_) => _animationController.reverse(),
-            onTapCancel: () => _animationController.reverse(),
-            onTap: widget.onTap,
-            child: Container(
-              padding: const EdgeInsets.all(SpacingConsts.s),
-              decoration: BoxDecoration(
-                color: widget.backgroundColor,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(widget.icon, color: widget.iconColor, size: 18),
-            ),
-          ),
-        );
-      },
+    return _AnimatedTapWrapper(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(SpacingConsts.s),
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(icon, color: iconColor, size: 18),
+      ),
     );
   }
 }
