@@ -69,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen>
       backgroundColor: ColorConsts.backgroundPrimary,
       body: pages[_tabController.index],
       bottomNavigationBar: _buildBottomNavigationBar(),
-      floatingActionButton: _buildFloatingActionButton(),
+      floatingActionButton: _tabController.index != 2 ? _buildFloatingActionButton() : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
