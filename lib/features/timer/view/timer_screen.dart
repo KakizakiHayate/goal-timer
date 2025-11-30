@@ -136,7 +136,7 @@ class _TimerScreenState extends State<TimerScreen> {
           _buildModeButton(
             'フォーカス',
             timerState.mode == TimerMode.countdown,
-            () => _onModeTapped(timerState, timerViewModel, TimerMode.countdown),
+            () => _onModeTapped(timerViewModel, TimerMode.countdown),
             Icons.timer_outlined,
           ),
 
@@ -144,7 +144,7 @@ class _TimerScreenState extends State<TimerScreen> {
           _buildModeButton(
             'フリー',
             timerState.mode == TimerMode.countup,
-            () => _onModeTapped(timerState, timerViewModel, TimerMode.countup),
+            () => _onModeTapped(timerViewModel, TimerMode.countup),
             Icons.all_inclusive,
           ),
         ],
@@ -153,15 +153,12 @@ class _TimerScreenState extends State<TimerScreen> {
   }
 
   void _onModeTapped(
-    TimerState timerState,
     TimerViewModel timerViewModel,
     TimerMode newMode,
   ) {
-    if (!timerState.isModeSwitchable) {
+    if (!timerViewModel.setMode(newMode)) {
       _showModeSwitchBlockedDialog(context);
-      return;
     }
-    timerViewModel.setMode(newMode);
   }
 
   void _showModeSwitchBlockedDialog(BuildContext context) {

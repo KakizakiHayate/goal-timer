@@ -121,11 +121,13 @@ class TimerViewModel extends GetxController {
     super.onClose();
   }
 
-  void setMode(TimerMode mode) {
+  /// モードを設定する
+  /// 戻り値: モード切り替えが成功した場合はtrue、ブロックされた場合はfalse
+  bool setMode(TimerMode mode) {
     // タイマーが動作中または一時停止中の場合はモード切り替えをブロック
     if (!state.isModeSwitchable) {
       AppLogger.instance.w('タイマー動作中のためモード切り替えをブロックしました');
-      return;
+      return false;
     }
 
     _state.value = state.copyWith(mode: mode);
@@ -142,6 +144,7 @@ class TimerViewModel extends GetxController {
         currentSeconds: TimerConstants.pomodoroWorkMinutes * 60,
       );
     }
+    return true;
   }
 
   void startTimer() {

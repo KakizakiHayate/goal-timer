@@ -163,22 +163,23 @@ void main() {
   });
 
   group('TimerViewModel setMode Tests', () {
-    test('initial状態でsetModeを呼ぶとモードが変更されること', () {
+    test('initial状態でsetModeを呼ぶとtrueを返しモードが変更されること', () {
       // Arrange
       final viewModel = TimerViewModel(goal: testGoal);
       expect(viewModel.state.mode, equals(TimerMode.countdown));
       expect(viewModel.state.status, equals(TimerStatus.initial));
 
       // Act
-      viewModel.setMode(TimerMode.countup);
+      final result = viewModel.setMode(TimerMode.countup);
 
       // Assert
+      expect(result, isTrue);
       expect(viewModel.state.mode, equals(TimerMode.countup));
 
       viewModel.onClose();
     });
 
-    test('running状態でsetModeを呼んでもモードが変更されないこと', () {
+    test('running状態でsetModeを呼ぶとfalseを返しモードが変更されないこと', () {
       // Arrange
       final viewModel = TimerViewModel(goal: testGoal);
       viewModel.startTimer();
@@ -186,15 +187,16 @@ void main() {
       final originalMode = viewModel.state.mode;
 
       // Act
-      viewModel.setMode(TimerMode.countup);
+      final result = viewModel.setMode(TimerMode.countup);
 
       // Assert
+      expect(result, isFalse);
       expect(viewModel.state.mode, equals(originalMode));
 
       viewModel.onClose();
     });
 
-    test('paused状態でsetModeを呼んでもモードが変更されないこと', () {
+    test('paused状態でsetModeを呼ぶとfalseを返しモードが変更されないこと', () {
       // Arrange
       final viewModel = TimerViewModel(goal: testGoal);
       viewModel.startTimer();
@@ -203,30 +205,32 @@ void main() {
       final originalMode = viewModel.state.mode;
 
       // Act
-      viewModel.setMode(TimerMode.countup);
+      final result = viewModel.setMode(TimerMode.countup);
 
       // Assert
+      expect(result, isFalse);
       expect(viewModel.state.mode, equals(originalMode));
 
       viewModel.onClose();
     });
 
-    test('completed状態でsetModeを呼ぶとモードが変更されること', () {
+    test('completed状態でsetModeを呼ぶとtrueを返しモードが変更されること', () {
       // Arrange
       final viewModel = TimerViewModel(goal: testGoal);
       viewModel.completeTimer();
       expect(viewModel.state.status, equals(TimerStatus.completed));
 
       // Act
-      viewModel.setMode(TimerMode.countup);
+      final result = viewModel.setMode(TimerMode.countup);
 
       // Assert
+      expect(result, isTrue);
       expect(viewModel.state.mode, equals(TimerMode.countup));
 
       viewModel.onClose();
     });
 
-    test('resetTimer後にsetModeを呼ぶとモードが変更されること', () {
+    test('resetTimer後にsetModeを呼ぶとtrueを返しモードが変更されること', () {
       // Arrange
       final viewModel = TimerViewModel(goal: testGoal);
       viewModel.startTimer();
@@ -235,9 +239,10 @@ void main() {
       expect(viewModel.state.status, equals(TimerStatus.initial));
 
       // Act
-      viewModel.setMode(TimerMode.countup);
+      final result = viewModel.setMode(TimerMode.countup);
 
       // Assert
+      expect(result, isTrue);
       expect(viewModel.state.mode, equals(TimerMode.countup));
 
       viewModel.onClose();
