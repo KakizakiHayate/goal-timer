@@ -5,6 +5,7 @@ import 'package:goal_timer/core/models/goals/goals_model.dart';
 import 'package:goal_timer/core/utils/app_logger.dart';
 import 'package:goal_timer/core/data/local/local_study_daily_logs_datasource.dart';
 import 'package:goal_timer/core/data/local/app_database.dart';
+import 'package:goal_timer/features/settings/view_model/settings_view_model.dart';
 import 'package:uuid/uuid.dart';
 
 // タイマー関連の定数
@@ -106,13 +107,17 @@ class TimerViewModel extends GetxController {
   // 経過時間を取得するgetter
   int get elapsedSeconds => _elapsedSeconds;
 
-  // ✅ コンストラクタでgoalを受け取る
   TimerViewModel({required this.goal}) {
-    // ✅ DIコンテナから取得
     final database = Get.find<AppDatabase>();
     _datasource = LocalStudyDailyLogsDatasource(database: database);
-    // goalIdを初期化
-    _state.value = TimerState();
+
+    final settingsController = Get.find<SettingsController>();
+    final defaultSeconds = settingsController.defaultTimerSeconds.value;
+
+    _state.value = TimerState(
+      totalSeconds: defaultSeconds,
+      currentSeconds: defaultSeconds,
+    );
   }
 
   @override
@@ -124,7 +129,6 @@ class TimerViewModel extends GetxController {
   /// モードを設定する
   /// 戻り値: モード切り替えが成功した場合はtrue、ブロックされた場合はfalse
   bool setMode(TimerMode mode) {
-    // タイマーが動作中または一時停止中の場合はモード切り替えをブロック
     if (!state.isModeSwitchable) {
       AppLogger.instance.w('タイマー動作中のためモード切り替えをブロックしました');
       return false;
@@ -132,9 +136,11 @@ class TimerViewModel extends GetxController {
 
     _state.value = state.copyWith(mode: mode);
     if (mode == TimerMode.countdown) {
+      final settingsController = Get.find<SettingsController>();
+      final defaultSeconds = settingsController.defaultTimerSeconds.value;
       _state.value = state.copyWith(
-        totalSeconds: 25 * 60,
-        currentSeconds: 25 * 60,
+        totalSeconds: defaultSeconds,
+        currentSeconds: defaultSeconds,
       );
     } else if (mode == TimerMode.countup) {
       _state.value = state.copyWith(totalSeconds: 60 * 60, currentSeconds: 0);

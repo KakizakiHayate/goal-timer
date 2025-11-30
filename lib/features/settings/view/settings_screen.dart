@@ -1,12 +1,15 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/utils/color_consts.dart';
 import '../../../core/utils/text_consts.dart';
 import '../../../core/utils/spacing_consts.dart';
 import '../../../core/utils/animation_consts.dart';
 import '../../../core/widgets/setting_item.dart';
 import '../../../core/widgets/pressable_card.dart';
+import '../view_model/settings_view_model.dart';
 
-/// 設定画面
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
@@ -136,16 +139,20 @@ class _SettingsScreenState extends State<SettingsScreen>
   }
 
   Widget _buildAppSection() {
+    final settingsController = Get.find<SettingsController>();
+
     return _buildSection(
       title: 'アプリ設定',
       children: [
-        SettingItem(
-          title: 'デフォルトタイマー時間',
-          subtitle: '新しい目標のデフォルト時間：25分',
-          icon: Icons.timer_outlined,
-          iconColor: ColorConsts.warning,
-          onTap: _showTimerSettings,
-        ),
+        Obx(() {
+          return SettingItem(
+            title: 'デフォルトタイマー時間',
+            subtitle: '新しい目標のデフォルト時間：${settingsController.formattedDefaultTime}',
+            icon: Icons.timer_outlined,
+            iconColor: ColorConsts.warning,
+            onTap: _showTimerSettings,
+          );
+        }),
       ],
     );
   }
@@ -154,13 +161,6 @@ class _SettingsScreenState extends State<SettingsScreen>
     return _buildSection(
       title: 'データとプライバシー',
       children: [
-        SettingItem(
-          title: 'データのバックアップ',
-          subtitle: 'クラウドにデータを同期',
-          icon: Icons.cloud_upload_outlined,
-          iconColor: ColorConsts.success,
-          onTap: _showBackupSettings,
-        ),
         SettingItem(
           title: 'プライバシーポリシー',
           subtitle: 'データの取り扱いについて',
@@ -220,19 +220,102 @@ class _SettingsScreenState extends State<SettingsScreen>
   }
 
   void _showTimerSettings() {
-    _showComingSoonDialog('タイマー設定');
+    final settingsController = Get.find<SettingsController>();
+    Duration tempDuration = Duration(seconds: settingsController.defaultTimerSeconds.value);
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: SizedBox(
+            height: 320,
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(SpacingConsts.m),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text(
+                          'キャンセル',
+                          style: TextConsts.body.copyWith(
+                            color: ColorConsts.textSecondary,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        'デフォルトタイマー時間',
+                        style: TextConsts.h4.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          final clampedDuration = tempDuration > const Duration(hours: 24)
+                              ? const Duration(hours: 24)
+                              : tempDuration;
+                          await settingsController.updateDefaultTimerDuration(clampedDuration);
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                          }
+                        },
+                        child: Text(
+                          '保存',
+                          style: TextConsts.body.copyWith(
+                            color: ColorConsts.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1),
+                Expanded(
+                  child: CupertinoTimerPicker(
+                    mode: CupertinoTimerPickerMode.hm,
+                    initialTimerDuration: tempDuration,
+                    onTimerDurationChanged: (Duration newDuration) {
+                      tempDuration = newDuration;
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
-  void _showBackupSettings() {
-    _showComingSoonDialog('バックアップ設定');
+  Future<void> _openUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('URLを開けませんでした'),
+            backgroundColor: ColorConsts.error,
+          ),
+        );
+      }
+    }
   }
 
   void _showPrivacyPolicy() {
-    _showComingSoonDialog('プライバシーポリシー');
+    _openUrl('https://docs.google.com/document/d/1xagtbSDKcWep7K_FUii8l2LTCZL_BUXbCRm4hxxNCww/edit?usp=sharing');
   }
 
   void _showContact() {
-    _showComingSoonDialog('お問い合わせ');
+    _openUrl('https://forms.gle/95jjrtez2Nc8CG9m9');
   }
 
   void _showAbout() {
@@ -264,19 +347,4 @@ class _SettingsScreenState extends State<SettingsScreen>
     );
   }
 
-  void _showComingSoonDialog(String feature) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(feature),
-        content: const Text('この機能は開発中です。\n今後のアップデートをお待ちください。'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
 }
