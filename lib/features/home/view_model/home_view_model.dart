@@ -90,8 +90,9 @@ class HomeViewModel extends GetxController {
       await _datasource.saveGoal(goal);
       AppLogger.instance.i('目標を保存しました: ${goal.id}');
 
-      // 目標リストを再読み込み
-      await loadGoals();
+      // 状態を直接更新（パフォーマンス改善: DBからの再読み込みを回避）
+      _state = state.copyWith(goals: [...state.goals, goal]);
+      update();
 
       // デバッグ: 保存後に全目標を表示（デバッグビルドのみ）
       assert(() {
@@ -100,6 +101,41 @@ class HomeViewModel extends GetxController {
       }());
     } catch (error, stackTrace) {
       AppLogger.instance.e('目標の保存に失敗しました', error, stackTrace);
+      rethrow;
+    }
+  }
+
+  // 目標を更新
+  Future<void> updateGoal({
+    required GoalsModel original,
+    required String title,
+    required String description,
+    required int targetMinutes,
+    required String avoidMessage,
+    required DateTime deadline,
+  }) async {
+    try {
+      final now = DateTime.now();
+      final updatedGoal = original.copyWith(
+        title: title,
+        description: description.isEmpty ? null : description,
+        targetMinutes: targetMinutes,
+        avoidMessage: avoidMessage,
+        deadline: deadline,
+        updatedAt: now,
+      );
+
+      await _datasource.updateGoal(updatedGoal);
+      AppLogger.instance.i('目標を更新しました: ${updatedGoal.id}');
+
+      // 状態を直接更新（パフォーマンス改善: DBからの再読み込みを回避）
+      final updatedGoals = state.goals
+          .map((g) => g.id == updatedGoal.id ? updatedGoal : g)
+          .toList();
+      _state = state.copyWith(goals: updatedGoals);
+      update();
+    } catch (error, stackTrace) {
+      AppLogger.instance.e('目標の更新に失敗しました', error, stackTrace);
       rethrow;
     }
   }
