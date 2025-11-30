@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import '../../../../core/models/goals/goals_model.dart';
 import '../../../../core/utils/color_consts.dart';
 import '../../../../core/utils/text_consts.dart';
@@ -378,7 +379,7 @@ class _AddGoalModalState extends State<AddGoalModal> {
                   child: Text(
                     _selectedDeadline == null
                         ? StringConsts.selectDeadlinePlaceholder
-                        : '${_selectedDeadline!.year}年${_selectedDeadline!.month}月${_selectedDeadline!.day}日',
+                        : DateFormat('yyyy年M月d日').format(_selectedDeadline!),
                     style: TextConsts.body.copyWith(
                       color: _selectedDeadline == null
                           ? ColorConsts.textTertiary
