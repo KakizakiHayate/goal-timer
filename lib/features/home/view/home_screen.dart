@@ -382,26 +382,10 @@ class _HomeTabContent extends StatelessWidget {
             TextButton(
               onPressed: () async {
                 Navigator.pop(context);
-                try {
-                  await viewModel.deleteGoal(goal);
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(StringConsts.goalDeletedMessage),
-                        backgroundColor: ColorConsts.success,
-                      ),
-                    );
-                  }
-                } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(StringConsts.goalDeleteFailedMessage),
-                        backgroundColor: ColorConsts.error,
-                      ),
-                    );
-                  }
-                }
+                // ViewModelに処理を委譲し、結果に基づいてUIフィードバックを表示
+                final result = await viewModel.onDeleteGoalConfirmed(goal);
+                if (!context.mounted) return;
+                _showDeleteResultSnackBar(context, result);
               },
               child: Text(
                 StringConsts.deleteButton,
@@ -414,6 +398,22 @@ class _HomeTabContent extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+
+  /// 削除結果に基づいてSnackBarを表示
+  void _showDeleteResultSnackBar(BuildContext context, DeleteGoalResult result) {
+    final isSuccess = result == DeleteGoalResult.success;
+    final message = isSuccess
+        ? StringConsts.goalDeletedMessage
+        : StringConsts.goalDeleteFailedMessage;
+    final color = isSuccess ? ColorConsts.success : ColorConsts.error;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: color,
+      ),
     );
   }
 }

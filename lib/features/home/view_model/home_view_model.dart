@@ -6,6 +6,12 @@ import '../../../core/data/local/local_study_daily_logs_datasource.dart';
 import '../../../core/data/local/app_database.dart';
 import '../../../core/utils/app_logger.dart';
 
+/// 目標削除操作の結果
+enum DeleteGoalResult {
+  success,
+  failure,
+}
+
 // Home画面の状態
 class HomeState {
   final List<GoalsModel> goals;
@@ -147,8 +153,20 @@ class HomeViewModel extends GetxController {
     }
   }
 
-  // 目標を削除（学習ログも含めてカスケード削除）
-  Future<void> deleteGoal(GoalsModel goal) async {
+  /// 目標削除を実行し、結果を返す（View層から呼び出すためのメソッド）
+  /// MVVMパターンに従い、ビジネスロジックをViewModelに集約
+  Future<DeleteGoalResult> onDeleteGoalConfirmed(GoalsModel goal) async {
+    try {
+      await _deleteGoalInternal(goal);
+      return DeleteGoalResult.success;
+    } catch (_) {
+      // エラーは_deleteGoalInternal内でログ記録済み
+      return DeleteGoalResult.failure;
+    }
+  }
+
+  // 目標を削除（学習ログも含めてカスケード削除）- 内部実装
+  Future<void> _deleteGoalInternal(GoalsModel goal) async {
     try {
       // 1. 紐づく学習ログを先に削除
       await _studyLogsDatasource.deleteLogsByGoalId(goal.id);

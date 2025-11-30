@@ -53,7 +53,7 @@ void main() {
   });
 
   group('HomeViewModel', () {
-    group('deleteGoal', () {
+    group('onDeleteGoalConfirmed', () {
       test('should delete goal and its study logs from datasources', () async {
         when(() => mockStudyLogsDatasource.deleteLogsByGoalId(testGoal.id))
             .thenAnswer((_) async {});
@@ -63,8 +63,9 @@ void main() {
         await viewModel.loadGoals();
         expect(viewModel.state.goals.length, 2);
 
-        await viewModel.deleteGoal(testGoal);
+        final result = await viewModel.onDeleteGoalConfirmed(testGoal);
 
+        expect(result, DeleteGoalResult.success);
         verify(() => mockStudyLogsDatasource.deleteLogsByGoalId(testGoal.id))
             .called(1);
         verify(() => mockGoalsDatasource.deleteGoal(testGoal.id)).called(1);
@@ -81,8 +82,9 @@ void main() {
         expect(
             viewModel.state.goals.any((g) => g.id == testGoal.id), isTrue);
 
-        await viewModel.deleteGoal(testGoal);
+        final result = await viewModel.onDeleteGoalConfirmed(testGoal);
 
+        expect(result, DeleteGoalResult.success);
         expect(viewModel.state.goals.length, 1);
         expect(
             viewModel.state.goals.any((g) => g.id == testGoal.id), isFalse);
@@ -104,21 +106,20 @@ void main() {
         });
 
         await viewModel.loadGoals();
-        await viewModel.deleteGoal(testGoal);
+        await viewModel.onDeleteGoalConfirmed(testGoal);
 
         expect(callOrder, ['deleteLogsByGoalId', 'deleteGoal']);
       });
 
-      test('should rethrow error when deletion fails', () async {
+      test('should return failure when deletion fails', () async {
         when(() => mockStudyLogsDatasource.deleteLogsByGoalId(testGoal.id))
             .thenThrow(Exception('Database error'));
 
         await viewModel.loadGoals();
 
-        expect(
-          () => viewModel.deleteGoal(testGoal),
-          throwsA(isA<Exception>()),
-        );
+        final result = await viewModel.onDeleteGoalConfirmed(testGoal);
+
+        expect(result, DeleteGoalResult.failure);
       });
 
       test('should not modify state when deletion fails', () async {
@@ -128,9 +129,7 @@ void main() {
         await viewModel.loadGoals();
         final initialGoalsCount = viewModel.state.goals.length;
 
-        try {
-          await viewModel.deleteGoal(testGoal);
-        } catch (_) {}
+        await viewModel.onDeleteGoalConfirmed(testGoal);
 
         expect(viewModel.state.goals.length, initialGoalsCount);
       });
