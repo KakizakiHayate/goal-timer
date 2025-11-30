@@ -136,7 +136,7 @@ class _TimerScreenState extends State<TimerScreen> {
           _buildModeButton(
             'フォーカス',
             timerState.mode == TimerMode.countdown,
-            () => timerViewModel.setMode(TimerMode.countdown),
+            () => _onModeTapped(timerState, timerViewModel, TimerMode.countdown),
             Icons.timer_outlined,
           ),
 
@@ -144,8 +144,57 @@ class _TimerScreenState extends State<TimerScreen> {
           _buildModeButton(
             'フリー',
             timerState.mode == TimerMode.countup,
-            () => timerViewModel.setMode(TimerMode.countup),
+            () => _onModeTapped(timerState, timerViewModel, TimerMode.countup),
             Icons.all_inclusive,
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _onModeTapped(
+    TimerState timerState,
+    TimerViewModel timerViewModel,
+    TimerMode newMode,
+  ) {
+    if (!timerState.isModeSwitchable) {
+      _showModeSwitchBlockedDialog(context);
+      return;
+    }
+    timerViewModel.setMode(newMode);
+  }
+
+  void _showModeSwitchBlockedDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: Text(
+          'モード切り替え',
+          style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          'タイマーを保存またはリセットしてからモードを切り替えてください',
+          style: TextConsts.body.copyWith(color: ColorConsts.textSecondary),
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ColorConsts.primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              'OK',
+              style: TextConsts.body.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
         ],
       ),

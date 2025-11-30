@@ -84,6 +84,11 @@ class TimerState {
   bool get isPaused => status == TimerStatus.paused;
   bool get isRunning => status == TimerStatus.running;
   bool get isCompleted => status == TimerStatus.completed;
+
+  /// モード切り替えが可能かどうか
+  /// タイマーが動作中または一時停止中の場合は切り替え不可
+  bool get isModeSwitchable =>
+      status == TimerStatus.initial || status == TimerStatus.completed;
 }
 
 // タイマーのViewModel
@@ -117,6 +122,12 @@ class TimerViewModel extends GetxController {
   }
 
   void setMode(TimerMode mode) {
+    // タイマーが動作中または一時停止中の場合はモード切り替えをブロック
+    if (!state.isModeSwitchable) {
+      AppLogger.instance.w('タイマー動作中のためモード切り替えをブロックしました');
+      return;
+    }
+
     _state.value = state.copyWith(mode: mode);
     if (mode == TimerMode.countdown) {
       _state.value = state.copyWith(
