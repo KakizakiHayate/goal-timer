@@ -2,7 +2,6 @@ import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 import '../../../core/models/goals/goals_model.dart';
 import '../../../core/data/local/local_goals_datasource.dart';
-import '../../../core/data/local/local_study_daily_logs_datasource.dart';
 import '../../../core/data/local/app_database.dart';
 import '../../../core/utils/app_logger.dart';
 
@@ -36,7 +35,6 @@ class HomeState {
 // Home画面のViewModel
 class HomeViewModel extends GetxController {
   late final LocalGoalsDatasource _goalsDatasource;
-  late final LocalStudyDailyLogsDatasource _studyLogsDatasource;
 
   // 状態（Rxを使わない）
   HomeState _state = HomeState();
@@ -44,11 +42,9 @@ class HomeViewModel extends GetxController {
 
   HomeViewModel({
     LocalGoalsDatasource? goalsDatasource,
-    LocalStudyDailyLogsDatasource? studyLogsDatasource,
   }) {
     final database = AppDatabase();
     _goalsDatasource = goalsDatasource ?? LocalGoalsDatasource(database: database);
-    _studyLogsDatasource = studyLogsDatasource ?? LocalStudyDailyLogsDatasource(database: database);
   }
 
   @override
@@ -166,15 +162,12 @@ class HomeViewModel extends GetxController {
   }
 
   // 目標を削除（学習ログも含めてカスケード削除）- 内部実装
+  // トランザクションを使用してデータ整合性を保証
   Future<void> _deleteGoalInternal(GoalsModel goal) async {
     try {
-      // 1. 紐づく学習ログを先に削除
-      await _studyLogsDatasource.deleteLogsByGoalId(goal.id);
-      AppLogger.instance.i('目標に紐づく学習ログを削除しました: ${goal.id}');
-
-      // 2. 目標を削除
-      await _goalsDatasource.deleteGoal(goal.id);
-      AppLogger.instance.i('目標を削除しました: ${goal.id}');
+      // トランザクションで学習ログと目標をアトミックに削除
+      await _goalsDatasource.deleteGoalWithStudyLogs(goal.id);
+      AppLogger.instance.i('目標と学習ログを削除しました: ${goal.id}');
 
       // 状態を直接更新（パフォーマンス改善: DBからの再読み込みを回避）
       final updatedGoals = state.goals.where((g) => g.id != goal.id).toList();
