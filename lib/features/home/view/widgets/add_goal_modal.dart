@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import '../../../../core/models/goals/goals_model.dart';
 import '../../../../core/utils/color_consts.dart';
 import '../../../../core/utils/text_consts.dart';
 import '../../../../core/utils/spacing_consts.dart';
+import '../../../../core/utils/ui_consts.dart';
+import '../../../../core/utils/string_consts.dart';
 import '../../view_model/home_view_model.dart';
 
 class AddGoalModal extends StatefulWidget {
-  const AddGoalModal({super.key});
+  final GoalsModel? goal;
+
+  const AddGoalModal({super.key, this.goal});
 
   @override
   State<AddGoalModal> createState() => _AddGoalModalState();
@@ -14,12 +20,28 @@ class AddGoalModal extends StatefulWidget {
 
 class _AddGoalModalState extends State<AddGoalModal> {
   final _formKey = GlobalKey<FormState>();
-  final _titleController = TextEditingController();
-  final _descriptionController = TextEditingController();
-  final _targetMinutesController = TextEditingController();
-  final _avoidMessageController = TextEditingController();
+  late final TextEditingController _titleController;
+  late final TextEditingController _descriptionController;
+  late final TextEditingController _targetMinutesController;
+  late final TextEditingController _avoidMessageController;
   DateTime? _selectedDeadline;
   bool _isLoading = false;
+
+  bool get _isEdit => widget.goal != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final goal = widget.goal;
+    _titleController = TextEditingController(text: goal?.title ?? '');
+    _descriptionController =
+        TextEditingController(text: goal?.description ?? '');
+    _targetMinutesController =
+        TextEditingController(text: goal?.targetMinutes.toString() ?? '');
+    _avoidMessageController =
+        TextEditingController(text: goal?.avoidMessage ?? '');
+    _selectedDeadline = goal?.deadline;
+  }
 
   @override
   void dispose() {
@@ -35,7 +57,7 @@ class _AddGoalModalState extends State<AddGoalModal> {
       context: context,
       initialDate: DateTime.now().add(const Duration(days: 30)),
       firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
+      lastDate: DateTime.now().add(const Duration(days: UIConsts.maxDeadlineDays)),
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -65,12 +87,16 @@ class _AddGoalModalState extends State<AddGoalModal> {
     if (_selectedDeadline == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('期限を選択してください'),
+          content: Text(StringConsts.selectDeadlineMessage),
           backgroundColor: ColorConsts.error,
         ),
       );
       return;
     }
+
+    // async gapの前にcontext関連の参照をキャプチャ
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
 
     setState(() {
       _isLoading = true;
@@ -78,33 +104,48 @@ class _AddGoalModalState extends State<AddGoalModal> {
 
     try {
       final homeViewModel = Get.find<HomeViewModel>();
-      await homeViewModel.addGoal(
-        title: _titleController.text.trim(),
-        description: _descriptionController.text.trim(),
-        targetMinutes: int.parse(_targetMinutesController.text.trim()),
-        avoidMessage: _avoidMessageController.text.trim(),
-        deadline: _selectedDeadline!,
-      );
+      if (_isEdit) {
+        await homeViewModel.updateGoal(
+          original: widget.goal!,
+          title: _titleController.text.trim(),
+          description: _descriptionController.text.trim(),
+          targetMinutes: int.parse(_targetMinutesController.text.trim()),
+          avoidMessage: _avoidMessageController.text.trim(),
+          deadline: _selectedDeadline!,
+        );
+      } else {
+        await homeViewModel.addGoal(
+          title: _titleController.text.trim(),
+          description: _descriptionController.text.trim(),
+          targetMinutes: int.parse(_targetMinutesController.text.trim()),
+          avoidMessage: _avoidMessageController.text.trim(),
+          deadline: _selectedDeadline!,
+        );
+      }
 
       if (mounted) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('目標を追加しました'),
+        navigator.pop();
+        scaffoldMessenger.showSnackBar(
+          SnackBar(
+            content: Text(_isEdit
+                ? StringConsts.goalUpdatedMessage
+                : StringConsts.goalAddedMessage),
             backgroundColor: ColorConsts.success,
           ),
         );
       }
     } catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('目標の追加に失敗しました'),
+        scaffoldMessenger.showSnackBar(
+          SnackBar(
+            content: Text(_isEdit
+                ? StringConsts.goalUpdateFailedMessage
+                : StringConsts.goalAddFailedMessage),
             backgroundColor: ColorConsts.error,
           ),
         );
       }
-    } finally {
+    }finally {
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -179,7 +220,9 @@ class _AddGoalModalState extends State<AddGoalModal> {
         children: [
           Expanded(
             child: Text(
-              '目標を追加',
+              _isEdit
+                  ? StringConsts.editGoalTitle
+                  : StringConsts.addGoalTitle,
               style: TextConsts.h3.copyWith(
                 color: ColorConsts.textPrimary,
                 fontWeight: FontWeight.bold,
@@ -201,7 +244,7 @@ class _AddGoalModalState extends State<AddGoalModal> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '目標名 *',
+          StringConsts.goalNameLabel,
           style: TextConsts.body.copyWith(
             color: ColorConsts.textPrimary,
             fontWeight: FontWeight.w600,
@@ -211,7 +254,7 @@ class _AddGoalModalState extends State<AddGoalModal> {
         TextFormField(
           controller: _titleController,
           decoration: InputDecoration(
-            hintText: '例: TOEIC 800点取得',
+            hintText: StringConsts.goalNamePlaceholder,
             filled: true,
             fillColor: ColorConsts.cardBackground,
             border: OutlineInputBorder(
@@ -223,7 +266,7 @@ class _AddGoalModalState extends State<AddGoalModal> {
           maxLength: 50,
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
-              return '目標名を入力してください';
+              return StringConsts.goalNameRequired;
             }
             return null;
           },
@@ -237,7 +280,7 @@ class _AddGoalModalState extends State<AddGoalModal> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '説明',
+          StringConsts.descriptionLabel,
           style: TextConsts.body.copyWith(
             color: ColorConsts.textPrimary,
             fontWeight: FontWeight.w600,
@@ -247,7 +290,7 @@ class _AddGoalModalState extends State<AddGoalModal> {
         TextFormField(
           controller: _descriptionController,
           decoration: InputDecoration(
-            hintText: '例: 海外転職のために英語力を向上させたい',
+            hintText: StringConsts.descriptionPlaceholder,
             filled: true,
             fillColor: ColorConsts.cardBackground,
             border: OutlineInputBorder(
@@ -268,7 +311,7 @@ class _AddGoalModalState extends State<AddGoalModal> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '目標時間（分） *',
+          StringConsts.targetMinutesLabel,
           style: TextConsts.body.copyWith(
             color: ColorConsts.textPrimary,
             fontWeight: FontWeight.w600,
@@ -278,7 +321,7 @@ class _AddGoalModalState extends State<AddGoalModal> {
         TextFormField(
           controller: _targetMinutesController,
           decoration: InputDecoration(
-            hintText: '例: 1500',
+            hintText: StringConsts.targetMinutesPlaceholder,
             filled: true,
             fillColor: ColorConsts.cardBackground,
             border: OutlineInputBorder(
@@ -291,11 +334,11 @@ class _AddGoalModalState extends State<AddGoalModal> {
           keyboardType: TextInputType.number,
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
-              return '目標時間を入力してください';
+              return StringConsts.targetMinutesRequired;
             }
             final minutes = int.tryParse(value.trim());
             if (minutes == null || minutes <= 0) {
-              return '正しい数値を入力してください';
+              return StringConsts.invalidNumber;
             }
             return null;
           },
@@ -309,7 +352,7 @@ class _AddGoalModalState extends State<AddGoalModal> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '期限 *',
+          StringConsts.deadlineLabel,
           style: TextConsts.body.copyWith(
             color: ColorConsts.textPrimary,
             fontWeight: FontWeight.w600,
@@ -335,8 +378,8 @@ class _AddGoalModalState extends State<AddGoalModal> {
                 Expanded(
                   child: Text(
                     _selectedDeadline == null
-                        ? '期限を選択してください'
-                        : '${_selectedDeadline!.year}年${_selectedDeadline!.month}月${_selectedDeadline!.day}日',
+                        ? StringConsts.selectDeadlinePlaceholder
+                        : DateFormat('yyyy年M月d日').format(_selectedDeadline!),
                     style: TextConsts.body.copyWith(
                       color: _selectedDeadline == null
                           ? ColorConsts.textTertiary
@@ -362,7 +405,7 @@ class _AddGoalModalState extends State<AddGoalModal> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '達成しないとどうなりますか？ *',
+          StringConsts.avoidMessageLabel,
           style: TextConsts.body.copyWith(
             color: ColorConsts.textPrimary,
             fontWeight: FontWeight.w600,
@@ -370,7 +413,7 @@ class _AddGoalModalState extends State<AddGoalModal> {
         ),
         const SizedBox(height: SpacingConsts.xs),
         Text(
-          'ネガティブな結果を明確にすることで、モチベーションを維持しやすくなります',
+          StringConsts.avoidMessageHint,
           style: TextConsts.caption.copyWith(
             color: ColorConsts.textTertiary,
           ),
@@ -379,7 +422,7 @@ class _AddGoalModalState extends State<AddGoalModal> {
         TextFormField(
           controller: _avoidMessageController,
           decoration: InputDecoration(
-            hintText: '例: キャリアアップの機会を逃してしまう',
+            hintText: StringConsts.avoidMessagePlaceholder,
             filled: true,
             fillColor: ColorConsts.cardBackground,
             border: OutlineInputBorder(
@@ -392,7 +435,7 @@ class _AddGoalModalState extends State<AddGoalModal> {
           maxLength: 200,
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
-              return '達成しない場合の結果を入力してください';
+              return StringConsts.avoidMessageRequired;
             }
             return null;
           },
@@ -425,7 +468,9 @@ class _AddGoalModalState extends State<AddGoalModal> {
                 ),
               )
             : Text(
-                '保存',
+                _isEdit
+                    ? StringConsts.updateButton
+                    : StringConsts.saveButton,
                 style: TextConsts.h4.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
