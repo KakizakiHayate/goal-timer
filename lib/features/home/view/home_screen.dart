@@ -239,6 +239,11 @@ class _HomeTabContent extends StatelessWidget {
 
             // 目標リスト
             _buildGoalList(homeViewModel),
+
+            // FABがコンテンツに重ならないようにするための余白
+            const SliverToBoxAdapter(
+              child: SizedBox(height: 96.0),
+            ),
           ],
         );
       },
