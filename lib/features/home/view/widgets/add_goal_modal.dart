@@ -93,6 +93,10 @@ class _AddGoalModalState extends State<AddGoalModal> {
       return;
     }
 
+    // async gapの前にcontext関連の参照をキャプチャ
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+
     setState(() {
       _isLoading = true;
     });
@@ -119,8 +123,8 @@ class _AddGoalModalState extends State<AddGoalModal> {
       }
 
       if (mounted) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
+        navigator.pop();
+        scaffoldMessenger.showSnackBar(
           SnackBar(
             content: Text(_isEdit
                 ? StringConsts.goalUpdatedMessage
@@ -131,7 +135,7 @@ class _AddGoalModalState extends State<AddGoalModal> {
       }
     } catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        scaffoldMessenger.showSnackBar(
           SnackBar(
             content: Text(_isEdit
                 ? StringConsts.goalUpdateFailedMessage
