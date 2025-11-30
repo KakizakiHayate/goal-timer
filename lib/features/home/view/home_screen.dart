@@ -6,6 +6,7 @@ import '../../../core/utils/text_consts.dart';
 import '../../../core/utils/spacing_consts.dart';
 import '../../../core/utils/animation_consts.dart';
 import '../../../core/utils/ui_consts.dart';
+import '../../../core/utils/string_consts.dart';
 import '../../../core/widgets/goal_card.dart';
 import '../../../core/widgets/pressable_card.dart';
 import '../view_model/home_view_model.dart';
@@ -336,9 +337,82 @@ class _HomeTabContent extends StatelessWidget {
                 },
               );
             },
+            onDeleteTap: () {
+              _showDeleteConfirmationDialog(context, viewModel, goal);
+            },
           );
         },
         childCount: goals.length,
+      ),
+    );
+  }
+
+  void _showDeleteConfirmationDialog(
+    BuildContext context,
+    HomeViewModel viewModel,
+    GoalsModel goal,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(
+            StringConsts.deleteGoalTitle,
+            style: TextConsts.h4.copyWith(
+              color: ColorConsts.textPrimary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Text(
+            StringConsts.deleteGoalMessage,
+            style: TextConsts.body.copyWith(
+              color: ColorConsts.textSecondary,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                StringConsts.cancelButton,
+                style: TextConsts.body.copyWith(
+                  color: ColorConsts.textSecondary,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                // ViewModelに処理を委譲し、結果に基づいてUIフィードバックを表示
+                final result = await viewModel.onDeleteGoalConfirmed(goal);
+                if (!context.mounted) return;
+                _showDeleteResultSnackBar(context, result);
+              },
+              child: Text(
+                StringConsts.deleteButton,
+                style: TextConsts.body.copyWith(
+                  color: ColorConsts.error,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// 削除結果に基づいてSnackBarを表示
+  void _showDeleteResultSnackBar(BuildContext context, DeleteGoalResult result) {
+    final isSuccess = result == DeleteGoalResult.success;
+    final message = isSuccess
+        ? StringConsts.goalDeletedMessage
+        : StringConsts.goalDeleteFailedMessage;
+    final color = isSuccess ? ColorConsts.success : ColorConsts.error;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: color,
       ),
     );
   }

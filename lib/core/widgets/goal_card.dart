@@ -16,6 +16,7 @@ class GoalCard extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onTimerTap;
   final VoidCallback? onEditTap;
+  final VoidCallback? onDeleteTap;
   final bool isActive;
   final GlobalKey? tutorialKey; // チュートリアル用のKey
   final GlobalKey? timerButtonKey; // タイマーボタン用のKey
@@ -30,6 +31,7 @@ class GoalCard extends StatelessWidget {
     this.onTap,
     this.onTimerTap,
     this.onEditTap,
+    this.onDeleteTap,
     this.isActive = true,
     this.tutorialKey,
     this.timerButtonKey,
@@ -233,6 +235,13 @@ class GoalCard extends StatelessWidget {
           textColor: ColorConsts.textSecondary,
           onTap: onEditTap,
         ),
+        const SizedBox(width: SpacingConsts.s),
+        _IconButton(
+          icon: Icons.delete_outline,
+          backgroundColor: ColorConsts.error.withOpacity(0.1),
+          iconColor: ColorConsts.error,
+          onTap: onDeleteTap,
+        ),
       ],
     );
   }
@@ -252,27 +261,22 @@ class GoalCard extends StatelessWidget {
   }
 }
 
-class _ActionButton extends StatefulWidget {
-  final IconData icon;
-  final String label;
-  final Color backgroundColor;
-  final Color textColor;
+/// タップ時のスケールアニメーションを提供する共通ラッパーウィジェット
+/// _ActionButtonと_IconButtonで共通のアニメーションロジックを再利用
+class _AnimatedTapWrapper extends StatefulWidget {
+  final Widget child;
   final VoidCallback? onTap;
 
-  const _ActionButton({
-    super.key,
-    required this.icon,
-    required this.label,
-    required this.backgroundColor,
-    required this.textColor,
+  const _AnimatedTapWrapper({
+    required this.child,
     this.onTap,
   });
 
   @override
-  State<_ActionButton> createState() => _ActionButtonState();
+  State<_AnimatedTapWrapper> createState() => _AnimatedTapWrapperState();
 }
 
-class _ActionButtonState extends State<_ActionButton>
+class _AnimatedTapWrapperState extends State<_AnimatedTapWrapper>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
@@ -313,43 +317,98 @@ class _ActionButtonState extends State<_ActionButton>
             onTapUp: (_) => _animationController.reverse(),
             onTapCancel: () => _animationController.reverse(),
             onTap: widget.onTap,
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: SpacingConsts.m,
-                vertical: SpacingConsts.s,
-              ),
-              decoration: BoxDecoration(
-                color: widget.backgroundColor,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow:
-                    widget.backgroundColor == ColorConsts.primary
-                        ? [
-                          BoxShadow(
-                            color: ColorConsts.primary.withOpacity(0.3),
-                            offset: const Offset(0, 2),
-                            blurRadius: 8,
-                          ),
-                        ]
-                        : null,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(widget.icon, color: widget.textColor, size: 18),
-                  const SizedBox(width: SpacingConsts.xs),
-                  Text(
-                    widget.label,
-                    style: TextConsts.caption.copyWith(
-                      color: widget.textColor,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            child: widget.child,
           ),
         );
       },
+    );
+  }
+}
+
+/// アクションボタン（タイマー開始、編集など）
+class _ActionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color backgroundColor;
+  final Color textColor;
+  final VoidCallback? onTap;
+
+  const _ActionButton({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.backgroundColor,
+    required this.textColor,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return _AnimatedTapWrapper(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: SpacingConsts.m,
+          vertical: SpacingConsts.s,
+        ),
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: backgroundColor == ColorConsts.primary
+              ? [
+                  BoxShadow(
+                    color: ColorConsts.primary.withOpacity(0.3),
+                    offset: const Offset(0, 2),
+                    blurRadius: 8,
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: textColor, size: 18),
+            const SizedBox(width: SpacingConsts.xs),
+            Text(
+              label,
+              style: TextConsts.caption.copyWith(
+                color: textColor,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// アイコンのみのボタン（削除ボタン用）
+class _IconButton extends StatelessWidget {
+  final IconData icon;
+  final Color backgroundColor;
+  final Color iconColor;
+  final VoidCallback? onTap;
+
+  const _IconButton({
+    required this.icon,
+    required this.backgroundColor,
+    required this.iconColor,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return _AnimatedTapWrapper(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(SpacingConsts.s),
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(icon, color: iconColor, size: 18),
+      ),
     );
   }
 }

@@ -1,0 +1,107 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:goal_timer/core/models/goals/goals_model.dart';
+import 'package:goal_timer/core/data/local/local_goals_datasource.dart';
+import 'package:goal_timer/features/home/view_model/home_view_model.dart';
+
+class MockLocalGoalsDatasource extends Mock implements LocalGoalsDatasource {}
+
+void main() {
+  late HomeViewModel viewModel;
+  late MockLocalGoalsDatasource mockGoalsDatasource;
+
+  final testGoal = GoalsModel(
+    id: 'test-goal-id',
+    userId: null,
+    title: 'Test Goal',
+    description: 'Test Description',
+    targetMinutes: 100,
+    avoidMessage: 'Test avoid message',
+    deadline: DateTime(2025, 12, 31),
+    createdAt: DateTime(2025, 1, 1),
+    updatedAt: DateTime(2025, 1, 1),
+  );
+
+  final testGoal2 = GoalsModel(
+    id: 'test-goal-id-2',
+    userId: null,
+    title: 'Test Goal 2',
+    description: 'Test Description 2',
+    targetMinutes: 200,
+    avoidMessage: 'Test avoid message 2',
+    deadline: DateTime(2025, 12, 31),
+    createdAt: DateTime(2025, 1, 1),
+    updatedAt: DateTime(2025, 1, 1),
+  );
+
+  setUp(() {
+    mockGoalsDatasource = MockLocalGoalsDatasource();
+
+    when(() => mockGoalsDatasource.fetchAllGoals())
+        .thenAnswer((_) async => [testGoal, testGoal2]);
+
+    viewModel = HomeViewModel(
+      goalsDatasource: mockGoalsDatasource,
+    );
+  });
+
+  group('HomeViewModel', () {
+    group('onDeleteGoalConfirmed', () {
+      test('should delete goal with study logs using transaction', () async {
+        when(() => mockGoalsDatasource.deleteGoalWithStudyLogs(testGoal.id))
+            .thenAnswer((_) async {});
+
+        await viewModel.loadGoals();
+        expect(viewModel.state.goals.length, 2);
+
+        final result = await viewModel.onDeleteGoalConfirmed(testGoal);
+
+        expect(result, DeleteGoalResult.success);
+        verify(() => mockGoalsDatasource.deleteGoalWithStudyLogs(testGoal.id))
+            .called(1);
+      });
+
+      test('should remove goal from state after deletion', () async {
+        when(() => mockGoalsDatasource.deleteGoalWithStudyLogs(testGoal.id))
+            .thenAnswer((_) async {});
+
+        await viewModel.loadGoals();
+        expect(viewModel.state.goals.length, 2);
+        expect(
+            viewModel.state.goals.any((g) => g.id == testGoal.id), isTrue);
+
+        final result = await viewModel.onDeleteGoalConfirmed(testGoal);
+
+        expect(result, DeleteGoalResult.success);
+        expect(viewModel.state.goals.length, 1);
+        expect(
+            viewModel.state.goals.any((g) => g.id == testGoal.id), isFalse);
+        expect(
+            viewModel.state.goals.any((g) => g.id == testGoal2.id), isTrue);
+      });
+
+      test('should return failure when deletion fails', () async {
+        when(() => mockGoalsDatasource.deleteGoalWithStudyLogs(testGoal.id))
+            .thenThrow(Exception('Database error'));
+
+        await viewModel.loadGoals();
+
+        final result = await viewModel.onDeleteGoalConfirmed(testGoal);
+
+        expect(result, DeleteGoalResult.failure);
+      });
+
+      test('should not modify state when deletion fails', () async {
+        when(() => mockGoalsDatasource.deleteGoalWithStudyLogs(testGoal.id))
+            .thenThrow(Exception('Database error'));
+
+        await viewModel.loadGoals();
+        final initialGoalsCount = viewModel.state.goals.length;
+
+        await viewModel.onDeleteGoalConfirmed(testGoal);
+
+        expect(viewModel.state.goals.length, initialGoalsCount);
+      });
+    });
+  });
+}

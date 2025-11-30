@@ -5,6 +5,12 @@ import '../../../core/data/local/local_goals_datasource.dart';
 import '../../../core/data/local/app_database.dart';
 import '../../../core/utils/app_logger.dart';
 
+/// 目標削除操作の結果
+enum DeleteGoalResult {
+  success,
+  failure,
+}
+
 // Home画面の状態
 class HomeState {
   final List<GoalsModel> goals;
@@ -28,14 +34,17 @@ class HomeState {
 
 // Home画面のViewModel
 class HomeViewModel extends GetxController {
-  late final LocalGoalsDatasource _datasource;
+  late final LocalGoalsDatasource _goalsDatasource;
 
   // 状態（Rxを使わない）
   HomeState _state = HomeState();
   HomeState get state => _state;
 
-  HomeViewModel() {
-    _datasource = LocalGoalsDatasource(database: AppDatabase());
+  HomeViewModel({
+    LocalGoalsDatasource? goalsDatasource,
+  }) {
+    final database = AppDatabase();
+    _goalsDatasource = goalsDatasource ?? LocalGoalsDatasource(database: database);
   }
 
   @override
@@ -50,7 +59,7 @@ class HomeViewModel extends GetxController {
       _state = state.copyWith(isLoading: true);
       update();
 
-      final goals = await _datasource.fetchAllGoals();
+      final goals = await _goalsDatasource.fetchAllGoals();
       AppLogger.instance.i('目標を${goals.length}件読み込みました');
 
       _state = state.copyWith(
@@ -87,7 +96,7 @@ class HomeViewModel extends GetxController {
         updatedAt: now,
       );
 
-      await _datasource.saveGoal(goal);
+      await _goalsDatasource.saveGoal(goal);
       AppLogger.instance.i('目標を保存しました: ${goal.id}');
 
       // 状態を直接更新（パフォーマンス改善: DBからの再読み込みを回避）
@@ -125,7 +134,7 @@ class HomeViewModel extends GetxController {
         updatedAt: now,
       );
 
-      await _datasource.updateGoal(updatedGoal);
+      await _goalsDatasource.updateGoal(updatedGoal);
       AppLogger.instance.i('目標を更新しました: ${updatedGoal.id}');
 
       // 状態を直接更新（パフォーマンス改善: DBからの再読み込みを回避）
@@ -136,6 +145,42 @@ class HomeViewModel extends GetxController {
       update();
     } catch (error, stackTrace) {
       AppLogger.instance.e('目標の更新に失敗しました', error, stackTrace);
+      rethrow;
+    }
+  }
+
+  /// 目標削除を実行し、結果を返す（View層から呼び出すためのメソッド）
+  /// MVVMパターンに従い、ビジネスロジックをViewModelに集約
+  Future<DeleteGoalResult> onDeleteGoalConfirmed(GoalsModel goal) async {
+    try {
+      await _deleteGoalInternal(goal);
+      return DeleteGoalResult.success;
+    } catch (_) {
+      // エラーは_deleteGoalInternal内でログ記録済み
+      return DeleteGoalResult.failure;
+    }
+  }
+
+  // 目標を削除（学習ログも含めてカスケード削除）- 内部実装
+  // トランザクションを使用してデータ整合性を保証
+  Future<void> _deleteGoalInternal(GoalsModel goal) async {
+    try {
+      // トランザクションで学習ログと目標をアトミックに削除
+      await _goalsDatasource.deleteGoalWithStudyLogs(goal.id);
+      AppLogger.instance.i('目標と学習ログを削除しました: ${goal.id}');
+
+      // 状態を直接更新（パフォーマンス改善: DBからの再読み込みを回避）
+      final updatedGoals = state.goals.where((g) => g.id != goal.id).toList();
+      _state = state.copyWith(goals: updatedGoals);
+      update();
+
+      // デバッグ: 削除後に全目標を表示（デバッグビルドのみ）
+      assert(() {
+        debugPrintAllGoals();
+        return true;
+      }());
+    } catch (error, stackTrace) {
+      AppLogger.instance.e('目標の削除に失敗しました', error, stackTrace);
       rethrow;
     }
   }
@@ -151,7 +196,7 @@ class HomeViewModel extends GetxController {
   /// デバッグ用: 保存されている目標を全件取得して表示
   Future<void> debugPrintAllGoals() async {
     try {
-      final goals = await _datasource.fetchAllGoals();
+      final goals = await _goalsDatasource.fetchAllGoals();
       AppLogger.instance.i('=== 保存されている目標一覧 (${goals.length}件) ===');
 
       if (goals.isEmpty) {

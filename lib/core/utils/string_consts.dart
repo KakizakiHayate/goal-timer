@@ -35,4 +35,13 @@ class StringConsts {
   // ボタン
   static const String saveButton = '保存';
   static const String updateButton = '更新';
+  static const String deleteButton = '削除';
+  static const String cancelButton = 'キャンセル';
+
+  // 削除確認ダイアログ
+  static const String deleteGoalTitle = '目標を削除しますか？';
+  static const String deleteGoalMessage =
+      'この目標と、紐づいた学習ログがすべて削除されます。この操作は元に戻せません。';
+  static const String goalDeletedMessage = '目標を削除しました';
+  static const String goalDeleteFailedMessage = '目標の削除に失敗しました';
 }

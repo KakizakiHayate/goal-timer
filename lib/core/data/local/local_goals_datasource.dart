@@ -64,6 +64,26 @@ class LocalGoalsDatasource {
     );
   }
 
+  /// 目標と紐づく学習ログをトランザクションで削除
+  /// データ整合性を保つため、学習ログと目標の削除をアトミックに実行
+  Future<void> deleteGoalWithStudyLogs(String goalId) async {
+    final db = await _database.database;
+    await db.transaction((txn) async {
+      // 1. 紐づく学習ログを先に削除
+      await txn.delete(
+        DatabaseConsts.tableStudyDailyLogs,
+        where: '${DatabaseConsts.columnGoalId} = ?',
+        whereArgs: [goalId],
+      );
+      // 2. 目標を削除
+      await txn.delete(
+        DatabaseConsts.tableGoals,
+        where: '${DatabaseConsts.columnId} = ?',
+        whereArgs: [goalId],
+      );
+    });
+  }
+
   /// 未同期の目標を取得
   Future<List<GoalsModel>> fetchUnsyncedGoals() async {
     final db = await _database.database;

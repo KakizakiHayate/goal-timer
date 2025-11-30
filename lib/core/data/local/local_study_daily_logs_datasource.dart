@@ -50,6 +50,16 @@ class LocalStudyDailyLogsDatasource {
     );
   }
 
+  /// 特定の目標に紐づく学習ログをすべて削除
+  Future<void> deleteLogsByGoalId(String goalId) async {
+    final db = await _database.database;
+    await db.delete(
+      DatabaseConsts.tableStudyDailyLogs,
+      where: '${DatabaseConsts.columnGoalId} = ?',
+      whereArgs: [goalId],
+    );
+  }
+
   /// 未同期のログを取得
   Future<List<StudyDailyLogsModel>> fetchUnsyncedLogs() async {
     final db = await _database.database;
