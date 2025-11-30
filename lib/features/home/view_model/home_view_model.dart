@@ -104,6 +104,37 @@ class HomeViewModel extends GetxController {
     }
   }
 
+  // 目標を更新
+  Future<void> updateGoal({
+    required GoalsModel original,
+    required String title,
+    required String description,
+    required int targetMinutes,
+    required String avoidMessage,
+    required DateTime deadline,
+  }) async {
+    try {
+      final now = DateTime.now();
+      final updatedGoal = original.copyWith(
+        title: title,
+        description: description.isEmpty ? null : description,
+        targetMinutes: targetMinutes,
+        avoidMessage: avoidMessage,
+        deadline: deadline,
+        updatedAt: now,
+      );
+
+      await _datasource.updateGoal(updatedGoal);
+      AppLogger.instance.i('目標を更新しました: ${updatedGoal.id}');
+
+      // 目標リストを再読み込み
+      await loadGoals();
+    } catch (error, stackTrace) {
+      AppLogger.instance.e('目標の更新に失敗しました', error, stackTrace);
+      rethrow;
+    }
+  }
+
   // 目標リストを再読み込み
   void reloadGoals() {
     loadGoals();

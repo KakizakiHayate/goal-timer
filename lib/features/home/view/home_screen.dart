@@ -11,6 +11,7 @@ import '../view_model/home_view_model.dart';
 import '../../settings/view/settings_screen.dart';
 import '../../timer/view/timer_screen.dart';
 import 'widgets/add_goal_modal.dart';
+import 'widgets/edit_goal_modal.dart';
 
 /// ホーム画面
 class HomeScreen extends StatefulWidget {
@@ -323,7 +324,17 @@ class _HomeTabContent extends StatelessWidget {
               );
             },
             onEditTap: () {
-              // 編集機能（Coming Soon）
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (context) {
+                  return FractionallySizedBox(
+                    heightFactor: 0.95,
+                    child: EditGoalModal(goal: goal),
+                  );
+                },
+              );
             },
           );
         },
