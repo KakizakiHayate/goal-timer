@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 import '../../../core/models/goals/goals_model.dart';
 import '../../../core/data/local/local_goals_datasource.dart';
+import '../../../core/data/local/local_study_daily_logs_datasource.dart';
 import '../../../core/data/local/app_database.dart';
 import '../../../core/utils/app_logger.dart';
 
@@ -28,14 +29,20 @@ class HomeState {
 
 // Home画面のViewModel
 class HomeViewModel extends GetxController {
-  late final LocalGoalsDatasource _datasource;
+  late final LocalGoalsDatasource _goalsDatasource;
+  late final LocalStudyDailyLogsDatasource _studyLogsDatasource;
 
   // 状態（Rxを使わない）
   HomeState _state = HomeState();
   HomeState get state => _state;
 
-  HomeViewModel() {
-    _datasource = LocalGoalsDatasource(database: AppDatabase());
+  HomeViewModel({
+    LocalGoalsDatasource? goalsDatasource,
+    LocalStudyDailyLogsDatasource? studyLogsDatasource,
+  }) {
+    final database = AppDatabase();
+    _goalsDatasource = goalsDatasource ?? LocalGoalsDatasource(database: database);
+    _studyLogsDatasource = studyLogsDatasource ?? LocalStudyDailyLogsDatasource(database: database);
   }
 
   @override
@@ -50,7 +57,7 @@ class HomeViewModel extends GetxController {
       _state = state.copyWith(isLoading: true);
       update();
 
-      final goals = await _datasource.fetchAllGoals();
+      final goals = await _goalsDatasource.fetchAllGoals();
       AppLogger.instance.i('目標を${goals.length}件読み込みました');
 
       _state = state.copyWith(
@@ -87,7 +94,7 @@ class HomeViewModel extends GetxController {
         updatedAt: now,
       );
 
-      await _datasource.saveGoal(goal);
+      await _goalsDatasource.saveGoal(goal);
       AppLogger.instance.i('目標を保存しました: ${goal.id}');
 
       // 状態を直接更新（パフォーマンス改善: DBからの再読み込みを回避）
@@ -125,7 +132,7 @@ class HomeViewModel extends GetxController {
         updatedAt: now,
       );
 
-      await _datasource.updateGoal(updatedGoal);
+      await _goalsDatasource.updateGoal(updatedGoal);
       AppLogger.instance.i('目標を更新しました: ${updatedGoal.id}');
 
       // 状態を直接更新（パフォーマンス改善: DBからの再読み込みを回避）
@@ -136,6 +143,33 @@ class HomeViewModel extends GetxController {
       update();
     } catch (error, stackTrace) {
       AppLogger.instance.e('目標の更新に失敗しました', error, stackTrace);
+      rethrow;
+    }
+  }
+
+  // 目標を削除（学習ログも含めてカスケード削除）
+  Future<void> deleteGoal(GoalsModel goal) async {
+    try {
+      // 1. 紐づく学習ログを先に削除
+      await _studyLogsDatasource.deleteLogsByGoalId(goal.id);
+      AppLogger.instance.i('目標に紐づく学習ログを削除しました: ${goal.id}');
+
+      // 2. 目標を削除
+      await _goalsDatasource.deleteGoal(goal.id);
+      AppLogger.instance.i('目標を削除しました: ${goal.id}');
+
+      // 状態を直接更新（パフォーマンス改善: DBからの再読み込みを回避）
+      final updatedGoals = state.goals.where((g) => g.id != goal.id).toList();
+      _state = state.copyWith(goals: updatedGoals);
+      update();
+
+      // デバッグ: 削除後に全目標を表示（デバッグビルドのみ）
+      assert(() {
+        debugPrintAllGoals();
+        return true;
+      }());
+    } catch (error, stackTrace) {
+      AppLogger.instance.e('目標の削除に失敗しました', error, stackTrace);
       rethrow;
     }
   }
@@ -151,7 +185,7 @@ class HomeViewModel extends GetxController {
   /// デバッグ用: 保存されている目標を全件取得して表示
   Future<void> debugPrintAllGoals() async {
     try {
-      final goals = await _datasource.fetchAllGoals();
+      final goals = await _goalsDatasource.fetchAllGoals();
       AppLogger.instance.i('=== 保存されている目標一覧 (${goals.length}件) ===');
 
       if (goals.isEmpty) {

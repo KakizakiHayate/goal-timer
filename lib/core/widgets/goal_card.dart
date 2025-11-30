@@ -16,6 +16,7 @@ class GoalCard extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onTimerTap;
   final VoidCallback? onEditTap;
+  final VoidCallback? onDeleteTap;
   final bool isActive;
   final GlobalKey? tutorialKey; // チュートリアル用のKey
   final GlobalKey? timerButtonKey; // タイマーボタン用のKey
@@ -30,6 +31,7 @@ class GoalCard extends StatelessWidget {
     this.onTap,
     this.onTimerTap,
     this.onEditTap,
+    this.onDeleteTap,
     this.isActive = true,
     this.tutorialKey,
     this.timerButtonKey,
@@ -233,6 +235,13 @@ class GoalCard extends StatelessWidget {
           textColor: ColorConsts.textSecondary,
           onTap: onEditTap,
         ),
+        const SizedBox(width: SpacingConsts.s),
+        _IconButton(
+          icon: Icons.delete_outline,
+          backgroundColor: ColorConsts.error.withOpacity(0.1),
+          iconColor: ColorConsts.error,
+          onTap: onDeleteTap,
+        ),
       ],
     );
   }
@@ -346,6 +355,80 @@ class _ActionButtonState extends State<_ActionButton>
                   ),
                 ],
               ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// アイコンのみのボタン（削除ボタン用）
+class _IconButton extends StatefulWidget {
+  final IconData icon;
+  final Color backgroundColor;
+  final Color iconColor;
+  final VoidCallback? onTap;
+
+  const _IconButton({
+    required this.icon,
+    required this.backgroundColor,
+    required this.iconColor,
+    this.onTap,
+  });
+
+  @override
+  State<_IconButton> createState() => _IconButtonState();
+}
+
+class _IconButtonState extends State<_IconButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: AnimationConsts.buttonTap,
+      vsync: this,
+    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: AnimationConsts.scalePressed,
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: AnimationConsts.sharpCurve,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _scaleAnimation,
+      builder: (context, child) {
+        return Transform.scale(
+          scale: _scaleAnimation.value,
+          child: GestureDetector(
+            onTapDown: (_) => _animationController.forward(),
+            onTapUp: (_) => _animationController.reverse(),
+            onTapCancel: () => _animationController.reverse(),
+            onTap: widget.onTap,
+            child: Container(
+              padding: const EdgeInsets.all(SpacingConsts.s),
+              decoration: BoxDecoration(
+                color: widget.backgroundColor,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(widget.icon, color: widget.iconColor, size: 18),
             ),
           ),
         );
