@@ -4,6 +4,7 @@ import '../../../../core/models/goals/goals_model.dart';
 import '../../../../core/utils/color_consts.dart';
 import '../../../../core/utils/text_consts.dart';
 import '../../../../core/utils/spacing_consts.dart';
+import '../../../../core/utils/ui_consts.dart';
 import '../../view_model/home_view_model.dart';
 
 class AddGoalModal extends StatefulWidget {
@@ -54,7 +55,7 @@ class _AddGoalModalState extends State<AddGoalModal> {
       context: context,
       initialDate: DateTime.now().add(const Duration(days: 30)),
       firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
+      lastDate: DateTime.now().add(const Duration(days: UIConsts.maxDeadlineDays)),
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(

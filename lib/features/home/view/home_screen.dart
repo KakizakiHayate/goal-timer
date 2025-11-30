@@ -5,6 +5,7 @@ import '../../../core/utils/color_consts.dart';
 import '../../../core/utils/text_consts.dart';
 import '../../../core/utils/spacing_consts.dart';
 import '../../../core/utils/animation_consts.dart';
+import '../../../core/utils/ui_consts.dart';
 import '../../../core/widgets/goal_card.dart';
 import '../../../core/widgets/pressable_card.dart';
 import '../view_model/home_view_model.dart';
@@ -172,7 +173,7 @@ class _HomeScreenState extends State<HomeScreen>
       backgroundColor: Colors.transparent,
       builder: (context) {
         return FractionallySizedBox(
-          heightFactor: 0.95,
+          heightFactor: UIConsts.modalHeightFactor,
           child: const AddGoalModal(),
         );
       },
@@ -329,7 +330,7 @@ class _HomeTabContent extends StatelessWidget {
                 backgroundColor: Colors.transparent,
                 builder: (context) {
                   return FractionallySizedBox(
-                    heightFactor: 0.95,
+                    heightFactor: UIConsts.modalHeightFactor,
                     child: AddGoalModal(goal: goal),
                   );
                 },
