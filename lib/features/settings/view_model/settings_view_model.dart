@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../core/utils/time_utils.dart';
 
 class SettingsController extends GetxController {
   static const String _keyDefaultTimerSeconds = 'default_timer_seconds';
@@ -39,13 +40,6 @@ class SettingsController extends GetxController {
   }
 
   String get formattedDefaultTime {
-    final hours = defaultTimerSeconds.value ~/ 3600;
-    final minutes = (defaultTimerSeconds.value % 3600) ~/ 60;
-
-    if (hours > 0) {
-      return '$hours時間$minutes分';
-    } else {
-      return '$minutes分';
-    }
+    return TimeUtils.formatDurationFromSeconds(defaultTimerSeconds.value);
   }
 }

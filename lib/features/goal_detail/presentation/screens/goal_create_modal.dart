@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../../../core/utils/color_consts.dart';
 import '../../../../core/utils/text_consts.dart';
 import '../../../../core/utils/spacing_consts.dart';
+import '../../../../core/utils/time_utils.dart';
 import '../../../../core/widgets/goal_input_field.dart';
 import '../../../../core/models/goals/goals_model.dart';
 
@@ -343,7 +344,7 @@ class _GoalCreateModalContentState
                   ),
                   const SizedBox(width: SpacingConsts.s),
                   Text(
-                    '${_targetMinutes ~/ 60}時間${_targetMinutes % 60}分',
+                    TimeUtils.formatDurationFromMinutes(_targetMinutes),
                     style: TextConsts.h3.copyWith(
                       color: ColorConsts.primary,
                       fontWeight: FontWeight.bold,
