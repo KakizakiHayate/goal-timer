@@ -1,5 +1,29 @@
 /// 時間関連のユーティリティクラス
 class TimeUtils {
+  /// 秒数を時間表示形式にフォーマット
+  /// 60分以上の場合は HH:MM:SS 形式、それ以外は MM:SS 形式
+  static String formatDurationFromSeconds(int totalSeconds) {
+    final hours = totalSeconds ~/ 3600;
+    final minutes = (totalSeconds % 3600) ~/ 60;
+    final seconds = totalSeconds % 60;
+
+    if (hours > 0) {
+      return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    } else {
+      return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    }
+  }
+
+  /// 分数を時間表示形式にフォーマット
+  /// 60分以上の場合は HH:MM:SS 形式（秒は00）、それ以外は「X分」形式
+  static String formatDurationFromMinutes(int totalMinutes) {
+    if (totalMinutes >= 60) {
+      return formatDurationFromSeconds(totalMinutes * 60);
+    } else {
+      return '$totalMinutes分';
+    }
+  }
+
   /// 残り時間を計算（目標時間 - 消費時間）- 後方互換性のため残す
   static String calculateRemainingTime(int totalTargetHours, int spentMinutes) {
     // 目標時間を分に変換

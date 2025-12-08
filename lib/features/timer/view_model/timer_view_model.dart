@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:goal_timer/core/models/study_daily_logs/study_daily_logs_model.dart';
 import 'package:goal_timer/core/models/goals/goals_model.dart';
 import 'package:goal_timer/core/utils/app_logger.dart';
+import 'package:goal_timer/core/utils/time_utils.dart';
 import 'package:goal_timer/core/data/local/local_study_daily_logs_datasource.dart';
 import 'package:goal_timer/core/data/local/app_database.dart';
 import 'package:goal_timer/features/settings/view_model/settings_view_model.dart';
@@ -67,15 +68,7 @@ class TimerState {
   }
 
   String formatTime() {
-    final hours = currentSeconds ~/ 3600;
-    final minutes = (currentSeconds % 3600) ~/ 60;
-    final seconds = currentSeconds % 60;
-
-    if (hours > 0) {
-      return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-    } else {
-      return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-    }
+    return TimeUtils.formatDurationFromSeconds(currentSeconds);
   }
 
   bool get isShowTimerFinishButton {
