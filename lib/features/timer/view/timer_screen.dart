@@ -249,10 +249,7 @@ class _TimerScreenState extends State<TimerScreen> {
   }
 
   Widget _buildTimerDisplay(TimerState timerState) {
-    final minutes = timerState.currentSeconds ~/ 60;
-    final seconds = timerState.currentSeconds % 60;
-    final timeText =
-        '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    final timeText = timerState.formatTime();
 
     final progressValue =
         timerState.mode == TimerMode.countdown
@@ -291,13 +288,19 @@ class _TimerScreenState extends State<TimerScreen> {
             centerWidget: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  timeText,
-                  style: TextConsts.h1.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 56,
-                    letterSpacing: -2,
+                SizedBox(
+                  width: 220,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      timeText,
+                      style: TextConsts.h1.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 56,
+                        letterSpacing: -2,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: SpacingConsts.s),
