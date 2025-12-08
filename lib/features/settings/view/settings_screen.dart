@@ -237,44 +237,50 @@ class _SettingsScreenState extends State<SettingsScreen>
               children: [
                 Padding(
                   padding: const EdgeInsets.all(SpacingConsts.m),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: Text(
-                          'キャンセル',
-                          style: TextConsts.body.copyWith(
-                            color: ColorConsts.textSecondary,
+                    child: Row(
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text(
+                            'キャンセル',
+                            style: TextConsts.body.copyWith(
+                              color: ColorConsts.textSecondary,
+                            ),
                           ),
                         ),
-                      ),
-                      Text(
-                        'デフォルトタイマー時間',
-                        style: TextConsts.h4.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () async {
-                          final clampedDuration = tempDuration > const Duration(hours: 24)
-                              ? const Duration(hours: 24)
-                              : tempDuration;
-                          await settingsController.updateDefaultTimerDuration(clampedDuration);
-                          if (context.mounted) {
-                            Navigator.pop(context);
-                          }
-                        },
-                        child: Text(
-                          '保存',
-                          style: TextConsts.body.copyWith(
-                            color: ColorConsts.primary,
-                            fontWeight: FontWeight.bold,
+                        Expanded(
+                          child: Center(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                'デフォルトタイマー時間',
+                                style: TextConsts.h4.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
+                        TextButton(
+                          onPressed: () async {
+                            final clampedDuration = tempDuration > const Duration(hours: 24)
+                                ? const Duration(hours: 24)
+                                : tempDuration;
+                            await settingsController.updateDefaultTimerDuration(clampedDuration);
+                            if (context.mounted) {
+                              Navigator.pop(context);
+                            }
+                          },
+                          child: Text(
+                            '保存',
+                            style: TextConsts.body.copyWith(
+                              color: ColorConsts.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                 ),
                 const Divider(height: 1),
                 Expanded(
