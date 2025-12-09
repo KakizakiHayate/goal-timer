@@ -1,13 +1,24 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:goal_timer/core/utils/app_logger.dart';
+import 'package:goal_timer/core/utils/time_utils.dart';
 
 /// 設定データのローカルDataSource
 /// SharedPreferencesを使用して設定を永続化
 class LocalSettingsDataSource {
   static const String _keyDefaultTimerSeconds = 'default_timer_seconds';
-  static const int defaultTimerSeconds = 25 * 60;
-  static const int minTimerSeconds = 60;
-  static const int maxTimerSeconds = 24 * 60 * 60;
+
+  // タイマー設定の定数
+  static const int _defaultTimerMinutes = 25;
+  static const int _minTimerMinutes = 1;
+  static const int _maxTimerHours = 24;
+
+  // 秒単位に変換した定数（外部公開用）
+  static const int defaultTimerSeconds =
+      _defaultTimerMinutes * TimeUtils.secondsPerMinute;
+  static const int minTimerSeconds =
+      _minTimerMinutes * TimeUtils.secondsPerMinute;
+  static const int maxTimerSeconds =
+      _maxTimerHours * TimeUtils.secondsPerHour;
 
   /// デフォルトタイマー時間を取得
   Future<int> fetchDefaultTimerSeconds() async {

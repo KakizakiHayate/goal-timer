@@ -15,6 +15,8 @@ class TimerConstants {
   static const int countdownCompleteThreshold = 0;
   static const int pomodoroWorkMinutes = 25;
   static const int pomodoroBreakMinutes = 5;
+  static const int countupMaxHours = 1;
+  static const int initialPomodoroRound = 1;
 }
 
 // タイマーの状態
@@ -32,14 +34,19 @@ class TimerState {
   final TimerMode mode;
   final bool isPomodoroBreak;
 
+  // デフォルト値の定数
+  static final int _defaultSeconds =
+      TimerConstants.pomodoroWorkMinutes * TimeUtils.secondsPerMinute;
+
   TimerState({
-    this.totalSeconds = 25 * 60,
-    this.currentSeconds = 25 * 60,
+    int? totalSeconds,
+    int? currentSeconds,
     this.status = TimerStatus.initial,
     this.mode = TimerMode.countdown,
     this.isPomodoroBreak = false,
-    this.pomodoroRound = 1,
-  });
+    this.pomodoroRound = TimerConstants.initialPomodoroRound,
+  })  : totalSeconds = totalSeconds ?? _defaultSeconds,
+        currentSeconds = currentSeconds ?? _defaultSeconds;
 
   TimerState copyWith({
     int? totalSeconds,
@@ -63,7 +70,7 @@ class TimerState {
     if (mode == TimerMode.countdown || mode == TimerMode.pomodoro) {
       return 1.0 - (currentSeconds / totalSeconds);
     } else {
-      return (currentSeconds / 3600).clamp(0.0, 1.0);
+      return (currentSeconds / TimeUtils.secondsPerHour).clamp(0.0, 1.0);
     }
   }
 
@@ -139,11 +146,18 @@ class TimerViewModel extends GetxController {
         currentSeconds: defaultSeconds,
       );
     } else if (mode == TimerMode.countup) {
-      _state.value = state.copyWith(totalSeconds: 60 * 60, currentSeconds: 0);
-    } else if (mode == TimerMode.pomodoro) {
+      final countupSeconds =
+          TimerConstants.countupMaxHours * TimeUtils.secondsPerHour;
       _state.value = state.copyWith(
-        totalSeconds: TimerConstants.pomodoroWorkMinutes * 60,
-        currentSeconds: TimerConstants.pomodoroWorkMinutes * 60,
+        totalSeconds: countupSeconds,
+        currentSeconds: TimerConstants.countdownCompleteThreshold,
+      );
+    } else if (mode == TimerMode.pomodoro) {
+      final pomodoroSeconds =
+          TimerConstants.pomodoroWorkMinutes * TimeUtils.secondsPerMinute;
+      _state.value = state.copyWith(
+        totalSeconds: pomodoroSeconds,
+        currentSeconds: pomodoroSeconds,
       );
     }
     return true;
