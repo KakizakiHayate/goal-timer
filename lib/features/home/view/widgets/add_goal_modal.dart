@@ -7,6 +7,7 @@ import '../../../../core/utils/text_consts.dart';
 import '../../../../core/utils/spacing_consts.dart';
 import '../../../../core/utils/ui_consts.dart';
 import '../../../../core/utils/string_consts.dart';
+import '../../../../core/utils/time_utils.dart';
 import '../../view_model/home_view_model.dart';
 
 class AddGoalModal extends StatefulWidget {
@@ -22,8 +23,8 @@ class _AddGoalModalState extends State<AddGoalModal> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _titleController;
   late final TextEditingController _descriptionController;
-  late final TextEditingController _targetMinutesController;
   late final TextEditingController _avoidMessageController;
+  late int _targetMinutes;
   DateTime? _selectedDeadline;
   bool _isLoading = false;
 
@@ -36,8 +37,7 @@ class _AddGoalModalState extends State<AddGoalModal> {
     _titleController = TextEditingController(text: goal?.title ?? '');
     _descriptionController =
         TextEditingController(text: goal?.description ?? '');
-    _targetMinutesController =
-        TextEditingController(text: goal?.targetMinutes.toString() ?? '');
+    _targetMinutes = goal?.targetMinutes ?? 30;
     _avoidMessageController =
         TextEditingController(text: goal?.avoidMessage ?? '');
     _selectedDeadline = goal?.deadline;
@@ -47,7 +47,6 @@ class _AddGoalModalState extends State<AddGoalModal> {
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
-    _targetMinutesController.dispose();
     _avoidMessageController.dispose();
     super.dispose();
   }
@@ -109,7 +108,7 @@ class _AddGoalModalState extends State<AddGoalModal> {
           original: widget.goal!,
           title: _titleController.text.trim(),
           description: _descriptionController.text.trim(),
-          targetMinutes: int.parse(_targetMinutesController.text.trim()),
+          targetMinutes: _targetMinutes,
           avoidMessage: _avoidMessageController.text.trim(),
           deadline: _selectedDeadline!,
         );
@@ -117,7 +116,7 @@ class _AddGoalModalState extends State<AddGoalModal> {
         await homeViewModel.addGoal(
           title: _titleController.text.trim(),
           description: _descriptionController.text.trim(),
-          targetMinutes: int.parse(_targetMinutesController.text.trim()),
+          targetMinutes: _targetMinutes,
           avoidMessage: _avoidMessageController.text.trim(),
           deadline: _selectedDeadline!,
         );
@@ -318,30 +317,53 @@ class _AddGoalModalState extends State<AddGoalModal> {
           ),
         ),
         const SizedBox(height: SpacingConsts.s),
-        TextFormField(
-          controller: _targetMinutesController,
-          decoration: InputDecoration(
-            hintText: StringConsts.targetMinutesPlaceholder,
-            filled: true,
-            fillColor: ColorConsts.cardBackground,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            contentPadding: const EdgeInsets.all(SpacingConsts.m),
-            suffixText: '分',
-          ),
-          keyboardType: TextInputType.number,
-          validator: (value) {
-            if (value == null || value.trim().isEmpty) {
-              return StringConsts.targetMinutesRequired;
-            }
-            final minutes = int.tryParse(value.trim());
-            if (minutes == null || minutes <= 0) {
-              return StringConsts.invalidNumber;
-            }
-            return null;
+        GestureDetector(
+          onTap: () async {
+            await showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return _TimePickerDialog(
+                  initialMinutes: _targetMinutes,
+                  onTimeSelected: (minutes) {
+                    setState(() {
+                      _targetMinutes = minutes;
+                    });
+                  },
+                );
+              },
+            );
           },
+          child: Container(
+            padding: const EdgeInsets.all(SpacingConsts.m),
+            decoration: BoxDecoration(
+              color: ColorConsts.cardBackground,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.schedule_outlined,
+                  color: ColorConsts.primary,
+                  size: 20,
+                ),
+                const SizedBox(width: SpacingConsts.m),
+                Expanded(
+                  child: Text(
+                    TimeUtils.formatDurationFromMinutes(_targetMinutes),
+                    style: TextConsts.body.copyWith(
+                      color: ColorConsts.textPrimary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  color: ColorConsts.textTertiary,
+                  size: 16,
+                ),
+              ],
+            ),
+          ),
         ),
       ],
     );
@@ -476,6 +498,197 @@ class _AddGoalModalState extends State<AddGoalModal> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
+      ),
+    );
+  }
+}
+
+// タイムピッカーダイアログ
+class _TimePickerDialog extends StatefulWidget {
+  final int initialMinutes;
+  final Function(int) onTimeSelected;
+
+  const _TimePickerDialog({
+    required this.initialMinutes,
+    required this.onTimeSelected,
+  });
+
+  @override
+  State<_TimePickerDialog> createState() => _TimePickerDialogState();
+}
+
+class _TimePickerDialogState extends State<_TimePickerDialog> {
+  late int _selectedHours;
+  late int _selectedMinutes;
+  late FixedExtentScrollController _hoursController;
+  late FixedExtentScrollController _minutesController;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedHours = widget.initialMinutes ~/ 60;
+    _selectedMinutes = widget.initialMinutes % 60;
+    _hoursController = FixedExtentScrollController(initialItem: _selectedHours);
+    _minutesController = FixedExtentScrollController(
+      initialItem: _selectedMinutes,
+    );
+  }
+
+  @override
+  void dispose() {
+    _hoursController.dispose();
+    _minutesController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: Container(
+        padding: const EdgeInsets.all(SpacingConsts.l),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '目標時間を設定',
+              style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: SpacingConsts.l),
+            SizedBox(
+              height: 200,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // 時間ピッカー
+                  SizedBox(
+                    width: 80,
+                    child: ListWheelScrollView.useDelegate(
+                      controller: _hoursController,
+                      itemExtent: 40,
+                      physics: const FixedExtentScrollPhysics(),
+                      onSelectedItemChanged: (index) {
+                        setState(() {
+                          _selectedHours = index;
+                        });
+                      },
+                      childDelegate: ListWheelChildBuilderDelegate(
+                        childCount: 24,
+                        builder: (context, index) {
+                          return Center(
+                            child: Text(
+                              '$index',
+                              style: TextConsts.h3.copyWith(
+                                color:
+                                    _selectedHours == index
+                                        ? ColorConsts.primary
+                                        : ColorConsts.textTertiary,
+                                fontWeight:
+                                    _selectedHours == index
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  Text(
+                    '時間',
+                    style: TextConsts.body.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: SpacingConsts.l),
+                  // 分ピッカー
+                  SizedBox(
+                    width: 80,
+                    child: ListWheelScrollView.useDelegate(
+                      controller: _minutesController,
+                      itemExtent: 40,
+                      physics: const FixedExtentScrollPhysics(),
+                      onSelectedItemChanged: (index) {
+                        setState(() {
+                          _selectedMinutes = index;
+                        });
+                      },
+                      childDelegate: ListWheelChildBuilderDelegate(
+                        childCount: 60,
+                        builder: (context, index) {
+                          return Center(
+                            child: Text(
+                              '$index',
+                              style: TextConsts.h3.copyWith(
+                                color:
+                                    _selectedMinutes == index
+                                        ? ColorConsts.primary
+                                        : ColorConsts.textTertiary,
+                                fontWeight:
+                                    _selectedMinutes == index
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  Text(
+                    '分',
+                    style: TextConsts.body.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: SpacingConsts.l),
+            Row(
+              children: [
+                Expanded(
+                  child: TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text(
+                      'キャンセル',
+                      style: TextConsts.body.copyWith(
+                        color: ColorConsts.textSecondary,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: SpacingConsts.m),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      final totalMinutes =
+                          _selectedHours * 60 + _selectedMinutes;
+                      if (totalMinutes > 0) {
+                        widget.onTimeSelected(totalMinutes);
+                        Navigator.of(context).pop();
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: ColorConsts.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: SpacingConsts.m,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      '決定',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
