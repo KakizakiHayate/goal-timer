@@ -2,8 +2,10 @@ import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 import '../../../core/models/goals/goals_model.dart';
 import '../../../core/data/local/local_goals_datasource.dart';
+import '../../../core/data/local/local_study_daily_logs_datasource.dart';
 import '../../../core/data/local/app_database.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../core/utils/time_utils.dart';
 
 /// 目標削除操作の結果
 enum DeleteGoalResult {
@@ -14,27 +16,48 @@ enum DeleteGoalResult {
 // Home画面の状態
 class HomeState {
   final List<GoalsModel> goals;
+  final Map<String, int> studiedSecondsByGoalId;
   final bool isLoading;
 
   HomeState({
     this.goals = const [],
+    this.studiedSecondsByGoalId = const {},
     this.isLoading = false,
   });
 
   HomeState copyWith({
     List<GoalsModel>? goals,
+    Map<String, int>? studiedSecondsByGoalId,
     bool? isLoading,
   }) {
     return HomeState(
       goals: goals ?? this.goals,
+      studiedSecondsByGoalId: studiedSecondsByGoalId ?? this.studiedSecondsByGoalId,
       isLoading: isLoading ?? this.isLoading,
     );
+  }
+
+  /// 目標の進捗率を計算（0.0〜1.0）
+  double getProgressForGoal(GoalsModel goal) {
+    final studiedSeconds = studiedSecondsByGoalId[goal.id] ?? 0;
+    final studiedMinutes = studiedSeconds ~/ TimeUtils.secondsPerMinute;
+    return TimeUtils.calculateProgressRateFromMinutes(
+      goal.targetMinutes,
+      studiedMinutes,
+    );
+  }
+
+  /// 目標の学習済み時間（分）を取得
+  int getStudiedMinutesForGoal(GoalsModel goal) {
+    final studiedSeconds = studiedSecondsByGoalId[goal.id] ?? 0;
+    return studiedSeconds ~/ TimeUtils.secondsPerMinute;
   }
 }
 
 // Home画面のViewModel
 class HomeViewModel extends GetxController {
   late final LocalGoalsDatasource _goalsDatasource;
+  late final LocalStudyDailyLogsDatasource _studyLogsDatasource;
 
   // 状態（Rxを使わない）
   HomeState _state = HomeState();
@@ -42,9 +65,11 @@ class HomeViewModel extends GetxController {
 
   HomeViewModel({
     LocalGoalsDatasource? goalsDatasource,
+    LocalStudyDailyLogsDatasource? studyLogsDatasource,
   }) {
     final database = AppDatabase();
     _goalsDatasource = goalsDatasource ?? LocalGoalsDatasource(database: database);
+    _studyLogsDatasource = studyLogsDatasource ?? LocalStudyDailyLogsDatasource(database: database);
   }
 
   @override
@@ -53,17 +78,27 @@ class HomeViewModel extends GetxController {
     loadGoals();
   }
 
-  // ローカルデータベースから目標をロード
+  // ローカルデータベースから目標と学習ログをロード
   Future<void> loadGoals() async {
     try {
       _state = state.copyWith(isLoading: true);
       update();
 
-      final goals = await _goalsDatasource.fetchAllGoals();
+      // 目標と学習時間を並列で取得
+      final results = await Future.wait([
+        _goalsDatasource.fetchAllGoals(),
+        _studyLogsDatasource.fetchTotalSecondsForAllGoals(),
+      ]);
+
+      final goals = results[0] as List<GoalsModel>;
+      final studiedSeconds = results[1] as Map<String, int>;
+
       AppLogger.instance.i('目標を${goals.length}件読み込みました');
+      AppLogger.instance.i('学習時間データを${studiedSeconds.length}件読み込みました');
 
       _state = state.copyWith(
         goals: goals,
+        studiedSecondsByGoalId: studiedSeconds,
         isLoading: false,
       );
       update();

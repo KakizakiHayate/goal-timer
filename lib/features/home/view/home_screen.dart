@@ -308,11 +308,12 @@ class _HomeTabContent extends StatelessWidget {
       delegate: SliverChildBuilderDelegate(
         (context, index) {
           final goal = goals[index];
+          final progress = viewModel.state.getProgressForGoal(goal);
 
           return GoalCard(
             title: goal.title,
             description: goal.description?.isNotEmpty == true ? goal.description : null,
-            progress: 0.0, // TODO: 進捗率の計算ロジックを実装
+            progress: progress,
             streakDays: 0,
             avoidMessage:
                 goal.avoidMessage.isNotEmpty ? goal.avoidMessage : null,
@@ -483,7 +484,7 @@ class _TimerTabContent extends StatelessWidget {
                               const SizedBox(height: SpacingConsts.m),
                           itemBuilder: (context, index) {
                             final goal = goals[index];
-                            return _buildGoalTimerCard(context, goal);
+                            return _buildGoalTimerCard(context, goal, homeViewModel);
                           },
                         ),
                       ),
@@ -495,7 +496,12 @@ class _TimerTabContent extends StatelessWidget {
     );
   }
 
-  Widget _buildGoalTimerCard(BuildContext context, GoalsModel goal) {
+  Widget _buildGoalTimerCard(BuildContext context, GoalsModel goal, HomeViewModel viewModel) {
+    final homeState = viewModel.state;
+    final studiedMinutes = homeState.getStudiedMinutesForGoal(goal);
+    final progress = homeState.getProgressForGoal(goal);
+    final progressPercent = (progress * 100).toInt();
+
     return PressableCard(
       onTap: () {
         Navigator.push(
@@ -538,7 +544,7 @@ class _TimerTabContent extends StatelessWidget {
                   ),
                   const SizedBox(height: SpacingConsts.xs),
                   Text(
-                    '0分 / ${TimeUtils.formatDurationFromMinutes(goal.targetMinutes)}', // TODO: 学習ログから消費時間を計算する
+                    '$studiedMinutes分 / ${TimeUtils.formatDurationFromMinutes(goal.targetMinutes)}',
                     style: TextConsts.body.copyWith(
                       color: ColorConsts.textSecondary,
                     ),
@@ -549,7 +555,7 @@ class _TimerTabContent extends StatelessWidget {
 
             // 進捗率
             Text(
-              '0%', // TODO: 進捗率の計算ロジックを実装
+              '$progressPercent%',
               style: TextConsts.body.copyWith(
                 color: ColorConsts.primary,
                 fontWeight: FontWeight.bold,

@@ -30,6 +30,34 @@ class LocalStudyDailyLogsDatasource {
     return maps.map((map) => _mapToModel(map)).toList();
   }
 
+  /// 目標ごとの学習時間合計（秒）を取得
+  /// SQLで直接集計することで効率的に取得
+  Future<int> fetchTotalSecondsByGoalId(String goalId) async {
+    final db = await _database.database;
+    final result = await db.rawQuery(
+      'SELECT SUM(${DatabaseConsts.columnTotalSeconds}) as total FROM ${DatabaseConsts.tableStudyDailyLogs} WHERE ${DatabaseConsts.columnGoalId} = ?',
+      [goalId],
+    );
+    return (result.first['total'] as int?) ?? 0;
+  }
+
+  /// 全目標の学習時間合計をまとめて取得
+  /// Map<goalId, totalSeconds>の形式で返す
+  Future<Map<String, int>> fetchTotalSecondsForAllGoals() async {
+    final db = await _database.database;
+    final result = await db.rawQuery(
+      'SELECT ${DatabaseConsts.columnGoalId}, SUM(${DatabaseConsts.columnTotalSeconds}) as total FROM ${DatabaseConsts.tableStudyDailyLogs} GROUP BY ${DatabaseConsts.columnGoalId}',
+    );
+    
+    final Map<String, int> totals = {};
+    for (final row in result) {
+      final goalId = row[DatabaseConsts.columnGoalId] as String;
+      final total = (row['total'] as int?) ?? 0;
+      totals[goalId] = total;
+    }
+    return totals;
+  }
+
   /// 学習ログを保存
   Future<void> saveLog(StudyDailyLogsModel log) async {
     final db = await _database.database;
