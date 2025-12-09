@@ -1,12 +1,16 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../../core/utils/app_consts.dart';
 import '../../../core/utils/color_consts.dart';
 import '../../../core/utils/text_consts.dart';
 import '../../../core/utils/spacing_consts.dart';
 import '../../../core/utils/animation_consts.dart';
 import '../../../core/widgets/setting_item.dart';
 import '../../../core/widgets/pressable_card.dart';
+import '../view_model/settings_view_model.dart';
 
-/// 設定画面
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
@@ -18,6 +22,9 @@ class _SettingsScreenState extends State<SettingsScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
+
+  // PRコメント対応: インスタンス変数として一度だけ取得
+  final _settingsViewModel = Get.find<SettingsViewModel>();
 
   @override
   void initState() {
@@ -139,13 +146,15 @@ class _SettingsScreenState extends State<SettingsScreen>
     return _buildSection(
       title: 'アプリ設定',
       children: [
-        SettingItem(
-          title: 'デフォルトタイマー時間',
-          subtitle: '新しい目標のデフォルト時間：25分',
-          icon: Icons.timer_outlined,
-          iconColor: ColorConsts.warning,
-          onTap: _showTimerSettings,
-        ),
+        Obx(() {
+          return SettingItem(
+            title: 'デフォルトタイマー時間',
+            subtitle: '新しい目標のデフォルト時間：${_settingsViewModel.formattedDefaultTime}',
+            icon: Icons.timer_outlined,
+            iconColor: ColorConsts.warning,
+            onTap: _showTimerSettings,
+          );
+        }),
       ],
     );
   }
@@ -154,13 +163,6 @@ class _SettingsScreenState extends State<SettingsScreen>
     return _buildSection(
       title: 'データとプライバシー',
       children: [
-        SettingItem(
-          title: 'データのバックアップ',
-          subtitle: 'クラウドにデータを同期',
-          icon: Icons.cloud_upload_outlined,
-          iconColor: ColorConsts.success,
-          onTap: _showBackupSettings,
-        ),
         SettingItem(
           title: 'プライバシーポリシー',
           subtitle: 'データの取り扱いについて',
@@ -185,7 +187,7 @@ class _SettingsScreenState extends State<SettingsScreen>
         ),
         SettingItem(
           title: 'アプリについて',
-          subtitle: 'バージョン 1.0.0',
+          subtitle: 'バージョン ${AppConsts.appVersion}',
           icon: Icons.info_outline,
           iconColor: ColorConsts.textSecondary,
           onTap: _showAbout,
@@ -220,36 +222,124 @@ class _SettingsScreenState extends State<SettingsScreen>
   }
 
   void _showTimerSettings() {
-    _showComingSoonDialog('タイマー設定');
+    Duration tempDuration = Duration(seconds: _settingsViewModel.defaultTimerSeconds.value);
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: SizedBox(
+            height: 320,
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(SpacingConsts.m),
+                    child: Row(
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text(
+                            'キャンセル',
+                            style: TextConsts.body.copyWith(
+                              color: ColorConsts.textSecondary,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Center(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                'デフォルトタイマー時間',
+                                style: TextConsts.h4.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () async {
+                            // PRコメント対応: ViewModelでバリデーションするのでUI側のclampは不要
+                            await _settingsViewModel.updateDefaultTimerDuration(tempDuration);
+                            if (context.mounted) {
+                              Navigator.pop(context);
+                            }
+                          },
+                          child: Text(
+                            '保存',
+                            style: TextConsts.body.copyWith(
+                              color: ColorConsts.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                ),
+                const Divider(height: 1),
+                Expanded(
+                  child: CupertinoTimerPicker(
+                    mode: CupertinoTimerPickerMode.hm,
+                    initialTimerDuration: tempDuration,
+                    onTimerDurationChanged: (Duration newDuration) {
+                      tempDuration = newDuration;
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
-  void _showBackupSettings() {
-    _showComingSoonDialog('バックアップ設定');
+  Future<void> _openUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('URLを開けませんでした'),
+            backgroundColor: ColorConsts.error,
+          ),
+        );
+      }
+    }
   }
 
   void _showPrivacyPolicy() {
-    _showComingSoonDialog('プライバシーポリシー');
+    // PRコメント対応: URLを定数化
+    _openUrl(AppConsts.privacyPolicyUrl);
   }
 
   void _showContact() {
-    _showComingSoonDialog('お問い合わせ');
+    // PRコメント対応: URLを定数化
+    _openUrl(AppConsts.contactFormUrl);
   }
 
   void _showAbout() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Goal Timer について'),
+        title: Text('${AppConsts.appName} について'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Goal Timer',
+              AppConsts.appName,
               style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: SpacingConsts.s),
-            const Text('バージョン: 1.0.0'),
+            Text('バージョン: ${AppConsts.appVersion}'),
             const SizedBox(height: SpacingConsts.m),
             const Text('目標達成をサポートするタイマーアプリです。毎日の小さな積み重ねが、大きな成果につながります。'),
           ],
@@ -264,19 +354,4 @@ class _SettingsScreenState extends State<SettingsScreen>
     );
   }
 
-  void _showComingSoonDialog(String feature) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(feature),
-        content: const Text('この機能は開発中です。\n今後のアップデートをお待ちください。'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
 }

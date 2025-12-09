@@ -7,6 +7,7 @@ import '../../../core/utils/spacing_consts.dart';
 import '../../../core/utils/animation_consts.dart';
 import '../../../core/utils/ui_consts.dart';
 import '../../../core/utils/string_consts.dart';
+import '../../../core/utils/time_utils.dart';
 import '../../../core/widgets/goal_card.dart';
 import '../../../core/widgets/pressable_card.dart';
 import '../view_model/home_view_model.dart';
@@ -537,7 +538,7 @@ class _TimerTabContent extends StatelessWidget {
                   ),
                   const SizedBox(height: SpacingConsts.xs),
                   Text(
-                    '0分 / ${goal.targetMinutes}分', // TODO: 学習ログから消費時間を計算する
+                    '0分 / ${TimeUtils.formatDurationFromMinutes(goal.targetMinutes)}', // TODO: 学習ログから消費時間を計算する
                     style: TextConsts.body.copyWith(
                       color: ColorConsts.textSecondary,
                     ),

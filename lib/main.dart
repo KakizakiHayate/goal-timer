@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'features/home/view/home_screen.dart';
+import 'features/settings/view_model/settings_view_model.dart';
 import 'core/utils/color_consts.dart';
 import 'core/data/local/app_database.dart';
 import 'core/utils/app_logger.dart';
@@ -10,6 +11,10 @@ void main() async {
 
   // ✅ DIコンテナに登録（シングルトンとして）
   Get.put<AppDatabase>(AppDatabase(), permanent: true);
+
+  // 設定ViewModelを登録・初期化
+  final settingsViewModel = Get.put(SettingsViewModel(), permanent: true);
+  await settingsViewModel.init();
 
   // データベースを初期化（テーブル作成が実行される）
   try {

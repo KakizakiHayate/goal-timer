@@ -6,6 +6,7 @@ import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/color_consts.dart';
 import '../../../core/utils/text_consts.dart';
 import '../../../core/utils/spacing_consts.dart';
+import '../../../core/utils/time_utils.dart';
 import '../../../core/widgets/circular_progress_indicator.dart' as custom;
 
 /// タイマー画面
@@ -249,15 +250,13 @@ class _TimerScreenState extends State<TimerScreen> {
   }
 
   Widget _buildTimerDisplay(TimerState timerState) {
-    final minutes = timerState.currentSeconds ~/ 60;
-    final seconds = timerState.currentSeconds % 60;
-    final timeText =
-        '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    final timeText = timerState.formatTime();
 
     final progressValue =
         timerState.mode == TimerMode.countdown
             ? timerState.currentSeconds / timerState.totalSeconds
-            : (timerState.currentSeconds % (60 * 60)) / (60 * 60);
+            : (timerState.currentSeconds % TimeUtils.secondsPerHour) /
+                TimeUtils.secondsPerHour;
 
     return Container(
       width: 280,
@@ -291,13 +290,19 @@ class _TimerScreenState extends State<TimerScreen> {
             centerWidget: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  timeText,
-                  style: TextConsts.h1.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 56,
-                    letterSpacing: -2,
+                SizedBox(
+                  width: 220,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      timeText,
+                      style: TextConsts.h1.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 56,
+                        letterSpacing: -2,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: SpacingConsts.s),

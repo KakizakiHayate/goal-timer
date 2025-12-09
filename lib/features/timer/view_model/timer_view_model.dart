@@ -3,8 +3,10 @@ import 'package:get/get.dart';
 import 'package:goal_timer/core/models/study_daily_logs/study_daily_logs_model.dart';
 import 'package:goal_timer/core/models/goals/goals_model.dart';
 import 'package:goal_timer/core/utils/app_logger.dart';
+import 'package:goal_timer/core/utils/time_utils.dart';
 import 'package:goal_timer/core/data/local/local_study_daily_logs_datasource.dart';
 import 'package:goal_timer/core/data/local/app_database.dart';
+import 'package:goal_timer/features/settings/view_model/settings_view_model.dart';
 import 'package:uuid/uuid.dart';
 
 // タイマー関連の定数
@@ -13,6 +15,8 @@ class TimerConstants {
   static const int countdownCompleteThreshold = 0;
   static const int pomodoroWorkMinutes = 25;
   static const int pomodoroBreakMinutes = 5;
+  static const int countupMaxHours = 1;
+  static const int initialPomodoroRound = 1;
 }
 
 // タイマーの状態
@@ -30,14 +34,19 @@ class TimerState {
   final TimerMode mode;
   final bool isPomodoroBreak;
 
+  // デフォルト値の定数
+  static final int _defaultSeconds =
+      TimerConstants.pomodoroWorkMinutes * TimeUtils.secondsPerMinute;
+
   TimerState({
-    this.totalSeconds = 25 * 60,
-    this.currentSeconds = 25 * 60,
+    int? totalSeconds,
+    int? currentSeconds,
     this.status = TimerStatus.initial,
     this.mode = TimerMode.countdown,
     this.isPomodoroBreak = false,
-    this.pomodoroRound = 1,
-  });
+    this.pomodoroRound = TimerConstants.initialPomodoroRound,
+  })  : totalSeconds = totalSeconds ?? _defaultSeconds,
+        currentSeconds = currentSeconds ?? _defaultSeconds;
 
   TimerState copyWith({
     int? totalSeconds,
@@ -61,20 +70,12 @@ class TimerState {
     if (mode == TimerMode.countdown || mode == TimerMode.pomodoro) {
       return 1.0 - (currentSeconds / totalSeconds);
     } else {
-      return (currentSeconds / 3600).clamp(0.0, 1.0);
+      return (currentSeconds / TimeUtils.secondsPerHour).clamp(0.0, 1.0);
     }
   }
 
   String formatTime() {
-    final hours = currentSeconds ~/ 3600;
-    final minutes = (currentSeconds % 3600) ~/ 60;
-    final seconds = currentSeconds % 60;
-
-    if (hours > 0) {
-      return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-    } else {
-      return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-    }
+    return TimeUtils.formatDurationFromSeconds(currentSeconds);
   }
 
   bool get isShowTimerFinishButton {
@@ -96,6 +97,9 @@ class TimerViewModel extends GetxController {
   late final LocalStudyDailyLogsDatasource _datasource;
   final GoalsModel goal; // ✅ goal全体を保持
 
+  // PRコメント対応: インスタンス変数として一度だけ取得
+  final SettingsViewModel _settingsViewModel;
+
   Timer? _timer;
   int _elapsedSeconds = 0;
 
@@ -106,13 +110,17 @@ class TimerViewModel extends GetxController {
   // 経過時間を取得するgetter
   int get elapsedSeconds => _elapsedSeconds;
 
-  // ✅ コンストラクタでgoalを受け取る
-  TimerViewModel({required this.goal}) {
-    // ✅ DIコンテナから取得
+  TimerViewModel({required this.goal})
+      : _settingsViewModel = Get.find<SettingsViewModel>() {
     final database = Get.find<AppDatabase>();
     _datasource = LocalStudyDailyLogsDatasource(database: database);
-    // goalIdを初期化
-    _state.value = TimerState();
+
+    final defaultSeconds = _settingsViewModel.defaultTimerSeconds.value;
+
+    _state.value = TimerState(
+      totalSeconds: defaultSeconds,
+      currentSeconds: defaultSeconds,
+    );
   }
 
   @override
@@ -124,7 +132,6 @@ class TimerViewModel extends GetxController {
   /// モードを設定する
   /// 戻り値: モード切り替えが成功した場合はtrue、ブロックされた場合はfalse
   bool setMode(TimerMode mode) {
-    // タイマーが動作中または一時停止中の場合はモード切り替えをブロック
     if (!state.isModeSwitchable) {
       AppLogger.instance.w('タイマー動作中のためモード切り替えをブロックしました');
       return false;
@@ -132,16 +139,25 @@ class TimerViewModel extends GetxController {
 
     _state.value = state.copyWith(mode: mode);
     if (mode == TimerMode.countdown) {
+      // PRコメント対応: インスタンス変数を使用
+      final defaultSeconds = _settingsViewModel.defaultTimerSeconds.value;
       _state.value = state.copyWith(
-        totalSeconds: 25 * 60,
-        currentSeconds: 25 * 60,
+        totalSeconds: defaultSeconds,
+        currentSeconds: defaultSeconds,
       );
     } else if (mode == TimerMode.countup) {
-      _state.value = state.copyWith(totalSeconds: 60 * 60, currentSeconds: 0);
-    } else if (mode == TimerMode.pomodoro) {
+      final countupSeconds =
+          TimerConstants.countupMaxHours * TimeUtils.secondsPerHour;
       _state.value = state.copyWith(
-        totalSeconds: TimerConstants.pomodoroWorkMinutes * 60,
-        currentSeconds: TimerConstants.pomodoroWorkMinutes * 60,
+        totalSeconds: countupSeconds,
+        currentSeconds: TimerConstants.countdownCompleteThreshold,
+      );
+    } else if (mode == TimerMode.pomodoro) {
+      final pomodoroSeconds =
+          TimerConstants.pomodoroWorkMinutes * TimeUtils.secondsPerMinute;
+      _state.value = state.copyWith(
+        totalSeconds: pomodoroSeconds,
+        currentSeconds: pomodoroSeconds,
       );
     }
     return true;
@@ -157,7 +173,7 @@ class TimerViewModel extends GetxController {
 
       if (state.mode == TimerMode.countdown ||
           state.mode == TimerMode.pomodoro) {
-        if (state.currentSeconds > 0) {
+        if (state.currentSeconds > TimeUtils.minValidSeconds) {
           _state.value = state.copyWith(
             currentSeconds: state.currentSeconds - 1,
           );
@@ -203,7 +219,7 @@ class TimerViewModel extends GetxController {
         return;
       }
 
-      if (_elapsedSeconds <= 0) {
+      if (_elapsedSeconds <= TimeUtils.minValidSeconds) {
         AppLogger.instance.w('学習時間が0秒のため記録しません');
         return;
       }
