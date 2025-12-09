@@ -12,9 +12,9 @@ void main() async {
   // ✅ DIコンテナに登録（シングルトンとして）
   Get.put<AppDatabase>(AppDatabase(), permanent: true);
 
-  // 設定コントローラーを登録・初期化
-  final settingsController = Get.put(SettingsController(), permanent: true);
-  await settingsController.init();
+  // 設定ViewModelを登録・初期化
+  final settingsViewModel = Get.put(SettingsViewModel(), permanent: true);
+  await settingsViewModel.init();
 
   // データベースを初期化（テーブル作成が実行される）
   try {

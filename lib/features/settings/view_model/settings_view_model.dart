@@ -1,44 +1,35 @@
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../../../core/utils/app_logger.dart';
+import '../../../core/data/local/local_settings_datasource.dart';
 import '../../../core/utils/time_utils.dart';
 
-class SettingsController extends GetxController {
-  static const String _keyDefaultTimerSeconds = 'default_timer_seconds';
-  static const int _defaultTimerSeconds = 25 * 60;
-  static const int _minTimerSeconds = 60;
-  static const int _maxTimerSeconds = 24 * 60 * 60;
+/// 設定画面のViewModel
+/// MVVM準拠: DataSource経由でデータアクセス
+class SettingsViewModel extends GetxController {
+  late final LocalSettingsDataSource _datasource;
 
-  final RxInt defaultTimerSeconds = _defaultTimerSeconds.obs;
+  final RxInt defaultTimerSeconds = LocalSettingsDataSource.defaultTimerSeconds.obs;
 
+  SettingsViewModel() {
+    _datasource = LocalSettingsDataSource();
+  }
+
+  /// 初期化: SharedPreferencesから設定を読み込む
   Future<void> init() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final stored = prefs.getInt(_keyDefaultTimerSeconds);
-      if (stored != null && stored >= _minTimerSeconds && stored <= _maxTimerSeconds) {
-        defaultTimerSeconds.value = stored;
-        AppLogger.instance.i('デフォルトタイマー時間を読み込みました: $stored秒');
-      }
-    } catch (error, stackTrace) {
-      AppLogger.instance.e('デフォルトタイマー時間の読み込みに失敗しました', error, stackTrace);
-    }
+    final seconds = await _datasource.fetchDefaultTimerSeconds();
+    defaultTimerSeconds.value = seconds;
   }
 
+  /// デフォルトタイマー時間を更新
   Future<void> updateDefaultTimerDuration(Duration duration) async {
-    try {
-      final seconds = duration.inSeconds.clamp(_minTimerSeconds, _maxTimerSeconds);
-      defaultTimerSeconds.value = seconds;
-
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt(_keyDefaultTimerSeconds, seconds);
-
-      AppLogger.instance.i('デフォルトタイマー時間を保存しました: $seconds秒');
-    } catch (error, stackTrace) {
-      AppLogger.instance.e('デフォルトタイマー時間の保存に失敗しました', error, stackTrace);
-      rethrow;
-    }
+    final seconds = duration.inSeconds.clamp(
+      LocalSettingsDataSource.minTimerSeconds,
+      LocalSettingsDataSource.maxTimerSeconds,
+    );
+    defaultTimerSeconds.value = seconds;
+    await _datasource.saveDefaultTimerSeconds(seconds);
   }
 
+  /// フォーマット済みのデフォルト時間を取得
   String get formattedDefaultTime {
     return TimeUtils.formatDurationFromSeconds(defaultTimerSeconds.value);
   }

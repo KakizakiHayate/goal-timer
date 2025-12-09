@@ -90,6 +90,9 @@ class TimerViewModel extends GetxController {
   late final LocalStudyDailyLogsDatasource _datasource;
   final GoalsModel goal; // ✅ goal全体を保持
 
+  // PRコメント対応: インスタンス変数として一度だけ取得
+  final SettingsViewModel _settingsViewModel;
+
   Timer? _timer;
   int _elapsedSeconds = 0;
 
@@ -100,12 +103,12 @@ class TimerViewModel extends GetxController {
   // 経過時間を取得するgetter
   int get elapsedSeconds => _elapsedSeconds;
 
-  TimerViewModel({required this.goal}) {
+  TimerViewModel({required this.goal})
+      : _settingsViewModel = Get.find<SettingsViewModel>() {
     final database = Get.find<AppDatabase>();
     _datasource = LocalStudyDailyLogsDatasource(database: database);
 
-    final settingsController = Get.find<SettingsController>();
-    final defaultSeconds = settingsController.defaultTimerSeconds.value;
+    final defaultSeconds = _settingsViewModel.defaultTimerSeconds.value;
 
     _state.value = TimerState(
       totalSeconds: defaultSeconds,
@@ -129,8 +132,8 @@ class TimerViewModel extends GetxController {
 
     _state.value = state.copyWith(mode: mode);
     if (mode == TimerMode.countdown) {
-      final settingsController = Get.find<SettingsController>();
-      final defaultSeconds = settingsController.defaultTimerSeconds.value;
+      // PRコメント対応: インスタンス変数を使用
+      final defaultSeconds = _settingsViewModel.defaultTimerSeconds.value;
       _state.value = state.copyWith(
         totalSeconds: defaultSeconds,
         currentSeconds: defaultSeconds,

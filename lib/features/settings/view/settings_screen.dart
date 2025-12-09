@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../core/utils/app_consts.dart';
 import '../../../core/utils/color_consts.dart';
 import '../../../core/utils/text_consts.dart';
 import '../../../core/utils/spacing_consts.dart';
@@ -21,6 +22,9 @@ class _SettingsScreenState extends State<SettingsScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
+
+  // PRコメント対応: インスタンス変数として一度だけ取得
+  final _settingsViewModel = Get.find<SettingsViewModel>();
 
   @override
   void initState() {
@@ -139,15 +143,13 @@ class _SettingsScreenState extends State<SettingsScreen>
   }
 
   Widget _buildAppSection() {
-    final settingsController = Get.find<SettingsController>();
-
     return _buildSection(
       title: 'アプリ設定',
       children: [
         Obx(() {
           return SettingItem(
             title: 'デフォルトタイマー時間',
-            subtitle: '新しい目標のデフォルト時間：${settingsController.formattedDefaultTime}',
+            subtitle: '新しい目標のデフォルト時間：${_settingsViewModel.formattedDefaultTime}',
             icon: Icons.timer_outlined,
             iconColor: ColorConsts.warning,
             onTap: _showTimerSettings,
@@ -185,7 +187,7 @@ class _SettingsScreenState extends State<SettingsScreen>
         ),
         SettingItem(
           title: 'アプリについて',
-          subtitle: 'バージョン 1.0.0',
+          subtitle: 'バージョン ${AppConsts.appVersion}',
           icon: Icons.info_outline,
           iconColor: ColorConsts.textSecondary,
           onTap: _showAbout,
@@ -220,8 +222,7 @@ class _SettingsScreenState extends State<SettingsScreen>
   }
 
   void _showTimerSettings() {
-    final settingsController = Get.find<SettingsController>();
-    Duration tempDuration = Duration(seconds: settingsController.defaultTimerSeconds.value);
+    Duration tempDuration = Duration(seconds: _settingsViewModel.defaultTimerSeconds.value);
 
     showModalBottomSheet(
       context: context,
@@ -263,10 +264,8 @@ class _SettingsScreenState extends State<SettingsScreen>
                         ),
                         TextButton(
                           onPressed: () async {
-                            final clampedDuration = tempDuration > const Duration(hours: 24)
-                                ? const Duration(hours: 24)
-                                : tempDuration;
-                            await settingsController.updateDefaultTimerDuration(clampedDuration);
+                            // PRコメント対応: ViewModelでバリデーションするのでUI側のclampは不要
+                            await _settingsViewModel.updateDefaultTimerDuration(tempDuration);
                             if (context.mounted) {
                               Navigator.pop(context);
                             }
@@ -317,28 +316,30 @@ class _SettingsScreenState extends State<SettingsScreen>
   }
 
   void _showPrivacyPolicy() {
-    _openUrl('https://docs.google.com/document/d/1xagtbSDKcWep7K_FUii8l2LTCZL_BUXbCRm4hxxNCww/edit?usp=sharing');
+    // PRコメント対応: URLを定数化
+    _openUrl(AppConsts.privacyPolicyUrl);
   }
 
   void _showContact() {
-    _openUrl('https://forms.gle/95jjrtez2Nc8CG9m9');
+    // PRコメント対応: URLを定数化
+    _openUrl(AppConsts.contactFormUrl);
   }
 
   void _showAbout() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Goal Timer について'),
+        title: Text('${AppConsts.appName} について'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Goal Timer',
+              AppConsts.appName,
               style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: SpacingConsts.s),
-            const Text('バージョン: 1.0.0'),
+            Text('バージョン: ${AppConsts.appVersion}'),
             const SizedBox(height: SpacingConsts.m),
             const Text('目標達成をサポートするタイマーアプリです。毎日の小さな積み重ねが、大きな成果につながります。'),
           ],
