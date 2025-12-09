@@ -6,6 +6,7 @@ import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/color_consts.dart';
 import '../../../core/utils/text_consts.dart';
 import '../../../core/utils/spacing_consts.dart';
+import '../../../core/utils/time_utils.dart';
 import '../../../core/widgets/circular_progress_indicator.dart' as custom;
 
 /// タイマー画面
@@ -254,7 +255,8 @@ class _TimerScreenState extends State<TimerScreen> {
     final progressValue =
         timerState.mode == TimerMode.countdown
             ? timerState.currentSeconds / timerState.totalSeconds
-            : (timerState.currentSeconds % (60 * 60)) / (60 * 60);
+            : (timerState.currentSeconds % TimeUtils.secondsPerHour) /
+                TimeUtils.secondsPerHour;
 
     return Container(
       width: 280,

@@ -173,7 +173,7 @@ class TimerViewModel extends GetxController {
 
       if (state.mode == TimerMode.countdown ||
           state.mode == TimerMode.pomodoro) {
-        if (state.currentSeconds > 0) {
+        if (state.currentSeconds > TimeUtils.minValidSeconds) {
           _state.value = state.copyWith(
             currentSeconds: state.currentSeconds - 1,
           );
@@ -219,7 +219,7 @@ class TimerViewModel extends GetxController {
         return;
       }
 
-      if (_elapsedSeconds <= 0) {
+      if (_elapsedSeconds <= TimeUtils.minValidSeconds) {
         AppLogger.instance.w('学習時間が0秒のため記録しません');
         return;
       }

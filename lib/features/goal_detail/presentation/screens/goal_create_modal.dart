@@ -787,8 +787,8 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
   @override
   void initState() {
     super.initState();
-    _selectedHours = widget.initialMinutes ~/ 60;
-    _selectedMinutes = widget.initialMinutes % 60;
+    _selectedHours = widget.initialMinutes ~/ TimeUtils.minutesPerHour;
+    _selectedMinutes = widget.initialMinutes % TimeUtils.minutesPerHour;
     _hoursController = FixedExtentScrollController(initialItem: _selectedHours);
     _minutesController = FixedExtentScrollController(
       initialItem: _selectedMinutes,
@@ -924,8 +924,9 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
                   child: ElevatedButton(
                     onPressed: () {
                       final totalMinutes =
-                          _selectedHours * 60 + _selectedMinutes;
-                      if (totalMinutes > 0) {
+                          _selectedHours * TimeUtils.minutesPerHour +
+                              _selectedMinutes;
+                      if (totalMinutes > TimeUtils.minValidMinutes) {
                         widget.onTimeSelected(totalMinutes);
                         Navigator.of(context).pop();
                       }

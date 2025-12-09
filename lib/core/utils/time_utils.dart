@@ -9,6 +9,10 @@ class TimeUtils {
   static const int hoursThresholdForExtendedFormat = 1;
   static const int minutesThresholdForExtendedFormat = 60;
 
+  // バリデーション用の定数
+  static const int minValidMinutes = 0;
+  static const int minValidSeconds = 0;
+
   /// 秒数を時間表示形式にフォーマット
   /// 60分以上の場合は HH:MM:SS 形式、それ以外は MM:SS 形式
   static String formatDurationFromSeconds(int totalSeconds) {
@@ -48,8 +52,8 @@ class TimeUtils {
     // 残り分を計算
     final remainingMinutes = targetMinutes - spentMinutes;
 
-    if (remainingMinutes <= 0) {
-      return '0時間0分';
+    if (remainingMinutes <= minValidMinutes) {
+      return '${minValidMinutes}時間${minValidMinutes}分';
     }
 
     // 時間と分に変換
@@ -70,7 +74,7 @@ class TimeUtils {
     int targetMinutes,
     int spentMinutes,
   ) {
-    return (targetMinutes - spentMinutes).clamp(0, double.infinity).toInt();
+    return (targetMinutes - spentMinutes).clamp(minValidMinutes, double.infinity).toInt();
   }
 
   /// 目標進捗率を計算（0.0 〜 1.0）- 後方互換性のため残す
@@ -84,7 +88,7 @@ class TimeUtils {
     int targetMinutes,
     int spentMinutes,
   ) {
-    if (targetMinutes <= 0) return 1.0;
+    if (targetMinutes <= minValidMinutes) return 1.0;
     return (spentMinutes / targetMinutes).clamp(0.0, 1.0);
   }
 }
