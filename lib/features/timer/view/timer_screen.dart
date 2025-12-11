@@ -467,6 +467,8 @@ class _TimerScreenState extends State<TimerScreen> {
               ElevatedButton(
                 onPressed: () async {
                   await timerViewModel.onTappedTimerFinishButton();
+                  if (!context.mounted) return;
+                  Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: ColorConsts.success,
