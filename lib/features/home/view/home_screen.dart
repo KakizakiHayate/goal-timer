@@ -320,8 +320,8 @@ class _HomeTabContent extends StatelessWidget {
             onTap: () {
               // 目標詳細画面（Coming Soon）
             },
-            onTimerTap: () {
-              Navigator.push(
+            onTimerTap: () async {
+              final result = await Navigator.push<bool>(
                 context,
                 MaterialPageRoute(
                   builder: (context) => TimerScreen(
@@ -330,6 +330,10 @@ class _HomeTabContent extends StatelessWidget {
                   ),
                 ),
               );
+              // 学習完了時（result == true）にデータを再読み込み
+              if (result == true) {
+                viewModel.reloadGoals();
+              }
             },
             onEditTap: () {
               showModalBottomSheet(
@@ -503,13 +507,17 @@ class _TimerTabContent extends StatelessWidget {
     final progressPercent = (progress * 100).toInt();
 
     return PressableCard(
-      onTap: () {
-        Navigator.push(
+      onTap: () async {
+        final result = await Navigator.push<bool>(
           context,
           MaterialPageRoute(
             builder: (context) => TimerScreen(goal: goal, goalId: goal.id),
           ),
         );
+        // 学習完了時（result == true）にデータを再読み込み
+        if (result == true) {
+          viewModel.reloadGoals();
+        }
       },
       child: Padding(
         padding: const EdgeInsets.all(SpacingConsts.l),
