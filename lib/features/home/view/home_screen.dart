@@ -15,6 +15,24 @@ import '../../settings/view/settings_screen.dart';
 import '../../timer/view/timer_screen.dart';
 import 'widgets/add_goal_modal.dart';
 
+/// タイマー画面に遷移し、学習完了時にデータを再読み込みするヘルパー関数
+Future<void> _navigateToTimerAndReload(
+  BuildContext context,
+  HomeViewModel viewModel,
+  GoalsModel goal,
+) async {
+  final result = await Navigator.push<bool>(
+    context,
+    MaterialPageRoute(
+      builder: (context) => TimerScreen(goal: goal, goalId: goal.id),
+    ),
+  );
+  // 学習完了時（result == true）にデータを再読み込み
+  if (result == true) {
+    viewModel.reloadGoals();
+  }
+}
+
 /// ホーム画面
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -320,21 +338,7 @@ class _HomeTabContent extends StatelessWidget {
             onTap: () {
               // 目標詳細画面（Coming Soon）
             },
-            onTimerTap: () async {
-              final result = await Navigator.push<bool>(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => TimerScreen(
-                    goal: goal,
-                    goalId: goal.id
-                  ),
-                ),
-              );
-              // 学習完了時（result == true）にデータを再読み込み
-              if (result == true) {
-                viewModel.reloadGoals();
-              }
-            },
+            onTimerTap: () => _navigateToTimerAndReload(context, viewModel, goal),
             onEditTap: () {
               showModalBottomSheet(
                 context: context,
@@ -507,18 +511,7 @@ class _TimerTabContent extends StatelessWidget {
     final progressPercent = (progress * 100).toInt();
 
     return PressableCard(
-      onTap: () async {
-        final result = await Navigator.push<bool>(
-          context,
-          MaterialPageRoute(
-            builder: (context) => TimerScreen(goal: goal, goalId: goal.id),
-          ),
-        );
-        // 学習完了時（result == true）にデータを再読み込み
-        if (result == true) {
-          viewModel.reloadGoals();
-        }
-      },
+      onTap: () => _navigateToTimerAndReload(context, viewModel, goal),
       child: Padding(
         padding: const EdgeInsets.all(SpacingConsts.l),
         child: Row(
