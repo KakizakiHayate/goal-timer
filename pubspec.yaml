@@ -69,6 +69,9 @@ dependencies:
   
   # URL起動
   url_launcher: ^6.3.0
+  
+  # App Tracking Transparency (iOS)
+  app_tracking_transparency: ^2.0.6
 
 dev_dependencies:
   flutter_test:

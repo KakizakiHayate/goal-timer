@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/models/goals/goals_model.dart';
+import '../../../core/services/att_service.dart';
 import '../../../core/utils/color_consts.dart';
 import '../../../core/utils/text_consts.dart';
 import '../../../core/utils/spacing_consts.dart';
@@ -66,6 +67,17 @@ class _HomeScreenState extends State<HomeScreen>
     );
 
     _fabAnimationController.forward();
+
+    // ATTダイアログを表示（iOS 14.5以降）
+    // 最初のフレームがレンダリングされた後に表示する
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _requestTrackingAuthorization();
+    });
+  }
+
+  /// ATT（App Tracking Transparency）の許可をリクエストする
+  Future<void> _requestTrackingAuthorization() async {
+    await AttService.requestTrackingAuthorization();
   }
 
   @override
