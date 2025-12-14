@@ -552,7 +552,7 @@ class _TimerTabContent extends StatelessWidget {
                   ),
                   const SizedBox(height: SpacingConsts.xs),
                   Text(
-                    '$studiedMinutes分 / ${TimeUtils.formatDurationFromMinutes(goal.targetMinutes)}',
+                    '${TimeUtils.formatMinutesToHoursAndMinutes(studiedMinutes)} / ${TimeUtils.formatMinutesToHoursAndMinutes(goal.targetMinutes)}',
                     style: TextConsts.body.copyWith(
                       color: ColorConsts.textSecondary,
                     ),

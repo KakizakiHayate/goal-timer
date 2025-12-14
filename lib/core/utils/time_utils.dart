@@ -37,6 +37,14 @@ class TimeUtils {
     }
   }
 
+  /// 分数を「X時間Y分」形式にフォーマット
+  /// 例: 90分 → "1時間30分", 30分 → "0時間30分"
+  static String formatMinutesToHoursAndMinutes(int totalMinutes) {
+    final hours = totalMinutes ~/ minutesPerHour;
+    final minutes = totalMinutes % minutesPerHour;
+    return '$hours時間$minutes分';
+  }
+
   /// 残り時間を計算（目標時間 - 消費時間）- 後方互換性のため残す
   static String calculateRemainingTime(int totalTargetHours, int spentMinutes) {
     // 目標時間を分に変換
