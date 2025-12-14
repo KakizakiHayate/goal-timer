@@ -39,8 +39,7 @@ class HomeState {
 
   /// 目標の進捗率を計算（0.0〜1.0）
   double getProgressForGoal(GoalsModel goal) {
-    final studiedSeconds = studiedSecondsByGoalId[goal.id] ?? 0;
-    final studiedMinutes = studiedSeconds ~/ TimeUtils.secondsPerMinute;
+    final studiedMinutes = getStudiedMinutesForGoal(goal);
     return TimeUtils.calculateProgressRateFromMinutes(
       goal.targetMinutes,
       studiedMinutes,
@@ -84,14 +83,11 @@ class HomeViewModel extends GetxController {
       _state = state.copyWith(isLoading: true);
       update();
 
-      // 目標と学習時間を並列で取得
-      final results = await Future.wait([
+      // 目標と学習時間を並列で取得（Dart 3 Recordsで型安全に）
+      final (goals, studiedSeconds) = await (
         _goalsDatasource.fetchAllGoals(),
         _studyLogsDatasource.fetchTotalSecondsForAllGoals(),
-      ]);
-
-      final goals = results[0] as List<GoalsModel>;
-      final studiedSeconds = results[1] as Map<String, int>;
+      ).wait;
 
       AppLogger.instance.i('目標を${goals.length}件読み込みました');
       AppLogger.instance.i('学習時間データを${studiedSeconds.length}件読み込みました');
