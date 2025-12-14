@@ -15,6 +15,24 @@ import '../../settings/view/settings_screen.dart';
 import '../../timer/view/timer_screen.dart';
 import 'widgets/add_goal_modal.dart';
 
+/// タイマー画面に遷移し、学習完了時にデータを再読み込みするヘルパー関数
+Future<void> _navigateToTimerAndReload(
+  BuildContext context,
+  HomeViewModel viewModel,
+  GoalsModel goal,
+) async {
+  final result = await Navigator.push<bool>(
+    context,
+    MaterialPageRoute(
+      builder: (context) => TimerScreen(goal: goal, goalId: goal.id),
+    ),
+  );
+  // 学習完了時（result == true）にデータを再読み込み
+  if (result == true) {
+    viewModel.reloadGoals();
+  }
+}
+
 /// ホーム画面
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -308,28 +326,19 @@ class _HomeTabContent extends StatelessWidget {
       delegate: SliverChildBuilderDelegate(
         (context, index) {
           final goal = goals[index];
+          final progress = viewModel.state.getProgressForGoal(goal);
 
           return GoalCard(
             title: goal.title,
             description: goal.description?.isNotEmpty == true ? goal.description : null,
-            progress: 0.0, // TODO: 進捗率の計算ロジックを実装
+            progress: progress,
             streakDays: 0,
             avoidMessage:
                 goal.avoidMessage.isNotEmpty ? goal.avoidMessage : null,
             onTap: () {
               // 目標詳細画面（Coming Soon）
             },
-            onTimerTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => TimerScreen(
-                    goal: goal,
-                    goalId: goal.id
-                  ),
-                ),
-              );
-            },
+            onTimerTap: () => _navigateToTimerAndReload(context, viewModel, goal),
             onEditTap: () {
               showModalBottomSheet(
                 context: context,
@@ -483,7 +492,7 @@ class _TimerTabContent extends StatelessWidget {
                               const SizedBox(height: SpacingConsts.m),
                           itemBuilder: (context, index) {
                             final goal = goals[index];
-                            return _buildGoalTimerCard(context, goal);
+                            return _buildGoalTimerCard(context, goal, homeViewModel);
                           },
                         ),
                       ),
@@ -495,16 +504,14 @@ class _TimerTabContent extends StatelessWidget {
     );
   }
 
-  Widget _buildGoalTimerCard(BuildContext context, GoalsModel goal) {
+  Widget _buildGoalTimerCard(BuildContext context, GoalsModel goal, HomeViewModel viewModel) {
+    final homeState = viewModel.state;
+    final studiedMinutes = homeState.getStudiedMinutesForGoal(goal);
+    final progress = homeState.getProgressForGoal(goal);
+    final progressPercent = (progress * 100).toInt();
+
     return PressableCard(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => TimerScreen(goal: goal, goalId: goal.id),
-          ),
-        );
-      },
+      onTap: () => _navigateToTimerAndReload(context, viewModel, goal),
       child: Padding(
         padding: const EdgeInsets.all(SpacingConsts.l),
         child: Row(
@@ -538,7 +545,7 @@ class _TimerTabContent extends StatelessWidget {
                   ),
                   const SizedBox(height: SpacingConsts.xs),
                   Text(
-                    '0分 / ${TimeUtils.formatDurationFromMinutes(goal.targetMinutes)}', // TODO: 学習ログから消費時間を計算する
+                    '${TimeUtils.formatMinutesToHoursAndMinutes(studiedMinutes)} / ${TimeUtils.formatMinutesToHoursAndMinutes(goal.targetMinutes)}',
                     style: TextConsts.body.copyWith(
                       color: ColorConsts.textSecondary,
                     ),
@@ -549,7 +556,7 @@ class _TimerTabContent extends StatelessWidget {
 
             // 進捗率
             Text(
-              '0%', // TODO: 進捗率の計算ロジックを実装
+              '$progressPercent%',
               style: TextConsts.body.copyWith(
                 color: ColorConsts.primary,
                 fontWeight: FontWeight.bold,
