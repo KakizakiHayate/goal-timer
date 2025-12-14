@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'Goal Timer',
+      title: '目標達成タイマー',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: ColorConsts.primary),
         useMaterial3: true,

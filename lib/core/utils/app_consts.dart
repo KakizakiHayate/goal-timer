@@ -12,7 +12,7 @@ class AppConsts {
 
   // === アプリ情報 ===
   /// アプリ名
-  static const String appName = 'Goal Timer';
+  static const String appName = '目標達成タイマー';
 
   /// アプリバージョン
   static const String appVersion = '1.0.0';
