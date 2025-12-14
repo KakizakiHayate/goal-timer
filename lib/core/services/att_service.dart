@@ -8,37 +8,30 @@ import '../utils/app_logger.dart';
 class AttService {
   /// ATTダイアログを表示し、ユーザーの許可状態を取得する
   /// iOSのみで動作し、Android等では何もしない
-  Future<TrackingStatus> requestTrackingAuthorization() async {
-    // iOSでない場合は何もしない
-    if (!Platform.isIOS) {
-      AppLogger.instance.i('ATT: iOS以外のプラットフォームのためスキップ');
-      return TrackingStatus.notSupported;
-    }
+  static Future<TrackingStatus> requestTrackingAuthorization() async {
+    // 先に現在のトラッキング許可状態を取得
+    final currentStatus = await getTrackingStatus();
+    AppLogger.instance.i('ATT: 現在の許可状態: $currentStatus');
 
-    try {
-      // 現在のトラッキング許可状態を取得
-      final currentStatus =
-          await AppTrackingTransparency.trackingAuthorizationStatus;
-      AppLogger.instance.i('ATT: 現在の許可状態: $currentStatus');
-
-      // まだ決定されていない場合のみダイアログを表示
-      if (currentStatus == TrackingStatus.notDetermined) {
+    // まだ決定されていない場合のみダイアログを表示
+    if (currentStatus == TrackingStatus.notDetermined) {
+      try {
         // ATTダイアログを表示
         final status =
             await AppTrackingTransparency.requestTrackingAuthorization();
         AppLogger.instance.i('ATT: ユーザーの選択: $status');
         return status;
+      } catch (error, stackTrace) {
+        AppLogger.instance.e('ATT: 許可リクエストに失敗しました', error, stackTrace);
+        return TrackingStatus.notSupported;
       }
-
-      return currentStatus;
-    } catch (error, stackTrace) {
-      AppLogger.instance.e('ATT: 許可リクエストに失敗しました', error, stackTrace);
-      return TrackingStatus.notSupported;
     }
+
+    return currentStatus;
   }
 
   /// 現在のトラッキング許可状態を取得する
-  Future<TrackingStatus> getTrackingStatus() async {
+  static Future<TrackingStatus> getTrackingStatus() async {
     if (!Platform.isIOS) {
       return TrackingStatus.notSupported;
     }
@@ -52,7 +45,7 @@ class AttService {
   }
 
   /// トラッキングが許可されているかどうかを確認する
-  Future<bool> isTrackingAuthorized() async {
+  static Future<bool> isTrackingAuthorized() async {
     final status = await getTrackingStatus();
     return status == TrackingStatus.authorized;
   }

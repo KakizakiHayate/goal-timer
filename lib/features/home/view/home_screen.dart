@@ -77,8 +77,7 @@ class _HomeScreenState extends State<HomeScreen>
 
   /// ATT（App Tracking Transparency）の許可をリクエストする
   Future<void> _requestTrackingAuthorization() async {
-    final attService = AttService();
-    await attService.requestTrackingAuthorization();
+    await AttService.requestTrackingAuthorization();
   }
 
   @override
