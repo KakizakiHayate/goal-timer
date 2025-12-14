@@ -14,7 +14,7 @@ class StringConsts {
   // フォームラベル
   static const String goalNameLabel = '目標名 *';
   static const String descriptionLabel = '説明';
-  static const String targetMinutesLabel = '目標時間（分） *';
+  static const String targetMinutesLabel = '一日の目標時間 *';
   static const String deadlineLabel = '期限 *';
   static const String avoidMessageLabel = '達成しないとどうなりますか？ *';
   static const String avoidMessageHint = 'ネガティブな結果を明確にすることで、モチベーションを維持しやすくなります';
