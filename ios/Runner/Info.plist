@@ -62,5 +62,7 @@
 	<array>
 		<string>Default</string>
 	</array>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>このアプリでは、より良いサービスを提供するために、お客様のアクティビティを追跡する許可をお願いしています。</string>
 </dict>
 </plist>
