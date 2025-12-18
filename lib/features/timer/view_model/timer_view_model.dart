@@ -7,6 +7,7 @@ import 'package:goal_timer/core/utils/time_utils.dart';
 import 'package:goal_timer/core/data/local/local_study_daily_logs_datasource.dart';
 import 'package:goal_timer/core/data/local/app_database.dart';
 import 'package:goal_timer/features/settings/view_model/settings_view_model.dart';
+import 'package:goal_timer/core/services/notification_service.dart';
 import 'package:uuid/uuid.dart';
 
 // タイマー関連の定数
@@ -15,7 +16,6 @@ class TimerConstants {
   static const int countdownCompleteThreshold = 0;
   static const int pomodoroWorkMinutes = 25;
   static const int pomodoroBreakMinutes = 5;
-  static const int countupMaxHours = 1;
   static const int initialPomodoroRound = 1;
 }
 
@@ -33,6 +33,7 @@ class TimerState {
   final TimerStatus status;
   final TimerMode mode;
   final bool isPomodoroBreak;
+  final bool needsCompletionConfirm;
 
   // デフォルト値の定数
   static final int _defaultSeconds =
@@ -45,6 +46,7 @@ class TimerState {
     this.mode = TimerMode.countdown,
     this.isPomodoroBreak = false,
     this.pomodoroRound = TimerConstants.initialPomodoroRound,
+    this.needsCompletionConfirm = false,
   })  : totalSeconds = totalSeconds ?? _defaultSeconds,
         currentSeconds = currentSeconds ?? _defaultSeconds;
 
@@ -55,6 +57,7 @@ class TimerState {
     TimerMode? mode,
     bool? isPomodoroBreak,
     int? pomodoroRound,
+    bool? needsCompletionConfirm,
   }) {
     return TimerState(
       totalSeconds: totalSeconds ?? this.totalSeconds,
@@ -63,6 +66,8 @@ class TimerState {
       mode: mode ?? this.mode,
       isPomodoroBreak: isPomodoroBreak ?? this.isPomodoroBreak,
       pomodoroRound: pomodoroRound ?? this.pomodoroRound,
+      needsCompletionConfirm:
+          needsCompletionConfirm ?? this.needsCompletionConfirm,
     );
   }
 
@@ -70,7 +75,7 @@ class TimerState {
     if (mode == TimerMode.countdown || mode == TimerMode.pomodoro) {
       return 1.0 - (currentSeconds / totalSeconds);
     } else {
-      return (currentSeconds / TimeUtils.secondsPerHour).clamp(0.0, 1.0);
+      return 0.0;
     }
   }
 
@@ -95,13 +100,20 @@ class TimerState {
 // タイマーのViewModel
 class TimerViewModel extends GetxController {
   late final LocalStudyDailyLogsDatasource _datasource;
-  final GoalsModel goal; // ✅ goal全体を保持
+  final GoalsModel goal;
 
   // PRコメント対応: インスタンス変数として一度だけ取得
   final SettingsViewModel _settingsViewModel;
 
+  // 通知サービス
+  final NotificationService _notificationService = NotificationService();
+
   Timer? _timer;
   int _elapsedSeconds = 0;
+
+  // バックグラウンド対応: タイマー開始時刻と一時停止時の累積経過秒数
+  DateTime? _timerStartTime;
+  int _pausedElapsedSeconds = 0;
 
   // 状態（Rxで管理）
   final Rx<TimerState> _state = TimerState().obs;
@@ -121,11 +133,19 @@ class TimerViewModel extends GetxController {
       totalSeconds: defaultSeconds,
       currentSeconds: defaultSeconds,
     );
+
+    _initNotificationService();
+  }
+
+  Future<void> _initNotificationService() async {
+    await _notificationService.init();
+    await _notificationService.requestPermission();
   }
 
   @override
   void onClose() {
     _timer?.cancel();
+    _notificationService.cancelAllNotifications();
     super.onClose();
   }
 
@@ -146,10 +166,9 @@ class TimerViewModel extends GetxController {
         currentSeconds: defaultSeconds,
       );
     } else if (mode == TimerMode.countup) {
-      final countupSeconds =
-          TimerConstants.countupMaxHours * TimeUtils.secondsPerHour;
+      // カウントアップモード: 上限なし
       _state.value = state.copyWith(
-        totalSeconds: countupSeconds,
+        totalSeconds: 0,
         currentSeconds: TimerConstants.countdownCompleteThreshold,
       );
     } else if (mode == TimerMode.pomodoro) {
@@ -166,7 +185,17 @@ class TimerViewModel extends GetxController {
   void startTimer() {
     if (state.status == TimerStatus.running) return;
 
-    _state.value = state.copyWith(status: TimerStatus.running);
+    // バックグラウンド対応: 開始時刻を記録
+    _timerStartTime = DateTime.now();
+    _state.value = state.copyWith(
+      status: TimerStatus.running,
+      needsCompletionConfirm: false,
+    );
+
+    // カウントダウン/ポモドーロモードの場合、完了時の通知をスケジュール
+    if (state.mode == TimerMode.countdown || state.mode == TimerMode.pomodoro) {
+      _scheduleCompletionNotification();
+    }
 
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       _elapsedSeconds++;
@@ -181,6 +210,7 @@ class TimerViewModel extends GetxController {
           completeTimer();
         }
       } else {
+        // カウントアップモード: 上限なしで継続
         _state.value = state.copyWith(currentSeconds: state.currentSeconds + 1);
       }
     });
@@ -188,27 +218,105 @@ class TimerViewModel extends GetxController {
 
   void pauseTimer() {
     _timer?.cancel();
+    // バックグラウンド対応: 一時停止時の累積経過秒数を保存
+    _pausedElapsedSeconds = _elapsedSeconds;
+    _timerStartTime = null;
     _state.value = state.copyWith(status: TimerStatus.paused);
+    // 通知をキャンセル
+    _notificationService.cancelScheduledNotification();
     AppLogger.instance.i('タイマーを一時停止しました');
   }
 
   void resetTimer() {
     _timer?.cancel();
     _elapsedSeconds = 0;
+    _pausedElapsedSeconds = 0;
+    _timerStartTime = null;
     _state.value = state.copyWith(
       currentSeconds: state.totalSeconds,
       status: TimerStatus.initial,
+      needsCompletionConfirm: false,
     );
+    // 通知をキャンセル
+    _notificationService.cancelAllNotifications();
     AppLogger.instance.i('タイマーをリセットしました');
   }
 
   void completeTimer() {
     _timer?.cancel();
+    _timerStartTime = null;
     _state.value = state.copyWith(
       status: TimerStatus.completed,
       currentSeconds: 0,
     );
     AppLogger.instance.i('タイマーが完了しました: $_elapsedSeconds秒');
+  }
+
+  /// 完了通知をスケジュールする
+  Future<void> _scheduleCompletionNotification() async {
+    if (state.currentSeconds > 0) {
+      await _notificationService.scheduleTimerCompletionNotification(
+        seconds: state.currentSeconds,
+        goalTitle: goal.title,
+      );
+    }
+  }
+
+  /// バックグラウンドから復帰した時に呼び出す
+  /// フォアグラウンド復帰時に経過時間を再計算する
+  void onAppResumed() {
+    if (state.status != TimerStatus.running || _timerStartTime == null) {
+      return;
+    }
+
+    final now = DateTime.now();
+    final backgroundElapsed = now.difference(_timerStartTime!).inSeconds;
+    final totalElapsed = _pausedElapsedSeconds + backgroundElapsed;
+
+    AppLogger.instance.i(
+      'バックグラウンドから復帰: 経過時間=$backgroundElapsed秒, 累計=$totalElapsed秒',
+    );
+
+    if (state.mode == TimerMode.countdown || state.mode == TimerMode.pomodoro) {
+      // カウントダウン/ポモドーロモード: 残り時間を計算
+      final newCurrentSeconds = state.totalSeconds - totalElapsed;
+
+      if (newCurrentSeconds <= 0) {
+        // バックグラウンド中に完了した場合
+        _elapsedSeconds = state.totalSeconds;
+        _timer?.cancel();
+        _state.value = state.copyWith(
+          status: TimerStatus.completed,
+          currentSeconds: 0,
+          needsCompletionConfirm: true,
+        );
+        AppLogger.instance.i('バックグラウンド中にタイマーが完了しました');
+      } else {
+        // まだ完了していない場合
+        _elapsedSeconds = totalElapsed;
+        _state.value = state.copyWith(currentSeconds: newCurrentSeconds);
+      }
+    } else {
+      // カウントアップモード: 経過時間を更新
+      _elapsedSeconds = totalElapsed;
+      _state.value = state.copyWith(currentSeconds: totalElapsed);
+    }
+  }
+
+  /// バックグラウンドに移行する時に呼び出す
+  void onAppPaused() {
+    if (state.status != TimerStatus.running) {
+      return;
+    }
+
+    // タイマーを停止（バックグラウンドでは動作しないため）
+    _timer?.cancel();
+    AppLogger.instance.i('アプリがバックグラウンドに移行しました');
+  }
+
+  /// 確認ダイアログを表示した後にフラグをクリアする
+  void clearCompletionConfirmFlag() {
+    _state.value = state.copyWith(needsCompletionConfirm: false);
   }
 
   Future<void> onTappedTimerFinishButton() async {

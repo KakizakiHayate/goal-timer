@@ -26,11 +26,14 @@ class TimerScreen extends StatefulWidget {
   State<TimerScreen> createState() => _TimerScreenState();
 }
 
-class _TimerScreenState extends State<TimerScreen> {
+class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
     AppLogger.instance.i('TimerScreen: goalId=${widget.goalId}');
+
+    // WidgetsBindingObserverを登録
+    WidgetsBinding.instance.addObserver(this);
 
     // ViewModel の生成と注入（goal全体を渡す）
     Get.put(TimerViewModel(goal: widget.goal));
@@ -38,8 +41,104 @@ class _TimerScreenState extends State<TimerScreen> {
 
   @override
   void dispose() {
+    // WidgetsBindingObserverを解除
+    WidgetsBinding.instance.removeObserver(this);
     Get.delete<TimerViewModel>();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    final timerViewModel = Get.find<TimerViewModel>();
+
+    switch (state) {
+      case AppLifecycleState.paused:
+      case AppLifecycleState.inactive:
+        // アプリがバックグラウンドに移行
+        timerViewModel.onAppPaused();
+        break;
+      case AppLifecycleState.resumed:
+        // アプリがフォアグラウンドに復帰
+        timerViewModel.onAppResumed();
+        // バックグラウンド中に完了した場合、確認ダイアログを表示
+        _checkAndShowBackgroundCompletionDialog();
+        break;
+      case AppLifecycleState.detached:
+      case AppLifecycleState.hidden:
+        break;
+    }
+  }
+
+  void _checkAndShowBackgroundCompletionDialog() {
+    final timerViewModel = Get.find<TimerViewModel>();
+    if (timerViewModel.state.needsCompletionConfirm) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _showBackgroundCompletionDialog(context, timerViewModel);
+        }
+      });
+    }
+  }
+
+  void _showBackgroundCompletionDialog(
+    BuildContext context,
+    TimerViewModel timerViewModel,
+  ) {
+    timerViewModel.clearCompletionConfirmFlag();
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: Text(
+          'タイマー完了',
+          style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          'バックグラウンド中にタイマーが完了しました。\n${timerViewModel.elapsedSeconds}秒を学習完了として記録しますか？',
+          style: TextConsts.body.copyWith(color: ColorConsts.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              timerViewModel.resetTimer();
+              Navigator.pop(context);
+            },
+            child: Text(
+              '記録しない',
+              style: TextConsts.body.copyWith(
+                color: ColorConsts.textSecondary,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              await timerViewModel.onTappedTimerFinishButton();
+              if (context.mounted) {
+                Navigator.pop(context);
+                Navigator.pop(context, true);
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ColorConsts.success,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              '記録する',
+              style: TextConsts.body.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -252,9 +351,13 @@ class _TimerScreenState extends State<TimerScreen> {
   Widget _buildTimerDisplay(TimerState timerState) {
     final timeText = timerState.formatTime();
 
+    // カウントダウンモード: 残り時間の割合を表示
+    // カウントアップモード: 1時間ごとにリセットするプログレス表示
     final progressValue =
         timerState.mode == TimerMode.countdown
-            ? timerState.currentSeconds / timerState.totalSeconds
+            ? (timerState.totalSeconds > 0
+                ? timerState.currentSeconds / timerState.totalSeconds
+                : 0.0)
             : (timerState.currentSeconds % TimeUtils.secondsPerHour) /
                 TimeUtils.secondsPerHour;
 
