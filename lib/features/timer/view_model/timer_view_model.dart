@@ -263,7 +263,7 @@ class TimerViewModel extends GetxController {
   }
 
   /// バックグラウンドから復帰した時に呼び出す
-  /// フォアグラウンド復帰時に経過時間を再計算する
+  /// フォアグラウンド復帰時に経過時間を再計算し、タイマーを再開する
   void onAppResumed() {
     if (state.status != TimerStatus.running || _timerStartTime == null) {
       return;
@@ -292,15 +292,47 @@ class TimerViewModel extends GetxController {
         );
         AppLogger.instance.i('バックグラウンド中にタイマーが完了しました');
       } else {
-        // まだ完了していない場合
+        // まだ完了していない場合: 経過時間を更新してタイマーを再開
         _elapsedSeconds = totalElapsed;
+        _pausedElapsedSeconds = totalElapsed;
+        _timerStartTime = now;
         _state.value = state.copyWith(currentSeconds: newCurrentSeconds);
+        _restartTimer();
       }
     } else {
-      // カウントアップモード: 経過時間を更新
+      // カウントアップモード: 経過時間を更新してタイマーを再開
       _elapsedSeconds = totalElapsed;
+      _pausedElapsedSeconds = totalElapsed;
+      _timerStartTime = now;
       _state.value = state.copyWith(currentSeconds: totalElapsed);
+      _restartTimer();
     }
+  }
+
+  /// タイマーを再開する（バックグラウンド復帰時用）
+  void _restartTimer() {
+    // 既存のタイマーがあればキャンセル
+    _timer?.cancel();
+
+    AppLogger.instance.i('タイマーを再開します');
+
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      _elapsedSeconds++;
+
+      if (state.mode == TimerMode.countdown ||
+          state.mode == TimerMode.pomodoro) {
+        if (state.currentSeconds > TimeUtils.minValidSeconds) {
+          _state.value = state.copyWith(
+            currentSeconds: state.currentSeconds - 1,
+          );
+        } else {
+          completeTimer();
+        }
+      } else {
+        // カウントアップモード: 上限なしで継続
+        _state.value = state.copyWith(currentSeconds: state.currentSeconds + 1);
+      }
+    });
   }
 
   /// バックグラウンドに移行する時に呼び出す
