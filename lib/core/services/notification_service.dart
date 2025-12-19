@@ -12,6 +12,9 @@ class NotificationService {
   factory NotificationService() => _instance;
   NotificationService._internal();
 
+  /// タイマー完了通知のID
+  static const int _timerCompletionNotificationId = 1;
+
   final FlutterLocalNotificationsPlugin _notifications =
       FlutterLocalNotificationsPlugin();
 
@@ -103,7 +106,7 @@ class NotificationService {
     );
 
     await _notifications.zonedSchedule(
-      0,
+      _timerCompletionNotificationId,
       'タイマー完了',
       '「$goalTitle」の学習時間が終了しました',
       scheduledTime,
@@ -144,7 +147,7 @@ class NotificationService {
     );
 
     await _notifications.show(
-      0,
+      _timerCompletionNotificationId,
       'タイマー完了',
       '「$goalTitle」の学習時間が終了しました',
       details,
@@ -155,7 +158,7 @@ class NotificationService {
 
   /// スケジュールされた通知をキャンセルする
   Future<void> cancelScheduledNotification() async {
-    await _notifications.cancel(0);
+    await _notifications.cancel(_timerCompletionNotificationId);
     AppLogger.instance.i('NotificationService: スケジュールされた通知をキャンセルしました');
   }
 
