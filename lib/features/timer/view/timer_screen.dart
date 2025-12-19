@@ -98,7 +98,7 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
           style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
         ),
         content: Text(
-          'バックグラウンド中にタイマーが完了しました。\n${timerViewModel.elapsedSeconds}秒を学習完了として記録しますか？',
+          'バックグラウンド中にタイマーが完了しました。\n${TimeUtils.formatSecondsToHoursAndMinutes(timerViewModel.elapsedSeconds)}を学習完了として記録しますか？',
           style: TextConsts.body.copyWith(color: ColorConsts.textSecondary),
         ),
         actions: [
@@ -347,18 +347,25 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
     );
   }
 
+  /// プログレス値を計算する
+  double _calculateProgressValue(TimerState timerState) {
+    if (timerState.mode == TimerMode.countdown ||
+        timerState.mode == TimerMode.pomodoro) {
+      // カウントダウン/ポモドーロモード: 残り時間の割合を表示
+      if (timerState.totalSeconds <= TimeUtils.minValidSeconds) {
+        return TimeUtils.minValidSeconds.toDouble();
+      }
+      return timerState.currentSeconds / timerState.totalSeconds;
+    } else {
+      // カウントアップモード: 1時間ごとにリセットするプログレス表示
+      return (timerState.currentSeconds % TimeUtils.secondsPerHour) /
+          TimeUtils.secondsPerHour;
+    }
+  }
+
   Widget _buildTimerDisplay(TimerState timerState) {
     final timeText = timerState.formatTime();
-
-    // カウントダウンモード: 残り時間の割合を表示
-    // カウントアップモード: 1時間ごとにリセットするプログレス表示
-    final progressValue =
-        timerState.mode == TimerMode.countdown
-            ? (timerState.totalSeconds > 0
-                ? timerState.currentSeconds / timerState.totalSeconds
-                : 0.0)
-            : (timerState.currentSeconds % TimeUtils.secondsPerHour) /
-                TimeUtils.secondsPerHour;
+    final progressValue = _calculateProgressValue(timerState);
 
     return Container(
       width: 280,
@@ -553,7 +560,7 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
               style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
             ),
             content: Text(
-              '${timerViewModel.elapsedSeconds}秒を学習完了として記録しますか？',
+              '${TimeUtils.formatSecondsToHoursAndMinutes(timerViewModel.elapsedSeconds)}を学習完了として記録しますか？',
               style: TextConsts.body.copyWith(color: ColorConsts.textSecondary),
             ),
             actions: [
