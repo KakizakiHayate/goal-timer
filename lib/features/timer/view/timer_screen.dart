@@ -26,11 +26,14 @@ class TimerScreen extends StatefulWidget {
   State<TimerScreen> createState() => _TimerScreenState();
 }
 
-class _TimerScreenState extends State<TimerScreen> {
+class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
     AppLogger.instance.i('TimerScreen: goalId=${widget.goalId}');
+
+    // WidgetsBindingObserverを登録
+    WidgetsBinding.instance.addObserver(this);
 
     // ViewModel の生成と注入（goal全体を渡す）
     Get.put(TimerViewModel(goal: widget.goal));
@@ -38,8 +41,110 @@ class _TimerScreenState extends State<TimerScreen> {
 
   @override
   void dispose() {
+    // WidgetsBindingObserverを解除
+    WidgetsBinding.instance.removeObserver(this);
     Get.delete<TimerViewModel>();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    final timerViewModel = Get.find<TimerViewModel>();
+
+    switch (state) {
+      case AppLifecycleState.paused:
+      case AppLifecycleState.inactive:
+        // アプリがバックグラウンドに移行
+        timerViewModel.onAppPaused();
+        break;
+      case AppLifecycleState.resumed:
+        // アプリがフォアグラウンドに復帰
+        timerViewModel.onAppResumed();
+        // バックグラウンド中に完了した場合、確認ダイアログを表示
+        _checkAndShowBackgroundCompletionDialog();
+        break;
+      case AppLifecycleState.detached:
+      case AppLifecycleState.hidden:
+        break;
+    }
+  }
+
+  void _checkAndShowBackgroundCompletionDialog() {
+    final timerViewModel = Get.find<TimerViewModel>();
+    if (timerViewModel.state.needsCompletionConfirm) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _showBackgroundCompletionDialog(context, timerViewModel);
+        }
+      });
+    }
+  }
+
+  void _showBackgroundCompletionDialog(
+    BuildContext context,
+    TimerViewModel timerViewModel,
+  ) {
+    timerViewModel.clearCompletionConfirmFlag();
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: Text(
+          'タイマー完了',
+          style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          'バックグラウンド中にタイマーが完了しました。\n${TimeUtils.formatSecondsToHoursAndMinutes(timerViewModel.elapsedSeconds)}を学習完了として記録しますか？',
+          style: TextConsts.body.copyWith(color: ColorConsts.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              timerViewModel.resetTimer();
+              Navigator.pop(context);
+            },
+            child: Text(
+              '記録しない',
+              style: TextConsts.body.copyWith(
+                color: ColorConsts.textSecondary,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final navigator = Navigator.of(context);
+              try {
+                await timerViewModel.onTappedTimerFinishButton();
+                navigator.pop();
+                navigator.pop(true);
+              } catch (e, s) {
+                AppLogger.instance.e('学習記録の保存に失敗しました', e, s);
+                if (navigator.canPop()) {
+                  navigator.pop();
+                }
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ColorConsts.success,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              '記録する',
+              style: TextConsts.body.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -249,14 +354,25 @@ class _TimerScreenState extends State<TimerScreen> {
     );
   }
 
+  /// プログレス値を計算する
+  double _calculateProgressValue(TimerState timerState) {
+    if (timerState.mode == TimerMode.countdown ||
+        timerState.mode == TimerMode.pomodoro) {
+      // カウントダウン/ポモドーロモード: 残り時間の割合を表示
+      if (timerState.totalSeconds <= TimeUtils.minValidSeconds) {
+        return TimeUtils.minValidSeconds.toDouble();
+      }
+      return timerState.currentSeconds / timerState.totalSeconds;
+    } else {
+      // カウントアップモード: 1時間ごとにリセットするプログレス表示
+      return (timerState.currentSeconds % TimeUtils.secondsPerHour) /
+          TimeUtils.secondsPerHour;
+    }
+  }
+
   Widget _buildTimerDisplay(TimerState timerState) {
     final timeText = timerState.formatTime();
-
-    final progressValue =
-        timerState.mode == TimerMode.countdown
-            ? timerState.currentSeconds / timerState.totalSeconds
-            : (timerState.currentSeconds % TimeUtils.secondsPerHour) /
-                TimeUtils.secondsPerHour;
+    final progressValue = _calculateProgressValue(timerState);
 
     return Container(
       width: 280,
@@ -451,7 +567,7 @@ class _TimerScreenState extends State<TimerScreen> {
               style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
             ),
             content: Text(
-              '${timerViewModel.elapsedSeconds}秒を学習完了として記録しますか？',
+              '${TimeUtils.formatSecondsToHoursAndMinutes(timerViewModel.elapsedSeconds)}を学習完了として記録しますか？',
               style: TextConsts.body.copyWith(color: ColorConsts.textSecondary),
             ),
             actions: [

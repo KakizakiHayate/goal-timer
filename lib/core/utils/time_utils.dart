@@ -45,6 +45,14 @@ class TimeUtils {
     return '$hours時間$minutes分';
   }
 
+  /// 秒数を「X時間Y分」形式にフォーマット
+  /// 例: 3660秒 → "1時間1分", 120秒 → "0時間2分"
+  static String formatSecondsToHoursAndMinutes(int totalSeconds) {
+    final hours = totalSeconds ~/ secondsPerHour;
+    final minutes = (totalSeconds % secondsPerHour) ~/ secondsPerMinute;
+    return '$hours時間$minutes分';
+  }
+
   /// 残り時間を計算（目標時間 - 消費時間）- 後方互換性のため残す
   static String calculateRemainingTime(int totalTargetHours, int spentMinutes) {
     // 目標時間を分に変換

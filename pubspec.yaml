@@ -72,6 +72,8 @@ dependencies:
   
   # App Tracking Transparency (iOS)
   app_tracking_transparency: ^2.0.6
+  flutter_local_notifications: ^19.5.0
+  timezone: ^0.10.1
 
 dev_dependencies:
   flutter_test:
