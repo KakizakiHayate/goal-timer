@@ -117,9 +117,16 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
           ElevatedButton(
             onPressed: () async {
               final navigator = Navigator.of(context);
-              await timerViewModel.onTappedTimerFinishButton();
-              navigator.pop();
-              navigator.pop(true);
+              try {
+                await timerViewModel.onTappedTimerFinishButton();
+                navigator.pop();
+                navigator.pop(true);
+              } catch (e, s) {
+                AppLogger.instance.e('学習記録の保存に失敗しました', e, s);
+                if (navigator.canPop()) {
+                  navigator.pop();
+                }
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: ColorConsts.success,

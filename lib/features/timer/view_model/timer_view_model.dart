@@ -17,8 +17,6 @@ class TimerConstants {
   static const int pomodoroWorkMinutes = 25;
   static const int pomodoroBreakMinutes = 5;
   static const int initialPomodoroRound = 1;
-  static const double defaultProgressValue = 0.0;
-  static const double fullProgressValue = 1.0;
   static const int initialElapsedSeconds = 0;
   static const int countupInitialSeconds = 0;
   static const int timerIntervalSeconds = 1;
@@ -76,14 +74,6 @@ class TimerState {
       needsCompletionConfirm:
           needsCompletionConfirm ?? this.needsCompletionConfirm,
     );
-  }
-
-  double get progress {
-    if (mode == TimerMode.countdown || mode == TimerMode.pomodoro) {
-      return TimerConstants.fullProgressValue - (currentSeconds / totalSeconds);
-    } else {
-      return TimerConstants.defaultProgressValue;
-    }
   }
 
   String formatTime() {
