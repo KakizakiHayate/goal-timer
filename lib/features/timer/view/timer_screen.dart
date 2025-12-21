@@ -238,17 +238,17 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // フォーカス（カウントダウン）
+          // カウントダウン
           _buildModeButton(
-            'フォーカス',
+            'カウントダウン',
             timerState.mode == TimerMode.countdown,
             () => _onModeTapped(timerViewModel, TimerMode.countdown),
             Icons.timer_outlined,
           ),
 
-          // フリー（カウントアップ）
+          // カウントアップ
           _buildModeButton(
-            'フリー',
+            'カウントアップ',
             timerState.mode == TimerMode.countup,
             () => _onModeTapped(timerViewModel, TimerMode.countup),
             Icons.all_inclusive,
