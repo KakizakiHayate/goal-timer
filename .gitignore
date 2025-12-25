@@ -65,7 +65,9 @@ android/app/google-services.json
 
 docs/
 
-ai-rules/
+ai-rules/*
+!ai-rules/plans/
+!ai-rules/plans/streak_card_implementation_plan.md
 .serena/
 .claude/commands/exec-issue.md
 ios/Runner/GoogleService-Info.plist.backup
@@ -78,3 +80,4 @@ ios/Runner.xcodeproj/project.pbxproj.backup
 !CHANGELOG.md
 !CONTRIBUTING.md
 !LICENSE.md
+!ai-rules/plans/streak_card_implementation_plan.md
