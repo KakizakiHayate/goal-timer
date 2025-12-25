@@ -342,20 +342,20 @@ class HomeState {
 **追加するメソッド:**
 ```dart
 /// ストリークデータを読み込む
+/// 注意: コンストラクタで注入された _studyLogsDatasource を使用すること
+///       新規にインスタンスを生成しないこと（DIの原則に従う）
 Future<void> _loadStreakData() async {
-  final datasource = LocalStudyDailyLogsDatasource(database: _database);
-
   // 直近7日間の学習日を取得
   final now = DateTime.now();
   final startDate = DateTime(now.year, now.month, now.day).subtract(const Duration(days: 6));
   final endDate = DateTime(now.year, now.month, now.day);
-  final studyDates = await datasource.fetchStudyDatesInRange(
+  final studyDates = await _studyLogsDatasource.fetchStudyDatesInRange(
     startDate: startDate,
     endDate: endDate,
   );
 
   // ストリークを計算
-  final streak = await datasource.calculateCurrentStreak();
+  final streak = await _studyLogsDatasource.calculateCurrentStreak();
 
   _state = _state.copyWith(
     currentStreak: streak,
