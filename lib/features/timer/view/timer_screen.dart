@@ -27,6 +27,9 @@ class TimerScreen extends StatefulWidget {
 }
 
 class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
+  /// 完了ダイアログの二重表示を防ぐためのガードフラグ
+  bool _isCompletionDialogShowing = false;
+
   @override
   void initState() {
     super.initState();
@@ -62,7 +65,7 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
         // アプリがフォアグラウンドに復帰
         timerViewModel.onAppResumed();
         // バックグラウンド中に完了した場合、確認ダイアログを表示
-        _checkAndShowBackgroundCompletionDialog();
+        _checkAndShowCompletionDialog();
         break;
       case AppLifecycleState.detached:
       case AppLifecycleState.hidden:
@@ -70,18 +73,22 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
     }
   }
 
-  void _checkAndShowBackgroundCompletionDialog() {
+  /// タイマー完了時の確認ダイアログを表示する
+  /// フォアグラウンド・バックグラウンド両方の完了に対応
+  void _checkAndShowCompletionDialog() {
     final timerViewModel = Get.find<TimerViewModel>();
-    if (timerViewModel.state.needsCompletionConfirm) {
+    if (timerViewModel.state.needsCompletionConfirm && !_isCompletionDialogShowing) {
+      _isCompletionDialogShowing = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          _showBackgroundCompletionDialog(context, timerViewModel);
+          _showTimerCompletionDialog(context, timerViewModel);
         }
       });
     }
   }
 
-  void _showBackgroundCompletionDialog(
+  /// タイマー完了時の確認ダイアログを表示する
+  void _showTimerCompletionDialog(
     BuildContext context,
     TimerViewModel timerViewModel,
   ) {
@@ -98,12 +105,13 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
           style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
         ),
         content: Text(
-          'バックグラウンド中にタイマーが完了しました。\n${TimeUtils.formatSecondsToHoursAndMinutes(timerViewModel.elapsedSeconds)}を学習完了として記録しますか？',
+          '${TimeUtils.formatSecondsToHoursAndMinutes(timerViewModel.elapsedSeconds)}を学習完了として記録しますか？',
           style: TextConsts.body.copyWith(color: ColorConsts.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () {
+              _isCompletionDialogShowing = false;
               timerViewModel.resetTimer();
               Navigator.pop(context);
             },
@@ -119,10 +127,12 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
               final navigator = Navigator.of(context);
               try {
                 await timerViewModel.onTappedTimerFinishButton();
+                _isCompletionDialogShowing = false;
                 navigator.pop();
                 navigator.pop(true);
               } catch (e, s) {
                 AppLogger.instance.e('学習記録の保存に失敗しました', e, s);
+                _isCompletionDialogShowing = false;
                 if (navigator.canPop()) {
                   navigator.pop();
                 }
@@ -152,6 +162,11 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
     return Obx(() {
       final timerViewModel = Get.find<TimerViewModel>();
       final timerState = timerViewModel.state;
+
+      // フォアグラウンドでタイマーが完了した場合、確認ダイアログを表示
+      if (timerState.needsCompletionConfirm && !_isCompletionDialogShowing) {
+        _checkAndShowCompletionDialog();
+      }
 
       return Scaffold(
         body: Container(

@@ -11,6 +11,7 @@ import '../../../core/utils/string_consts.dart';
 import '../../../core/utils/time_utils.dart';
 import '../../../core/widgets/goal_card.dart';
 import '../../../core/widgets/pressable_card.dart';
+import '../../../core/widgets/streak_card.dart';
 import '../view_model/home_view_model.dart';
 import '../../settings/view/settings_screen.dart';
 import '../../timer/view/timer_screen.dart';
@@ -248,6 +249,15 @@ class _HomeTabContent extends StatelessWidget {
                     ),
                   ),
                 ),
+              ),
+            ),
+
+            // ストリークカード
+            SliverToBoxAdapter(
+              child: StreakCard(
+                streakDays: homeState.currentStreak,
+                studyDates: homeState.recentStudyDates,
+                onTap: null,
               ),
             ),
 

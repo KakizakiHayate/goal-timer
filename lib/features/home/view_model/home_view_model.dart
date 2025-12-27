@@ -6,6 +6,7 @@ import '../../../core/data/local/local_study_daily_logs_datasource.dart';
 import '../../../core/data/local/app_database.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/time_utils.dart';
+import '../../../core/utils/streak_consts.dart';
 
 /// 目標削除操作の結果
 enum DeleteGoalResult {
@@ -18,22 +19,30 @@ class HomeState {
   final List<GoalsModel> goals;
   final Map<String, int> studiedSecondsByGoalId;
   final bool isLoading;
+  final int currentStreak;
+  final List<DateTime> recentStudyDates;
 
   HomeState({
     this.goals = const [],
     this.studiedSecondsByGoalId = const {},
     this.isLoading = false,
+    this.currentStreak = 0,
+    this.recentStudyDates = const [],
   });
 
   HomeState copyWith({
     List<GoalsModel>? goals,
     Map<String, int>? studiedSecondsByGoalId,
     bool? isLoading,
+    int? currentStreak,
+    List<DateTime>? recentStudyDates,
   }) {
     return HomeState(
       goals: goals ?? this.goals,
       studiedSecondsByGoalId: studiedSecondsByGoalId ?? this.studiedSecondsByGoalId,
       isLoading: isLoading ?? this.isLoading,
+      currentStreak: currentStreak ?? this.currentStreak,
+      recentStudyDates: recentStudyDates ?? this.recentStudyDates,
     );
   }
 
@@ -83,18 +92,32 @@ class HomeViewModel extends GetxController {
       _state = state.copyWith(isLoading: true);
       update();
 
-      // 目標と学習時間を並列で取得（Dart 3 Recordsで型安全に）
-      final (goals, studiedSeconds) = await (
+      // 目標、学習時間、ストリークデータを並列で取得（Dart 3 Recordsで型安全に）
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final startDate = today.subtract(
+        Duration(days: StreakConsts.recentDaysCount - 1),
+      );
+
+      final (goals, studiedSeconds, recentStudyDates, currentStreak) = await (
         _goalsDatasource.fetchAllGoals(),
         _studyLogsDatasource.fetchTotalSecondsForAllGoals(),
+        _studyLogsDatasource.fetchStudyDatesInRange(
+          startDate: startDate,
+          endDate: today,
+        ),
+        _studyLogsDatasource.calculateCurrentStreak(),
       ).wait;
 
       AppLogger.instance.i('目標を${goals.length}件読み込みました');
       AppLogger.instance.i('学習時間データを${studiedSeconds.length}件読み込みました');
+      AppLogger.instance.i('ストリーク: $currentStreak日, 直近学習日: ${recentStudyDates.length}日');
 
       _state = state.copyWith(
         goals: goals,
         studiedSecondsByGoalId: studiedSeconds,
+        currentStreak: currentStreak,
+        recentStudyDates: recentStudyDates,
         isLoading: false,
       );
       update();
@@ -192,13 +215,13 @@ class HomeViewModel extends GetxController {
     }
   }
 
-  // 目標を削除（学習ログも含めてカスケード削除）- 内部実装
-  // トランザクションを使用してデータ整合性を保証
+  // 目標を削除（学習ログは保持）- 内部実装
+  // ストリーク計算のため、削除された目標の学習記録も保持する
   Future<void> _deleteGoalInternal(GoalsModel goal) async {
     try {
-      // トランザクションで学習ログと目標をアトミックに削除
-      await _goalsDatasource.deleteGoalWithStudyLogs(goal.id);
-      AppLogger.instance.i('目標と学習ログを削除しました: ${goal.id}');
+      // 目標のみ削除（学習ログは保持してストリーク計算に使用）
+      await _goalsDatasource.deleteGoal(goal.id);
+      AppLogger.instance.i('目標を削除しました（学習ログは保持）: ${goal.id}');
 
       // 状態を直接更新（パフォーマンス改善: DBからの再読み込みを回避）
       final updatedGoals = state.goals.where((g) => g.id != goal.id).toList();

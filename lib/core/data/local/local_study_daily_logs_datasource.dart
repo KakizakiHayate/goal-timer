@@ -1,6 +1,8 @@
 import 'package:goal_timer/core/data/local/app_database.dart';
 import 'package:goal_timer/core/data/local/database_consts.dart';
 import 'package:goal_timer/core/models/study_daily_logs/study_daily_logs_model.dart';
+import 'package:goal_timer/core/utils/streak_consts.dart';
+import 'package:goal_timer/core/utils/time_utils.dart';
 import 'package:sqflite/sqflite.dart';
 
 class LocalStudyDailyLogsDatasource {
@@ -108,6 +110,100 @@ class LocalStudyDailyLogsDatasource {
       where: '${DatabaseConsts.columnId} = ?',
       whereArgs: [id],
     );
+  }
+
+  /// 指定期間内の学習日リストを取得（合計1分以上の日のみ）
+  /// 全ての目標を合算してカウント
+  Future<List<DateTime>> fetchStudyDatesInRange({
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    final db = await _database.database;
+
+    final startDateStr = _formatDateOnly(startDate);
+    final endDateStr = _formatDateOnly(endDate);
+
+    final result = await db.rawQuery(
+      '''
+      SELECT DATE(${DatabaseConsts.columnStudyDate}) as study_day, 
+             SUM(${DatabaseConsts.columnTotalSeconds}) as total
+      FROM ${DatabaseConsts.tableStudyDailyLogs}
+      WHERE DATE(${DatabaseConsts.columnStudyDate}) >= DATE(?)
+        AND DATE(${DatabaseConsts.columnStudyDate}) <= DATE(?)
+      GROUP BY DATE(${DatabaseConsts.columnStudyDate})
+      HAVING SUM(${DatabaseConsts.columnTotalSeconds}) >= ?
+      ORDER BY study_day ASC
+      ''',
+      [startDateStr, endDateStr, StreakConsts.minStudySeconds],
+    );
+
+    return result.map((row) {
+      final dateStr = row['study_day'] as String;
+      return DateTime.parse(dateStr);
+    }).toList();
+  }
+
+  /// 現在のストリーク（連続学習日数）を計算
+  /// 今日または昨日から遡って連続した学習日をカウント
+  Future<int> calculateCurrentStreak() async {
+    final db = await _database.database;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    final result = await db.rawQuery(
+      '''
+      SELECT DATE(${DatabaseConsts.columnStudyDate}) as study_day, 
+             SUM(${DatabaseConsts.columnTotalSeconds}) as total
+      FROM ${DatabaseConsts.tableStudyDailyLogs}
+      GROUP BY DATE(${DatabaseConsts.columnStudyDate})
+      HAVING SUM(${DatabaseConsts.columnTotalSeconds}) >= ?
+      ORDER BY study_day DESC
+      LIMIT ?
+      ''',
+      [StreakConsts.minStudySeconds, StreakConsts.maxStreakQueryLimit],
+    );
+
+    if (result.isEmpty) {
+      return 0;
+    }
+
+    final studyDates = result.map((row) {
+      final dateStr = row['study_day'] as String;
+      return DateTime.parse(dateStr);
+    }).toList();
+
+    int streak = 0;
+    DateTime checkDate = today;
+
+    final isStudiedToday = studyDates.isNotEmpty &&
+        studyDates.first.isSameDay(today);
+
+    if (!isStudiedToday) {
+      final yesterday = today.subtract(const Duration(days: 1));
+      final isStudiedYesterday = studyDates.isNotEmpty &&
+          studyDates.first.isSameDay(yesterday);
+
+      if (!isStudiedYesterday) {
+        return 0;
+      }
+      checkDate = yesterday;
+    }
+
+    for (final studyDate in studyDates) {
+      if (studyDate.isSameDay(checkDate)) {
+        streak++;
+        checkDate = checkDate.subtract(const Duration(days: 1));
+      } else if (studyDate.isBefore(checkDate)) {
+        break;
+      }
+    }
+
+    return streak;
+  }
+
+  // ヘルパーメソッド: 日付のみをYYYY-MM-DD形式で取得
+  String _formatDateOnly(DateTime date) {
+    return '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
   // ヘルパーメソッド: Map → Model

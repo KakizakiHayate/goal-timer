@@ -112,6 +112,10 @@ class TimerViewModel extends GetxController {
   DateTime? _timerStartTime;
   int _pausedElapsedSeconds = TimerConstants.initialElapsedSeconds;
 
+  // 学習セッションの開始日（深夜0時またぎ対応: 開始日を基準にログを保存）
+  // 初回startTimer()でセット、pause/resumeでは維持、reset/保存完了でクリア
+  DateTime? _studySessionStartDay;
+
   // 状態（Rxで管理）
   final Rx<TimerState> _state = TimerState().obs;
   TimerState get state => _state.value;
@@ -184,6 +188,12 @@ class TimerViewModel extends GetxController {
 
     // バックグラウンド対応: 開始時刻を記録
     _timerStartTime = DateTime.now();
+
+    // 学習セッションの開始日を記録（初回のみ）
+    // 深夜0時またぎ対応: 開始日を基準にログを保存するため
+    final now = DateTime.now();
+    _studySessionStartDay ??= DateTime(now.year, now.month, now.day);
+
     _state.value = state.copyWith(
       status: TimerStatus.running,
       needsCompletionConfirm: false,
@@ -234,6 +244,7 @@ class TimerViewModel extends GetxController {
     _elapsedSeconds = TimerConstants.initialElapsedSeconds;
     _pausedElapsedSeconds = TimerConstants.initialElapsedSeconds;
     _timerStartTime = null;
+    _studySessionStartDay = null; // 学習セッションの開始日をクリア
     _state.value = state.copyWith(
       currentSeconds: state.totalSeconds,
       status: TimerStatus.initial,
@@ -250,6 +261,7 @@ class TimerViewModel extends GetxController {
     _state.value = state.copyWith(
       status: TimerStatus.completed,
       currentSeconds: TimerConstants.countdownCompleteThreshold,
+      needsCompletionConfirm: true,
     );
     AppLogger.instance.i('タイマーが完了しました: $_elapsedSeconds秒');
   }
@@ -389,18 +401,23 @@ class TimerViewModel extends GetxController {
 
   Future<void> saveStudyDailyLogData() async {
     try {
-      final today = DateTime.now();
+      // 深夜0時またぎ対応: 学習セッションの開始日を使用
+      // 例: 23:50開始→0:10終了の場合、開始日（前日）にカウント
+      final studyDate = _studySessionStartDay ?? DateTime.now();
       final log = StudyDailyLogsModel(
         id: const Uuid().v4(),
         goalId: goal.id,
-        studyDate: DateTime(today.year, today.month, today.day),
+        studyDate: DateTime(studyDate.year, studyDate.month, studyDate.day),
         totalSeconds: _elapsedSeconds,
       );
 
       // DataSource経由で保存
       await _datasource.saveLog(log);
 
-      AppLogger.instance.i('学習記録を保存しました: ${log.id}');
+      // 保存完了後、学習セッションの開始日をクリア
+      _studySessionStartDay = null;
+
+      AppLogger.instance.i('学習記録を保存しました: ${log.id}, 学習日: ${log.studyDate}');
     } catch (error, stackTrace) {
       AppLogger.instance.e('学習記録の保存に失敗しました', error, stackTrace);
       rethrow;
