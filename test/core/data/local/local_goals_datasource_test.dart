@@ -126,7 +126,7 @@ void main() {
       expect(fetchedGoal.targetMinutes, equals(2000));
     });
 
-    test('目標を削除できること', () async {
+    test('目標を論理削除できること（fetchAllGoalsから除外される）', () async {
       // Arrange
       final goal = GoalsModel(
         id: const Uuid().v4(),
@@ -145,9 +145,66 @@ void main() {
       // Act
       await datasource.deleteGoal(goal.id);
 
+      // Assert - fetchAllGoalsからは除外される
+      final goals = await datasource.fetchAllGoals();
+      expect(goals.any((g) => g.id == goal.id), isFalse);
+
+      // Assert - fetchAllGoalsIncludingDeletedには含まれる
+      final allGoals = await datasource.fetchAllGoalsIncludingDeleted();
+      final deletedGoal = allGoals.firstWhere((g) => g.id == goal.id);
+      expect(deletedGoal.deletedAt, isNotNull);
+    });
+
+    test('論理削除された目標はfetchGoalByIdで取得できること', () async {
+      // Arrange
+      final goal = GoalsModel(
+        id: const Uuid().v4(),
+        userId: 'test-user-1',
+        title: '削除する目標',
+        description: '削除テスト',
+        targetMinutes: 1000,
+        avoidMessage: '削除テスト',
+        deadline: DateTime.now().add(const Duration(days: 30)),
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      await datasource.saveGoal(goal);
+      await datasource.deleteGoal(goal.id);
+
+      // Act
+      final fetchedGoal = await datasource.fetchGoalById(goal.id);
+
+      // Assert - fetchGoalByIdでは削除済みも取得可能（学習記録画面で使用）
+      expect(fetchedGoal, isNotNull);
+      expect(fetchedGoal!.deletedAt, isNotNull);
+    });
+
+    test('物理削除（hardDeleteGoal）で完全に削除できること', () async {
+      // Arrange
+      final goal = GoalsModel(
+        id: const Uuid().v4(),
+        userId: 'test-user-1',
+        title: '完全削除する目標',
+        description: '物理削除テスト',
+        targetMinutes: 1000,
+        avoidMessage: '物理削除テスト',
+        deadline: DateTime.now().add(const Duration(days: 30)),
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      await datasource.saveGoal(goal);
+
+      // Act
+      await datasource.hardDeleteGoal(goal.id);
+
       // Assert
       final deletedGoal = await datasource.fetchGoalById(goal.id);
       expect(deletedGoal, isNull);
+
+      final allGoals = await datasource.fetchAllGoalsIncludingDeleted();
+      expect(allGoals.any((g) => g.id == goal.id), isFalse);
     });
 
     test('未同期の目標を取得できること', () async {

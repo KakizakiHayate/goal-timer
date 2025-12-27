@@ -9,8 +9,19 @@ class LocalGoalsDatasource {
   LocalGoalsDatasource({required AppDatabase database})
       : _database = database;
 
-  /// 全ての目標を取得
+  /// 全ての目標を取得（削除済みを除く）
   Future<List<GoalsModel>> fetchAllGoals() async {
+    final db = await _database.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      DatabaseConsts.tableGoals,
+      where: '${DatabaseConsts.columnDeletedAt} IS NULL',
+    );
+
+    return maps.map((map) => _mapToModel(map)).toList();
+  }
+
+  /// 削除済みを含む全ての目標を取得
+  Future<List<GoalsModel>> fetchAllGoalsIncludingDeleted() async {
     final db = await _database.database;
     final List<Map<String, dynamic>> maps =
         await db.query(DatabaseConsts.tableGoals);
@@ -54,8 +65,22 @@ class LocalGoalsDatasource {
     );
   }
 
-  /// 目標を削除
+  /// 目標を論理削除（deleted_atに現在日時を設定）
   Future<void> deleteGoal(String id) async {
+    final db = await _database.database;
+    await db.update(
+      DatabaseConsts.tableGoals,
+      {
+        DatabaseConsts.columnDeletedAt: DateTime.now().toIso8601String(),
+        DatabaseConsts.columnSyncUpdatedAt: null, // 未同期状態にする
+      },
+      where: '${DatabaseConsts.columnId} = ?',
+      whereArgs: [id],
+    );
+  }
+
+  /// 目標を物理削除（完全に削除）
+  Future<void> hardDeleteGoal(String id) async {
     final db = await _database.database;
     await db.delete(
       DatabaseConsts.tableGoals,
@@ -99,6 +124,9 @@ class LocalGoalsDatasource {
       completedAt: map[DatabaseConsts.columnCompletedAt] != null
           ? DateTime.parse(map[DatabaseConsts.columnCompletedAt] as String)
           : null,
+      deletedAt: map[DatabaseConsts.columnDeletedAt] != null
+          ? DateTime.parse(map[DatabaseConsts.columnDeletedAt] as String)
+          : null,
       createdAt: map[DatabaseConsts.columnCreatedAt] != null
           ? DateTime.parse(map[DatabaseConsts.columnCreatedAt] as String)
           : null,
@@ -122,6 +150,7 @@ class LocalGoalsDatasource {
       DatabaseConsts.columnAvoidMessage: model.avoidMessage,
       DatabaseConsts.columnDeadline: model.deadline.toIso8601String(),
       DatabaseConsts.columnCompletedAt: model.completedAt?.toIso8601String(),
+      DatabaseConsts.columnDeletedAt: model.deletedAt?.toIso8601String(),
       DatabaseConsts.columnCreatedAt: model.createdAt?.toIso8601String(),
       DatabaseConsts.columnUpdatedAt: model.updatedAt?.toIso8601String(),
       DatabaseConsts.columnSyncUpdatedAt: model.syncUpdatedAt?.toIso8601String(),

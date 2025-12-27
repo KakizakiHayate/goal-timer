@@ -19,6 +19,7 @@ class GoalsModel with _$GoalsModel {
     @JsonKey(name: 'target_minutes') required int targetMinutes,
     @JsonKey(name: 'created_at') DateTime? createdAt,
     @JsonKey(name: 'completed_at') DateTime? completedAt,
+    @JsonKey(name: 'deleted_at') DateTime? deletedAt,
   }) = _GoalsModel;
 
   /// Supabaseからのデータを元にGoalsModelを生成
