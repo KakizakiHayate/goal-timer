@@ -201,6 +201,51 @@ class LocalStudyDailyLogsDatasource {
     return streak;
   }
 
+  /// 最初の学習記録日を取得
+  /// 学習記録がない場合はnullを返す
+  Future<DateTime?> fetchFirstStudyDate() async {
+    final db = await _database.database;
+
+    final result = await db.rawQuery(
+      '''
+      SELECT MIN(DATE(${DatabaseConsts.columnStudyDate})) as first_date
+      FROM ${DatabaseConsts.tableStudyDailyLogs}
+      ''',
+    );
+
+    if (result.isEmpty || result.first['first_date'] == null) {
+      return null;
+    }
+
+    final dateStr = result.first['first_date'] as String;
+    return DateTime.parse(dateStr);
+  }
+
+  /// 指定日の目標別学習時間を取得
+  /// Map<goalId, totalSeconds>の形式で返す
+  Future<Map<String, int>> fetchDailyRecordsByDate(DateTime date) async {
+    final db = await _database.database;
+    final dateStr = _formatDateOnly(date);
+
+    final result = await db.rawQuery(
+      '''
+      SELECT ${DatabaseConsts.columnGoalId}, SUM(${DatabaseConsts.columnTotalSeconds}) as total
+      FROM ${DatabaseConsts.tableStudyDailyLogs}
+      WHERE DATE(${DatabaseConsts.columnStudyDate}) = DATE(?)
+      GROUP BY ${DatabaseConsts.columnGoalId}
+      ''',
+      [dateStr],
+    );
+
+    final Map<String, int> records = {};
+    for (final row in result) {
+      final goalId = row[DatabaseConsts.columnGoalId] as String;
+      final total = (row['total'] as int?) ?? 0;
+      records[goalId] = total;
+    }
+    return records;
+  }
+
   // ヘルパーメソッド: 日付のみをYYYY-MM-DD形式で取得
   String _formatDateOnly(DateTime date) {
     return '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';

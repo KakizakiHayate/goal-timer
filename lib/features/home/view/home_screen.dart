@@ -14,6 +14,7 @@ import '../../../core/widgets/pressable_card.dart';
 import '../../../core/widgets/streak_card.dart';
 import '../view_model/home_view_model.dart';
 import '../../settings/view/settings_screen.dart';
+import '../../study_records/view/study_records_screen.dart';
 import '../../timer/view/timer_screen.dart';
 import 'widgets/add_goal_modal.dart';
 
@@ -257,7 +258,14 @@ class _HomeTabContent extends StatelessWidget {
               child: StreakCard(
                 streakDays: homeState.currentStreak,
                 studyDates: homeState.recentStudyDates,
-                onTap: null,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const StudyRecordsScreen(),
+                    ),
+                  );
+                },
               ),
             ),
 
