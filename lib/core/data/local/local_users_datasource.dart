@@ -36,30 +36,21 @@ class LocalUsersDatasource {
     try {
       final db = await _database.database;
 
-      // ユーザーが存在するか確認
-      final existingUsers = await db.query(
-        DatabaseConsts.tableUsers,
-        limit: 1,
-      );
-
-      if (existingUsers.isEmpty) {
-        AppLogger.instance.w('ユーザーが存在しないため、最長ストリークを更新できません');
-        return;
-      }
-
-      final userId = existingUsers.first[DatabaseConsts.columnId] as String;
-
-      await db.update(
+      // updateは更新した行数を返すため、事前にSELECTする必要はない
+      // usersテーブルには単一のユーザーしか存在しない前提
+      final count = await db.update(
         DatabaseConsts.tableUsers,
         {
           DatabaseConsts.columnLongestStreak: streak,
           DatabaseConsts.columnUpdatedAt: DateTime.now().toIso8601String(),
         },
-        where: '${DatabaseConsts.columnId} = ?',
-        whereArgs: [userId],
       );
 
-      AppLogger.instance.i('最長ストリークを更新しました: $streak');
+      if (count > 0) {
+        AppLogger.instance.i('最長ストリークを更新しました: $streak');
+      } else {
+        AppLogger.instance.w('ユーザーが存在しないため、最長ストリークを更新できません');
+      }
     } catch (e, stackTrace) {
       AppLogger.instance.e('最長ストリークの更新に失敗しました', e, stackTrace);
       rethrow;
@@ -73,7 +64,7 @@ class LocalUsersDatasource {
     try {
       final db = await _database.database;
 
-      // ユーザーが存在するか確認
+      // ユーザー情報を取得
       final existingUsers = await db.query(
         DatabaseConsts.tableUsers,
         limit: 1,
@@ -83,12 +74,23 @@ class LocalUsersDatasource {
         return false;
       }
 
+      final userData = existingUsers.first;
       final longestStreak =
-          (existingUsers.first[DatabaseConsts.columnLongestStreak] as int?) ??
-              0;
+          (userData[DatabaseConsts.columnLongestStreak] as int?) ?? 0;
 
       if (currentStreak > longestStreak) {
-        await updateLongestStreak(currentStreak);
+        // 直接更新することでDBアクセスを削減
+        final userId = userData[DatabaseConsts.columnId] as String;
+        await db.update(
+          DatabaseConsts.tableUsers,
+          {
+            DatabaseConsts.columnLongestStreak: currentStreak,
+            DatabaseConsts.columnUpdatedAt: DateTime.now().toIso8601String(),
+          },
+          where: '${DatabaseConsts.columnId} = ?',
+          whereArgs: [userId],
+        );
+        AppLogger.instance.i('最長ストリークを更新しました: $currentStreak');
         return true;
       }
 
