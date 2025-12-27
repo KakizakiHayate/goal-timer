@@ -5,6 +5,7 @@ import 'package:goal_timer/core/models/goals/goals_model.dart';
 import 'package:goal_timer/core/utils/app_logger.dart';
 import 'package:goal_timer/core/utils/time_utils.dart';
 import 'package:goal_timer/core/data/local/local_study_daily_logs_datasource.dart';
+import 'package:goal_timer/core/data/local/local_users_datasource.dart';
 import 'package:goal_timer/core/data/local/app_database.dart';
 import 'package:goal_timer/features/settings/view_model/settings_view_model.dart';
 import 'package:goal_timer/core/services/notification_service.dart';
@@ -97,6 +98,7 @@ class TimerState {
 // タイマーのViewModel
 class TimerViewModel extends GetxController {
   late final LocalStudyDailyLogsDatasource _datasource;
+  late final LocalUsersDatasource _usersDatasource;
   final GoalsModel goal;
 
   // PRコメント対応: インスタンス変数として一度だけ取得
@@ -127,6 +129,7 @@ class TimerViewModel extends GetxController {
       : _settingsViewModel = Get.find<SettingsViewModel>() {
     final database = Get.find<AppDatabase>();
     _datasource = LocalStudyDailyLogsDatasource(database: database);
+    _usersDatasource = LocalUsersDatasource(database: database);
 
     final defaultSeconds = _settingsViewModel.defaultTimerSeconds.value;
 
@@ -418,9 +421,32 @@ class TimerViewModel extends GetxController {
       _studySessionStartDay = null;
 
       AppLogger.instance.i('学習記録を保存しました: ${log.id}, 学習日: ${log.studyDate}');
+
+      // 最長ストリークを更新
+      await _updateLongestStreakIfNeeded();
     } catch (error, stackTrace) {
       AppLogger.instance.e('学習記録の保存に失敗しました', error, stackTrace);
       rethrow;
+    }
+  }
+
+  /// 現在のストリークが最長を超えていれば更新する
+  Future<void> _updateLongestStreakIfNeeded() async {
+    try {
+      // 現在のストリークを計算
+      final currentStreak = await _datasource.calculateCurrentStreak();
+
+      // 最長ストリークと比較して必要なら更新
+      final updated =
+          await _usersDatasource.updateLongestStreakIfNeeded(currentStreak);
+
+      if (updated) {
+        AppLogger.instance.i('最長ストリークを更新しました: $currentStreak日');
+      }
+    } catch (error, stackTrace) {
+      // 最長ストリーク更新の失敗は学習記録保存の失敗とは別に扱う
+      // ログを出力するが、例外は再スローしない
+      AppLogger.instance.e('最長ストリークの更新に失敗しました', error, stackTrace);
     }
   }
 
