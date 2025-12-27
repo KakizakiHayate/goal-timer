@@ -7,6 +7,13 @@ class StreakConsts {
   /// ミニヒートマップに表示する日数
   static const int recentDaysCount = 7;
 
+  /// ストリーク計算時のクエリ上限（パフォーマンス最適化）
+  /// 400日以上の連続ストリークにも対応可能
+  static const int maxStreakQueryLimit = 400;
+
+  /// 最後のドットのインデックスオフセット（ドット間隔計算用）
+  static const int lastDotIndexOffset = 1;
+
   /// 1週間達成のマイルストーン
   static const int weekMilestone = 7;
 

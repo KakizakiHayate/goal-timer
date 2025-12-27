@@ -1,3 +1,11 @@
+/// DateTime拡張メソッド
+extension DateTimeComparison on DateTime {
+  /// 同じ日かどうかを判定
+  bool isSameDay(DateTime other) {
+    return year == other.year && month == other.month && day == other.day;
+  }
+}
+
 /// 時間関連のユーティリティクラス
 class TimeUtils {
   // 時間変換の定数

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:goal_timer/core/utils/color_consts.dart';
 import 'package:goal_timer/core/utils/streak_consts.dart';
+import 'package:goal_timer/core/utils/time_utils.dart';
 
 /// ミニヒートマップウィジェット
 /// 直近7日間の学習状況を7つのドットで表示する
@@ -23,35 +24,34 @@ class MiniHeatmap extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(StreakConsts.recentDaysCount, (index) {
-        final daysAgo = StreakConsts.recentDaysCount - 1 - index;
+        final daysAgo = StreakConsts.recentDaysCount -
+            StreakConsts.lastDotIndexOffset -
+            index;
         final date = today.subtract(Duration(days: daysAgo));
         final isToday = daysAgo == 0;
-        final hasStudied = _hasStudiedOnDate(date);
+        final isStudied = _isStudiedOnDate(date);
 
+        final isLastDot = index ==
+            StreakConsts.recentDaysCount - StreakConsts.lastDotIndexOffset;
         return Padding(
           padding: EdgeInsets.only(
-            right: index < StreakConsts.recentDaysCount - 1
-                ? StreakConsts.dotSpacing
-                : 0,
+            right: isLastDot ? 0 : StreakConsts.dotSpacing,
           ),
-          child: _buildDot(isToday: isToday, hasStudied: hasStudied),
+          child: _buildDot(isToday: isToday, isStudied: isStudied),
         );
       }),
     );
   }
 
-  bool _hasStudiedOnDate(DateTime date) {
-    return studyDates.any((studyDate) =>
-        studyDate.year == date.year &&
-        studyDate.month == date.month &&
-        studyDate.day == date.day);
+  bool _isStudiedOnDate(DateTime date) {
+    return studyDates.any((studyDate) => studyDate.isSameDay(date));
   }
 
-  Widget _buildDot({required bool isToday, required bool hasStudied}) {
+  Widget _buildDot({required bool isToday, required bool isStudied}) {
     BoxDecoration decoration;
 
     if (isToday) {
-      if (hasStudied) {
+      if (isStudied) {
         decoration = BoxDecoration(
           color: todayStudiedColor,
           borderRadius: BorderRadius.circular(StreakConsts.dotBorderRadius),
@@ -67,7 +67,7 @@ class MiniHeatmap extends StatelessWidget {
         );
       }
     } else {
-      if (hasStudied) {
+      if (isStudied) {
         decoration = BoxDecoration(
           color: ColorConsts.success,
           borderRadius: BorderRadius.circular(StreakConsts.dotBorderRadius),
