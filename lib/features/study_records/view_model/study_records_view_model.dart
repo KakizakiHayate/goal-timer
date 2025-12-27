@@ -20,8 +20,8 @@ class DailyRecord {
   });
 }
 
-/// 統計画面の状態
-class StatisticsState {
+/// 学習記録画面の状態
+class StudyRecordsState {
   final DateTime currentMonth;
   final List<DateTime> studyDates;
   final int currentStreak;
@@ -29,7 +29,7 @@ class StatisticsState {
   final DateTime? firstStudyDate;
   final bool isLoading;
 
-  const StatisticsState({
+  const StudyRecordsState({
     required this.currentMonth,
     this.studyDates = const [],
     this.currentStreak = 0,
@@ -38,7 +38,7 @@ class StatisticsState {
     this.isLoading = false,
   });
 
-  StatisticsState copyWith({
+  StudyRecordsState copyWith({
     DateTime? currentMonth,
     List<DateTime>? studyDates,
     int? currentStreak,
@@ -46,7 +46,7 @@ class StatisticsState {
     DateTime? firstStudyDate,
     bool? isLoading,
   }) {
-    return StatisticsState(
+    return StudyRecordsState(
       currentMonth: currentMonth ?? this.currentMonth,
       studyDates: studyDates ?? this.studyDates,
       currentStreak: currentStreak ?? this.currentStreak,
@@ -71,20 +71,20 @@ class StatisticsState {
   }
 }
 
-/// 統計画面のViewModel
-class StatisticsViewModel extends GetxController {
+/// 学習記録画面のViewModel
+class StudyRecordsViewModel extends GetxController {
   final LocalStudyDailyLogsDatasource _studyLogsDatasource;
   final LocalGoalsDatasource _goalsDatasource;
   final LocalUsersDatasource _usersDatasource;
 
-  StatisticsState _state = StatisticsState(
+  StudyRecordsState _state = StudyRecordsState(
     currentMonth: DateTime(DateTime.now().year, DateTime.now().month),
   );
-  StatisticsState get state => _state;
+  StudyRecordsState get state => _state;
 
   /// コンストラクタ
   /// テスト時にはDataSourceを注入可能
-  StatisticsViewModel({
+  StudyRecordsViewModel({
     LocalStudyDailyLogsDatasource? studyLogsDatasource,
     LocalGoalsDatasource? goalsDatasource,
     LocalUsersDatasource? usersDatasource,
@@ -107,16 +107,12 @@ class StatisticsViewModel extends GetxController {
     update();
 
     try {
-      // 並列で取得
-      final results = await Future.wait([
+      // 並列で取得（Dart 3 レコード構文で型安全に）
+      final (firstStudyDate, currentStreak, longestStreak) = await (
         _studyLogsDatasource.fetchFirstStudyDate(),
         _studyLogsDatasource.calculateCurrentStreak(),
         _usersDatasource.getLongestStreak(),
-      ]);
-
-      final firstStudyDate = results[0] as DateTime?;
-      final currentStreak = results[1] as int;
-      final longestStreak = results[2] as int;
+      ).wait;
 
       _state = _state.copyWith(
         firstStudyDate: firstStudyDate,

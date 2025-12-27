@@ -18,13 +18,27 @@ class MonthlyCalendar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // パフォーマンス改善: DateTime.now()を一度だけ呼び出し
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    // パフォーマンス改善: studyDatesをSetに変換してO(1)検索
+    final studyDateSet = _createStudyDateSet();
+
     return Column(
       children: [
         _buildWeekdayHeader(),
         const SizedBox(height: SpacingConsts.s),
-        _buildCalendarGrid(),
+        _buildCalendarGrid(today: today, studyDateSet: studyDateSet),
       ],
     );
+  }
+
+  /// studyDatesをSetに変換（日付のみで比較するため正規化）
+  Set<DateTime> _createStudyDateSet() {
+    return studyDates
+        .map((d) => DateTime(d.year, d.month, d.day))
+        .toSet();
   }
 
   /// 曜日ヘッダー（月曜始まり）
@@ -51,7 +65,10 @@ class MonthlyCalendar extends StatelessWidget {
   }
 
   /// カレンダーグリッド
-  Widget _buildCalendarGrid() {
+  Widget _buildCalendarGrid({
+    required DateTime today,
+    required Set<DateTime> studyDateSet,
+  }) {
     final days = _generateCalendarDays();
 
     return GridView.builder(
@@ -69,17 +86,25 @@ class MonthlyCalendar extends StatelessWidget {
         if (day == null) {
           return const SizedBox.shrink();
         }
-        return _buildDayCell(day);
+        return _buildDayCell(
+          date: day,
+          today: today,
+          studyDateSet: studyDateSet,
+        );
       },
     );
   }
 
   /// 日付セルを構築
-  Widget _buildDayCell(DateTime date) {
-    final isToday = _isToday(date);
-    final hasStudied = _hasStudied(date);
-    final isPast = _isPast(date);
-    final isFuture = _isFuture(date);
+  Widget _buildDayCell({
+    required DateTime date,
+    required DateTime today,
+    required Set<DateTime> studyDateSet,
+  }) {
+    final isToday = _isToday(date, today);
+    final hasStudied = _hasStudied(date, studyDateSet);
+    final isPast = date.isBefore(today);
+    final isFuture = date.isAfter(today);
 
     return GestureDetector(
       onTap: hasStudied ? () => onDateTap?.call(date) : null,
@@ -172,7 +197,8 @@ class MonthlyCalendar extends StatelessWidget {
   /// カレンダーの日付リストを生成（月曜始まり）
   List<DateTime?> _generateCalendarDays() {
     final firstDayOfMonth = DateTime(currentMonth.year, currentMonth.month, 1);
-    final lastDayOfMonth = DateTime(currentMonth.year, currentMonth.month + 1, 0);
+    final lastDayOfMonth =
+        DateTime(currentMonth.year, currentMonth.month + 1, 0);
 
     // 月曜始まりのため、1=月曜, 7=日曜に変換
     // DateTime.weekdayは1=月曜, 7=日曜なので調整不要
@@ -197,31 +223,15 @@ class MonthlyCalendar extends StatelessWidget {
   }
 
   /// 今日かどうか
-  bool _isToday(DateTime date) {
-    final now = DateTime.now();
-    return date.year == now.year &&
-        date.month == now.month &&
-        date.day == now.day;
+  bool _isToday(DateTime date, DateTime today) {
+    return date.year == today.year &&
+        date.month == today.month &&
+        date.day == today.day;
   }
 
-  /// 過去の日付かどうか
-  bool _isPast(DateTime date) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    return date.isBefore(today);
-  }
-
-  /// 未来の日付かどうか
-  bool _isFuture(DateTime date) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    return date.isAfter(today);
-  }
-
-  /// 学習記録があるかどうか
-  bool _hasStudied(DateTime date) {
-    return studyDates.any(
-      (d) => d.year == date.year && d.month == date.month && d.day == date.day,
-    );
+  /// 学習記録があるかどうか（O(1)検索）
+  bool _hasStudied(DateTime date, Set<DateTime> studyDateSet) {
+    final normalizedDate = DateTime(date.year, date.month, date.day);
+    return studyDateSet.contains(normalizedDate);
   }
 }

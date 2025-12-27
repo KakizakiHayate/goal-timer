@@ -3,28 +3,28 @@ import 'package:get/get.dart';
 import 'package:goal_timer/core/utils/color_consts.dart';
 import 'package:goal_timer/core/utils/spacing_consts.dart';
 import 'package:goal_timer/core/utils/text_consts.dart';
-import 'package:goal_timer/features/statistics/view/widgets/daily_record_bottom_sheet.dart';
-import 'package:goal_timer/features/statistics/view/widgets/monthly_calendar.dart';
-import 'package:goal_timer/features/statistics/view_model/statistics_view_model.dart';
+import 'package:goal_timer/features/study_records/view/widgets/daily_record_bottom_sheet.dart';
+import 'package:goal_timer/features/study_records/view/widgets/monthly_calendar.dart';
+import 'package:goal_timer/features/study_records/view_model/study_records_view_model.dart';
 
-/// 学習記録画面（統計詳細画面）
-class StatisticsScreen extends StatefulWidget {
-  const StatisticsScreen({super.key});
+/// 学習記録画面
+class StudyRecordsScreen extends StatefulWidget {
+  const StudyRecordsScreen({super.key});
 
   @override
-  State<StatisticsScreen> createState() => _StatisticsScreenState();
+  State<StudyRecordsScreen> createState() => _StudyRecordsScreenState();
 }
 
-class _StatisticsScreenState extends State<StatisticsScreen> {
+class _StudyRecordsScreenState extends State<StudyRecordsScreen> {
   @override
   void initState() {
     super.initState();
-    Get.put(StatisticsViewModel());
+    Get.put(StudyRecordsViewModel());
   }
 
   @override
   void dispose() {
-    Get.delete<StatisticsViewModel>();
+    Get.delete<StudyRecordsViewModel>();
     super.dispose();
   }
 
@@ -38,7 +38,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         foregroundColor: ColorConsts.textPrimary,
         elevation: 0,
       ),
-      body: GetBuilder<StatisticsViewModel>(
+      body: GetBuilder<StudyRecordsViewModel>(
         builder: (viewModel) {
           final state = viewModel.state;
 
@@ -68,8 +68,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   /// 月ナビゲーション
   Widget _buildMonthNavigation(
-    StatisticsViewModel viewModel,
-    StatisticsState state,
+    StudyRecordsViewModel viewModel,
+    StudyRecordsState state,
   ) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: SpacingConsts.l),
@@ -109,8 +109,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   /// カレンダーカード
   Widget _buildCalendarCard(
-    StatisticsViewModel viewModel,
-    StatisticsState state,
+    StudyRecordsViewModel viewModel,
+    StudyRecordsState state,
   ) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: SpacingConsts.l),
@@ -135,7 +135,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   /// ストリーク情報
-  Widget _buildStreakInfo(StatisticsState state) {
+  Widget _buildStreakInfo(StudyRecordsState state) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: SpacingConsts.l),
       padding: const EdgeInsets.all(SpacingConsts.m),
@@ -214,7 +214,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   /// 日別学習記録を表示
   Future<void> _showDailyRecords(
-    StatisticsViewModel viewModel,
+    StudyRecordsViewModel viewModel,
     DateTime date,
   ) async {
     final records = await viewModel.fetchDailyRecords(date);

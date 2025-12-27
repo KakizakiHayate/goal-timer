@@ -4,7 +4,7 @@ import 'package:goal_timer/core/data/local/local_goals_datasource.dart';
 import 'package:goal_timer/core/data/local/local_study_daily_logs_datasource.dart';
 import 'package:goal_timer/core/data/local/local_users_datasource.dart';
 import 'package:goal_timer/core/models/goals/goals_model.dart';
-import 'package:goal_timer/features/statistics/view_model/statistics_view_model.dart';
+import 'package:goal_timer/features/study_records/view_model/study_records_view_model.dart';
 
 class MockLocalStudyDailyLogsDatasource extends Mock
     implements LocalStudyDailyLogsDatasource {}
@@ -14,7 +14,7 @@ class MockLocalGoalsDatasource extends Mock implements LocalGoalsDatasource {}
 class MockLocalUsersDatasource extends Mock implements LocalUsersDatasource {}
 
 void main() {
-  late StatisticsViewModel viewModel;
+  late StudyRecordsViewModel viewModel;
   late MockLocalStudyDailyLogsDatasource mockStudyLogsDatasource;
   late MockLocalGoalsDatasource mockGoalsDatasource;
   late MockLocalUsersDatasource mockUsersDatasource;
@@ -61,14 +61,14 @@ void main() {
           endDate: any(named: 'endDate'),
         )).thenAnswer((_) async => [DateTime(2025, 12, 1), DateTime(2025, 12, 15)]);
 
-    viewModel = StatisticsViewModel(
+    viewModel = StudyRecordsViewModel(
       studyLogsDatasource: mockStudyLogsDatasource,
       goalsDatasource: mockGoalsDatasource,
       usersDatasource: mockUsersDatasource,
     );
   });
 
-  group('StatisticsViewModel', () {
+  group('StudyRecordsViewModel', () {
     group('初期化', () {
       test('初期状態が正しく設定されること', () {
         final now = DateTime.now();
@@ -252,9 +252,9 @@ void main() {
       });
     });
 
-    group('StatisticsState', () {
+    group('StudyRecordsState', () {
       test('canGoPreviousが正しく計算されること', () {
-        final state = StatisticsState(
+        final state = StudyRecordsState(
           currentMonth: DateTime(2025, 6),
           firstStudyDate: DateTime(2025, 1),
         );
@@ -263,7 +263,7 @@ void main() {
       });
 
       test('firstStudyDateがnullの場合canGoPreviousはfalseになること', () {
-        final state = StatisticsState(
+        final state = StudyRecordsState(
           currentMonth: DateTime(2025, 6),
         );
 
@@ -274,7 +274,7 @@ void main() {
         final now = DateTime.now();
         final pastMonth = DateTime(now.year, now.month - 1);
 
-        final state = StatisticsState(
+        final state = StudyRecordsState(
           currentMonth: pastMonth,
         );
 
@@ -284,7 +284,7 @@ void main() {
       test('今月の場合canGoNextはfalseになること', () {
         final now = DateTime.now();
 
-        final state = StatisticsState(
+        final state = StudyRecordsState(
           currentMonth: DateTime(now.year, now.month),
         );
 

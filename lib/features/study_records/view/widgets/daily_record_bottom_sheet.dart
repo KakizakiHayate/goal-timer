@@ -3,7 +3,7 @@ import 'package:goal_timer/core/utils/color_consts.dart';
 import 'package:goal_timer/core/utils/spacing_consts.dart';
 import 'package:goal_timer/core/utils/text_consts.dart';
 import 'package:goal_timer/core/utils/time_utils.dart';
-import 'package:goal_timer/features/statistics/view_model/statistics_view_model.dart';
+import 'package:goal_timer/features/study_records/view_model/study_records_view_model.dart';
 
 /// 日別学習記録のボトムシート
 class DailyRecordBottomSheet extends StatelessWidget {
