@@ -40,8 +40,21 @@ class AppDatabase {
         ADD COLUMN ${DatabaseConsts.columnCompletedAt} TEXT
       ''');
     }
+    if (oldVersion < 3) {
+      // バージョン3へのマイグレーション:
+      // 1. goalsテーブルにdeleted_atカラムを追加（論理削除用）
+      await db.execute('''
+        ALTER TABLE ${DatabaseConsts.tableGoals}
+        ADD COLUMN ${DatabaseConsts.columnDeletedAt} TEXT
+      ''');
+      // 2. usersテーブルにlongest_streakカラムを追加
+      await db.execute('''
+        ALTER TABLE ${DatabaseConsts.tableUsers}
+        ADD COLUMN ${DatabaseConsts.columnLongestStreak} INTEGER DEFAULT 0
+      ''');
+    }
     // 今後のバージョンアップ時は、ここに追加のマイグレーションロジックを記述
-    // if (oldVersion < 3) { ... }
+    // if (oldVersion < 4) { ... }
   }
 
   /// テーブルを作成
@@ -71,6 +84,7 @@ class AppDatabase {
         ${DatabaseConsts.columnAvoidMessage} TEXT NOT NULL,
         ${DatabaseConsts.columnDeadline} TEXT NOT NULL,
         ${DatabaseConsts.columnCompletedAt} TEXT,
+        ${DatabaseConsts.columnDeletedAt} TEXT,
         ${DatabaseConsts.columnCreatedAt} TEXT,
         ${DatabaseConsts.columnUpdatedAt} TEXT,
         ${DatabaseConsts.columnSyncUpdatedAt} TEXT
@@ -86,6 +100,7 @@ class AppDatabase {
         ${DatabaseConsts.columnCreatedAt} TEXT,
         ${DatabaseConsts.columnUpdatedAt} TEXT,
         ${DatabaseConsts.columnLastLogin} TEXT,
+        ${DatabaseConsts.columnLongestStreak} INTEGER DEFAULT 0,
         ${DatabaseConsts.columnSyncUpdatedAt} TEXT
       )
     ''');

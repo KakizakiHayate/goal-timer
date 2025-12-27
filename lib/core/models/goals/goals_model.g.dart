@@ -27,6 +27,9 @@ _$GoalsModelImpl _$$GoalsModelImplFromJson(Map<String, dynamic> json) =>
       completedAt: json['completed_at'] == null
           ? null
           : DateTime.parse(json['completed_at'] as String),
+      deletedAt: json['deleted_at'] == null
+          ? null
+          : DateTime.parse(json['deleted_at'] as String),
     );
 
 Map<String, dynamic> _$$GoalsModelImplToJson(_$GoalsModelImpl instance) =>
@@ -42,4 +45,5 @@ Map<String, dynamic> _$$GoalsModelImplToJson(_$GoalsModelImpl instance) =>
       'target_minutes': instance.targetMinutes,
       'created_at': instance.createdAt?.toIso8601String(),
       'completed_at': instance.completedAt?.toIso8601String(),
+      'deleted_at': instance.deletedAt?.toIso8601String(),
     };
