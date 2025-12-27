@@ -261,6 +261,7 @@ class TimerViewModel extends GetxController {
     _state.value = state.copyWith(
       status: TimerStatus.completed,
       currentSeconds: TimerConstants.countdownCompleteThreshold,
+      needsCompletionConfirm: true,
     );
     AppLogger.instance.i('タイマーが完了しました: $_elapsedSeconds秒');
   }
