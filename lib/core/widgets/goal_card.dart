@@ -120,8 +120,11 @@ class GoalCard extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.local_fire_department,
-                    color: ColorConsts.success, size: 16),
+                const Icon(
+                  Icons.local_fire_department,
+                  color: ColorConsts.success,
+                  size: 16,
+                ),
                 const SizedBox(width: 4),
                 Text(
                   '$streakDays',
@@ -267,10 +270,7 @@ class _AnimatedTapWrapper extends StatefulWidget {
   final Widget child;
   final VoidCallback? onTap;
 
-  const _AnimatedTapWrapper({
-    required this.child,
-    this.onTap,
-  });
+  const _AnimatedTapWrapper({required this.child, this.onTap});
 
   @override
   State<_AnimatedTapWrapper> createState() => _AnimatedTapWrapperState();
@@ -354,15 +354,16 @@ class _ActionButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: backgroundColor,
           borderRadius: BorderRadius.circular(12),
-          boxShadow: backgroundColor == ColorConsts.primary
-              ? [
-                  BoxShadow(
-                    color: ColorConsts.primary.withOpacity(0.3),
-                    offset: const Offset(0, 2),
-                    blurRadius: 8,
-                  ),
-                ]
-              : null,
+          boxShadow:
+              backgroundColor == ColorConsts.primary
+                  ? [
+                    BoxShadow(
+                      color: ColorConsts.primary.withOpacity(0.3),
+                      offset: const Offset(0, 2),
+                      blurRadius: 8,
+                    ),
+                  ]
+                  : null,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,

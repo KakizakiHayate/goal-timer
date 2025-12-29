@@ -60,10 +60,7 @@ class StreakCard extends StatelessWidget {
 
     return Row(
       children: [
-        Text(
-          icon,
-          style: const TextStyle(fontSize: 24),
-        ),
+        Text(icon, style: const TextStyle(fontSize: 24)),
         const SizedBox(width: SpacingConsts.s),
         Expanded(
           child: Text(
@@ -114,11 +111,7 @@ class StreakCard extends StatelessWidget {
           ),
         ),
         const SizedBox(width: SpacingConsts.xs),
-        Icon(
-          Icons.chevron_right,
-          size: 16,
-          color: ColorConsts.textSecondary,
-        ),
+        Icon(Icons.chevron_right, size: 16, color: ColorConsts.textSecondary),
       ],
     );
   }

@@ -30,7 +30,8 @@ class CustomCircularProgressIndicator extends StatefulWidget {
       _CustomCircularProgressIndicatorState();
 }
 
-class _CustomCircularProgressIndicatorState extends State<CustomCircularProgressIndicator>
+class _CustomCircularProgressIndicatorState
+    extends State<CustomCircularProgressIndicator>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _progressAnimation;

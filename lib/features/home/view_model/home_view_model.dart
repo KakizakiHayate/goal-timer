@@ -9,10 +9,7 @@ import '../../../core/utils/time_utils.dart';
 import '../../../core/utils/streak_consts.dart';
 
 /// 目標削除操作の結果
-enum DeleteGoalResult {
-  success,
-  failure,
-}
+enum DeleteGoalResult { success, failure }
 
 // Home画面の状態
 class HomeState {
@@ -39,7 +36,8 @@ class HomeState {
   }) {
     return HomeState(
       goals: goals ?? this.goals,
-      studiedSecondsByGoalId: studiedSecondsByGoalId ?? this.studiedSecondsByGoalId,
+      studiedSecondsByGoalId:
+          studiedSecondsByGoalId ?? this.studiedSecondsByGoalId,
       isLoading: isLoading ?? this.isLoading,
       currentStreak: currentStreak ?? this.currentStreak,
       recentStudyDates: recentStudyDates ?? this.recentStudyDates,
@@ -76,8 +74,11 @@ class HomeViewModel extends GetxController {
     LocalStudyDailyLogsDatasource? studyLogsDatasource,
   }) {
     final database = AppDatabase();
-    _goalsDatasource = goalsDatasource ?? LocalGoalsDatasource(database: database);
-    _studyLogsDatasource = studyLogsDatasource ?? LocalStudyDailyLogsDatasource(database: database);
+    _goalsDatasource =
+        goalsDatasource ?? LocalGoalsDatasource(database: database);
+    _studyLogsDatasource =
+        studyLogsDatasource ??
+        LocalStudyDailyLogsDatasource(database: database);
   }
 
   @override
@@ -99,19 +100,22 @@ class HomeViewModel extends GetxController {
         Duration(days: StreakConsts.recentDaysCount - 1),
       );
 
-      final (goals, studiedSeconds, recentStudyDates, currentStreak) = await (
-        _goalsDatasource.fetchAllGoals(),
-        _studyLogsDatasource.fetchTotalSecondsForAllGoals(),
-        _studyLogsDatasource.fetchStudyDatesInRange(
-          startDate: startDate,
-          endDate: today,
-        ),
-        _studyLogsDatasource.calculateCurrentStreak(),
-      ).wait;
+      final (goals, studiedSeconds, recentStudyDates, currentStreak) =
+          await (
+            _goalsDatasource.fetchAllGoals(),
+            _studyLogsDatasource.fetchTotalSecondsForAllGoals(),
+            _studyLogsDatasource.fetchStudyDatesInRange(
+              startDate: startDate,
+              endDate: today,
+            ),
+            _studyLogsDatasource.calculateCurrentStreak(),
+          ).wait;
 
       AppLogger.instance.i('目標を${goals.length}件読み込みました');
       AppLogger.instance.i('学習時間データを${studiedSeconds.length}件読み込みました');
-      AppLogger.instance.i('ストリーク: $currentStreak日, 直近学習日: ${recentStudyDates.length}日');
+      AppLogger.instance.i(
+        'ストリーク: $currentStreak日, 直近学習日: ${recentStudyDates.length}日',
+      );
 
       _state = state.copyWith(
         goals: goals,
@@ -192,9 +196,10 @@ class HomeViewModel extends GetxController {
       AppLogger.instance.i('目標を更新しました: ${updatedGoal.id}');
 
       // 状態を直接更新（パフォーマンス改善: DBからの再読み込みを回避）
-      final updatedGoals = state.goals
-          .map((g) => g.id == updatedGoal.id ? updatedGoal : g)
-          .toList();
+      final updatedGoals =
+          state.goals
+              .map((g) => g.id == updatedGoal.id ? updatedGoal : g)
+              .toList();
       _state = state.copyWith(goals: updatedGoals);
       update();
     } catch (error, stackTrace) {

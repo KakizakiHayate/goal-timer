@@ -9,6 +9,7 @@ import 'package:goal_timer/core/data/local/local_users_datasource.dart';
 import 'package:goal_timer/core/data/local/app_database.dart';
 import 'package:goal_timer/features/settings/view_model/settings_view_model.dart';
 import 'package:goal_timer/core/services/notification_service.dart';
+import 'package:goal_timer/core/utils/streak_consts.dart';
 import 'package:uuid/uuid.dart';
 
 // タイマー関連の定数
@@ -53,8 +54,8 @@ class TimerState {
     this.isPomodoroBreak = false,
     this.pomodoroRound = TimerConstants.initialPomodoroRound,
     this.needsCompletionConfirm = false,
-  })  : totalSeconds = totalSeconds ?? _defaultSeconds,
-        currentSeconds = currentSeconds ?? _defaultSeconds;
+  }) : totalSeconds = totalSeconds ?? _defaultSeconds,
+       currentSeconds = currentSeconds ?? _defaultSeconds;
 
   TimerState copyWith({
     int? totalSeconds,
@@ -133,12 +134,14 @@ class TimerViewModel extends GetxController {
     LocalUsersDatasource? usersDatasource,
     SettingsViewModel? settingsViewModel,
     NotificationService? notificationService,
-  })  : _settingsViewModel = settingsViewModel ?? Get.find<SettingsViewModel>(),
-        _notificationService = notificationService ?? NotificationService(),
-        _datasource = datasource ??
-            LocalStudyDailyLogsDatasource(database: Get.find<AppDatabase>()),
-        _usersDatasource = usersDatasource ??
-            LocalUsersDatasource(database: Get.find<AppDatabase>()) {
+  }) : _settingsViewModel = settingsViewModel ?? Get.find<SettingsViewModel>(),
+       _notificationService = notificationService ?? NotificationService(),
+       _datasource =
+           datasource ??
+           LocalStudyDailyLogsDatasource(database: Get.find<AppDatabase>()),
+       _usersDatasource =
+           usersDatasource ??
+           LocalUsersDatasource(database: Get.find<AppDatabase>()) {
     final defaultSeconds = _settingsViewModel.defaultTimerSeconds.value;
 
     _state.value = TimerState(
@@ -157,7 +160,8 @@ class TimerViewModel extends GetxController {
   @override
   void onClose() {
     _timer?.cancel();
-    _notificationService.cancelAllNotifications();
+    // タイマー完了通知のみキャンセル（ストリークリマインダーは維持）
+    _notificationService.cancelScheduledNotification();
     super.onClose();
   }
 
@@ -224,7 +228,8 @@ class TimerViewModel extends GetxController {
             state.mode == TimerMode.pomodoro) {
           if (state.currentSeconds > TimeUtils.minValidSeconds) {
             _state.value = state.copyWith(
-              currentSeconds: state.currentSeconds - TimerConstants.decrementValue,
+              currentSeconds:
+                  state.currentSeconds - TimerConstants.decrementValue,
             );
           } else {
             completeTimer();
@@ -232,7 +237,8 @@ class TimerViewModel extends GetxController {
         } else {
           // カウントアップモード: 上限なしで継続
           _state.value = state.copyWith(
-            currentSeconds: state.currentSeconds + TimerConstants.incrementValue,
+            currentSeconds:
+                state.currentSeconds + TimerConstants.incrementValue,
           );
         }
       },
@@ -261,8 +267,8 @@ class TimerViewModel extends GetxController {
       status: TimerStatus.initial,
       needsCompletionConfirm: false,
     );
-    // 通知をキャンセル
-    _notificationService.cancelAllNotifications();
+    // タイマー完了通知のみキャンセル（ストリークリマインダーは維持）
+    _notificationService.cancelScheduledNotification();
     AppLogger.instance.i('タイマーをリセットしました');
   }
 
@@ -351,7 +357,8 @@ class TimerViewModel extends GetxController {
             state.mode == TimerMode.pomodoro) {
           if (state.currentSeconds > TimeUtils.minValidSeconds) {
             _state.value = state.copyWith(
-              currentSeconds: state.currentSeconds - TimerConstants.decrementValue,
+              currentSeconds:
+                  state.currentSeconds - TimerConstants.decrementValue,
             );
           } else {
             completeTimer();
@@ -359,7 +366,8 @@ class TimerViewModel extends GetxController {
         } else {
           // カウントアップモード: 上限なしで継続
           _state.value = state.copyWith(
-            currentSeconds: state.currentSeconds + TimerConstants.incrementValue,
+            currentSeconds:
+                state.currentSeconds + TimerConstants.incrementValue,
           );
         }
       },
@@ -430,8 +438,12 @@ class TimerViewModel extends GetxController {
 
       AppLogger.instance.i('学習記録を保存しました: ${log.id}, 学習日: ${log.studyDate}');
 
-      // 最長ストリークを更新
-      await _updateLongestStreakIfNeeded();
+      // 1分以上学習した場合のみストリーク関連の処理を実行
+      if (_elapsedSeconds >= StreakConsts.minStudySeconds) {
+        await _updateLongestStreakIfNeeded();
+      } else {
+        AppLogger.instance.i('学習時間が1分未満のためストリーク処理をスキップ');
+      }
     } catch (error, stackTrace) {
       AppLogger.instance.e('学習記録の保存に失敗しました', error, stackTrace);
       rethrow;
@@ -445,15 +457,44 @@ class TimerViewModel extends GetxController {
       final currentStreak = await _datasource.calculateCurrentStreak();
 
       // 最長ストリークと比較して必要なら更新
-      final updated =
-          await _usersDatasource.updateLongestStreakIfNeeded(currentStreak);
+      final updated = await _usersDatasource.updateLongestStreakIfNeeded(
+        currentStreak,
+      );
 
       if (updated) {
         AppLogger.instance.i('最長ストリークを更新しました: $currentStreak日');
       }
+
+      // 明日のストリークリマインダーをスケジュール
+      await _scheduleTomorrowStreakReminders(currentStreak);
     } catch (error, stackTrace) {
       // 最長ストリーク更新の失敗はログのみ（致命的エラーとしては扱わない）
       AppLogger.instance.e('最長ストリークの更新に失敗しました', error, stackTrace);
+    }
+  }
+
+  /// 明日のストリークリマインダーをスケジュールする
+  Future<void> _scheduleTomorrowStreakReminders(int currentStreak) async {
+    try {
+      // リマインダー設定が有効かどうかを確認
+      final reminderEnabled = await _usersDatasource.getStreakReminderEnabled();
+      if (!reminderEnabled) {
+        AppLogger.instance.i('ストリークリマインダーはOFFのためスケジュールをスキップ');
+        return;
+      }
+
+      // 今日のリマインダーをキャンセル（学習完了したため）
+      await _notificationService.cancelTodayStreakReminders();
+
+      // 明日のリマインダーをスケジュール
+      await _notificationService.scheduleTomorrowStreakReminders(
+        streakDays: currentStreak,
+      );
+
+      AppLogger.instance.i('明日のストリークリマインダーをスケジュールしました: $currentStreak日');
+    } catch (error, stackTrace) {
+      // リマインダースケジュールの失敗はログのみ（致命的エラーとしては扱わない）
+      AppLogger.instance.e('ストリークリマインダーのスケジュールに失敗しました', error, stackTrace);
     }
   }
 

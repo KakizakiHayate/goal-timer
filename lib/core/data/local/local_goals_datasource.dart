@@ -6,8 +6,7 @@ import 'package:sqflite/sqflite.dart';
 class LocalGoalsDatasource {
   final AppDatabase _database;
 
-  LocalGoalsDatasource({required AppDatabase database})
-      : _database = database;
+  LocalGoalsDatasource({required AppDatabase database}) : _database = database;
 
   /// 全ての目標を取得（削除済みを除く）
   Future<List<GoalsModel>> fetchAllGoals() async {
@@ -23,8 +22,9 @@ class LocalGoalsDatasource {
   /// 削除済みを含む全ての目標を取得
   Future<List<GoalsModel>> fetchAllGoalsIncludingDeleted() async {
     final db = await _database.database;
-    final List<Map<String, dynamic>> maps =
-        await db.query(DatabaseConsts.tableGoals);
+    final List<Map<String, dynamic>> maps = await db.query(
+      DatabaseConsts.tableGoals,
+    );
 
     return maps.map((map) => _mapToModel(map)).toList();
   }
@@ -121,21 +121,28 @@ class LocalGoalsDatasource {
       targetMinutes: map[DatabaseConsts.columnTargetMinutes] as int,
       avoidMessage: map[DatabaseConsts.columnAvoidMessage] as String,
       deadline: DateTime.parse(map[DatabaseConsts.columnDeadline] as String),
-      completedAt: map[DatabaseConsts.columnCompletedAt] != null
-          ? DateTime.parse(map[DatabaseConsts.columnCompletedAt] as String)
-          : null,
-      deletedAt: map[DatabaseConsts.columnDeletedAt] != null
-          ? DateTime.parse(map[DatabaseConsts.columnDeletedAt] as String)
-          : null,
-      createdAt: map[DatabaseConsts.columnCreatedAt] != null
-          ? DateTime.parse(map[DatabaseConsts.columnCreatedAt] as String)
-          : null,
-      updatedAt: map[DatabaseConsts.columnUpdatedAt] != null
-          ? DateTime.parse(map[DatabaseConsts.columnUpdatedAt] as String)
-          : null,
-      syncUpdatedAt: map[DatabaseConsts.columnSyncUpdatedAt] != null
-          ? DateTime.parse(map[DatabaseConsts.columnSyncUpdatedAt] as String)
-          : null,
+      completedAt:
+          map[DatabaseConsts.columnCompletedAt] != null
+              ? DateTime.parse(map[DatabaseConsts.columnCompletedAt] as String)
+              : null,
+      deletedAt:
+          map[DatabaseConsts.columnDeletedAt] != null
+              ? DateTime.parse(map[DatabaseConsts.columnDeletedAt] as String)
+              : null,
+      createdAt:
+          map[DatabaseConsts.columnCreatedAt] != null
+              ? DateTime.parse(map[DatabaseConsts.columnCreatedAt] as String)
+              : null,
+      updatedAt:
+          map[DatabaseConsts.columnUpdatedAt] != null
+              ? DateTime.parse(map[DatabaseConsts.columnUpdatedAt] as String)
+              : null,
+      syncUpdatedAt:
+          map[DatabaseConsts.columnSyncUpdatedAt] != null
+              ? DateTime.parse(
+                map[DatabaseConsts.columnSyncUpdatedAt] as String,
+              )
+              : null,
     );
   }
 
@@ -153,7 +160,8 @@ class LocalGoalsDatasource {
       DatabaseConsts.columnDeletedAt: model.deletedAt?.toIso8601String(),
       DatabaseConsts.columnCreatedAt: model.createdAt?.toIso8601String(),
       DatabaseConsts.columnUpdatedAt: model.updatedAt?.toIso8601String(),
-      DatabaseConsts.columnSyncUpdatedAt: model.syncUpdatedAt?.toIso8601String(),
+      DatabaseConsts.columnSyncUpdatedAt:
+          model.syncUpdatedAt?.toIso8601String(),
     };
   }
 }

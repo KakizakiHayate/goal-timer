@@ -113,10 +113,7 @@ void main() {
       await datasource.saveGoal(goal);
 
       // Act
-      final updatedGoal = goal.copyWith(
-        title: '更新された目標',
-        targetMinutes: 2000,
-      );
+      final updatedGoal = goal.copyWith(title: '更新された目標', targetMinutes: 2000);
       await datasource.updateGoal(updatedGoal);
 
       // Assert
@@ -233,7 +230,9 @@ void main() {
         updatedAt: DateTime.now(),
       );
 
-      await datasource.saveGoal(syncedGoal.copyWith(syncUpdatedAt: DateTime.now()));
+      await datasource.saveGoal(
+        syncedGoal.copyWith(syncUpdatedAt: DateTime.now()),
+      );
       await datasource.saveGoal(unsyncedGoal);
 
       // Act

@@ -79,6 +79,11 @@ class _SettingsScreenState extends State<SettingsScreen>
 
               const SizedBox(height: SpacingConsts.l),
 
+              // 通知設定
+              _buildNotificationSection(),
+
+              const SizedBox(height: SpacingConsts.l),
+
               // データとプライバシー
               _buildDataSection(),
 
@@ -149,13 +154,94 @@ class _SettingsScreenState extends State<SettingsScreen>
         Obx(() {
           return SettingItem(
             title: 'デフォルトタイマー時間',
-            subtitle: '新しい目標のデフォルト時間：${_settingsViewModel.formattedDefaultTime}',
+            subtitle:
+                '新しい目標のデフォルト時間：${_settingsViewModel.formattedDefaultTime}',
             icon: Icons.timer_outlined,
             iconColor: ColorConsts.warning,
             onTap: _showTimerSettings,
           );
         }),
       ],
+    );
+  }
+
+  Widget _buildNotificationSection() {
+    return _buildSection(
+      title: '通知設定',
+      children: [
+        Obx(() {
+          return _buildSwitchSettingItem(
+            title: 'ストリークリマインダー',
+            subtitle:
+                _settingsViewModel.streakReminderEnabled.value
+                    ? '連続学習を維持するためのリマインダーを受け取ります'
+                    : 'リマインダー通知はOFFです',
+            icon: Icons.notifications_active_outlined,
+            iconColor: ColorConsts.primary,
+            value: _settingsViewModel.streakReminderEnabled.value,
+            onChanged: (value) {
+              _settingsViewModel.updateStreakReminderEnabled(value);
+            },
+          );
+        }),
+      ],
+    );
+  }
+
+  Widget _buildSwitchSettingItem({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color iconColor,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: SpacingConsts.s),
+      decoration: BoxDecoration(
+        color: ColorConsts.cardBackground,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: SpacingConsts.m,
+          vertical: SpacingConsts.s,
+        ),
+        leading: Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: iconColor.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, color: iconColor, size: 24),
+        ),
+        title: Text(
+          title,
+          style: TextConsts.body.copyWith(
+            fontWeight: FontWeight.w600,
+            color: ColorConsts.textPrimary,
+          ),
+        ),
+        subtitle: Text(
+          subtitle,
+          style: TextConsts.bodySmall.copyWith(
+            color: ColorConsts.textSecondary,
+          ),
+        ),
+        trailing: Switch.adaptive(
+          value: value,
+          onChanged: onChanged,
+          activeColor: ColorConsts.primary,
+        ),
+      ),
     );
   }
 
@@ -222,7 +308,9 @@ class _SettingsScreenState extends State<SettingsScreen>
   }
 
   void _showTimerSettings() {
-    Duration tempDuration = Duration(seconds: _settingsViewModel.defaultTimerSeconds.value);
+    Duration tempDuration = Duration(
+      seconds: _settingsViewModel.defaultTimerSeconds.value,
+    );
 
     showModalBottomSheet(
       context: context,
@@ -238,48 +326,50 @@ class _SettingsScreenState extends State<SettingsScreen>
               children: [
                 Padding(
                   padding: const EdgeInsets.all(SpacingConsts.m),
-                    child: Row(
-                      children: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: Text(
-                            'キャンセル',
-                            style: TextConsts.body.copyWith(
-                              color: ColorConsts.textSecondary,
-                            ),
+                  child: Row(
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text(
+                          'キャンセル',
+                          style: TextConsts.body.copyWith(
+                            color: ColorConsts.textSecondary,
                           ),
                         ),
-                        Expanded(
-                          child: Center(
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text(
-                                'デフォルトタイマー時間',
-                                style: TextConsts.h4.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                      ),
+                      Expanded(
+                        child: Center(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              'デフォルトタイマー時間',
+                              style: TextConsts.h4.copyWith(
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
                         ),
-                        TextButton(
-                          onPressed: () async {
-                            // PRコメント対応: ViewModelでバリデーションするのでUI側のclampは不要
-                            await _settingsViewModel.updateDefaultTimerDuration(tempDuration);
-                            if (context.mounted) {
-                              Navigator.pop(context);
-                            }
-                          },
-                          child: Text(
-                            '保存',
-                            style: TextConsts.body.copyWith(
-                              color: ColorConsts.primary,
-                              fontWeight: FontWeight.bold,
-                            ),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          // PRコメント対応: ViewModelでバリデーションするのでUI側のclampは不要
+                          await _settingsViewModel.updateDefaultTimerDuration(
+                            tempDuration,
+                          );
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                          }
+                        },
+                        child: Text(
+                          '保存',
+                          style: TextConsts.body.copyWith(
+                            color: ColorConsts.primary,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
+                  ),
                 ),
                 const Divider(height: 1),
                 Expanded(
@@ -328,30 +418,30 @@ class _SettingsScreenState extends State<SettingsScreen>
   void _showAbout() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('${AppConsts.appName} について'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              AppConsts.appName,
-              style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
+      builder:
+          (context) => AlertDialog(
+            title: Text('${AppConsts.appName} について'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  AppConsts.appName,
+                  style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: SpacingConsts.s),
+                Text('バージョン: ${AppConsts.appVersion}'),
+                const SizedBox(height: SpacingConsts.m),
+                const Text('目標達成をサポートするタイマーアプリです。毎日の小さな積み重ねが、大きな成果につながります。'),
+              ],
             ),
-            const SizedBox(height: SpacingConsts.s),
-            Text('バージョン: ${AppConsts.appVersion}'),
-            const SizedBox(height: SpacingConsts.m),
-            const Text('目標達成をサポートするタイマーアプリです。毎日の小さな積み重ねが、大きな成果につながります。'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
-
 }

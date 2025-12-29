@@ -19,10 +19,18 @@ class FakeSettingsViewModel extends GetxController
       LocalSettingsDataSource.defaultTimerSeconds.obs;
 
   @override
+  final RxBool streakReminderEnabled = true.obs;
+
+  @override
   Future<void> init() async {}
 
   @override
   Future<void> updateDefaultTimerDuration(Duration duration) async {}
+
+  @override
+  Future<void> updateStreakReminderEnabled(bool enabled) async {
+    streakReminderEnabled.value = enabled;
+  }
 
   @override
   String get formattedDefaultTime => '25:00';
@@ -63,19 +71,26 @@ void main() {
 
     // MockNotificationServiceのスタブ設定
     when(() => mockNotificationService.init()).thenAnswer((_) async {});
-    when(() => mockNotificationService.cancelAllNotifications())
-        .thenAnswer((_) async {});
-    when(() => mockNotificationService.cancelScheduledNotification())
-        .thenAnswer((_) async {});
-    when(() => mockNotificationService.requestPermission())
-        .thenAnswer((_) async => true);
-    when(() => mockNotificationService.scheduleTimerCompletionNotification(
-          seconds: any(named: 'seconds'),
-          goalTitle: any(named: 'goalTitle'),
-        )).thenAnswer((_) async {});
-    when(() => mockNotificationService.showTimerCompletionNotification(
-          goalTitle: any(named: 'goalTitle'),
-        )).thenAnswer((_) async {});
+    when(
+      () => mockNotificationService.cancelAllNotifications(),
+    ).thenAnswer((_) async {});
+    when(
+      () => mockNotificationService.cancelScheduledNotification(),
+    ).thenAnswer((_) async {});
+    when(
+      () => mockNotificationService.requestPermission(),
+    ).thenAnswer((_) async => true);
+    when(
+      () => mockNotificationService.scheduleTimerCompletionNotification(
+        seconds: any(named: 'seconds'),
+        goalTitle: any(named: 'goalTitle'),
+      ),
+    ).thenAnswer((_) async {});
+    when(
+      () => mockNotificationService.showTimerCompletionNotification(
+        goalTitle: any(named: 'goalTitle'),
+      ),
+    ).thenAnswer((_) async {});
   });
 
   /// テスト用のTimerViewModelを作成するヘルパー関数
@@ -167,8 +182,9 @@ void main() {
         expect(runningState.isModeSwitchable, isFalse);
 
         // Act
-        final completedState =
-            runningState.copyWith(status: TimerStatus.completed);
+        final completedState = runningState.copyWith(
+          status: TimerStatus.completed,
+        );
 
         // Assert
         expect(completedState.isModeSwitchable, isTrue);
