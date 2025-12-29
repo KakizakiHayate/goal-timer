@@ -83,7 +83,8 @@
       "Bash(xargs:*)",
       "Bash(tree:*)",
       "Bash(gh api:*)",
-      "WebFetch(domain:zenn.dev)"
+      "WebFetch(domain:zenn.dev)",
+      "Bash(dart run:*)"
     ],
     "deny": []
   },

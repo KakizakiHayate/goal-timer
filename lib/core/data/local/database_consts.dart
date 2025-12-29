@@ -2,7 +2,7 @@
 class DatabaseConsts {
   // データベース名
   static const String databaseName = 'goal_timer.db';
-  static const int databaseVersion = 4;
+  static const int databaseVersion = 5;
 
   // テーブル名
   static const String tableStudyDailyLogs = 'study_daily_logs';
@@ -29,6 +29,10 @@ class DatabaseConsts {
 
   // goals カラム（論理削除用）
   static const String columnDeletedAt = 'deleted_at';
+
+  // goals カラム（総目標時間・期限切れ用）
+  static const String columnTotalTargetMinutes = 'total_target_minutes';
+  static const String columnExpiredAt = 'expired_at';
 
   // users カラム
   static const String columnEmail = 'email';

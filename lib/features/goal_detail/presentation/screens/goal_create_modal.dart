@@ -314,11 +314,18 @@ class _GoalCreateModalContentState extends State<_GoalCreateModalContent> {
   }
 
   Widget _buildTargetTimeSelector() {
+    // 残り日数と総目標時間を計算
+    final remainingDays = TimeUtils.calculateRemainingDays(_deadline);
+    final totalTargetMinutes = TimeUtils.calculateTotalTargetMinutes(
+      targetMinutes: _targetMinutes,
+      remainingDays: remainingDays,
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '総目標時間',
+          '1日の勉強時間',
           style: TextConsts.labelLarge.copyWith(
             color: ColorConsts.textSecondary,
             fontWeight: FontWeight.w600,
@@ -351,6 +358,45 @@ class _GoalCreateModalContentState extends State<_GoalCreateModalContent> {
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: SpacingConsts.m),
+              // 残り日数と総目標時間の表示
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: SpacingConsts.m,
+                  vertical: SpacingConsts.s,
+                ),
+                decoration: BoxDecoration(
+                  color: ColorConsts.primaryExtraLight,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '残り$remainingDays日',
+                      style: TextConsts.bodySmall.copyWith(
+                        color: ColorConsts.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(width: SpacingConsts.s),
+                    Text(
+                      '→',
+                      style: TextConsts.bodySmall.copyWith(
+                        color: ColorConsts.primary,
+                      ),
+                    ),
+                    const SizedBox(width: SpacingConsts.s),
+                    Text(
+                      '総目標: ${TimeUtils.formatDurationFromMinutes(totalTargetMinutes)}',
+                      style: TextConsts.bodySmall.copyWith(
+                        color: ColorConsts.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: SpacingConsts.m),
               GestureDetector(
@@ -468,14 +514,13 @@ class _GoalCreateModalContentState extends State<_GoalCreateModalContent> {
                 const SizedBox(height: SpacingConsts.m),
                 GestureDetector(
                   onTap: () async {
-                    final DateTime tomorrow = DateTime.now().add(
-                      const Duration(days: 1),
-                    );
+                    final now = DateTime.now();
+                    final DateTime today = DateTime(now.year, now.month, now.day);
                     final DateTime? picked = await showDatePicker(
                       context: context,
                       initialDate:
-                          _deadline.isBefore(tomorrow) ? tomorrow : _deadline,
-                      firstDate: tomorrow,
+                          _deadline.isBefore(today) ? today : _deadline,
+                      firstDate: today,
                       lastDate: DateTime(2100),
                       locale: const Locale('ja', 'JP'),
                     );
