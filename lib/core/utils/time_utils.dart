@@ -77,7 +77,7 @@ class TimeUtils {
     final remainingMinutes = targetMinutes - spentMinutes;
 
     if (remainingMinutes <= minValidMinutes) {
-      return '${minValidMinutes}時間${minValidMinutes}分';
+      return '$minValidMinutes時間$minValidMinutes分';
     }
 
     // 時間と分に変換
