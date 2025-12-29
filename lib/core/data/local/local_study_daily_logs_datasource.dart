@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:goal_timer/core/data/local/app_database.dart';
 import 'package:goal_timer/core/data/local/database_consts.dart';
 import 'package:goal_timer/core/models/study_daily_logs/study_daily_logs_model.dart';
@@ -195,7 +197,9 @@ class LocalStudyDailyLogsDatasource {
       if (studyDate.isSameDay(checkDate)) {
         streak++;
         checkDate = checkDate.subtract(const Duration(days: 1));
-      } else if (studyDate.isBefore(checkDate)) {
+        continue;
+      }
+      if (studyDate.isBefore(checkDate)) {
         break;
       }
     }
@@ -245,9 +249,7 @@ class LocalStudyDailyLogsDatasource {
 
       if (difference == 1) {
         currentStreak++;
-        if (currentStreak > longestStreak) {
-          longestStreak = currentStreak;
-        }
+        longestStreak = max(currentStreak, longestStreak);
       } else {
         // 連続が途切れた
         currentStreak = 1;

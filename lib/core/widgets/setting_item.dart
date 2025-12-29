@@ -106,10 +106,10 @@ class _SettingItemState extends State<SettingItem>
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  if (widget.subtitle != null) ...[
+                  if (widget.subtitle case final subtitle?) ...[
                     const SizedBox(height: SpacingConsts.xs),
                     Text(
-                      widget.subtitle!,
+                      subtitle,
                       style: TextConsts.caption.copyWith(
                         color:
                             widget.enabled
@@ -124,9 +124,9 @@ class _SettingItemState extends State<SettingItem>
             ),
 
             // トレーリング
-            if (widget.trailing != null) ...[
+            if (widget.trailing case final trailing?) ...[
               const SizedBox(width: SpacingConsts.m),
-              widget.trailing!,
+              trailing,
             ] else if (widget.onTap != null) ...[
               const SizedBox(width: SpacingConsts.m),
               Icon(

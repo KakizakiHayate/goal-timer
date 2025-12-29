@@ -130,10 +130,8 @@ class _CustomCircularProgressIndicatorState
                 ),
               ),
               // 中央コンテンツ
-              if (widget.centerWidget != null)
-                widget.centerWidget!
-              else
-                _buildDefaultCenterWidget(progressValue),
+              widget.centerWidget ??
+                  _buildDefaultCenterWidget(progressValue),
             ],
           ),
         );
@@ -166,16 +164,10 @@ class _CustomCircularProgressIndicatorState
   }
 
   Color _getProgressColor(double progress) {
-    if (progress >= 1.0) {
-      return ColorConsts.success;
-    } else if (progress >= 0.8) {
-      return ColorConsts.success; // 緑系
-    } else if (progress >= 0.5) {
-      return ColorConsts.primary;
-    } else if (progress >= 0.3) {
-      return ColorConsts.warning;
-    } else {
-      return ColorConsts.textTertiary;
-    }
+    if (progress >= 1.0) return ColorConsts.success;
+    if (progress >= 0.8) return ColorConsts.success; // 緑系
+    if (progress >= 0.5) return ColorConsts.primary;
+    if (progress >= 0.3) return ColorConsts.warning;
+    return ColorConsts.textTertiary;
   }
 }

@@ -25,9 +25,8 @@ dependencies:
   
   # Supabase連携
   supabase_flutter: '2.3.4'
-  intl: '0.20.2'
   fl_chart: '0.71.0'
-  uuid: '4.4.0'
+  uuid: ^4.5.1
   
   # 環境変数
   flutter_dotenv: '5.1.0'
@@ -78,23 +77,28 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  
+
   # Riverpodのコード生成
   riverpod_generator: '2.3.9'
   build_runner: '2.4.13'
 
   freezed: '2.4.5'
   json_serializable: '6.7.1'
-  
-  flutter_lints: '3.0.1'
-  
+
+  flutter_lints: '4.0.0'
+
+  # カスタムリント
+  custom_lint: 0.7.0
+  tanzam_lints:
+    path: tanzam_lints
+
   # テスト用モック
   mockito: ^5.4.4
-  
+
   # アプリアイコン生成
   flutter_launcher_icons: ^0.13.1
   mocktail: ^1.0.4
-  
+
   sqflite_common_ffi: ^2.3.6
 
 flutter:

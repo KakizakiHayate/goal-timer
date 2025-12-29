@@ -76,6 +76,7 @@ class GoalCard extends StatelessWidget {
   }
 
   Widget _buildHeader() {
+    final localDescription = description;
     return Row(
       children: [
         Expanded(
@@ -91,10 +92,10 @@ class GoalCard extends StatelessWidget {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-              if (description != null) ...[
+              if (localDescription != null) ...[
                 const SizedBox(height: SpacingConsts.xs),
                 Text(
-                  description!,
+                  localDescription,
                   style: TextConsts.body.copyWith(
                     color: ColorConsts.textSecondary,
                   ),
@@ -187,6 +188,7 @@ class GoalCard extends StatelessWidget {
   }
 
   Widget _buildAvoidanceMessage() {
+    final localAvoidMessage = avoidMessage ?? '';
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(SpacingConsts.m),
@@ -201,7 +203,7 @@ class GoalCard extends StatelessWidget {
           const SizedBox(width: SpacingConsts.s),
           Expanded(
             child: Text(
-              avoidMessage!,
+              localAvoidMessage,
               style: TextConsts.caption.copyWith(
                 color: ColorConsts.error,
                 fontWeight: FontWeight.w600,
@@ -250,17 +252,11 @@ class GoalCard extends StatelessWidget {
   }
 
   Color _getProgressColor() {
-    if (progress >= 1.0) {
-      return ColorConsts.success;
-    } else if (progress >= 0.8) {
-      return ColorConsts.success;
-    } else if (progress >= 0.5) {
-      return ColorConsts.primary;
-    } else if (progress >= 0.3) {
-      return ColorConsts.warning;
-    } else {
-      return ColorConsts.textTertiary;
-    }
+    if (progress >= 1.0) return ColorConsts.success;
+    if (progress >= 0.8) return ColorConsts.success;
+    if (progress >= 0.5) return ColorConsts.primary;
+    if (progress >= 0.3) return ColorConsts.warning;
+    return ColorConsts.textTertiary;
   }
 }
 

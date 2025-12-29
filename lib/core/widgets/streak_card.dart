@@ -76,27 +76,21 @@ class StreakCard extends StatelessWidget {
   }
 
   String _getStreakMessage() {
-    if (streakDays == 0) {
-      return StreakConsts.messageZeroStreak;
-    } else if (streakDays >= StreakConsts.monthMilestone) {
+    if (streakDays == 0) return StreakConsts.messageZeroStreak;
+    if (streakDays >= StreakConsts.monthMilestone) {
       return '🏆 ${StreakConsts.messageMonthMilestone}';
-    } else if (streakDays >= StreakConsts.weekMilestone) {
-      return '🎉 ${StreakConsts.messageWeekMilestone}';
-    } else {
-      return StreakConsts.messageStreakDays(streakDays);
     }
+    if (streakDays >= StreakConsts.weekMilestone) {
+      return '🎉 ${StreakConsts.messageWeekMilestone}';
+    }
+    return StreakConsts.messageStreakDays(streakDays);
   }
 
   String _getStreakIcon() {
-    if (streakDays == 0) {
-      return '✨';
-    } else if (streakDays >= StreakConsts.monthMilestone) {
-      return '';
-    } else if (streakDays >= StreakConsts.weekMilestone) {
-      return '';
-    } else {
-      return '🔥';
-    }
+    if (streakDays == 0) return '✨';
+    if (streakDays >= StreakConsts.monthMilestone) return '';
+    if (streakDays >= StreakConsts.weekMilestone) return '';
+    return '🔥';
   }
 
   Widget _buildDetailLink() {
