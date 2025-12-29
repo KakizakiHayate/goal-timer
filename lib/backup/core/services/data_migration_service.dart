@@ -18,11 +18,7 @@ class DataMigrationService {
       return await executeMigrationTransaction(tempUserId, realUserId);
     } catch (e, stackTrace) {
       // Log error for debugging
-      AppLogger.instance.e(
-        'Migration failed for $tempUserId -> $realUserId',
-        e,
-        stackTrace,
-      );
+      AppLogger.instance.e('Migration failed for $tempUserId -> $realUserId', e, stackTrace);
       return false;
     }
   }
@@ -125,7 +121,11 @@ class DataMigrationService {
 
       // Delete all temp user data
       // Use user_id instead of temp_user_id for consistent cleanup
-      await db.delete('goals', where: 'user_id = ?', whereArgs: [tempUserId]);
+      await db.delete(
+        'goals',
+        where: 'user_id = ?',
+        whereArgs: [tempUserId],
+      );
 
       await db.delete(
         'daily_study_logs',
@@ -134,7 +134,11 @@ class DataMigrationService {
       );
 
       // Delete the temp user record
-      await db.delete('users', where: 'id = ?', whereArgs: [tempUserId]);
+      await db.delete(
+        'users',
+        where: 'id = ?',
+        whereArgs: [tempUserId],
+      );
 
       // Clear SharedPreferences temp data
       final prefs = await SharedPreferences.getInstance();
@@ -204,9 +208,10 @@ class DataMigrationService {
 
       final goalCount =
           Sqflite.firstIntValue(
-            await db.rawQuery('SELECT COUNT(*) FROM goals WHERE user_id = ?', [
-              tempUserId,
-            ]),
+            await db.rawQuery(
+              'SELECT COUNT(*) FROM goals WHERE user_id = ?',
+              [tempUserId],
+            ),
           ) ??
           0;
 

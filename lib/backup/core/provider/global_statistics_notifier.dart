@@ -12,8 +12,10 @@ class GlobalStatisticsNotifier extends StateNotifier<StudyStatistics> {
   final StudyStatisticsService _service;
   final SyncChecker _syncChecker;
 
-  GlobalStatisticsNotifier(this._service, this._syncChecker)
-    : super(StudyStatistics.empty()) {
+  GlobalStatisticsNotifier(
+    this._service,
+    this._syncChecker,
+  ) : super(StudyStatistics.empty()) {
     _loadStatistics();
   }
 
@@ -50,7 +52,11 @@ class GlobalStatisticsNotifier extends StateNotifier<StudyStatistics> {
       await _loadStatistics();
       AppLogger.instance.i('グローバル統計データのリフレッシュが完了しました');
     } catch (e, stackTrace) {
-      AppLogger.instance.e('グローバル統計データのリフレッシュに失敗', e, stackTrace);
+      AppLogger.instance.e(
+        'グローバル統計データのリフレッシュに失敗',
+        e,
+        stackTrace,
+      );
       // エラーでも現在の状態は保持（ユーザー体験を優先）
     }
   }

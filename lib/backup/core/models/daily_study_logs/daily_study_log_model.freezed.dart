@@ -12,8 +12,7 @@ part of 'daily_study_log_model.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
 
 DailyStudyLogModel _$DailyStudyLogModelFromJson(Map<String, dynamic> json) {
   return _DailyStudyLogModel.fromJson(json);
@@ -60,22 +59,20 @@ mixin _$DailyStudyLogModel {
 /// @nodoc
 abstract class $DailyStudyLogModelCopyWith<$Res> {
   factory $DailyStudyLogModelCopyWith(
-    DailyStudyLogModel value,
-    $Res Function(DailyStudyLogModel) then,
-  ) = _$DailyStudyLogModelCopyWithImpl<$Res, DailyStudyLogModel>;
+          DailyStudyLogModel value, $Res Function(DailyStudyLogModel) then) =
+      _$DailyStudyLogModelCopyWithImpl<$Res, DailyStudyLogModel>;
   @useResult
-  $Res call({
-    String id,
-    String goalId,
-    DateTime date,
-    int totalSeconds,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    DateTime? syncUpdatedAt,
-    bool isSynced,
-    bool isTemp,
-    String? tempUserId,
-  });
+  $Res call(
+      {String id,
+      String goalId,
+      DateTime date,
+      int totalSeconds,
+      DateTime? createdAt,
+      DateTime? updatedAt,
+      DateTime? syncUpdatedAt,
+      bool isSynced,
+      bool isTemp,
+      String? tempUserId});
 }
 
 /// @nodoc
@@ -102,95 +99,79 @@ class _$DailyStudyLogModelCopyWithImpl<$Res, $Val extends DailyStudyLogModel>
     Object? isTemp = null,
     Object? tempUserId = freezed,
   }) {
-    return _then(
-      _value.copyWith(
-            id:
-                null == id
-                    ? _value.id
-                    : id // ignore: cast_nullable_to_non_nullable
-                        as String,
-            goalId:
-                null == goalId
-                    ? _value.goalId
-                    : goalId // ignore: cast_nullable_to_non_nullable
-                        as String,
-            date:
-                null == date
-                    ? _value.date
-                    : date // ignore: cast_nullable_to_non_nullable
-                        as DateTime,
-            totalSeconds:
-                null == totalSeconds
-                    ? _value.totalSeconds
-                    : totalSeconds // ignore: cast_nullable_to_non_nullable
-                        as int,
-            createdAt:
-                freezed == createdAt
-                    ? _value.createdAt
-                    : createdAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime?,
-            updatedAt:
-                freezed == updatedAt
-                    ? _value.updatedAt
-                    : updatedAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime?,
-            syncUpdatedAt:
-                freezed == syncUpdatedAt
-                    ? _value.syncUpdatedAt
-                    : syncUpdatedAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime?,
-            isSynced:
-                null == isSynced
-                    ? _value.isSynced
-                    : isSynced // ignore: cast_nullable_to_non_nullable
-                        as bool,
-            isTemp:
-                null == isTemp
-                    ? _value.isTemp
-                    : isTemp // ignore: cast_nullable_to_non_nullable
-                        as bool,
-            tempUserId:
-                freezed == tempUserId
-                    ? _value.tempUserId
-                    : tempUserId // ignore: cast_nullable_to_non_nullable
-                        as String?,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      goalId: null == goalId
+          ? _value.goalId
+          : goalId // ignore: cast_nullable_to_non_nullable
+              as String,
+      date: null == date
+          ? _value.date
+          : date // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      totalSeconds: null == totalSeconds
+          ? _value.totalSeconds
+          : totalSeconds // ignore: cast_nullable_to_non_nullable
+              as int,
+      createdAt: freezed == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      updatedAt: freezed == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      syncUpdatedAt: freezed == syncUpdatedAt
+          ? _value.syncUpdatedAt
+          : syncUpdatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      isSynced: null == isSynced
+          ? _value.isSynced
+          : isSynced // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isTemp: null == isTemp
+          ? _value.isTemp
+          : isTemp // ignore: cast_nullable_to_non_nullable
+              as bool,
+      tempUserId: freezed == tempUserId
+          ? _value.tempUserId
+          : tempUserId // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ) as $Val);
   }
 }
 
 /// @nodoc
 abstract class _$$DailyStudyLogModelImplCopyWith<$Res>
     implements $DailyStudyLogModelCopyWith<$Res> {
-  factory _$$DailyStudyLogModelImplCopyWith(
-    _$DailyStudyLogModelImpl value,
-    $Res Function(_$DailyStudyLogModelImpl) then,
-  ) = __$$DailyStudyLogModelImplCopyWithImpl<$Res>;
+  factory _$$DailyStudyLogModelImplCopyWith(_$DailyStudyLogModelImpl value,
+          $Res Function(_$DailyStudyLogModelImpl) then) =
+      __$$DailyStudyLogModelImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    String id,
-    String goalId,
-    DateTime date,
-    int totalSeconds,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    DateTime? syncUpdatedAt,
-    bool isSynced,
-    bool isTemp,
-    String? tempUserId,
-  });
+  $Res call(
+      {String id,
+      String goalId,
+      DateTime date,
+      int totalSeconds,
+      DateTime? createdAt,
+      DateTime? updatedAt,
+      DateTime? syncUpdatedAt,
+      bool isSynced,
+      bool isTemp,
+      String? tempUserId});
 }
 
 /// @nodoc
 class __$$DailyStudyLogModelImplCopyWithImpl<$Res>
     extends _$DailyStudyLogModelCopyWithImpl<$Res, _$DailyStudyLogModelImpl>
     implements _$$DailyStudyLogModelImplCopyWith<$Res> {
-  __$$DailyStudyLogModelImplCopyWithImpl(
-    _$DailyStudyLogModelImpl _value,
-    $Res Function(_$DailyStudyLogModelImpl) _then,
-  ) : super(_value, _then);
+  __$$DailyStudyLogModelImplCopyWithImpl(_$DailyStudyLogModelImpl _value,
+      $Res Function(_$DailyStudyLogModelImpl) _then)
+      : super(_value, _then);
 
   @pragma('vm:prefer-inline')
   @override
@@ -206,78 +187,65 @@ class __$$DailyStudyLogModelImplCopyWithImpl<$Res>
     Object? isTemp = null,
     Object? tempUserId = freezed,
   }) {
-    return _then(
-      _$DailyStudyLogModelImpl(
-        id:
-            null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                    as String,
-        goalId:
-            null == goalId
-                ? _value.goalId
-                : goalId // ignore: cast_nullable_to_non_nullable
-                    as String,
-        date:
-            null == date
-                ? _value.date
-                : date // ignore: cast_nullable_to_non_nullable
-                    as DateTime,
-        totalSeconds:
-            null == totalSeconds
-                ? _value.totalSeconds
-                : totalSeconds // ignore: cast_nullable_to_non_nullable
-                    as int,
-        createdAt:
-            freezed == createdAt
-                ? _value.createdAt
-                : createdAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime?,
-        updatedAt:
-            freezed == updatedAt
-                ? _value.updatedAt
-                : updatedAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime?,
-        syncUpdatedAt:
-            freezed == syncUpdatedAt
-                ? _value.syncUpdatedAt
-                : syncUpdatedAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime?,
-        isSynced:
-            null == isSynced
-                ? _value.isSynced
-                : isSynced // ignore: cast_nullable_to_non_nullable
-                    as bool,
-        isTemp:
-            null == isTemp
-                ? _value.isTemp
-                : isTemp // ignore: cast_nullable_to_non_nullable
-                    as bool,
-        tempUserId:
-            freezed == tempUserId
-                ? _value.tempUserId
-                : tempUserId // ignore: cast_nullable_to_non_nullable
-                    as String?,
-      ),
-    );
+    return _then(_$DailyStudyLogModelImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      goalId: null == goalId
+          ? _value.goalId
+          : goalId // ignore: cast_nullable_to_non_nullable
+              as String,
+      date: null == date
+          ? _value.date
+          : date // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      totalSeconds: null == totalSeconds
+          ? _value.totalSeconds
+          : totalSeconds // ignore: cast_nullable_to_non_nullable
+              as int,
+      createdAt: freezed == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      updatedAt: freezed == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      syncUpdatedAt: freezed == syncUpdatedAt
+          ? _value.syncUpdatedAt
+          : syncUpdatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      isSynced: null == isSynced
+          ? _value.isSynced
+          : isSynced // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isTemp: null == isTemp
+          ? _value.isTemp
+          : isTemp // ignore: cast_nullable_to_non_nullable
+              as bool,
+      tempUserId: freezed == tempUserId
+          ? _value.tempUserId
+          : tempUserId // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$DailyStudyLogModelImpl implements _DailyStudyLogModel {
-  const _$DailyStudyLogModelImpl({
-    required this.id,
-    required this.goalId,
-    required this.date,
-    required this.totalSeconds,
-    this.createdAt = null,
-    this.updatedAt = null,
-    this.syncUpdatedAt = null,
-    this.isSynced = false,
-    this.isTemp = false,
-    this.tempUserId = null,
-  });
+  const _$DailyStudyLogModelImpl(
+      {required this.id,
+      required this.goalId,
+      required this.date,
+      required this.totalSeconds,
+      this.createdAt = null,
+      this.updatedAt = null,
+      this.syncUpdatedAt = null,
+      this.isSynced = false,
+      this.isTemp = false,
+      this.tempUserId = null});
 
   factory _$DailyStudyLogModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$DailyStudyLogModelImplFromJson(json);
@@ -358,80 +326,78 @@ class _$DailyStudyLogModelImpl implements _DailyStudyLogModel {
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    goalId,
-    date,
-    totalSeconds,
-    createdAt,
-    updatedAt,
-    syncUpdatedAt,
-    isSynced,
-    isTemp,
-    tempUserId,
-  );
+  int get hashCode => Object.hash(runtimeType, id, goalId, date, totalSeconds,
+      createdAt, updatedAt, syncUpdatedAt, isSynced, isTemp, tempUserId);
 
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$DailyStudyLogModelImplCopyWith<_$DailyStudyLogModelImpl> get copyWith =>
       __$$DailyStudyLogModelImplCopyWithImpl<_$DailyStudyLogModelImpl>(
-        this,
-        _$identity,
-      );
+          this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$DailyStudyLogModelImplToJson(this);
+    return _$$DailyStudyLogModelImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _DailyStudyLogModel implements DailyStudyLogModel {
-  const factory _DailyStudyLogModel({
-    required final String id,
-    required final String goalId,
-    required final DateTime date,
-    required final int totalSeconds,
-    final DateTime? createdAt,
-    final DateTime? updatedAt,
-    final DateTime? syncUpdatedAt,
-    final bool isSynced,
-    final bool isTemp,
-    final String? tempUserId,
-  }) = _$DailyStudyLogModelImpl;
+  const factory _DailyStudyLogModel(
+      {required final String id,
+      required final String goalId,
+      required final DateTime date,
+      required final int totalSeconds,
+      final DateTime? createdAt,
+      final DateTime? updatedAt,
+      final DateTime? syncUpdatedAt,
+      final bool isSynced,
+      final bool isTemp,
+      final String? tempUserId}) = _$DailyStudyLogModelImpl;
 
   factory _DailyStudyLogModel.fromJson(Map<String, dynamic> json) =
       _$DailyStudyLogModelImpl.fromJson;
 
   @override
+
   /// 自動生成される一意のID
   String get id;
   @override
+
   /// 関連する目標のID
   String get goalId;
   @override
+
   /// 学習した日付
   DateTime get date;
   @override
+
   /// 学習した時間（秒）
   int get totalSeconds;
   @override
+
   /// 作成日時
   DateTime? get createdAt;
   @override
+
   /// 最終更新日時
   DateTime? get updatedAt;
   @override
+
   /// 同期時の最終更新日時（同期処理で使用）
   DateTime? get syncUpdatedAt;
   @override
+
   /// 同期状態（ローカルDBのみで使用）
   bool get isSynced;
   @override
+
   /// 仮ユーザーかどうか
   bool get isTemp;
   @override
+
   /// 仮ユーザーのID
   String? get tempUserId;
   @override

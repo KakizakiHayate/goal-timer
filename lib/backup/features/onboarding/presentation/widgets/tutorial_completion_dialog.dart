@@ -16,8 +16,7 @@ class TutorialCompletionDialog extends StatefulWidget {
   });
 
   @override
-  State<TutorialCompletionDialog> createState() =>
-      _TutorialCompletionDialogState();
+  State<TutorialCompletionDialog> createState() => _TutorialCompletionDialogState();
 
   static void show(
     BuildContext context, {
@@ -27,11 +26,10 @@ class TutorialCompletionDialog extends StatefulWidget {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder:
-          (context) => TutorialCompletionDialog(
-            onContinue: onContinue,
-            goalTitle: goalTitle,
-          ),
+      builder: (context) => TutorialCompletionDialog(
+        onContinue: onContinue,
+        goalTitle: goalTitle,
+      ),
     );
   }
 }
@@ -89,9 +87,7 @@ class _TutorialCompletionDialogState extends State<TutorialCompletionDialog>
                   margin: const EdgeInsets.all(SpacingConsts.lg),
                   constraints: BoxConstraints(
                     maxHeight: MediaQuery.of(context).size.height * 0.85,
-                    maxWidth:
-                        MediaQuery.of(context).size.width -
-                        (SpacingConsts.lg * 2),
+                    maxWidth: MediaQuery.of(context).size.width - (SpacingConsts.lg * 2),
                   ),
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -191,7 +187,11 @@ class _TutorialCompletionDialogState extends State<TutorialCompletionDialog>
           ),
         ],
       ),
-      child: const Icon(Icons.check, color: Colors.white, size: 40),
+      child: const Icon(
+        Icons.check,
+        color: Colors.white,
+        size: 40,
+      ),
     );
   }
 
@@ -262,7 +262,11 @@ class _TutorialCompletionDialogState extends State<TutorialCompletionDialog>
         children: [
           Row(
             children: [
-              const Icon(Icons.stars, color: ColorConsts.primary, size: 20),
+              const Icon(
+                Icons.stars,
+                color: ColorConsts.primary,
+                size: 20,
+              ),
               const SizedBox(width: SpacingConsts.sm),
               Expanded(
                 child: Text(

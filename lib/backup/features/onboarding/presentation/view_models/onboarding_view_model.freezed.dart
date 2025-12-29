@@ -12,8 +12,7 @@ part of 'onboarding_view_model.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
 
 /// @nodoc
 mixin _$OnboardingState {
@@ -32,18 +31,16 @@ mixin _$OnboardingState {
 /// @nodoc
 abstract class $OnboardingStateCopyWith<$Res> {
   factory $OnboardingStateCopyWith(
-    OnboardingState value,
-    $Res Function(OnboardingState) then,
-  ) = _$OnboardingStateCopyWithImpl<$Res, OnboardingState>;
+          OnboardingState value, $Res Function(OnboardingState) then) =
+      _$OnboardingStateCopyWithImpl<$Res, OnboardingState>;
   @useResult
-  $Res call({
-    int currentStep,
-    double progress,
-    bool isLoading,
-    String tempUserId,
-    String? errorMessage,
-    bool isDataMigrationInProgress,
-  });
+  $Res call(
+      {int currentStep,
+      double progress,
+      bool isLoading,
+      String tempUserId,
+      String? errorMessage,
+      bool isDataMigrationInProgress});
 }
 
 /// @nodoc
@@ -66,61 +63,50 @@ class _$OnboardingStateCopyWithImpl<$Res, $Val extends OnboardingState>
     Object? errorMessage = freezed,
     Object? isDataMigrationInProgress = null,
   }) {
-    return _then(
-      _value.copyWith(
-            currentStep:
-                null == currentStep
-                    ? _value.currentStep
-                    : currentStep // ignore: cast_nullable_to_non_nullable
-                        as int,
-            progress:
-                null == progress
-                    ? _value.progress
-                    : progress // ignore: cast_nullable_to_non_nullable
-                        as double,
-            isLoading:
-                null == isLoading
-                    ? _value.isLoading
-                    : isLoading // ignore: cast_nullable_to_non_nullable
-                        as bool,
-            tempUserId:
-                null == tempUserId
-                    ? _value.tempUserId
-                    : tempUserId // ignore: cast_nullable_to_non_nullable
-                        as String,
-            errorMessage:
-                freezed == errorMessage
-                    ? _value.errorMessage
-                    : errorMessage // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            isDataMigrationInProgress:
-                null == isDataMigrationInProgress
-                    ? _value.isDataMigrationInProgress
-                    : isDataMigrationInProgress // ignore: cast_nullable_to_non_nullable
-                        as bool,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      currentStep: null == currentStep
+          ? _value.currentStep
+          : currentStep // ignore: cast_nullable_to_non_nullable
+              as int,
+      progress: null == progress
+          ? _value.progress
+          : progress // ignore: cast_nullable_to_non_nullable
+              as double,
+      isLoading: null == isLoading
+          ? _value.isLoading
+          : isLoading // ignore: cast_nullable_to_non_nullable
+              as bool,
+      tempUserId: null == tempUserId
+          ? _value.tempUserId
+          : tempUserId // ignore: cast_nullable_to_non_nullable
+              as String,
+      errorMessage: freezed == errorMessage
+          ? _value.errorMessage
+          : errorMessage // ignore: cast_nullable_to_non_nullable
+              as String?,
+      isDataMigrationInProgress: null == isDataMigrationInProgress
+          ? _value.isDataMigrationInProgress
+          : isDataMigrationInProgress // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ) as $Val);
   }
 }
 
 /// @nodoc
 abstract class _$$OnboardingStateImplCopyWith<$Res>
     implements $OnboardingStateCopyWith<$Res> {
-  factory _$$OnboardingStateImplCopyWith(
-    _$OnboardingStateImpl value,
-    $Res Function(_$OnboardingStateImpl) then,
-  ) = __$$OnboardingStateImplCopyWithImpl<$Res>;
+  factory _$$OnboardingStateImplCopyWith(_$OnboardingStateImpl value,
+          $Res Function(_$OnboardingStateImpl) then) =
+      __$$OnboardingStateImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    int currentStep,
-    double progress,
-    bool isLoading,
-    String tempUserId,
-    String? errorMessage,
-    bool isDataMigrationInProgress,
-  });
+  $Res call(
+      {int currentStep,
+      double progress,
+      bool isLoading,
+      String tempUserId,
+      String? errorMessage,
+      bool isDataMigrationInProgress});
 }
 
 /// @nodoc
@@ -128,9 +114,8 @@ class __$$OnboardingStateImplCopyWithImpl<$Res>
     extends _$OnboardingStateCopyWithImpl<$Res, _$OnboardingStateImpl>
     implements _$$OnboardingStateImplCopyWith<$Res> {
   __$$OnboardingStateImplCopyWithImpl(
-    _$OnboardingStateImpl _value,
-    $Res Function(_$OnboardingStateImpl) _then,
-  ) : super(_value, _then);
+      _$OnboardingStateImpl _value, $Res Function(_$OnboardingStateImpl) _then)
+      : super(_value, _then);
 
   @pragma('vm:prefer-inline')
   @override
@@ -142,54 +127,45 @@ class __$$OnboardingStateImplCopyWithImpl<$Res>
     Object? errorMessage = freezed,
     Object? isDataMigrationInProgress = null,
   }) {
-    return _then(
-      _$OnboardingStateImpl(
-        currentStep:
-            null == currentStep
-                ? _value.currentStep
-                : currentStep // ignore: cast_nullable_to_non_nullable
-                    as int,
-        progress:
-            null == progress
-                ? _value.progress
-                : progress // ignore: cast_nullable_to_non_nullable
-                    as double,
-        isLoading:
-            null == isLoading
-                ? _value.isLoading
-                : isLoading // ignore: cast_nullable_to_non_nullable
-                    as bool,
-        tempUserId:
-            null == tempUserId
-                ? _value.tempUserId
-                : tempUserId // ignore: cast_nullable_to_non_nullable
-                    as String,
-        errorMessage:
-            freezed == errorMessage
-                ? _value.errorMessage
-                : errorMessage // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        isDataMigrationInProgress:
-            null == isDataMigrationInProgress
-                ? _value.isDataMigrationInProgress
-                : isDataMigrationInProgress // ignore: cast_nullable_to_non_nullable
-                    as bool,
-      ),
-    );
+    return _then(_$OnboardingStateImpl(
+      currentStep: null == currentStep
+          ? _value.currentStep
+          : currentStep // ignore: cast_nullable_to_non_nullable
+              as int,
+      progress: null == progress
+          ? _value.progress
+          : progress // ignore: cast_nullable_to_non_nullable
+              as double,
+      isLoading: null == isLoading
+          ? _value.isLoading
+          : isLoading // ignore: cast_nullable_to_non_nullable
+              as bool,
+      tempUserId: null == tempUserId
+          ? _value.tempUserId
+          : tempUserId // ignore: cast_nullable_to_non_nullable
+              as String,
+      errorMessage: freezed == errorMessage
+          ? _value.errorMessage
+          : errorMessage // ignore: cast_nullable_to_non_nullable
+              as String?,
+      isDataMigrationInProgress: null == isDataMigrationInProgress
+          ? _value.isDataMigrationInProgress
+          : isDataMigrationInProgress // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ));
   }
 }
 
 /// @nodoc
 
 class _$OnboardingStateImpl implements _OnboardingState {
-  const _$OnboardingStateImpl({
-    this.currentStep = 0,
-    this.progress = 0.0,
-    this.isLoading = false,
-    this.tempUserId = '',
-    this.errorMessage,
-    this.isDataMigrationInProgress = false,
-  });
+  const _$OnboardingStateImpl(
+      {this.currentStep = 0,
+      this.progress = 0.0,
+      this.isLoading = false,
+      this.tempUserId = '',
+      this.errorMessage,
+      this.isDataMigrationInProgress = false});
 
   @override
   @JsonKey()
@@ -229,43 +205,31 @@ class _$OnboardingStateImpl implements _OnboardingState {
                 other.tempUserId == tempUserId) &&
             (identical(other.errorMessage, errorMessage) ||
                 other.errorMessage == errorMessage) &&
-            (identical(
-                  other.isDataMigrationInProgress,
-                  isDataMigrationInProgress,
-                ) ||
+            (identical(other.isDataMigrationInProgress,
+                    isDataMigrationInProgress) ||
                 other.isDataMigrationInProgress == isDataMigrationInProgress));
   }
 
   @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    currentStep,
-    progress,
-    isLoading,
-    tempUserId,
-    errorMessage,
-    isDataMigrationInProgress,
-  );
+  int get hashCode => Object.hash(runtimeType, currentStep, progress, isLoading,
+      tempUserId, errorMessage, isDataMigrationInProgress);
 
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$OnboardingStateImplCopyWith<_$OnboardingStateImpl> get copyWith =>
       __$$OnboardingStateImplCopyWithImpl<_$OnboardingStateImpl>(
-        this,
-        _$identity,
-      );
+          this, _$identity);
 }
 
 abstract class _OnboardingState implements OnboardingState {
-  const factory _OnboardingState({
-    final int currentStep,
-    final double progress,
-    final bool isLoading,
-    final String tempUserId,
-    final String? errorMessage,
-    final bool isDataMigrationInProgress,
-  }) = _$OnboardingStateImpl;
+  const factory _OnboardingState(
+      {final int currentStep,
+      final double progress,
+      final bool isLoading,
+      final String tempUserId,
+      final String? errorMessage,
+      final bool isDataMigrationInProgress}) = _$OnboardingStateImpl;
 
   @override
   int get currentStep;

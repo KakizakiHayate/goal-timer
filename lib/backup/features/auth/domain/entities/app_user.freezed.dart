@@ -12,8 +12,7 @@ part of 'app_user.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
 
 AppUser _$AppUserFromJson(Map<String, dynamic> json) {
   return _AppUser.fromJson(json);
@@ -38,14 +37,13 @@ abstract class $AppUserCopyWith<$Res> {
   factory $AppUserCopyWith(AppUser value, $Res Function(AppUser) then) =
       _$AppUserCopyWithImpl<$Res, AppUser>;
   @useResult
-  $Res call({
-    String id,
-    String email,
-    String? displayName,
-    String? photoUrl,
-    String createdAt,
-    String? lastSignInAt,
-  });
+  $Res call(
+      {String id,
+      String email,
+      String? displayName,
+      String? photoUrl,
+      String createdAt,
+      String? lastSignInAt});
 }
 
 /// @nodoc
@@ -68,60 +66,49 @@ class _$AppUserCopyWithImpl<$Res, $Val extends AppUser>
     Object? createdAt = null,
     Object? lastSignInAt = freezed,
   }) {
-    return _then(
-      _value.copyWith(
-            id:
-                null == id
-                    ? _value.id
-                    : id // ignore: cast_nullable_to_non_nullable
-                        as String,
-            email:
-                null == email
-                    ? _value.email
-                    : email // ignore: cast_nullable_to_non_nullable
-                        as String,
-            displayName:
-                freezed == displayName
-                    ? _value.displayName
-                    : displayName // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            photoUrl:
-                freezed == photoUrl
-                    ? _value.photoUrl
-                    : photoUrl // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            createdAt:
-                null == createdAt
-                    ? _value.createdAt
-                    : createdAt // ignore: cast_nullable_to_non_nullable
-                        as String,
-            lastSignInAt:
-                freezed == lastSignInAt
-                    ? _value.lastSignInAt
-                    : lastSignInAt // ignore: cast_nullable_to_non_nullable
-                        as String?,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      email: null == email
+          ? _value.email
+          : email // ignore: cast_nullable_to_non_nullable
+              as String,
+      displayName: freezed == displayName
+          ? _value.displayName
+          : displayName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      photoUrl: freezed == photoUrl
+          ? _value.photoUrl
+          : photoUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as String,
+      lastSignInAt: freezed == lastSignInAt
+          ? _value.lastSignInAt
+          : lastSignInAt // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ) as $Val);
   }
 }
 
 /// @nodoc
 abstract class _$$AppUserImplCopyWith<$Res> implements $AppUserCopyWith<$Res> {
   factory _$$AppUserImplCopyWith(
-    _$AppUserImpl value,
-    $Res Function(_$AppUserImpl) then,
-  ) = __$$AppUserImplCopyWithImpl<$Res>;
+          _$AppUserImpl value, $Res Function(_$AppUserImpl) then) =
+      __$$AppUserImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    String id,
-    String email,
-    String? displayName,
-    String? photoUrl,
-    String createdAt,
-    String? lastSignInAt,
-  });
+  $Res call(
+      {String id,
+      String email,
+      String? displayName,
+      String? photoUrl,
+      String createdAt,
+      String? lastSignInAt});
 }
 
 /// @nodoc
@@ -129,9 +116,8 @@ class __$$AppUserImplCopyWithImpl<$Res>
     extends _$AppUserCopyWithImpl<$Res, _$AppUserImpl>
     implements _$$AppUserImplCopyWith<$Res> {
   __$$AppUserImplCopyWithImpl(
-    _$AppUserImpl _value,
-    $Res Function(_$AppUserImpl) _then,
-  ) : super(_value, _then);
+      _$AppUserImpl _value, $Res Function(_$AppUserImpl) _then)
+      : super(_value, _then);
 
   @pragma('vm:prefer-inline')
   @override
@@ -143,54 +129,45 @@ class __$$AppUserImplCopyWithImpl<$Res>
     Object? createdAt = null,
     Object? lastSignInAt = freezed,
   }) {
-    return _then(
-      _$AppUserImpl(
-        id:
-            null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                    as String,
-        email:
-            null == email
-                ? _value.email
-                : email // ignore: cast_nullable_to_non_nullable
-                    as String,
-        displayName:
-            freezed == displayName
-                ? _value.displayName
-                : displayName // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        photoUrl:
-            freezed == photoUrl
-                ? _value.photoUrl
-                : photoUrl // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        createdAt:
-            null == createdAt
-                ? _value.createdAt
-                : createdAt // ignore: cast_nullable_to_non_nullable
-                    as String,
-        lastSignInAt:
-            freezed == lastSignInAt
-                ? _value.lastSignInAt
-                : lastSignInAt // ignore: cast_nullable_to_non_nullable
-                    as String?,
-      ),
-    );
+    return _then(_$AppUserImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      email: null == email
+          ? _value.email
+          : email // ignore: cast_nullable_to_non_nullable
+              as String,
+      displayName: freezed == displayName
+          ? _value.displayName
+          : displayName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      photoUrl: freezed == photoUrl
+          ? _value.photoUrl
+          : photoUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as String,
+      lastSignInAt: freezed == lastSignInAt
+          ? _value.lastSignInAt
+          : lastSignInAt // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$AppUserImpl implements _AppUser {
-  const _$AppUserImpl({
-    required this.id,
-    required this.email,
-    this.displayName,
-    this.photoUrl,
-    required this.createdAt,
-    this.lastSignInAt,
-  });
+  const _$AppUserImpl(
+      {required this.id,
+      required this.email,
+      this.displayName,
+      this.photoUrl,
+      required this.createdAt,
+      this.lastSignInAt});
 
   factory _$AppUserImpl.fromJson(Map<String, dynamic> json) =>
       _$$AppUserImplFromJson(json);
@@ -233,14 +210,7 @@ class _$AppUserImpl implements _AppUser {
   @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    email,
-    displayName,
-    photoUrl,
-    createdAt,
-    lastSignInAt,
-  );
+      runtimeType, id, email, displayName, photoUrl, createdAt, lastSignInAt);
 
   @JsonKey(ignore: true)
   @override
@@ -250,19 +220,20 @@ class _$AppUserImpl implements _AppUser {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$AppUserImplToJson(this);
+    return _$$AppUserImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _AppUser implements AppUser {
-  const factory _AppUser({
-    required final String id,
-    required final String email,
-    final String? displayName,
-    final String? photoUrl,
-    required final String createdAt,
-    final String? lastSignInAt,
-  }) = _$AppUserImpl;
+  const factory _AppUser(
+      {required final String id,
+      required final String email,
+      final String? displayName,
+      final String? photoUrl,
+      required final String createdAt,
+      final String? lastSignInAt}) = _$AppUserImpl;
 
   factory _AppUser.fromJson(Map<String, dynamic> json) = _$AppUserImpl.fromJson;
 

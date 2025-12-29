@@ -12,8 +12,7 @@ part of 'goals_model.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
 
 GoalsModel _$GoalsModelFromJson(Map<String, dynamic> json) {
   return _GoalsModel.fromJson(json);
@@ -66,24 +65,22 @@ mixin _$GoalsModel {
 /// @nodoc
 abstract class $GoalsModelCopyWith<$Res> {
   factory $GoalsModelCopyWith(
-    GoalsModel value,
-    $Res Function(GoalsModel) then,
-  ) = _$GoalsModelCopyWithImpl<$Res, GoalsModel>;
+          GoalsModel value, $Res Function(GoalsModel) then) =
+      _$GoalsModelCopyWithImpl<$Res, GoalsModel>;
   @useResult
-  $Res call({
-    String id,
-    String userId,
-    String title,
-    String description,
-    DateTime deadline,
-    bool isCompleted,
-    String avoidMessage,
-    int targetMinutes,
-    int spentMinutes,
-    DateTime? updatedAt,
-    DateTime? syncUpdatedAt,
-    bool isSynced,
-  });
+  $Res call(
+      {String id,
+      String userId,
+      String title,
+      String description,
+      DateTime deadline,
+      bool isCompleted,
+      String avoidMessage,
+      int targetMinutes,
+      int spentMinutes,
+      DateTime? updatedAt,
+      DateTime? syncUpdatedAt,
+      bool isSynced});
 }
 
 /// @nodoc
@@ -112,71 +109,56 @@ class _$GoalsModelCopyWithImpl<$Res, $Val extends GoalsModel>
     Object? syncUpdatedAt = freezed,
     Object? isSynced = null,
   }) {
-    return _then(
-      _value.copyWith(
-            id:
-                null == id
-                    ? _value.id
-                    : id // ignore: cast_nullable_to_non_nullable
-                        as String,
-            userId:
-                null == userId
-                    ? _value.userId
-                    : userId // ignore: cast_nullable_to_non_nullable
-                        as String,
-            title:
-                null == title
-                    ? _value.title
-                    : title // ignore: cast_nullable_to_non_nullable
-                        as String,
-            description:
-                null == description
-                    ? _value.description
-                    : description // ignore: cast_nullable_to_non_nullable
-                        as String,
-            deadline:
-                null == deadline
-                    ? _value.deadline
-                    : deadline // ignore: cast_nullable_to_non_nullable
-                        as DateTime,
-            isCompleted:
-                null == isCompleted
-                    ? _value.isCompleted
-                    : isCompleted // ignore: cast_nullable_to_non_nullable
-                        as bool,
-            avoidMessage:
-                null == avoidMessage
-                    ? _value.avoidMessage
-                    : avoidMessage // ignore: cast_nullable_to_non_nullable
-                        as String,
-            targetMinutes:
-                null == targetMinutes
-                    ? _value.targetMinutes
-                    : targetMinutes // ignore: cast_nullable_to_non_nullable
-                        as int,
-            spentMinutes:
-                null == spentMinutes
-                    ? _value.spentMinutes
-                    : spentMinutes // ignore: cast_nullable_to_non_nullable
-                        as int,
-            updatedAt:
-                freezed == updatedAt
-                    ? _value.updatedAt
-                    : updatedAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime?,
-            syncUpdatedAt:
-                freezed == syncUpdatedAt
-                    ? _value.syncUpdatedAt
-                    : syncUpdatedAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime?,
-            isSynced:
-                null == isSynced
-                    ? _value.isSynced
-                    : isSynced // ignore: cast_nullable_to_non_nullable
-                        as bool,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      userId: null == userId
+          ? _value.userId
+          : userId // ignore: cast_nullable_to_non_nullable
+              as String,
+      title: null == title
+          ? _value.title
+          : title // ignore: cast_nullable_to_non_nullable
+              as String,
+      description: null == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
+              as String,
+      deadline: null == deadline
+          ? _value.deadline
+          : deadline // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      isCompleted: null == isCompleted
+          ? _value.isCompleted
+          : isCompleted // ignore: cast_nullable_to_non_nullable
+              as bool,
+      avoidMessage: null == avoidMessage
+          ? _value.avoidMessage
+          : avoidMessage // ignore: cast_nullable_to_non_nullable
+              as String,
+      targetMinutes: null == targetMinutes
+          ? _value.targetMinutes
+          : targetMinutes // ignore: cast_nullable_to_non_nullable
+              as int,
+      spentMinutes: null == spentMinutes
+          ? _value.spentMinutes
+          : spentMinutes // ignore: cast_nullable_to_non_nullable
+              as int,
+      updatedAt: freezed == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      syncUpdatedAt: freezed == syncUpdatedAt
+          ? _value.syncUpdatedAt
+          : syncUpdatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      isSynced: null == isSynced
+          ? _value.isSynced
+          : isSynced // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ) as $Val);
   }
 }
 
@@ -184,25 +166,23 @@ class _$GoalsModelCopyWithImpl<$Res, $Val extends GoalsModel>
 abstract class _$$GoalsModelImplCopyWith<$Res>
     implements $GoalsModelCopyWith<$Res> {
   factory _$$GoalsModelImplCopyWith(
-    _$GoalsModelImpl value,
-    $Res Function(_$GoalsModelImpl) then,
-  ) = __$$GoalsModelImplCopyWithImpl<$Res>;
+          _$GoalsModelImpl value, $Res Function(_$GoalsModelImpl) then) =
+      __$$GoalsModelImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    String id,
-    String userId,
-    String title,
-    String description,
-    DateTime deadline,
-    bool isCompleted,
-    String avoidMessage,
-    int targetMinutes,
-    int spentMinutes,
-    DateTime? updatedAt,
-    DateTime? syncUpdatedAt,
-    bool isSynced,
-  });
+  $Res call(
+      {String id,
+      String userId,
+      String title,
+      String description,
+      DateTime deadline,
+      bool isCompleted,
+      String avoidMessage,
+      int targetMinutes,
+      int spentMinutes,
+      DateTime? updatedAt,
+      DateTime? syncUpdatedAt,
+      bool isSynced});
 }
 
 /// @nodoc
@@ -210,9 +190,8 @@ class __$$GoalsModelImplCopyWithImpl<$Res>
     extends _$GoalsModelCopyWithImpl<$Res, _$GoalsModelImpl>
     implements _$$GoalsModelImplCopyWith<$Res> {
   __$$GoalsModelImplCopyWithImpl(
-    _$GoalsModelImpl _value,
-    $Res Function(_$GoalsModelImpl) _then,
-  ) : super(_value, _then);
+      _$GoalsModelImpl _value, $Res Function(_$GoalsModelImpl) _then)
+      : super(_value, _then);
 
   @pragma('vm:prefer-inline')
   @override
@@ -230,90 +209,75 @@ class __$$GoalsModelImplCopyWithImpl<$Res>
     Object? syncUpdatedAt = freezed,
     Object? isSynced = null,
   }) {
-    return _then(
-      _$GoalsModelImpl(
-        id:
-            null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                    as String,
-        userId:
-            null == userId
-                ? _value.userId
-                : userId // ignore: cast_nullable_to_non_nullable
-                    as String,
-        title:
-            null == title
-                ? _value.title
-                : title // ignore: cast_nullable_to_non_nullable
-                    as String,
-        description:
-            null == description
-                ? _value.description
-                : description // ignore: cast_nullable_to_non_nullable
-                    as String,
-        deadline:
-            null == deadline
-                ? _value.deadline
-                : deadline // ignore: cast_nullable_to_non_nullable
-                    as DateTime,
-        isCompleted:
-            null == isCompleted
-                ? _value.isCompleted
-                : isCompleted // ignore: cast_nullable_to_non_nullable
-                    as bool,
-        avoidMessage:
-            null == avoidMessage
-                ? _value.avoidMessage
-                : avoidMessage // ignore: cast_nullable_to_non_nullable
-                    as String,
-        targetMinutes:
-            null == targetMinutes
-                ? _value.targetMinutes
-                : targetMinutes // ignore: cast_nullable_to_non_nullable
-                    as int,
-        spentMinutes:
-            null == spentMinutes
-                ? _value.spentMinutes
-                : spentMinutes // ignore: cast_nullable_to_non_nullable
-                    as int,
-        updatedAt:
-            freezed == updatedAt
-                ? _value.updatedAt
-                : updatedAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime?,
-        syncUpdatedAt:
-            freezed == syncUpdatedAt
-                ? _value.syncUpdatedAt
-                : syncUpdatedAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime?,
-        isSynced:
-            null == isSynced
-                ? _value.isSynced
-                : isSynced // ignore: cast_nullable_to_non_nullable
-                    as bool,
-      ),
-    );
+    return _then(_$GoalsModelImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      userId: null == userId
+          ? _value.userId
+          : userId // ignore: cast_nullable_to_non_nullable
+              as String,
+      title: null == title
+          ? _value.title
+          : title // ignore: cast_nullable_to_non_nullable
+              as String,
+      description: null == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
+              as String,
+      deadline: null == deadline
+          ? _value.deadline
+          : deadline // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      isCompleted: null == isCompleted
+          ? _value.isCompleted
+          : isCompleted // ignore: cast_nullable_to_non_nullable
+              as bool,
+      avoidMessage: null == avoidMessage
+          ? _value.avoidMessage
+          : avoidMessage // ignore: cast_nullable_to_non_nullable
+              as String,
+      targetMinutes: null == targetMinutes
+          ? _value.targetMinutes
+          : targetMinutes // ignore: cast_nullable_to_non_nullable
+              as int,
+      spentMinutes: null == spentMinutes
+          ? _value.spentMinutes
+          : spentMinutes // ignore: cast_nullable_to_non_nullable
+              as int,
+      updatedAt: freezed == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      syncUpdatedAt: freezed == syncUpdatedAt
+          ? _value.syncUpdatedAt
+          : syncUpdatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      isSynced: null == isSynced
+          ? _value.isSynced
+          : isSynced // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$GoalsModelImpl implements _GoalsModel {
-  const _$GoalsModelImpl({
-    required this.id,
-    required this.userId,
-    required this.title,
-    required this.description,
-    required this.deadline,
-    required this.isCompleted,
-    required this.avoidMessage,
-    required this.targetMinutes,
-    required this.spentMinutes,
-    this.updatedAt = null,
-    this.syncUpdatedAt = null,
-    this.isSynced = false,
-  });
+  const _$GoalsModelImpl(
+      {required this.id,
+      required this.userId,
+      required this.title,
+      required this.description,
+      required this.deadline,
+      required this.isCompleted,
+      required this.avoidMessage,
+      required this.targetMinutes,
+      required this.spentMinutes,
+      this.updatedAt = null,
+      this.syncUpdatedAt = null,
+      this.isSynced = false});
 
   factory _$GoalsModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$GoalsModelImplFromJson(json);
@@ -405,20 +369,19 @@ class _$GoalsModelImpl implements _GoalsModel {
   @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    userId,
-    title,
-    description,
-    deadline,
-    isCompleted,
-    avoidMessage,
-    targetMinutes,
-    spentMinutes,
-    updatedAt,
-    syncUpdatedAt,
-    isSynced,
-  );
+      runtimeType,
+      id,
+      userId,
+      title,
+      description,
+      deadline,
+      isCompleted,
+      avoidMessage,
+      targetMinutes,
+      spentMinutes,
+      updatedAt,
+      syncUpdatedAt,
+      isSynced);
 
   @JsonKey(ignore: true)
   @override
@@ -428,63 +391,76 @@ class _$GoalsModelImpl implements _GoalsModel {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$GoalsModelImplToJson(this);
+    return _$$GoalsModelImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _GoalsModel implements GoalsModel {
-  const factory _GoalsModel({
-    required final String id,
-    required final String userId,
-    required final String title,
-    required final String description,
-    required final DateTime deadline,
-    required final bool isCompleted,
-    required final String avoidMessage,
-    required final int targetMinutes,
-    required final int spentMinutes,
-    final DateTime? updatedAt,
-    final DateTime? syncUpdatedAt,
-    final bool isSynced,
-  }) = _$GoalsModelImpl;
+  const factory _GoalsModel(
+      {required final String id,
+      required final String userId,
+      required final String title,
+      required final String description,
+      required final DateTime deadline,
+      required final bool isCompleted,
+      required final String avoidMessage,
+      required final int targetMinutes,
+      required final int spentMinutes,
+      final DateTime? updatedAt,
+      final DateTime? syncUpdatedAt,
+      final bool isSynced}) = _$GoalsModelImpl;
 
   factory _GoalsModel.fromJson(Map<String, dynamic> json) =
       _$GoalsModelImpl.fromJson;
 
   @override
+
   /// 各目標のid管理
   String get id;
   @override
+
   /// users tableのidとリレーション
   String get userId;
   @override
+
   /// 目標名
   String get title;
   @override
+
   /// 目標の詳細説明
   String get description;
   @override
+
   /// いつまで(日付)に達成するのか？
   DateTime get deadline;
   @override
+
   /// 目標を完了したかの判定フラグ
   bool get isCompleted;
   @override
+
   /// 目標達成しなかったら自分に課すこと
   String get avoidMessage;
   @override
+
   /// 目標達成に必要な時間（分単位）
   int get targetMinutes;
   @override
+
   /// 実際に使った時間（分単位）
   int get spentMinutes;
   @override
+
   /// 最終更新日時
   DateTime? get updatedAt;
   @override
+
   /// 同期時の最終更新日時（同期処理で使用）
   DateTime? get syncUpdatedAt;
   @override
+
   /// 同期状態（ローカルDBのみで使用）
   bool get isSynced;
   @override

@@ -27,7 +27,10 @@ final timerRestrictionServiceProvider = Provider<TimerRestrictionService>((
 final timerViewModelProvider =
     StateNotifierProvider<TimerViewModel, TimerState>((ref) {
       final saveStudyLogUseCase = ref.watch(saveStudyLogUseCaseProvider);
-      return TimerViewModel(ref: ref, saveStudyLogUseCase: saveStudyLogUseCase);
+      return TimerViewModel(
+        ref: ref,
+        saveStudyLogUseCase: saveStudyLogUseCase,
+      );
     });
 
 // タイマーの状態
@@ -118,9 +121,9 @@ class TimerViewModel extends StateNotifier<TimerState> {
   TimerViewModel({
     required Ref ref,
     required SaveStudyLogUseCase saveStudyLogUseCase,
-  }) : _ref = ref,
-       _saveStudyLogUseCase = saveStudyLogUseCase,
-       super(TimerState()) {
+  })  : _ref = ref,
+        _saveStudyLogUseCase = saveStudyLogUseCase,
+        super(TimerState()) {
     // タイマー制限サービスを初期化
     _initializeRestrictions();
   }
@@ -358,7 +361,11 @@ class TimerViewModel extends StateNotifier<TimerState> {
       pauseTimer();
       resetTimer();
     } catch (error, stackTrace) {
-      AppLogger.instance.e('学習時間の手動記録に失敗しました: $error', error, stackTrace);
+      AppLogger.instance.e(
+        '学習時間の手動記録に失敗しました: $error',
+        error,
+        stackTrace,
+      );
       rethrow;
     }
   }
@@ -408,7 +415,11 @@ class TimerViewModel extends StateNotifier<TimerState> {
       // 目標データのキャッシュをクリアして最新状態を反映
       _ref.invalidate(goalDetailListProvider);
     } catch (error, stackTrace) {
-      AppLogger.instance.e('学習時間の記録に失敗しました: $error', error, stackTrace);
+      AppLogger.instance.e(
+        '学習時間の記録に失敗しました: $error',
+        error,
+        stackTrace,
+      );
     }
   }
 

@@ -24,7 +24,7 @@ class GoalCreationScreen extends ConsumerStatefulWidget {
 
 class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
   final _formKey = GlobalKey<FormState>();
-
+  
   String _title = '';
   String _description = '';
   String _avoidMessage = '';
@@ -65,9 +65,9 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
                   children: [
                     // 説明
                     _buildDescription(),
-
+                    
                     const SizedBox(height: SpacingConsts.l),
-
+                    
                     // フォーム
                     _buildForm(),
                   ],
@@ -389,10 +389,9 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
       final onboardingState = ref.read(onboardingViewModelProvider);
       await tutorialViewModel.startTutorial(
         tempUserId: onboardingState.tempUserId,
-        totalSteps:
-            4, // home_goal_selection -> home_timer_button_showcase -> timer_operation -> completion
+        totalSteps: 4, // home_goal_selection -> home_timer_button_showcase -> timer_operation -> completion
       );
-
+      
       // ゴール作成完了後、次のチュートリアルステップに進む
       await tutorialViewModel.nextStep('home_timer_button_showcase');
 
@@ -417,10 +416,10 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
     try {
       final createGoalUseCase = ref.read(createGoalUseCaseProvider);
       final onboardingState = ref.read(onboardingViewModelProvider);
-
+      
       // オンボーディングではユーザーが選択した目標時間を使用
       final int targetMinutes = _targetMinutes;
-
+      
       // デフォルトの締切（30日後）
       final deadline = DateTime.now().add(const Duration(days: 30));
 

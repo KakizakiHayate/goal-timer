@@ -45,10 +45,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   late AnimationController _fabAnimationController;
   late Animation<double> _fabScaleAnimation;
   late ScrollController _scrollController;
-
+  
   // チュートリアル用：最初の目標カードのタイマーボタンKey
   final GlobalKey _firstGoalTimerButtonKey = GlobalKey();
-
+  
   // チュートリアル用：FloatingActionButtonのKey
   final GlobalKey _timerButtonKey = GlobalKey();
 
@@ -92,9 +92,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       if (next.needsOnboarding) {
         // 初回起動または未認証の場合
         if (next == app_auth.AuthState.initial) {
-          Navigator.of(
-            context,
-          ).pushReplacementNamed(RouteNames.onboardingGoalCreation);
+          Navigator.of(context).pushReplacementNamed(RouteNames.onboardingGoalCreation);
         } else if (next == app_auth.AuthState.unauthenticated) {
           Navigator.of(context).pushReplacementNamed(RouteNames.login);
         }
@@ -109,7 +107,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       } else if (authState == app_auth.AuthState.error) {
         message = 'エラーが発生しました';
       }
-
+      
       return Scaffold(
         body: Center(
           child: Column(
@@ -156,10 +154,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     print('- isCompleted: ${tutorialState.isCompleted}');
     print('- current tab index: ${_tabController.index}');
     print('- home tab index: $_homeTabIndex');
-
+    
     // チュートリアル表示処理を改善
-    if (tutorialState.isTutorialActive &&
-        _tabController.index == _homeTabIndex) {
+    if (tutorialState.isTutorialActive && _tabController.index == _homeTabIndex) {
       // ゴール選択チュートリアル
       if (tutorialState.currentStepId == 'home_goal_selection') {
         print('✅ Showing goal selection tutorial overlay');
@@ -181,10 +178,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         );
       }
     }
-
-    print(
-      '❌ Tutorial not shown - Current step: ${tutorialState.currentStepId}',
-    );
+    
+    print('❌ Tutorial not shown - Current step: ${tutorialState.currentStepId}');
 
     return mainScaffold;
   }
@@ -273,16 +268,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             _executeScrollAndHighlight(scrollController);
           });
         });
-
+        
         return TutorialOverlay(
           title: 'タイマーを開始しよう',
           description: 'タイマーボタンを押して学習を開始しましょう',
           targetButtonKey: _firstGoalTimerButtonKey,
           scrollController: scrollController,
           onNext: () {
-            final tutorialViewModel = ref.read(
-              tutorialViewModelProvider.notifier,
-            );
+            final tutorialViewModel = ref.read(tutorialViewModelProvider.notifier);
             // タイマー画面に遷移してデモモードで実行
             Navigator.pushNamed(
               context,
@@ -298,14 +291,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             });
           },
           onSkip: () {
-            final tutorialViewModel = ref.read(
-              tutorialViewModelProvider.notifier,
-            );
+            final tutorialViewModel = ref.read(tutorialViewModelProvider.notifier);
             tutorialViewModel.skipTutorial();
-            Navigator.pushReplacementNamed(
-              context,
-              RouteNames.onboardingAccountPromotion,
-            );
+            Navigator.pushReplacementNamed(context, RouteNames.onboardingAccountPromotion);
           },
         );
       },
@@ -314,35 +302,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
   void _executeScrollAndHighlight(ScrollController scrollController) {
     print('🔍 [DEBUG] _executeScrollAndHighlight called');
-    print(
-      '🔍 [DEBUG] ScrollController hasClients: ${scrollController.hasClients}',
-    );
-
+    print('🔍 [DEBUG] ScrollController hasClients: ${scrollController.hasClients}');
+    
     // Step 1: まず推定位置にスクロール（ゴールカードをビューに入れる）
     if (scrollController.hasClients) {
-      final estimatedPosition =
-          MediaQuery.of(context).size.height * 0.5; // より大きくスクロール
-      print(
-        '🔍 [DEBUG] Starting scroll to estimated position: $estimatedPosition',
-      );
+      final estimatedPosition = MediaQuery.of(context).size.height * 0.5; // より大きくスクロール
+      print('🔍 [DEBUG] Starting scroll to estimated position: $estimatedPosition');
       print('🔍 [DEBUG] Current scroll position: ${scrollController.offset}');
-      print(
-        '🔍 [DEBUG] Max scroll extent: ${scrollController.position.maxScrollExtent}',
-      );
-
-      scrollController
-          .animateTo(
-            estimatedPosition,
-            duration: const Duration(milliseconds: 800), // より長い時間でゆっくりスクロール
-            curve: Curves.easeInOut,
-          )
-          .then((_) {
-            print('🔍 [DEBUG] First scroll completed');
-            // Step 2: スクロール完了後、少し長めに待ってから正確な位置に調整
-            Future.delayed(const Duration(milliseconds: 300), () {
-              _scrollToFirstGoal(scrollController);
-            });
-          });
+      print('🔍 [DEBUG] Max scroll extent: ${scrollController.position.maxScrollExtent}');
+      
+      scrollController.animateTo(
+        estimatedPosition,
+        duration: const Duration(milliseconds: 800), // より長い時間でゆっくりスクロール
+        curve: Curves.easeInOut,
+      ).then((_) {
+        print('🔍 [DEBUG] First scroll completed');
+        // Step 2: スクロール完了後、少し長めに待ってから正確な位置に調整
+        Future.delayed(const Duration(milliseconds: 300), () {
+          _scrollToFirstGoal(scrollController);
+        });
+      });
     } else {
       print('❌ [DEBUG] ScrollController has no clients - retrying in 200ms');
       Future.delayed(const Duration(milliseconds: 200), () {
@@ -353,53 +332,42 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
   void _scrollToFirstGoal(ScrollController scrollController) {
     print('🔍 [DEBUG] _scrollToFirstGoal called');
-    print(
-      '🔍 [DEBUG] ScrollController hasClients: ${scrollController.hasClients}',
-    );
-    print(
-      '🔍 [DEBUG] _firstGoalTimerButtonKey.currentContext != null: ${_firstGoalTimerButtonKey.currentContext != null}',
-    );
-
+    print('🔍 [DEBUG] ScrollController hasClients: ${scrollController.hasClients}');
+    print('🔍 [DEBUG] _firstGoalTimerButtonKey.currentContext != null: ${_firstGoalTimerButtonKey.currentContext != null}');
+    
     // 最初のゴールの位置を動的に計算してスクロール
-    if (scrollController.hasClients &&
-        _firstGoalTimerButtonKey.currentContext != null) {
+    if (scrollController.hasClients && _firstGoalTimerButtonKey.currentContext != null) {
       try {
         final context = _firstGoalTimerButtonKey.currentContext!;
         final RenderBox renderBox = context.findRenderObject() as RenderBox;
-
+        
         print('🔍 [DEBUG] RenderBox hasSize: ${renderBox.hasSize}');
-
+        
         if (renderBox.hasSize) {
           // ゴールカードの位置を取得
           final position = renderBox.localToGlobal(Offset.zero);
           final currentScrollOffset = scrollController.offset;
-
+          
           print('🔍 [DEBUG] Button global position: $position');
           print('🔍 [DEBUG] Current scroll offset: $currentScrollOffset');
-
+          
           // 画面の中央にゴールカードが表示されるように計算
           final screenHeight = MediaQuery.of(context).size.height;
-          final targetScrollOffset =
-              currentScrollOffset + position.dy - (screenHeight * 0.4);
-
+          final targetScrollOffset = currentScrollOffset + position.dy - (screenHeight * 0.4);
+          
           // 0以下にならないように調整
-          final adjustedOffset = targetScrollOffset.clamp(
-            0.0,
-            scrollController.position.maxScrollExtent,
-          );
-
+          final adjustedOffset = targetScrollOffset.clamp(0.0, scrollController.position.maxScrollExtent);
+          
           print('🔍 [DEBUG] Target scroll offset: $targetScrollOffset');
           print('🔍 [DEBUG] Adjusted scroll offset: $adjustedOffset');
-
-          scrollController
-              .animateTo(
-                adjustedOffset,
-                duration: const Duration(milliseconds: 500),
-                curve: Curves.easeInOut,
-              )
-              .then((_) {
-                print('🔍 [DEBUG] Precise scroll completed');
-              });
+          
+          scrollController.animateTo(
+            adjustedOffset,
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeInOut,
+          ).then((_) {
+            print('🔍 [DEBUG] Precise scroll completed');
+          });
         } else {
           print('❌ [DEBUG] RenderBox has no size - retrying in 50ms');
           Future.delayed(const Duration(milliseconds: 50), () {
@@ -418,9 +386,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         );
       }
     } else {
-      print(
-        '❌ [DEBUG] ScrollController or context not ready - retrying in 100ms',
-      );
+      print('❌ [DEBUG] ScrollController or context not ready - retrying in 100ms');
       Future.delayed(const Duration(milliseconds: 100), () {
         _scrollToFirstGoal(scrollController);
       });
@@ -491,9 +457,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       // build中のprovider状態変更を避けるため、次のフレームで実行
       Future.microtask(() async {
         if (mounted) {
-          final tutorialViewModel = ref.read(
-            tutorialViewModelProvider.notifier,
-          );
+          final tutorialViewModel = ref.read(tutorialViewModelProvider.notifier);
           await tutorialViewModel.skipTutorial();
         }
       });
@@ -502,12 +466,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
     // 実際の画面上のGoalCardのタイマーボタンをハイライト
     final firstGoal = goals.first;
-
+    
     return TutorialOverlay(
       targetButtonKey: _firstGoalTimerButtonKey,
       title: 'この目標でタイマーを体験しましょう',
-      description:
-          '作成した「${firstGoal.title}」の目標カードの「タイマー開始」ボタンをタップして、タイマー画面に移動しましょう！',
+      description: '作成した「${firstGoal.title}」の目標カードの「タイマー開始」ボタンをタップして、タイマー画面に移動しましょう！',
       scrollController: scrollController,
       onNext: () async {
         final tutorialViewModel = ref.read(tutorialViewModelProvider.notifier);
@@ -517,14 +480,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         final tutorialViewModel = ref.read(tutorialViewModelProvider.notifier);
         await tutorialViewModel.skipTutorial();
         if (mounted) {
-          Navigator.pushReplacementNamed(
-            context,
-            RouteNames.onboardingAccountPromotion,
-          );
+          Navigator.pushReplacementNamed(context, RouteNames.onboardingAccountPromotion);
         }
       },
     );
   }
+
 
   /// 最初の目標カードまで自動スクロール
   void _scrollToFirstGoalCard() {
@@ -540,13 +501,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       // 目標リストの位置を推定（ユーザー挨拶 + 今日の進捗 + マージン）
       // より正確な位置計算のために、段階的にスクロール
       const estimatedGoalListPosition = 300.0; // ピクセル単位での推定位置
-
+      
       _scrollController.animateTo(
         estimatedGoalListPosition,
         duration: const Duration(milliseconds: 800),
         curve: Curves.easeInOutCubic,
       );
-
+      
       // Auto-scrolled to goal card position: $estimatedGoalListPosition
     } catch (e) {
       // Error during auto-scroll: $e
@@ -742,34 +703,31 @@ class _HomeTabContent extends ConsumerWidget {
           progress: goal.getProgressRate(),
           streakDays: streakDays,
           avoidMessage: goal.avoidMessage.isNotEmpty ? goal.avoidMessage : null,
-          timerButtonKey:
-              index == 0 ? firstGoalTimerButtonKey : null, // 最初の目標のみキーを設定
+          timerButtonKey: index == 0 ? firstGoalTimerButtonKey : null, // 最初の目標のみキーを設定
           onTap: () {
             // TODO: 目標詳細画面に遷移
           },
           onTimerTap: () {
             // チュートリアル中かどうかをチェック
-            final isInTutorial =
-                tutorialState.isTutorialActive &&
+            final isInTutorial = tutorialState.isTutorialActive && 
                 tutorialState.currentStepId == 'home_timer_button_showcase';
-
-            print(
-              '🎯 Timer button tapped - Tutorial mode: $isInTutorial, Step: ${tutorialState.currentStepId}',
-            );
-
+            
+            print('🎯 Timer button tapped - Tutorial mode: $isInTutorial, Step: ${tutorialState.currentStepId}');
+            
             // タイマー画面に遷移（チュートリアルモードを考慮）
             Navigator.pushNamed(
               context,
               RouteNames.timerWithGoal,
-              arguments: {'goalId': goal.id, 'isTutorialMode': isInTutorial},
+              arguments: {
+                'goalId': goal.id,
+                'isTutorialMode': isInTutorial,
+              },
             );
-
+            
             // チュートリアル中の場合、タイマー画面が完全にロードされてから次のステップに進む
             if (isInTutorial) {
               Future.delayed(const Duration(milliseconds: 800), () {
-                final tutorialViewModel = ref.read(
-                  tutorialViewModelProvider.notifier,
-                );
+                final tutorialViewModel = ref.read(tutorialViewModelProvider.notifier);
                 tutorialViewModel.nextStep('timer_operation');
               });
             }

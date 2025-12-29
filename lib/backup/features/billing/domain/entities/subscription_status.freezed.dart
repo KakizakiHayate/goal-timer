@@ -12,8 +12,7 @@ part of 'subscription_status.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
 
 SubscriptionStatus _$SubscriptionStatusFromJson(Map<String, dynamic> json) {
   return _SubscriptionStatus.fromJson(json);
@@ -40,21 +39,19 @@ mixin _$SubscriptionStatus {
 /// @nodoc
 abstract class $SubscriptionStatusCopyWith<$Res> {
   factory $SubscriptionStatusCopyWith(
-    SubscriptionStatus value,
-    $Res Function(SubscriptionStatus) then,
-  ) = _$SubscriptionStatusCopyWithImpl<$Res, SubscriptionStatus>;
+          SubscriptionStatus value, $Res Function(SubscriptionStatus) then) =
+      _$SubscriptionStatusCopyWithImpl<$Res, SubscriptionStatus>;
   @useResult
-  $Res call({
-    SubscriptionState state,
-    bool isPremium,
-    String? planId,
-    DateTime? expirationDate,
-    DateTime? renewalDate,
-    bool isAutoRenew,
-    bool isInTrialPeriod,
-    DateTime? trialEndDate,
-    List<String> entitlements,
-  });
+  $Res call(
+      {SubscriptionState state,
+      bool isPremium,
+      String? planId,
+      DateTime? expirationDate,
+      DateTime? renewalDate,
+      bool isAutoRenew,
+      bool isInTrialPeriod,
+      DateTime? trialEndDate,
+      List<String> entitlements});
 }
 
 /// @nodoc
@@ -80,89 +77,74 @@ class _$SubscriptionStatusCopyWithImpl<$Res, $Val extends SubscriptionStatus>
     Object? trialEndDate = freezed,
     Object? entitlements = null,
   }) {
-    return _then(
-      _value.copyWith(
-            state:
-                null == state
-                    ? _value.state
-                    : state // ignore: cast_nullable_to_non_nullable
-                        as SubscriptionState,
-            isPremium:
-                null == isPremium
-                    ? _value.isPremium
-                    : isPremium // ignore: cast_nullable_to_non_nullable
-                        as bool,
-            planId:
-                freezed == planId
-                    ? _value.planId
-                    : planId // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            expirationDate:
-                freezed == expirationDate
-                    ? _value.expirationDate
-                    : expirationDate // ignore: cast_nullable_to_non_nullable
-                        as DateTime?,
-            renewalDate:
-                freezed == renewalDate
-                    ? _value.renewalDate
-                    : renewalDate // ignore: cast_nullable_to_non_nullable
-                        as DateTime?,
-            isAutoRenew:
-                null == isAutoRenew
-                    ? _value.isAutoRenew
-                    : isAutoRenew // ignore: cast_nullable_to_non_nullable
-                        as bool,
-            isInTrialPeriod:
-                null == isInTrialPeriod
-                    ? _value.isInTrialPeriod
-                    : isInTrialPeriod // ignore: cast_nullable_to_non_nullable
-                        as bool,
-            trialEndDate:
-                freezed == trialEndDate
-                    ? _value.trialEndDate
-                    : trialEndDate // ignore: cast_nullable_to_non_nullable
-                        as DateTime?,
-            entitlements:
-                null == entitlements
-                    ? _value.entitlements
-                    : entitlements // ignore: cast_nullable_to_non_nullable
-                        as List<String>,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      state: null == state
+          ? _value.state
+          : state // ignore: cast_nullable_to_non_nullable
+              as SubscriptionState,
+      isPremium: null == isPremium
+          ? _value.isPremium
+          : isPremium // ignore: cast_nullable_to_non_nullable
+              as bool,
+      planId: freezed == planId
+          ? _value.planId
+          : planId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      expirationDate: freezed == expirationDate
+          ? _value.expirationDate
+          : expirationDate // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      renewalDate: freezed == renewalDate
+          ? _value.renewalDate
+          : renewalDate // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      isAutoRenew: null == isAutoRenew
+          ? _value.isAutoRenew
+          : isAutoRenew // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isInTrialPeriod: null == isInTrialPeriod
+          ? _value.isInTrialPeriod
+          : isInTrialPeriod // ignore: cast_nullable_to_non_nullable
+              as bool,
+      trialEndDate: freezed == trialEndDate
+          ? _value.trialEndDate
+          : trialEndDate // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      entitlements: null == entitlements
+          ? _value.entitlements
+          : entitlements // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+    ) as $Val);
   }
 }
 
 /// @nodoc
 abstract class _$$SubscriptionStatusImplCopyWith<$Res>
     implements $SubscriptionStatusCopyWith<$Res> {
-  factory _$$SubscriptionStatusImplCopyWith(
-    _$SubscriptionStatusImpl value,
-    $Res Function(_$SubscriptionStatusImpl) then,
-  ) = __$$SubscriptionStatusImplCopyWithImpl<$Res>;
+  factory _$$SubscriptionStatusImplCopyWith(_$SubscriptionStatusImpl value,
+          $Res Function(_$SubscriptionStatusImpl) then) =
+      __$$SubscriptionStatusImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    SubscriptionState state,
-    bool isPremium,
-    String? planId,
-    DateTime? expirationDate,
-    DateTime? renewalDate,
-    bool isAutoRenew,
-    bool isInTrialPeriod,
-    DateTime? trialEndDate,
-    List<String> entitlements,
-  });
+  $Res call(
+      {SubscriptionState state,
+      bool isPremium,
+      String? planId,
+      DateTime? expirationDate,
+      DateTime? renewalDate,
+      bool isAutoRenew,
+      bool isInTrialPeriod,
+      DateTime? trialEndDate,
+      List<String> entitlements});
 }
 
 /// @nodoc
 class __$$SubscriptionStatusImplCopyWithImpl<$Res>
     extends _$SubscriptionStatusCopyWithImpl<$Res, _$SubscriptionStatusImpl>
     implements _$$SubscriptionStatusImplCopyWith<$Res> {
-  __$$SubscriptionStatusImplCopyWithImpl(
-    _$SubscriptionStatusImpl _value,
-    $Res Function(_$SubscriptionStatusImpl) _then,
-  ) : super(_value, _then);
+  __$$SubscriptionStatusImplCopyWithImpl(_$SubscriptionStatusImpl _value,
+      $Res Function(_$SubscriptionStatusImpl) _then)
+      : super(_value, _then);
 
   @pragma('vm:prefer-inline')
   @override
@@ -177,72 +159,61 @@ class __$$SubscriptionStatusImplCopyWithImpl<$Res>
     Object? trialEndDate = freezed,
     Object? entitlements = null,
   }) {
-    return _then(
-      _$SubscriptionStatusImpl(
-        state:
-            null == state
-                ? _value.state
-                : state // ignore: cast_nullable_to_non_nullable
-                    as SubscriptionState,
-        isPremium:
-            null == isPremium
-                ? _value.isPremium
-                : isPremium // ignore: cast_nullable_to_non_nullable
-                    as bool,
-        planId:
-            freezed == planId
-                ? _value.planId
-                : planId // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        expirationDate:
-            freezed == expirationDate
-                ? _value.expirationDate
-                : expirationDate // ignore: cast_nullable_to_non_nullable
-                    as DateTime?,
-        renewalDate:
-            freezed == renewalDate
-                ? _value.renewalDate
-                : renewalDate // ignore: cast_nullable_to_non_nullable
-                    as DateTime?,
-        isAutoRenew:
-            null == isAutoRenew
-                ? _value.isAutoRenew
-                : isAutoRenew // ignore: cast_nullable_to_non_nullable
-                    as bool,
-        isInTrialPeriod:
-            null == isInTrialPeriod
-                ? _value.isInTrialPeriod
-                : isInTrialPeriod // ignore: cast_nullable_to_non_nullable
-                    as bool,
-        trialEndDate:
-            freezed == trialEndDate
-                ? _value.trialEndDate
-                : trialEndDate // ignore: cast_nullable_to_non_nullable
-                    as DateTime?,
-        entitlements:
-            null == entitlements
-                ? _value._entitlements
-                : entitlements // ignore: cast_nullable_to_non_nullable
-                    as List<String>,
-      ),
-    );
+    return _then(_$SubscriptionStatusImpl(
+      state: null == state
+          ? _value.state
+          : state // ignore: cast_nullable_to_non_nullable
+              as SubscriptionState,
+      isPremium: null == isPremium
+          ? _value.isPremium
+          : isPremium // ignore: cast_nullable_to_non_nullable
+              as bool,
+      planId: freezed == planId
+          ? _value.planId
+          : planId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      expirationDate: freezed == expirationDate
+          ? _value.expirationDate
+          : expirationDate // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      renewalDate: freezed == renewalDate
+          ? _value.renewalDate
+          : renewalDate // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      isAutoRenew: null == isAutoRenew
+          ? _value.isAutoRenew
+          : isAutoRenew // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isInTrialPeriod: null == isInTrialPeriod
+          ? _value.isInTrialPeriod
+          : isInTrialPeriod // ignore: cast_nullable_to_non_nullable
+              as bool,
+      trialEndDate: freezed == trialEndDate
+          ? _value.trialEndDate
+          : trialEndDate // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      entitlements: null == entitlements
+          ? _value._entitlements
+          : entitlements // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$SubscriptionStatusImpl implements _SubscriptionStatus {
-  const _$SubscriptionStatusImpl({
-    required this.state,
-    required this.isPremium,
-    required this.planId,
-    required this.expirationDate,
-    required this.renewalDate,
-    required this.isAutoRenew,
-    required this.isInTrialPeriod,
-    required this.trialEndDate,
-    final List<String> entitlements = const [],
-  }) : _entitlements = entitlements;
+  const _$SubscriptionStatusImpl(
+      {required this.state,
+      required this.isPremium,
+      required this.planId,
+      required this.expirationDate,
+      required this.renewalDate,
+      required this.isAutoRenew,
+      required this.isInTrialPeriod,
+      required this.trialEndDate,
+      final List<String> entitlements = const []})
+      : _entitlements = entitlements;
 
   factory _$SubscriptionStatusImpl.fromJson(Map<String, dynamic> json) =>
       _$$SubscriptionStatusImplFromJson(json);
@@ -296,54 +267,50 @@ class _$SubscriptionStatusImpl implements _SubscriptionStatus {
                 other.isInTrialPeriod == isInTrialPeriod) &&
             (identical(other.trialEndDate, trialEndDate) ||
                 other.trialEndDate == trialEndDate) &&
-            const DeepCollectionEquality().equals(
-              other._entitlements,
-              _entitlements,
-            ));
+            const DeepCollectionEquality()
+                .equals(other._entitlements, _entitlements));
   }
 
   @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
-    runtimeType,
-    state,
-    isPremium,
-    planId,
-    expirationDate,
-    renewalDate,
-    isAutoRenew,
-    isInTrialPeriod,
-    trialEndDate,
-    const DeepCollectionEquality().hash(_entitlements),
-  );
+      runtimeType,
+      state,
+      isPremium,
+      planId,
+      expirationDate,
+      renewalDate,
+      isAutoRenew,
+      isInTrialPeriod,
+      trialEndDate,
+      const DeepCollectionEquality().hash(_entitlements));
 
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$SubscriptionStatusImplCopyWith<_$SubscriptionStatusImpl> get copyWith =>
       __$$SubscriptionStatusImplCopyWithImpl<_$SubscriptionStatusImpl>(
-        this,
-        _$identity,
-      );
+          this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$SubscriptionStatusImplToJson(this);
+    return _$$SubscriptionStatusImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _SubscriptionStatus implements SubscriptionStatus {
-  const factory _SubscriptionStatus({
-    required final SubscriptionState state,
-    required final bool isPremium,
-    required final String? planId,
-    required final DateTime? expirationDate,
-    required final DateTime? renewalDate,
-    required final bool isAutoRenew,
-    required final bool isInTrialPeriod,
-    required final DateTime? trialEndDate,
-    final List<String> entitlements,
-  }) = _$SubscriptionStatusImpl;
+  const factory _SubscriptionStatus(
+      {required final SubscriptionState state,
+      required final bool isPremium,
+      required final String? planId,
+      required final DateTime? expirationDate,
+      required final DateTime? renewalDate,
+      required final bool isAutoRenew,
+      required final bool isInTrialPeriod,
+      required final DateTime? trialEndDate,
+      final List<String> entitlements}) = _$SubscriptionStatusImpl;
 
   factory _SubscriptionStatus.fromJson(Map<String, dynamic> json) =
       _$SubscriptionStatusImpl.fromJson;

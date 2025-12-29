@@ -12,8 +12,7 @@ part of 'purchase_result.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
 
 PurchaseResult _$PurchaseResultFromJson(Map<String, dynamic> json) {
   return _PurchaseResult.fromJson(json);
@@ -38,19 +37,17 @@ mixin _$PurchaseResult {
 /// @nodoc
 abstract class $PurchaseResultCopyWith<$Res> {
   factory $PurchaseResultCopyWith(
-    PurchaseResult value,
-    $Res Function(PurchaseResult) then,
-  ) = _$PurchaseResultCopyWithImpl<$Res, PurchaseResult>;
+          PurchaseResult value, $Res Function(PurchaseResult) then) =
+      _$PurchaseResultCopyWithImpl<$Res, PurchaseResult>;
   @useResult
-  $Res call({
-    PurchaseResultType type,
-    String? transactionId,
-    String? productId,
-    DateTime? purchaseDate,
-    PurchaseErrorType? errorType,
-    String? errorMessage,
-    bool needsFinalization,
-  });
+  $Res call(
+      {PurchaseResultType type,
+      String? transactionId,
+      String? productId,
+      DateTime? purchaseDate,
+      PurchaseErrorType? errorType,
+      String? errorMessage,
+      bool needsFinalization});
 }
 
 /// @nodoc
@@ -74,67 +71,55 @@ class _$PurchaseResultCopyWithImpl<$Res, $Val extends PurchaseResult>
     Object? errorMessage = freezed,
     Object? needsFinalization = null,
   }) {
-    return _then(
-      _value.copyWith(
-            type:
-                null == type
-                    ? _value.type
-                    : type // ignore: cast_nullable_to_non_nullable
-                        as PurchaseResultType,
-            transactionId:
-                freezed == transactionId
-                    ? _value.transactionId
-                    : transactionId // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            productId:
-                freezed == productId
-                    ? _value.productId
-                    : productId // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            purchaseDate:
-                freezed == purchaseDate
-                    ? _value.purchaseDate
-                    : purchaseDate // ignore: cast_nullable_to_non_nullable
-                        as DateTime?,
-            errorType:
-                freezed == errorType
-                    ? _value.errorType
-                    : errorType // ignore: cast_nullable_to_non_nullable
-                        as PurchaseErrorType?,
-            errorMessage:
-                freezed == errorMessage
-                    ? _value.errorMessage
-                    : errorMessage // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            needsFinalization:
-                null == needsFinalization
-                    ? _value.needsFinalization
-                    : needsFinalization // ignore: cast_nullable_to_non_nullable
-                        as bool,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      type: null == type
+          ? _value.type
+          : type // ignore: cast_nullable_to_non_nullable
+              as PurchaseResultType,
+      transactionId: freezed == transactionId
+          ? _value.transactionId
+          : transactionId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      productId: freezed == productId
+          ? _value.productId
+          : productId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      purchaseDate: freezed == purchaseDate
+          ? _value.purchaseDate
+          : purchaseDate // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      errorType: freezed == errorType
+          ? _value.errorType
+          : errorType // ignore: cast_nullable_to_non_nullable
+              as PurchaseErrorType?,
+      errorMessage: freezed == errorMessage
+          ? _value.errorMessage
+          : errorMessage // ignore: cast_nullable_to_non_nullable
+              as String?,
+      needsFinalization: null == needsFinalization
+          ? _value.needsFinalization
+          : needsFinalization // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ) as $Val);
   }
 }
 
 /// @nodoc
 abstract class _$$PurchaseResultImplCopyWith<$Res>
     implements $PurchaseResultCopyWith<$Res> {
-  factory _$$PurchaseResultImplCopyWith(
-    _$PurchaseResultImpl value,
-    $Res Function(_$PurchaseResultImpl) then,
-  ) = __$$PurchaseResultImplCopyWithImpl<$Res>;
+  factory _$$PurchaseResultImplCopyWith(_$PurchaseResultImpl value,
+          $Res Function(_$PurchaseResultImpl) then) =
+      __$$PurchaseResultImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    PurchaseResultType type,
-    String? transactionId,
-    String? productId,
-    DateTime? purchaseDate,
-    PurchaseErrorType? errorType,
-    String? errorMessage,
-    bool needsFinalization,
-  });
+  $Res call(
+      {PurchaseResultType type,
+      String? transactionId,
+      String? productId,
+      DateTime? purchaseDate,
+      PurchaseErrorType? errorType,
+      String? errorMessage,
+      bool needsFinalization});
 }
 
 /// @nodoc
@@ -142,9 +127,8 @@ class __$$PurchaseResultImplCopyWithImpl<$Res>
     extends _$PurchaseResultCopyWithImpl<$Res, _$PurchaseResultImpl>
     implements _$$PurchaseResultImplCopyWith<$Res> {
   __$$PurchaseResultImplCopyWithImpl(
-    _$PurchaseResultImpl _value,
-    $Res Function(_$PurchaseResultImpl) _then,
-  ) : super(_value, _then);
+      _$PurchaseResultImpl _value, $Res Function(_$PurchaseResultImpl) _then)
+      : super(_value, _then);
 
   @pragma('vm:prefer-inline')
   @override
@@ -157,60 +141,50 @@ class __$$PurchaseResultImplCopyWithImpl<$Res>
     Object? errorMessage = freezed,
     Object? needsFinalization = null,
   }) {
-    return _then(
-      _$PurchaseResultImpl(
-        type:
-            null == type
-                ? _value.type
-                : type // ignore: cast_nullable_to_non_nullable
-                    as PurchaseResultType,
-        transactionId:
-            freezed == transactionId
-                ? _value.transactionId
-                : transactionId // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        productId:
-            freezed == productId
-                ? _value.productId
-                : productId // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        purchaseDate:
-            freezed == purchaseDate
-                ? _value.purchaseDate
-                : purchaseDate // ignore: cast_nullable_to_non_nullable
-                    as DateTime?,
-        errorType:
-            freezed == errorType
-                ? _value.errorType
-                : errorType // ignore: cast_nullable_to_non_nullable
-                    as PurchaseErrorType?,
-        errorMessage:
-            freezed == errorMessage
-                ? _value.errorMessage
-                : errorMessage // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        needsFinalization:
-            null == needsFinalization
-                ? _value.needsFinalization
-                : needsFinalization // ignore: cast_nullable_to_non_nullable
-                    as bool,
-      ),
-    );
+    return _then(_$PurchaseResultImpl(
+      type: null == type
+          ? _value.type
+          : type // ignore: cast_nullable_to_non_nullable
+              as PurchaseResultType,
+      transactionId: freezed == transactionId
+          ? _value.transactionId
+          : transactionId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      productId: freezed == productId
+          ? _value.productId
+          : productId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      purchaseDate: freezed == purchaseDate
+          ? _value.purchaseDate
+          : purchaseDate // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      errorType: freezed == errorType
+          ? _value.errorType
+          : errorType // ignore: cast_nullable_to_non_nullable
+              as PurchaseErrorType?,
+      errorMessage: freezed == errorMessage
+          ? _value.errorMessage
+          : errorMessage // ignore: cast_nullable_to_non_nullable
+              as String?,
+      needsFinalization: null == needsFinalization
+          ? _value.needsFinalization
+          : needsFinalization // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$PurchaseResultImpl implements _PurchaseResult {
-  const _$PurchaseResultImpl({
-    required this.type,
-    required this.transactionId,
-    required this.productId,
-    required this.purchaseDate,
-    required this.errorType,
-    required this.errorMessage,
-    this.needsFinalization = false,
-  });
+  const _$PurchaseResultImpl(
+      {required this.type,
+      required this.transactionId,
+      required this.productId,
+      required this.purchaseDate,
+      required this.errorType,
+      required this.errorMessage,
+      this.needsFinalization = false});
 
   factory _$PurchaseResultImpl.fromJson(Map<String, dynamic> json) =>
       _$$PurchaseResultImplFromJson(json);
@@ -258,42 +232,33 @@ class _$PurchaseResultImpl implements _PurchaseResult {
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    type,
-    transactionId,
-    productId,
-    purchaseDate,
-    errorType,
-    errorMessage,
-    needsFinalization,
-  );
+  int get hashCode => Object.hash(runtimeType, type, transactionId, productId,
+      purchaseDate, errorType, errorMessage, needsFinalization);
 
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$PurchaseResultImplCopyWith<_$PurchaseResultImpl> get copyWith =>
       __$$PurchaseResultImplCopyWithImpl<_$PurchaseResultImpl>(
-        this,
-        _$identity,
-      );
+          this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$PurchaseResultImplToJson(this);
+    return _$$PurchaseResultImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _PurchaseResult implements PurchaseResult {
-  const factory _PurchaseResult({
-    required final PurchaseResultType type,
-    required final String? transactionId,
-    required final String? productId,
-    required final DateTime? purchaseDate,
-    required final PurchaseErrorType? errorType,
-    required final String? errorMessage,
-    final bool needsFinalization,
-  }) = _$PurchaseResultImpl;
+  const factory _PurchaseResult(
+      {required final PurchaseResultType type,
+      required final String? transactionId,
+      required final String? productId,
+      required final DateTime? purchaseDate,
+      required final PurchaseErrorType? errorType,
+      required final String? errorMessage,
+      final bool needsFinalization}) = _$PurchaseResultImpl;
 
   factory _PurchaseResult.fromJson(Map<String, dynamic> json) =
       _$PurchaseResultImpl.fromJson;
@@ -338,16 +303,14 @@ mixin _$RestoreResult {
 /// @nodoc
 abstract class $RestoreResultCopyWith<$Res> {
   factory $RestoreResultCopyWith(
-    RestoreResult value,
-    $Res Function(RestoreResult) then,
-  ) = _$RestoreResultCopyWithImpl<$Res, RestoreResult>;
+          RestoreResult value, $Res Function(RestoreResult) then) =
+      _$RestoreResultCopyWithImpl<$Res, RestoreResult>;
   @useResult
-  $Res call({
-    bool success,
-    int restoredCount,
-    String? errorMessage,
-    List<String> restoredProductIds,
-  });
+  $Res call(
+      {bool success,
+      int restoredCount,
+      String? errorMessage,
+      List<String> restoredProductIds});
 }
 
 /// @nodoc
@@ -368,31 +331,24 @@ class _$RestoreResultCopyWithImpl<$Res, $Val extends RestoreResult>
     Object? errorMessage = freezed,
     Object? restoredProductIds = null,
   }) {
-    return _then(
-      _value.copyWith(
-            success:
-                null == success
-                    ? _value.success
-                    : success // ignore: cast_nullable_to_non_nullable
-                        as bool,
-            restoredCount:
-                null == restoredCount
-                    ? _value.restoredCount
-                    : restoredCount // ignore: cast_nullable_to_non_nullable
-                        as int,
-            errorMessage:
-                freezed == errorMessage
-                    ? _value.errorMessage
-                    : errorMessage // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            restoredProductIds:
-                null == restoredProductIds
-                    ? _value.restoredProductIds
-                    : restoredProductIds // ignore: cast_nullable_to_non_nullable
-                        as List<String>,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      success: null == success
+          ? _value.success
+          : success // ignore: cast_nullable_to_non_nullable
+              as bool,
+      restoredCount: null == restoredCount
+          ? _value.restoredCount
+          : restoredCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      errorMessage: freezed == errorMessage
+          ? _value.errorMessage
+          : errorMessage // ignore: cast_nullable_to_non_nullable
+              as String?,
+      restoredProductIds: null == restoredProductIds
+          ? _value.restoredProductIds
+          : restoredProductIds // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+    ) as $Val);
   }
 }
 
@@ -400,17 +356,15 @@ class _$RestoreResultCopyWithImpl<$Res, $Val extends RestoreResult>
 abstract class _$$RestoreResultImplCopyWith<$Res>
     implements $RestoreResultCopyWith<$Res> {
   factory _$$RestoreResultImplCopyWith(
-    _$RestoreResultImpl value,
-    $Res Function(_$RestoreResultImpl) then,
-  ) = __$$RestoreResultImplCopyWithImpl<$Res>;
+          _$RestoreResultImpl value, $Res Function(_$RestoreResultImpl) then) =
+      __$$RestoreResultImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    bool success,
-    int restoredCount,
-    String? errorMessage,
-    List<String> restoredProductIds,
-  });
+  $Res call(
+      {bool success,
+      int restoredCount,
+      String? errorMessage,
+      List<String> restoredProductIds});
 }
 
 /// @nodoc
@@ -418,9 +372,8 @@ class __$$RestoreResultImplCopyWithImpl<$Res>
     extends _$RestoreResultCopyWithImpl<$Res, _$RestoreResultImpl>
     implements _$$RestoreResultImplCopyWith<$Res> {
   __$$RestoreResultImplCopyWithImpl(
-    _$RestoreResultImpl _value,
-    $Res Function(_$RestoreResultImpl) _then,
-  ) : super(_value, _then);
+      _$RestoreResultImpl _value, $Res Function(_$RestoreResultImpl) _then)
+      : super(_value, _then);
 
   @pragma('vm:prefer-inline')
   @override
@@ -430,42 +383,36 @@ class __$$RestoreResultImplCopyWithImpl<$Res>
     Object? errorMessage = freezed,
     Object? restoredProductIds = null,
   }) {
-    return _then(
-      _$RestoreResultImpl(
-        success:
-            null == success
-                ? _value.success
-                : success // ignore: cast_nullable_to_non_nullable
-                    as bool,
-        restoredCount:
-            null == restoredCount
-                ? _value.restoredCount
-                : restoredCount // ignore: cast_nullable_to_non_nullable
-                    as int,
-        errorMessage:
-            freezed == errorMessage
-                ? _value.errorMessage
-                : errorMessage // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        restoredProductIds:
-            null == restoredProductIds
-                ? _value._restoredProductIds
-                : restoredProductIds // ignore: cast_nullable_to_non_nullable
-                    as List<String>,
-      ),
-    );
+    return _then(_$RestoreResultImpl(
+      success: null == success
+          ? _value.success
+          : success // ignore: cast_nullable_to_non_nullable
+              as bool,
+      restoredCount: null == restoredCount
+          ? _value.restoredCount
+          : restoredCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      errorMessage: freezed == errorMessage
+          ? _value.errorMessage
+          : errorMessage // ignore: cast_nullable_to_non_nullable
+              as String?,
+      restoredProductIds: null == restoredProductIds
+          ? _value._restoredProductIds
+          : restoredProductIds // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$RestoreResultImpl implements _RestoreResult {
-  const _$RestoreResultImpl({
-    required this.success,
-    required this.restoredCount,
-    required this.errorMessage,
-    required final List<String> restoredProductIds,
-  }) : _restoredProductIds = restoredProductIds;
+  const _$RestoreResultImpl(
+      {required this.success,
+      required this.restoredCount,
+      required this.errorMessage,
+      required final List<String> restoredProductIds})
+      : _restoredProductIds = restoredProductIds;
 
   factory _$RestoreResultImpl.fromJson(Map<String, dynamic> json) =>
       _$$RestoreResultImplFromJson(json);
@@ -500,21 +447,14 @@ class _$RestoreResultImpl implements _RestoreResult {
                 other.restoredCount == restoredCount) &&
             (identical(other.errorMessage, errorMessage) ||
                 other.errorMessage == errorMessage) &&
-            const DeepCollectionEquality().equals(
-              other._restoredProductIds,
-              _restoredProductIds,
-            ));
+            const DeepCollectionEquality()
+                .equals(other._restoredProductIds, _restoredProductIds));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    success,
-    restoredCount,
-    errorMessage,
-    const DeepCollectionEquality().hash(_restoredProductIds),
-  );
+  int get hashCode => Object.hash(runtimeType, success, restoredCount,
+      errorMessage, const DeepCollectionEquality().hash(_restoredProductIds));
 
   @JsonKey(ignore: true)
   @override
@@ -524,17 +464,18 @@ class _$RestoreResultImpl implements _RestoreResult {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$RestoreResultImplToJson(this);
+    return _$$RestoreResultImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _RestoreResult implements RestoreResult {
-  const factory _RestoreResult({
-    required final bool success,
-    required final int restoredCount,
-    required final String? errorMessage,
-    required final List<String> restoredProductIds,
-  }) = _$RestoreResultImpl;
+  const factory _RestoreResult(
+      {required final bool success,
+      required final int restoredCount,
+      required final String? errorMessage,
+      required final List<String> restoredProductIds}) = _$RestoreResultImpl;
 
   factory _RestoreResult.fromJson(Map<String, dynamic> json) =
       _$RestoreResultImpl.fromJson;

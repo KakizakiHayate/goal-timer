@@ -43,7 +43,7 @@ class _TutorialOverlayState extends State<TutorialOverlay>
   late Animation<double> _fadeAnimation;
   late Animation<double> _pulseAnimation;
   Rect? _buttonRect; // ボタンの位置とサイズを保存
-
+  
   // 矢印の方向を管理
   ArrowDirection _arrowDirection = ArrowDirection.down;
 
@@ -55,19 +55,24 @@ class _TutorialOverlayState extends State<TutorialOverlay>
       vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
-      ),
-    );
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
+    ));
 
-    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.05).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
-    );
+    _pulseAnimation = Tween<double>(
+      begin: 1.0,
+      end: 1.05,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    ));
 
     _animationController.forward();
-
+    
     // パルスアニメーションをループ
     _startPulseLoop();
 
@@ -112,9 +117,7 @@ class _TutorialOverlayState extends State<TutorialOverlay>
 
   void _getButtonPosition() {
     if (widget.targetButtonKey.currentContext == null) {
-      print(
-        '⚠️ [TutorialOverlay] TargetButtonKey context is null, retrying...',
-      );
+      print('⚠️ [TutorialOverlay] TargetButtonKey context is null, retrying...');
       Future.delayed(const Duration(milliseconds: 100), () {
         if (mounted) {
           _getButtonPosition();
@@ -126,7 +129,7 @@ class _TutorialOverlayState extends State<TutorialOverlay>
     try {
       final context = widget.targetButtonKey.currentContext!;
       final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
-
+      
       if (renderBox == null || !renderBox.hasSize) {
         print('⚠️ [TutorialOverlay] RenderBox not ready, retrying...');
         Future.delayed(const Duration(milliseconds: 50), () {
@@ -140,40 +143,35 @@ class _TutorialOverlayState extends State<TutorialOverlay>
       // グローバル座標を取得
       final globalPosition = renderBox.localToGlobal(Offset.zero);
       final size = renderBox.size;
-
+      
       // MediaQueryのコンテキストを使用してスクリーン座標を正確に計算
       final mediaQuery = MediaQuery.of(context);
       final screenSize = mediaQuery.size;
       final padding = mediaQuery.padding;
-
+      
       // 実際の表示可能領域を考慮した位置調整
       final adjustedPosition = Offset(
         globalPosition.dx.clamp(0.0, screenSize.width - size.width),
-        globalPosition.dy.clamp(
-          padding.top,
-          screenSize.height - padding.bottom - size.height,
-        ),
+        globalPosition.dy.clamp(padding.top, screenSize.height - padding.bottom - size.height),
       );
-
-      print(
-        '✅ [TutorialOverlay] Button position found: global=$globalPosition, adjusted=$adjustedPosition, size=$size',
-      );
+      
+      print('✅ [TutorialOverlay] Button position found: global=$globalPosition, adjusted=$adjustedPosition, size=$size');
       print('✅ [TutorialOverlay] Screen size: $screenSize, padding: $padding');
-
+      
       if (mounted) {
         setState(() {
           _buttonRect = Rect.fromLTWH(
-            adjustedPosition.dx,
-            adjustedPosition.dy,
-            size.width,
-            size.height,
+            adjustedPosition.dx, 
+            adjustedPosition.dy, 
+            size.width, 
+            size.height
           );
         });
       }
     } catch (e, stackTrace) {
       print('❌ [TutorialOverlay] Error getting button position: $e');
       print('❌ [TutorialOverlay] Stack trace: $stackTrace');
-
+      
       // エラーが発生した場合も少し待ってから再試行
       Future.delayed(const Duration(milliseconds: 100), () {
         if (mounted) {
@@ -190,6 +188,7 @@ class _TutorialOverlayState extends State<TutorialOverlay>
     }
   }
 
+
   @override
   void dispose() {
     widget.scrollController?.removeListener(_onScrollChanged);
@@ -203,7 +202,7 @@ class _TutorialOverlayState extends State<TutorialOverlay>
     print('🎯 TutorialOverlay build called');
     print('- targetButtonKey: ${widget.targetButtonKey}');
     print('- buttonRect: $_buttonRect');
-
+    
     if (_buttonRect != null) {
       print('✅ TutorialOverlay: Showing showcase view');
       // レイヤー構造を再設計：CutoutOverlayとダイアログを分離
@@ -222,7 +221,7 @@ class _TutorialOverlayState extends State<TutorialOverlay>
             showPulseAnimation: widget.showPulseEffect,
             child: Container(), // 空のコンテナ
           ),
-
+          
           // レイヤー2: チュートリアルダイアログ（最上層・独立）
           AnimatedPositioned(
             duration: const Duration(milliseconds: 300),
@@ -235,18 +234,20 @@ class _TutorialOverlayState extends State<TutorialOverlay>
               child: _buildTooltipWithArrow(),
             ),
           ),
-
+          
           // レイヤー3: スマート矢印ポインター（不要なため削除）
           // _buildSmartArrowPointer() は使用しない
         ],
       );
     }
-
+    
     // ボタン位置が取得できていない場合はローディング表示
     print('⏳ TutorialOverlay: Button position not ready, showing loading...');
     return Container(
       color: Colors.black.withValues(alpha: 0.7),
-      child: const Center(child: CircularProgressIndicator()),
+      child: const Center(
+        child: CircularProgressIndicator(),
+      ),
     );
   }
 
@@ -256,103 +257,86 @@ class _TutorialOverlayState extends State<TutorialOverlay>
     final screenWidth = MediaQuery.of(context).size.width;
     final safeArea = MediaQuery.of(context).padding;
     final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
-
+    
     // ダイアログの動的高さ推定（レスポンシブ対応）
     final dialogHeight = _estimateDialogHeight();
     const arrowHeight = 30.0; // 三角矢印の高さ
     const idealGap = 30.0; // 矢印とボタン間の理想的な距離（重なり防止のため増加）
-
+    
     // ターゲットボタンの位置を基準に計算
     final buttonTop = _buttonRect!.top;
     final buttonBottom = _buttonRect!.bottom;
-
+    
     // デバイス密度を考慮した最小余白
     final minSpacing = _getDeviceAwareSpacing(devicePixelRatio, screenWidth);
-
+    
     // 優先順位で配置位置を決定
     double dialogTop;
-
+    
     // 1. ボタンの上に配置（最優先）
     final spaceAboveButton = buttonTop - safeArea.top;
-    final requiredSpaceAbove =
-        dialogHeight + arrowHeight + idealGap + minSpacing;
-
+    final requiredSpaceAbove = dialogHeight + arrowHeight + idealGap + minSpacing;
+    
     if (spaceAboveButton >= requiredSpaceAbove) {
       // 動的計算：矢印の先端がボタン上端から idealGap 分離れるように配置
       dialogTop = buttonTop - arrowHeight - idealGap - dialogHeight;
       _arrowDirection = ArrowDirection.down;
-
+      
       // 重なり検証のためのデバッグ出力
       final arrowBottomY = dialogTop + dialogHeight + arrowHeight;
       final gapToButton = buttonTop - arrowBottomY;
       print('✅ [TutorialOverlay] ダイアログをボタン上部に配置');
       print('   dialogTop: $dialogTop, buttonTop: $buttonTop');
-      print(
-        '   矢印下端: $arrowBottomY, ボタンまでの実際の距離: ${gapToButton.toStringAsFixed(1)}px',
-      );
+      print('   矢印下端: $arrowBottomY, ボタンまでの実際の距離: ${gapToButton.toStringAsFixed(1)}px');
       print('   必要距離: ${idealGap}px, 重なり: ${gapToButton < 0 ? "あり" : "なし"}');
     }
     // 2. ボタンの下に配置
     else {
       final spaceBelowButton = screenHeight - buttonBottom - safeArea.bottom;
-      final requiredSpaceBelow =
-          dialogHeight + arrowHeight + idealGap + minSpacing;
-
+      final requiredSpaceBelow = dialogHeight + arrowHeight + idealGap + minSpacing;
+      
       if (spaceBelowButton >= requiredSpaceBelow) {
         // 動的計算：矢印の先端がボタン下端から idealGap 分離れるように配置
         dialogTop = buttonBottom + idealGap + arrowHeight;
         _arrowDirection = ArrowDirection.up;
-
+        
         // 重なり検証のためのデバッグ出力
         final arrowTopY = dialogTop - arrowHeight;
         final gapFromButton = arrowTopY - buttonBottom;
         print('✅ [TutorialOverlay] ダイアログをボタン下部に配置');
         print('   dialogTop: $dialogTop, buttonBottom: $buttonBottom');
-        print(
-          '   矢印上端: $arrowTopY, ボタンからの実際の距離: ${gapFromButton.toStringAsFixed(1)}px',
-        );
-        print(
-          '   必要距離: ${idealGap}px, 重なり: ${gapFromButton < 0 ? "あり" : "なし"}',
-        );
+        print('   矢印上端: $arrowTopY, ボタンからの実際の距離: ${gapFromButton.toStringAsFixed(1)}px');
+        print('   必要距離: ${idealGap}px, 重なり: ${gapFromButton < 0 ? "あり" : "なし"}');
       }
       // 3. 画面上部に固定配置（スペース不足の場合）
       else {
         dialogTop = safeArea.top + minSpacing;
         _arrowDirection = ArrowDirection.none;
         print('⚠️ [TutorialOverlay] スペース不足のため画面上部に配置');
-        print(
-          '   dialogTop: $dialogTop, 利用可能上部: ${spaceAboveButton.toStringAsFixed(1)}px, 下部: ${spaceBelowButton.toStringAsFixed(1)}px',
-        );
+        print('   dialogTop: $dialogTop, 利用可能上部: ${spaceAboveButton.toStringAsFixed(1)}px, 下部: ${spaceBelowButton.toStringAsFixed(1)}px');
       }
     }
-
+    
     // 画面境界内に収める（安全な範囲内に配置）
     final originalDialogTop = dialogTop;
-    dialogTop = dialogTop.clamp(
-      safeArea.top,
-      screenHeight - safeArea.bottom - dialogHeight,
-    );
-
+    dialogTop = dialogTop.clamp(safeArea.top, screenHeight - safeArea.bottom - dialogHeight);
+    
     if (originalDialogTop != dialogTop) {
-      print(
-        '⚠️ [TutorialOverlay] ダイアログ位置を画面境界内に調整: ${originalDialogTop.toStringAsFixed(1)} → ${dialogTop.toStringAsFixed(1)}',
-      );
+      print('⚠️ [TutorialOverlay] ダイアログ位置を画面境界内に調整: ${originalDialogTop.toStringAsFixed(1)} → ${dialogTop.toStringAsFixed(1)}');
     }
-
-    print(
-      '📍 [TutorialOverlay] 最終配置 - ダイアログ: ${dialogTop.toStringAsFixed(1)}, 矢印方向: $_arrowDirection',
-    );
-
+    
+    print('📍 [TutorialOverlay] 最終配置 - ダイアログ: ${dialogTop.toStringAsFixed(1)}, 矢印方向: $_arrowDirection');
+    
     return dialogTop;
   }
 
   /// ダイアログ高さの動的推定
   double _estimateDialogHeight() {
     final screenWidth = MediaQuery.of(context).size.width;
-
+    
     // デバイスサイズに応じた基本高さ
     double baseHeight = 200.0;
-
+    
     if (screenWidth > 600) {
       // タブレット
       baseHeight = 240.0;
@@ -360,14 +344,13 @@ class _TutorialOverlayState extends State<TutorialOverlay>
       // 小型スマートフォン
       baseHeight = 180.0;
     }
-
+    
     // テキスト長に応じた調整
     final titleLines = (widget.title.length / 20).ceil();
     final descriptionLines = (widget.description.length / 30).ceil();
-
-    final additionalHeight =
-        (titleLines - 1) * 24 + (descriptionLines - 2) * 20;
-
+    
+    final additionalHeight = (titleLines - 1) * 24 + (descriptionLines - 2) * 20;
+    
     return baseHeight + additionalHeight;
   }
 
@@ -375,20 +358,20 @@ class _TutorialOverlayState extends State<TutorialOverlay>
   double _getDeviceAwareSpacing(double devicePixelRatio, double screenWidth) {
     // 高密度ディスプレイでは余白を調整
     double baseSpacing = 20.0;
-
+    
     if (devicePixelRatio > 3.0) {
       baseSpacing = 25.0;
     } else if (devicePixelRatio < 2.0) {
       baseSpacing = 15.0;
     }
-
+    
     // 画面幅に応じた調整
     if (screenWidth > 600) {
       baseSpacing += 10.0; // タブレットでは余白を増やす
     } else if (screenWidth <= 350) {
       baseSpacing -= 5.0; // 小型デバイスでは余白を減らす
     }
-
+    
     return baseSpacing;
   }
 
@@ -398,8 +381,9 @@ class _TutorialOverlayState extends State<TutorialOverlay>
       mainAxisSize: MainAxisSize.min,
       children: [
         // 上向き矢印（ダイアログが下にある場合）
-        if (_arrowDirection == ArrowDirection.up) _buildArrow(isUpward: true),
-
+        if (_arrowDirection == ArrowDirection.up)
+          _buildArrow(isUpward: true),
+        
         // ダイアログ本体（強調された影付き）
         Container(
           padding: const EdgeInsets.all(SpacingConsts.lg),
@@ -429,7 +413,7 @@ class _TutorialOverlayState extends State<TutorialOverlay>
           ),
           child: _buildDialogContent(),
         ),
-
+        
         // 下向き矢印（ダイアログが上にある場合）
         if (_arrowDirection == ArrowDirection.down)
           _buildArrow(isUpward: false),
@@ -443,7 +427,7 @@ class _TutorialOverlayState extends State<TutorialOverlay>
     final screenWidth = MediaQuery.of(context).size.width;
     final arrowWidth = screenWidth > 600 ? 36.0 : 30.0;
     const arrowHeight = 20.0;
-
+    
     return SizedBox(
       width: arrowWidth,
       height: arrowHeight,
@@ -462,7 +446,7 @@ class _TutorialOverlayState extends State<TutorialOverlay>
     // レスポンシブ対応のためのテキストスタイル取得
     final titleStyle = _getResponsiveTitleStyle();
     final bodyStyle = _getResponsiveBodyStyle();
-
+    
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -526,7 +510,7 @@ class _TutorialOverlayState extends State<TutorialOverlay>
               ),
               const SizedBox(width: SpacingConsts.sm),
             ],
-
+            
             CommonButton(
               text: widget.onNext != null ? '次へ' : '完了',
               variant: ButtonVariant.primary,
@@ -542,7 +526,7 @@ class _TutorialOverlayState extends State<TutorialOverlay>
   /// レスポンシブ対応：タイトルスタイル
   TextStyle _getResponsiveTitleStyle() {
     final screenWidth = MediaQuery.of(context).size.width;
-
+    
     if (screenWidth > 600) {
       // タブレット
       return TextConsts.h3;
@@ -558,7 +542,7 @@ class _TutorialOverlayState extends State<TutorialOverlay>
   /// レスポンシブ対応：本文スタイル
   TextStyle _getResponsiveBodyStyle() {
     final screenWidth = MediaQuery.of(context).size.width;
-
+    
     if (screenWidth > 600) {
       // タブレット
       return TextConsts.bodyLarge;
@@ -574,7 +558,7 @@ class _TutorialOverlayState extends State<TutorialOverlay>
   /// レスポンシブ対応：ラベルスタイル
   TextStyle _getResponsiveLabelStyle() {
     final screenWidth = MediaQuery.of(context).size.width;
-
+    
     if (screenWidth > 600) {
       return TextConsts.labelLarge;
     } else {
@@ -585,7 +569,7 @@ class _TutorialOverlayState extends State<TutorialOverlay>
   /// レスポンシブ対応：パディング
   double _getResponsivePadding() {
     final screenWidth = MediaQuery.of(context).size.width;
-
+    
     if (screenWidth > 600) {
       return SpacingConsts.lg;
     } else if (screenWidth > 350) {
@@ -598,7 +582,7 @@ class _TutorialOverlayState extends State<TutorialOverlay>
   /// レスポンシブ対応：ボタンサイズ
   ButtonSize _getResponsiveButtonSize() {
     final screenWidth = MediaQuery.of(context).size.width;
-
+    
     if (screenWidth > 600) {
       return ButtonSize.large;
     } else if (screenWidth > 350) {
@@ -607,6 +591,8 @@ class _TutorialOverlayState extends State<TutorialOverlay>
       return ButtonSize.small;
     }
   }
+
+
 }
 
 /// 三角形を描画するPainter
@@ -623,19 +609,17 @@ class TrianglePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint =
-        Paint()
-          ..color = color
-          ..style = PaintingStyle.fill;
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
 
-    final borderPaint =
-        Paint()
-          ..color = borderColor
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.5;
+    final borderPaint = Paint()
+      ..color = borderColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
 
     final path = Path();
-
+    
     if (isUpward) {
       // 上向き矢印
       path.moveTo(size.width / 2, 0);
@@ -647,9 +631,9 @@ class TrianglePainter extends CustomPainter {
       path.lineTo(size.width, 0);
       path.lineTo(size.width / 2, size.height);
     }
-
+    
     path.close();
-
+    
     canvas.drawPath(path, paint);
     canvas.drawPath(path, borderPaint);
   }

@@ -10,7 +10,7 @@ class SaveStudyLogUseCase {
   final DailyStudyLogsRepository _repository;
 
   SaveStudyLogUseCase({required DailyStudyLogsRepository repository})
-    : _repository = repository;
+      : _repository = repository;
 
   /// 学習ログを保存する
   ///
