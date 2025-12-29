@@ -14,22 +14,27 @@ _$GoalsModelImpl _$$GoalsModelImplFromJson(Map<String, dynamic> json) =>
       description: json['description'] as String?,
       deadline: DateTime.parse(json['deadline'] as String),
       avoidMessage: json['avoid_message'] as String,
-      updatedAt: json['updated_at'] == null
-          ? null
-          : DateTime.parse(json['updated_at'] as String),
-      syncUpdatedAt: json['sync_updated_at'] == null
-          ? null
-          : DateTime.parse(json['sync_updated_at'] as String),
+      updatedAt:
+          json['updated_at'] == null
+              ? null
+              : DateTime.parse(json['updated_at'] as String),
+      syncUpdatedAt:
+          json['sync_updated_at'] == null
+              ? null
+              : DateTime.parse(json['sync_updated_at'] as String),
       targetMinutes: json['target_minutes'] as int,
-      createdAt: json['created_at'] == null
-          ? null
-          : DateTime.parse(json['created_at'] as String),
-      completedAt: json['completed_at'] == null
-          ? null
-          : DateTime.parse(json['completed_at'] as String),
-      deletedAt: json['deleted_at'] == null
-          ? null
-          : DateTime.parse(json['deleted_at'] as String),
+      createdAt:
+          json['created_at'] == null
+              ? null
+              : DateTime.parse(json['created_at'] as String),
+      completedAt:
+          json['completed_at'] == null
+              ? null
+              : DateTime.parse(json['completed_at'] as String),
+      deletedAt:
+          json['deleted_at'] == null
+              ? null
+              : DateTime.parse(json['deleted_at'] as String),
     );
 
 Map<String, dynamic> _$$GoalsModelImplToJson(_$GoalsModelImpl instance) =>

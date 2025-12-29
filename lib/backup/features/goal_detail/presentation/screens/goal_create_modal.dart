@@ -411,7 +411,7 @@ class _GoalCreateModalContentState
 
   Widget _buildDeadlineSelector() {
     final bool isEditMode = widget.existingGoal != null;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -426,14 +426,16 @@ class _GoalCreateModalContentState
         Container(
           padding: const EdgeInsets.all(SpacingConsts.l),
           decoration: BoxDecoration(
-            color: isEditMode 
-                ? ColorConsts.backgroundSecondary.withOpacity(0.5)
-                : ColorConsts.backgroundSecondary,
+            color:
+                isEditMode
+                    ? ColorConsts.backgroundSecondary.withOpacity(0.5)
+                    : ColorConsts.backgroundSecondary,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: isEditMode 
-                  ? ColorConsts.border.withOpacity(0.5)
-                  : ColorConsts.border,
+              color:
+                  isEditMode
+                      ? ColorConsts.border.withOpacity(0.5)
+                      : ColorConsts.border,
               width: 1.5,
             ),
           ),
@@ -443,19 +445,23 @@ class _GoalCreateModalContentState
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    isEditMode ? Icons.lock_outlined : Icons.calendar_today_outlined,
-                    color: isEditMode 
-                        ? ColorConsts.textTertiary
-                        : ColorConsts.primary,
+                    isEditMode
+                        ? Icons.lock_outlined
+                        : Icons.calendar_today_outlined,
+                    color:
+                        isEditMode
+                            ? ColorConsts.textTertiary
+                            : ColorConsts.primary,
                     size: 24,
                   ),
                   const SizedBox(width: SpacingConsts.s),
                   Text(
                     '${_deadline.year}年${_deadline.month}月${_deadline.day}日',
                     style: TextConsts.h3.copyWith(
-                      color: isEditMode 
-                          ? ColorConsts.textTertiary
-                          : ColorConsts.primary,
+                      color:
+                          isEditMode
+                              ? ColorConsts.textTertiary
+                              : ColorConsts.primary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -465,10 +471,13 @@ class _GoalCreateModalContentState
                 const SizedBox(height: SpacingConsts.m),
                 GestureDetector(
                   onTap: () async {
-                    final DateTime tomorrow = DateTime.now().add(const Duration(days: 1));
+                    final DateTime tomorrow = DateTime.now().add(
+                      const Duration(days: 1),
+                    );
                     final DateTime? picked = await showDatePicker(
                       context: context,
-                      initialDate: _deadline.isBefore(tomorrow) ? tomorrow : _deadline,
+                      initialDate:
+                          _deadline.isBefore(tomorrow) ? tomorrow : _deadline,
                       firstDate: tomorrow,
                       lastDate: DateTime(2100),
                       locale: const Locale('ja', 'JP'),
@@ -487,7 +496,10 @@ class _GoalCreateModalContentState
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: ColorConsts.primary, width: 1.5),
+                      border: Border.all(
+                        color: ColorConsts.primary,
+                        width: 1.5,
+                      ),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,

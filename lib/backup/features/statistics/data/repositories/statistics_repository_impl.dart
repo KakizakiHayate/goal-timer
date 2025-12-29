@@ -256,7 +256,10 @@ class StatisticsRepositoryImpl implements StatisticsRepository {
 
       if (logs.isEmpty) return 0.0;
 
-      final totalMinutes = logs.fold<int>(0, (sum, log) => sum + log.totalMinutes);
+      final totalMinutes = logs.fold<int>(
+        0,
+        (sum, log) => sum + log.totalMinutes,
+      );
       return totalMinutes / logs.length;
     } catch (e, stackTrace) {
       AppLogger.instance.e('getAverageSessionTime error', e, stackTrace);

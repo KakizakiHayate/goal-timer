@@ -98,7 +98,9 @@ class TimeUtils {
     int targetMinutes,
     int spentMinutes,
   ) {
-    return (targetMinutes - spentMinutes).clamp(minValidMinutes, double.infinity).toInt();
+    return (targetMinutes - spentMinutes)
+        .clamp(minValidMinutes, double.infinity)
+        .toInt();
   }
 
   /// 目標進捗率を計算（0.0 〜 1.0）- 後方互換性のため残す

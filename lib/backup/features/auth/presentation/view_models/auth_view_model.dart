@@ -63,7 +63,7 @@ class AuthViewModel extends StateNotifier<AuthState> {
         // tempユーザーの存在チェックを追加
         final tempUserService = TempUserService();
         final hasTempUser = await tempUserService.hasTempUser();
-        
+
         if (hasTempUser) {
           // tempユーザーが存在する = チュートリアル完了済み
           AppLogger.instance.i('TempUserが存在します。ゲスト状態に設定します');

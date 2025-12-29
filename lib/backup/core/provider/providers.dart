@@ -247,10 +247,10 @@ final studyStatisticsServiceProvider = Provider<StudyStatisticsService>((ref) {
 /// 起動時にローカルDBから統計を計算し、必要に応じて手動でリフレッシュ可能。
 final globalStatisticsProvider =
     StateNotifierProvider<GlobalStatisticsNotifier, StudyStatistics>((ref) {
-  final statisticsService = ref.watch(studyStatisticsServiceProvider);
-  final syncChecker = ref.watch(syncCheckerProvider);
-  return GlobalStatisticsNotifier(statisticsService, syncChecker);
-});
+      final statisticsService = ref.watch(studyStatisticsServiceProvider);
+      final syncChecker = ref.watch(syncCheckerProvider);
+      return GlobalStatisticsNotifier(statisticsService, syncChecker);
+    });
 
 // ===== 認証統合プロバイダー =====
 

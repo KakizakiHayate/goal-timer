@@ -88,12 +88,13 @@ class StudyRecordsViewModel extends GetxController {
     LocalStudyDailyLogsDatasource? studyLogsDatasource,
     LocalGoalsDatasource? goalsDatasource,
     LocalUsersDatasource? usersDatasource,
-  })  : _studyLogsDatasource = studyLogsDatasource ??
-            LocalStudyDailyLogsDatasource(database: AppDatabase()),
-        _goalsDatasource =
-            goalsDatasource ?? LocalGoalsDatasource(database: AppDatabase()),
-        _usersDatasource =
-            usersDatasource ?? LocalUsersDatasource(database: AppDatabase());
+  }) : _studyLogsDatasource =
+           studyLogsDatasource ??
+           LocalStudyDailyLogsDatasource(database: AppDatabase()),
+       _goalsDatasource =
+           goalsDatasource ?? LocalGoalsDatasource(database: AppDatabase()),
+       _usersDatasource =
+           usersDatasource ?? LocalUsersDatasource(database: AppDatabase());
 
   @override
   void onInit() {
@@ -108,11 +109,12 @@ class StudyRecordsViewModel extends GetxController {
 
     try {
       // 並列で取得（Dart 3 レコード構文で型安全に）
-      final (firstStudyDate, currentStreak, longestStreak) = await (
-        _studyLogsDatasource.fetchFirstStudyDate(),
-        _studyLogsDatasource.calculateCurrentStreak(),
-        _getOrCalculateLongestStreak(),
-      ).wait;
+      final (firstStudyDate, currentStreak, longestStreak) =
+          await (
+            _studyLogsDatasource.fetchFirstStudyDate(),
+            _studyLogsDatasource.calculateCurrentStreak(),
+            _getOrCalculateLongestStreak(),
+          ).wait;
 
       _state = _state.copyWith(
         firstStudyDate: firstStudyDate,
@@ -145,8 +147,9 @@ class StudyRecordsViewModel extends GetxController {
         if (historicalLongestStreak > 0) {
           // 履歴から計算した最長ストリークを保存
           await _usersDatasource.updateLongestStreak(historicalLongestStreak);
-          AppLogger.instance
-              .i('最長ストリークを履歴から計算・保存しました: $historicalLongestStreak日');
+          AppLogger.instance.i(
+            '最長ストリークを履歴から計算・保存しました: $historicalLongestStreak日',
+          );
           return historicalLongestStreak;
         }
       }
@@ -233,12 +236,14 @@ class StudyRecordsViewModel extends GetxController {
       final dailyRecords = <DailyRecord>[];
       for (final entry in records.entries) {
         final goal = goalMap[entry.key];
-        dailyRecords.add(DailyRecord(
-          goalId: entry.key,
-          goalTitle: goal?.title ?? '削除された目標',
-          totalSeconds: entry.value,
-          isDeleted: goal?.deletedAt != null || goal == null,
-        ));
+        dailyRecords.add(
+          DailyRecord(
+            goalId: entry.key,
+            goalTitle: goal?.title ?? '削除された目標',
+            totalSeconds: entry.value,
+            isDeleted: goal?.deletedAt != null || goal == null,
+          ),
+        );
       }
 
       return dailyRecords;

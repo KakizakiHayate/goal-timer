@@ -8,10 +8,7 @@ import 'package:goal_timer/core/utils/time_utils.dart';
 class MiniHeatmap extends StatelessWidget {
   final List<DateTime> studyDates;
 
-  const MiniHeatmap({
-    super.key,
-    required this.studyDates,
-  });
+  const MiniHeatmap({super.key, required this.studyDates});
 
   /// 今日の学習済みドットの色（濃い緑）
   static const Color todayStudiedColor = Color(0xFF059669);
@@ -24,14 +21,16 @@ class MiniHeatmap extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(StreakConsts.recentDaysCount, (index) {
-        final daysAgo = StreakConsts.recentDaysCount -
+        final daysAgo =
+            StreakConsts.recentDaysCount -
             StreakConsts.lastDotIndexOffset -
             index;
         final date = today.subtract(Duration(days: daysAgo));
         final isToday = daysAgo == 0;
         final isStudied = _isStudiedOnDate(date);
 
-        final isLastDot = index ==
+        final isLastDot =
+            index ==
             StreakConsts.recentDaysCount - StreakConsts.lastDotIndexOffset;
         return Padding(
           padding: EdgeInsets.only(

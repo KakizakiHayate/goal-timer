@@ -53,8 +53,16 @@ class AppDatabase {
         ADD COLUMN ${DatabaseConsts.columnLongestStreak} INTEGER DEFAULT 0
       ''');
     }
+    if (oldVersion < 4) {
+      // バージョン4へのマイグレーション:
+      // usersテーブルにstreak_reminder_enabledカラムを追加（デフォルト: 有効）
+      await db.execute('''
+        ALTER TABLE ${DatabaseConsts.tableUsers}
+        ADD COLUMN ${DatabaseConsts.columnStreakReminderEnabled} INTEGER DEFAULT 1
+      ''');
+    }
     // 今後のバージョンアップ時は、ここに追加のマイグレーションロジックを記述
-    // if (oldVersion < 4) { ... }
+    // if (oldVersion < 5) { ... }
   }
 
   /// テーブルを作成
@@ -101,6 +109,7 @@ class AppDatabase {
         ${DatabaseConsts.columnUpdatedAt} TEXT,
         ${DatabaseConsts.columnLastLogin} TEXT,
         ${DatabaseConsts.columnLongestStreak} INTEGER DEFAULT 0,
+        ${DatabaseConsts.columnStreakReminderEnabled} INTEGER DEFAULT 1,
         ${DatabaseConsts.columnSyncUpdatedAt} TEXT
       )
     ''');

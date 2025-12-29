@@ -44,8 +44,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen>
-    with TickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late TabController _tabController;
   late AnimationController _fabAnimationController;
   late Animation<double> _fabScaleAnimation;
@@ -102,7 +101,8 @@ class _HomeScreenState extends State<HomeScreen>
       backgroundColor: ColorConsts.backgroundPrimary,
       body: pages[_tabController.index],
       bottomNavigationBar: _buildBottomNavigationBar(),
-      floatingActionButton: _tabController.index != 2 ? _buildFloatingActionButton() : null,
+      floatingActionButton:
+          _tabController.index != 2 ? _buildFloatingActionButton() : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
@@ -225,9 +225,7 @@ class _HomeTabContent extends StatelessWidget {
         final homeState = homeViewModel.state;
 
         if (homeState.isLoading) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+          return const Center(child: CircularProgressIndicator());
         }
 
         return CustomScrollView(
@@ -290,9 +288,7 @@ class _HomeTabContent extends StatelessWidget {
             _buildGoalList(homeViewModel),
 
             // FABがコンテンツに重ならないようにするための余白
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 96.0),
-            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 96.0)),
           ],
         );
       },
@@ -353,42 +349,39 @@ class _HomeTabContent extends StatelessWidget {
     }
 
     return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          final goal = goals[index];
-          final progress = viewModel.state.getProgressForGoal(goal);
+      delegate: SliverChildBuilderDelegate((context, index) {
+        final goal = goals[index];
+        final progress = viewModel.state.getProgressForGoal(goal);
 
-          return GoalCard(
-            title: goal.title,
-            description: goal.description?.isNotEmpty == true ? goal.description : null,
-            progress: progress,
-            streakDays: 0,
-            avoidMessage:
-                goal.avoidMessage.isNotEmpty ? goal.avoidMessage : null,
-            onTap: () {
-              // 目標詳細画面（Coming Soon）
-            },
-            onTimerTap: () => _navigateToTimerAndReload(context, viewModel, goal),
-            onEditTap: () {
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                backgroundColor: Colors.transparent,
-                builder: (context) {
-                  return FractionallySizedBox(
-                    heightFactor: UIConsts.modalHeightFactor,
-                    child: AddGoalModal(goal: goal),
-                  );
-                },
-              );
-            },
-            onDeleteTap: () {
-              _showDeleteConfirmationDialog(context, viewModel, goal);
-            },
-          );
-        },
-        childCount: goals.length,
-      ),
+        return GoalCard(
+          title: goal.title,
+          description:
+              goal.description?.isNotEmpty == true ? goal.description : null,
+          progress: progress,
+          streakDays: 0,
+          avoidMessage: goal.avoidMessage.isNotEmpty ? goal.avoidMessage : null,
+          onTap: () {
+            // 目標詳細画面（Coming Soon）
+          },
+          onTimerTap: () => _navigateToTimerAndReload(context, viewModel, goal),
+          onEditTap: () {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (context) {
+                return FractionallySizedBox(
+                  heightFactor: UIConsts.modalHeightFactor,
+                  child: AddGoalModal(goal: goal),
+                );
+              },
+            );
+          },
+          onDeleteTap: () {
+            _showDeleteConfirmationDialog(context, viewModel, goal);
+          },
+        );
+      }, childCount: goals.length),
     );
   }
 
@@ -410,9 +403,7 @@ class _HomeTabContent extends StatelessWidget {
           ),
           content: Text(
             StringConsts.deleteGoalMessage,
-            style: TextConsts.body.copyWith(
-              color: ColorConsts.textSecondary,
-            ),
+            style: TextConsts.body.copyWith(color: ColorConsts.textSecondary),
           ),
           actions: [
             TextButton(
@@ -447,19 +438,20 @@ class _HomeTabContent extends StatelessWidget {
   }
 
   /// 削除結果に基づいてSnackBarを表示
-  void _showDeleteResultSnackBar(BuildContext context, DeleteGoalResult result) {
+  void _showDeleteResultSnackBar(
+    BuildContext context,
+    DeleteGoalResult result,
+  ) {
     final isSuccess = result == DeleteGoalResult.success;
-    final message = isSuccess
-        ? StringConsts.goalDeletedMessage
-        : StringConsts.goalDeleteFailedMessage;
+    final message =
+        isSuccess
+            ? StringConsts.goalDeletedMessage
+            : StringConsts.goalDeleteFailedMessage;
     final color = isSuccess ? ColorConsts.success : ColorConsts.error;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: color,
-      ),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message), backgroundColor: color));
   }
 }
 
@@ -478,63 +470,73 @@ class _TimerTabContent extends StatelessWidget {
             backgroundColor: ColorConsts.primary,
             foregroundColor: Colors.white,
           ),
-          body: goals.isEmpty
-              ? Center(
-                  child: Padding(
+          body:
+              goals.isEmpty
+                  ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(SpacingConsts.l),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.flag,
+                            size: 80,
+                            color: ColorConsts.textTertiary,
+                          ),
+                          const SizedBox(height: SpacingConsts.l),
+                          Text(
+                            'タイマーを使用するには\n目標を作成してください',
+                            textAlign: TextAlign.center,
+                            style: TextConsts.h3.copyWith(
+                              color: ColorConsts.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                  : Padding(
                     padding: const EdgeInsets.all(SpacingConsts.l),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(
-                          Icons.flag,
-                          size: 80,
-                          color: ColorConsts.textTertiary,
+                        Text(
+                          'タイマーを開始する目標を選択してください',
+                          style: TextConsts.h4.copyWith(
+                            color: ColorConsts.textPrimary,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         const SizedBox(height: SpacingConsts.l),
-                        Text(
-                          'タイマーを使用するには\n目標を作成してください',
-                          textAlign: TextAlign.center,
-                          style: TextConsts.h3.copyWith(
-                            color: ColorConsts.textSecondary,
+                        Expanded(
+                          child: ListView.separated(
+                            itemCount: goals.length,
+                            separatorBuilder:
+                                (context, index) =>
+                                    const SizedBox(height: SpacingConsts.m),
+                            itemBuilder: (context, index) {
+                              final goal = goals[index];
+                              return _buildGoalTimerCard(
+                                context,
+                                goal,
+                                homeViewModel,
+                              );
+                            },
                           ),
                         ),
                       ],
                     ),
                   ),
-                )
-              : Padding(
-                  padding: const EdgeInsets.all(SpacingConsts.l),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'タイマーを開始する目標を選択してください',
-                        style: TextConsts.h4.copyWith(
-                          color: ColorConsts.textPrimary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: SpacingConsts.l),
-                      Expanded(
-                        child: ListView.separated(
-                          itemCount: goals.length,
-                          separatorBuilder: (context, index) =>
-                              const SizedBox(height: SpacingConsts.m),
-                          itemBuilder: (context, index) {
-                            final goal = goals[index];
-                            return _buildGoalTimerCard(context, goal, homeViewModel);
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
         );
       },
     );
   }
 
-  Widget _buildGoalTimerCard(BuildContext context, GoalsModel goal, HomeViewModel viewModel) {
+  Widget _buildGoalTimerCard(
+    BuildContext context,
+    GoalsModel goal,
+    HomeViewModel viewModel,
+  ) {
     final homeState = viewModel.state;
     final studiedMinutes = homeState.getStudiedMinutesForGoal(goal);
     final progress = homeState.getProgressForGoal(goal);

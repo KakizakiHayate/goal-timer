@@ -12,7 +12,8 @@ part of 'tutorial_view_model.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods',
+);
 
 /// @nodoc
 mixin _$TutorialState {
@@ -31,16 +32,18 @@ mixin _$TutorialState {
 /// @nodoc
 abstract class $TutorialStateCopyWith<$Res> {
   factory $TutorialStateCopyWith(
-          TutorialState value, $Res Function(TutorialState) then) =
-      _$TutorialStateCopyWithImpl<$Res, TutorialState>;
+    TutorialState value,
+    $Res Function(TutorialState) then,
+  ) = _$TutorialStateCopyWithImpl<$Res, TutorialState>;
   @useResult
-  $Res call(
-      {bool isTutorialActive,
-      String currentStepId,
-      int currentStepIndex,
-      int totalSteps,
-      bool isCompleted,
-      String? tempUserId});
+  $Res call({
+    bool isTutorialActive,
+    String currentStepId,
+    int currentStepIndex,
+    int totalSteps,
+    bool isCompleted,
+    String? tempUserId,
+  });
 }
 
 /// @nodoc
@@ -63,32 +66,41 @@ class _$TutorialStateCopyWithImpl<$Res, $Val extends TutorialState>
     Object? isCompleted = null,
     Object? tempUserId = freezed,
   }) {
-    return _then(_value.copyWith(
-      isTutorialActive: null == isTutorialActive
-          ? _value.isTutorialActive
-          : isTutorialActive // ignore: cast_nullable_to_non_nullable
-              as bool,
-      currentStepId: null == currentStepId
-          ? _value.currentStepId
-          : currentStepId // ignore: cast_nullable_to_non_nullable
-              as String,
-      currentStepIndex: null == currentStepIndex
-          ? _value.currentStepIndex
-          : currentStepIndex // ignore: cast_nullable_to_non_nullable
-              as int,
-      totalSteps: null == totalSteps
-          ? _value.totalSteps
-          : totalSteps // ignore: cast_nullable_to_non_nullable
-              as int,
-      isCompleted: null == isCompleted
-          ? _value.isCompleted
-          : isCompleted // ignore: cast_nullable_to_non_nullable
-              as bool,
-      tempUserId: freezed == tempUserId
-          ? _value.tempUserId
-          : tempUserId // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            isTutorialActive:
+                null == isTutorialActive
+                    ? _value.isTutorialActive
+                    : isTutorialActive // ignore: cast_nullable_to_non_nullable
+                        as bool,
+            currentStepId:
+                null == currentStepId
+                    ? _value.currentStepId
+                    : currentStepId // ignore: cast_nullable_to_non_nullable
+                        as String,
+            currentStepIndex:
+                null == currentStepIndex
+                    ? _value.currentStepIndex
+                    : currentStepIndex // ignore: cast_nullable_to_non_nullable
+                        as int,
+            totalSteps:
+                null == totalSteps
+                    ? _value.totalSteps
+                    : totalSteps // ignore: cast_nullable_to_non_nullable
+                        as int,
+            isCompleted:
+                null == isCompleted
+                    ? _value.isCompleted
+                    : isCompleted // ignore: cast_nullable_to_non_nullable
+                        as bool,
+            tempUserId:
+                freezed == tempUserId
+                    ? _value.tempUserId
+                    : tempUserId // ignore: cast_nullable_to_non_nullable
+                        as String?,
+          )
+          as $Val,
+    );
   }
 }
 
@@ -96,17 +108,19 @@ class _$TutorialStateCopyWithImpl<$Res, $Val extends TutorialState>
 abstract class _$$TutorialStateImplCopyWith<$Res>
     implements $TutorialStateCopyWith<$Res> {
   factory _$$TutorialStateImplCopyWith(
-          _$TutorialStateImpl value, $Res Function(_$TutorialStateImpl) then) =
-      __$$TutorialStateImplCopyWithImpl<$Res>;
+    _$TutorialStateImpl value,
+    $Res Function(_$TutorialStateImpl) then,
+  ) = __$$TutorialStateImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {bool isTutorialActive,
-      String currentStepId,
-      int currentStepIndex,
-      int totalSteps,
-      bool isCompleted,
-      String? tempUserId});
+  $Res call({
+    bool isTutorialActive,
+    String currentStepId,
+    int currentStepIndex,
+    int totalSteps,
+    bool isCompleted,
+    String? tempUserId,
+  });
 }
 
 /// @nodoc
@@ -114,8 +128,9 @@ class __$$TutorialStateImplCopyWithImpl<$Res>
     extends _$TutorialStateCopyWithImpl<$Res, _$TutorialStateImpl>
     implements _$$TutorialStateImplCopyWith<$Res> {
   __$$TutorialStateImplCopyWithImpl(
-      _$TutorialStateImpl _value, $Res Function(_$TutorialStateImpl) _then)
-      : super(_value, _then);
+    _$TutorialStateImpl _value,
+    $Res Function(_$TutorialStateImpl) _then,
+  ) : super(_value, _then);
 
   @pragma('vm:prefer-inline')
   @override
@@ -127,45 +142,54 @@ class __$$TutorialStateImplCopyWithImpl<$Res>
     Object? isCompleted = null,
     Object? tempUserId = freezed,
   }) {
-    return _then(_$TutorialStateImpl(
-      isTutorialActive: null == isTutorialActive
-          ? _value.isTutorialActive
-          : isTutorialActive // ignore: cast_nullable_to_non_nullable
-              as bool,
-      currentStepId: null == currentStepId
-          ? _value.currentStepId
-          : currentStepId // ignore: cast_nullable_to_non_nullable
-              as String,
-      currentStepIndex: null == currentStepIndex
-          ? _value.currentStepIndex
-          : currentStepIndex // ignore: cast_nullable_to_non_nullable
-              as int,
-      totalSteps: null == totalSteps
-          ? _value.totalSteps
-          : totalSteps // ignore: cast_nullable_to_non_nullable
-              as int,
-      isCompleted: null == isCompleted
-          ? _value.isCompleted
-          : isCompleted // ignore: cast_nullable_to_non_nullable
-              as bool,
-      tempUserId: freezed == tempUserId
-          ? _value.tempUserId
-          : tempUserId // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ));
+    return _then(
+      _$TutorialStateImpl(
+        isTutorialActive:
+            null == isTutorialActive
+                ? _value.isTutorialActive
+                : isTutorialActive // ignore: cast_nullable_to_non_nullable
+                    as bool,
+        currentStepId:
+            null == currentStepId
+                ? _value.currentStepId
+                : currentStepId // ignore: cast_nullable_to_non_nullable
+                    as String,
+        currentStepIndex:
+            null == currentStepIndex
+                ? _value.currentStepIndex
+                : currentStepIndex // ignore: cast_nullable_to_non_nullable
+                    as int,
+        totalSteps:
+            null == totalSteps
+                ? _value.totalSteps
+                : totalSteps // ignore: cast_nullable_to_non_nullable
+                    as int,
+        isCompleted:
+            null == isCompleted
+                ? _value.isCompleted
+                : isCompleted // ignore: cast_nullable_to_non_nullable
+                    as bool,
+        tempUserId:
+            freezed == tempUserId
+                ? _value.tempUserId
+                : tempUserId // ignore: cast_nullable_to_non_nullable
+                    as String?,
+      ),
+    );
   }
 }
 
 /// @nodoc
 
 class _$TutorialStateImpl implements _TutorialState {
-  const _$TutorialStateImpl(
-      {this.isTutorialActive = false,
-      this.currentStepId = '',
-      this.currentStepIndex = 0,
-      this.totalSteps = 0,
-      this.isCompleted = false,
-      this.tempUserId});
+  const _$TutorialStateImpl({
+    this.isTutorialActive = false,
+    this.currentStepId = '',
+    this.currentStepIndex = 0,
+    this.totalSteps = 0,
+    this.isCompleted = false,
+    this.tempUserId,
+  });
 
   @override
   @JsonKey()
@@ -210,8 +234,15 @@ class _$TutorialStateImpl implements _TutorialState {
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, isTutorialActive, currentStepId,
-      currentStepIndex, totalSteps, isCompleted, tempUserId);
+  int get hashCode => Object.hash(
+    runtimeType,
+    isTutorialActive,
+    currentStepId,
+    currentStepIndex,
+    totalSteps,
+    isCompleted,
+    tempUserId,
+  );
 
   @JsonKey(ignore: true)
   @override
@@ -221,13 +252,14 @@ class _$TutorialStateImpl implements _TutorialState {
 }
 
 abstract class _TutorialState implements TutorialState {
-  const factory _TutorialState(
-      {final bool isTutorialActive,
-      final String currentStepId,
-      final int currentStepIndex,
-      final int totalSteps,
-      final bool isCompleted,
-      final String? tempUserId}) = _$TutorialStateImpl;
+  const factory _TutorialState({
+    final bool isTutorialActive,
+    final String currentStepId,
+    final int currentStepIndex,
+    final int totalSteps,
+    final bool isCompleted,
+    final String? tempUserId,
+  }) = _$TutorialStateImpl;
 
   @override
   bool get isTutorialActive;

@@ -2,7 +2,7 @@
 class DatabaseConsts {
   // データベース名
   static const String databaseName = 'goal_timer.db';
-  static const int databaseVersion = 3;
+  static const int databaseVersion = 4;
 
   // テーブル名
   static const String tableStudyDailyLogs = 'study_daily_logs';
@@ -35,4 +35,5 @@ class DatabaseConsts {
   static const String columnDisplayName = 'display_name';
   static const String columnLastLogin = 'last_login';
   static const String columnLongestStreak = 'longest_streak';
+  static const String columnStreakReminderEnabled = 'streak_reminder_enabled';
 }

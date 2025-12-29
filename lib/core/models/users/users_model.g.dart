@@ -11,18 +11,22 @@ _$UsersModelImpl _$$UsersModelImplFromJson(Map<String, dynamic> json) =>
       id: json['id'] as String,
       email: json['email'] as String?,
       displayName: json['display_name'] as String?,
-      createdAt: json['created_at'] == null
-          ? null
-          : DateTime.parse(json['created_at'] as String),
-      updatedAt: json['updated_at'] == null
-          ? null
-          : DateTime.parse(json['updated_at'] as String),
-      lastLogin: json['last_login'] == null
-          ? null
-          : DateTime.parse(json['last_login'] as String),
-      syncUpdatedAt: json['sync_updated_at'] == null
-          ? null
-          : DateTime.parse(json['sync_updated_at'] as String),
+      createdAt:
+          json['created_at'] == null
+              ? null
+              : DateTime.parse(json['created_at'] as String),
+      updatedAt:
+          json['updated_at'] == null
+              ? null
+              : DateTime.parse(json['updated_at'] as String),
+      lastLogin:
+          json['last_login'] == null
+              ? null
+              : DateTime.parse(json['last_login'] as String),
+      syncUpdatedAt:
+          json['sync_updated_at'] == null
+              ? null
+              : DateTime.parse(json['sync_updated_at'] as String),
     );
 
 Map<String, dynamic> _$$UsersModelImplToJson(_$UsersModelImpl instance) =>

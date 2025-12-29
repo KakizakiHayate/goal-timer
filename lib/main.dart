@@ -5,6 +5,7 @@ import 'features/settings/view_model/settings_view_model.dart';
 import 'core/utils/color_consts.dart';
 import 'core/data/local/app_database.dart';
 import 'core/utils/app_logger.dart';
+import 'core/services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +25,14 @@ void main() async {
   } catch (error, stackTrace) {
     AppLogger.instance.e('データベース初期化に失敗しました', error, stackTrace);
     // エラーが発生してもアプリは起動する（データベースを使わない機能は動作可能）
+  }
+
+  // 通知サービスを初期化
+  try {
+    await NotificationService().init();
+    AppLogger.instance.i('通知サービス初期化が完了しました');
+  } catch (error, stackTrace) {
+    AppLogger.instance.e('通知サービス初期化に失敗しました', error, stackTrace);
   }
 
   runApp(const MyApp());

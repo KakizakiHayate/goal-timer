@@ -38,19 +38,15 @@ class _CutoutOverlayState extends State<CutoutOverlay>
   @override
   void initState() {
     super.initState();
-    
+
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 1200),
       vsync: this,
     );
 
-    _pulseAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.08,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.08).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
 
     if (widget.showPulseAnimation) {
       _startPulseLoop();
@@ -80,14 +76,14 @@ class _CutoutOverlayState extends State<CutoutOverlay>
       children: [
         // 子ウィジェット
         widget.child,
-        
+
         // 切り抜きオーバーレイ
         if (widget.targetRect != null)
           Positioned.fill(
             child: GestureDetector(
               onTapDown: (details) {
                 final tapPosition = details.globalPosition;
-                
+
                 // タップした位置がターゲット領域内かチェック
                 if (_isInTargetArea(tapPosition)) {
                   widget.onTargetTap?.call();
@@ -105,9 +101,10 @@ class _CutoutOverlayState extends State<CutoutOverlay>
                       borderRadius: widget.borderRadius,
                       borderWidth: widget.borderWidth,
                       borderColor: widget.borderColor,
-                      pulseScale: widget.showPulseAnimation 
-                          ? _pulseAnimation.value 
-                          : 1.0,
+                      pulseScale:
+                          widget.showPulseAnimation
+                              ? _pulseAnimation.value
+                              : 1.0,
                     ),
                     child: Container(),
                   );
@@ -121,13 +118,13 @@ class _CutoutOverlayState extends State<CutoutOverlay>
 
   bool _isInTargetArea(Offset tapPosition) {
     if (widget.targetRect == null) return false;
-    
+
     final expandedRect = Rect.fromCenter(
       center: widget.targetRect!.center,
       width: widget.targetRect!.width + (widget.borderWidth * 2),
       height: widget.targetRect!.height + (widget.borderWidth * 2),
     );
-    
+
     return expandedRect.contains(tapPosition);
   }
 }
@@ -153,22 +150,25 @@ class _CutoutPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     // オーバーレイペイント
-    final overlayPaint = Paint()
-      ..color = overlayColor
-      ..style = PaintingStyle.fill;
+    final overlayPaint =
+        Paint()
+          ..color = overlayColor
+          ..style = PaintingStyle.fill;
 
     // ボーダーペイント
-    final borderPaint = Paint()
-      ..color = borderColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = borderWidth;
+    final borderPaint =
+        Paint()
+          ..color = borderColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = borderWidth;
 
     // グローエフェクトペイント
-    final glowPaint = Paint()
-      ..color = borderColor.withValues(alpha: 0.3)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = borderWidth * 2
-      ..maskFilter = const MaskFilter.blur(BlurStyle.outer, 8);
+    final glowPaint =
+        Paint()
+          ..color = borderColor.withValues(alpha: 0.3)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = borderWidth * 2
+          ..maskFilter = const MaskFilter.blur(BlurStyle.outer, 8);
 
     // パルススケールを適用したターゲット矩形
     final scaledTargetRect = Rect.fromCenter(
@@ -178,40 +178,31 @@ class _CutoutPainter extends CustomPainter {
     );
 
     // 切り抜きパスを作成
-    final path = Path()
-      ..addRect(Rect.fromLTWH(0, 0, size.width, size.height));
+    final path = Path()..addRect(Rect.fromLTWH(0, 0, size.width, size.height));
 
-    final cutoutPath = Path()
-      ..addRRect(RRect.fromRectAndRadius(
-        scaledTargetRect,
-        Radius.circular(borderRadius),
-      ));
+    final cutoutPath =
+        Path()..addRRect(
+          RRect.fromRectAndRadius(
+            scaledTargetRect,
+            Radius.circular(borderRadius),
+          ),
+        );
 
     // 切り抜き部分を除外（差集合）
-    final finalPath = Path.combine(
-      PathOperation.difference,
-      path,
-      cutoutPath,
-    );
+    final finalPath = Path.combine(PathOperation.difference, path, cutoutPath);
 
     // オーバーレイを描画（切り抜き部分以外）
     canvas.drawPath(finalPath, overlayPaint);
 
     // グローエフェクトを描画
     canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        scaledTargetRect,
-        Radius.circular(borderRadius),
-      ),
+      RRect.fromRectAndRadius(scaledTargetRect, Radius.circular(borderRadius)),
       glowPaint,
     );
 
     // ボーダーを描画
     canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        scaledTargetRect,
-        Radius.circular(borderRadius),
-      ),
+      RRect.fromRectAndRadius(scaledTargetRect, Radius.circular(borderRadius)),
       borderPaint,
     );
   }

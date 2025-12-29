@@ -13,12 +13,14 @@ _$UsersModelImpl _$$UsersModelImplFromJson(Map<String, dynamic> json) =>
       displayName: json['displayName'] as String,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
-      lastLogin: json['lastLogin'] == null
-          ? null
-          : DateTime.parse(json['lastLogin'] as String),
-      syncUpdatedAt: json['syncUpdatedAt'] == null
-          ? null
-          : DateTime.parse(json['syncUpdatedAt'] as String),
+      lastLogin:
+          json['lastLogin'] == null
+              ? null
+              : DateTime.parse(json['lastLogin'] as String),
+      syncUpdatedAt:
+          json['syncUpdatedAt'] == null
+              ? null
+              : DateTime.parse(json['syncUpdatedAt'] as String),
       isSynced: json['isSynced'] as bool? ?? false,
     );
 

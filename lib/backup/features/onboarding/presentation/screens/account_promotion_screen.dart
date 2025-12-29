@@ -699,11 +699,7 @@ class _AccountPromotionScreenState
         Navigator.pushReplacementNamed(context, '/home');
       }
     } catch (error, stackTrace) {
-      AppLogger.instance.e(
-        'ゲストモード開始に失敗しました',
-        error,
-        stackTrace,
-      );
+      AppLogger.instance.e('ゲストモード開始に失敗しました', error, stackTrace);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

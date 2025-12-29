@@ -101,7 +101,9 @@ class SplashViewModel extends StateNotifier<SplashState> {
       AppLogger.instance.i('SplashViewModel: 認証システムを初期化します');
 
       // authInitializationProviderから認証初期化を実行
-      AppLogger.instance.i('SplashViewModel: authInitializationProviderを読み込み開始');
+      AppLogger.instance.i(
+        'SplashViewModel: authInitializationProviderを読み込み開始',
+      );
       await _ref.read(authInitializationProvider.future);
       AppLogger.instance.i('SplashViewModel: authInitializationProvider完了');
 
@@ -169,7 +171,7 @@ class SplashViewModel extends StateNotifier<SplashState> {
       // ゲストユーザーの場合、認証が必要なテーブルアクセスは失敗するため
       // 実際のネットワーク接続確認は不要（オフラインファーストアプリとして動作）
       _safeUpdateState((state) => state.copyWith(isConnectionOk: true));
-      
+
       AppLogger.instance.i('SplashViewModel: Supabase接続確認完了（ゲストユーザー対応）');
     } catch (error) {
       _safeUpdateState(

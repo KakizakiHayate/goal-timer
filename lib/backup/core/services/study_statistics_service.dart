@@ -126,7 +126,12 @@ class StudyStatisticsService {
         final remainingDays = goal.deadline.difference(now).inDays;
 
         // 残りの学習時間を計算（学習済み時間を考慮）
-        final remainingMinutes = (goal.targetMinutes - goal.spentMinutes).clamp(0, goal.targetMinutes) as int;
+        final remainingMinutes =
+            (goal.targetMinutes - goal.spentMinutes).clamp(
+                  0,
+                  goal.targetMinutes,
+                )
+                as int;
 
         // 期限が過去または今日の場合の処理
         if (remainingDays <= 0) {
@@ -149,7 +154,9 @@ class StudyStatisticsService {
         return sum + dailyMinutes;
       });
 
-      AppLogger.instance.d('今日の目標時間: $todayTargetMinutes分（アクティブな目標数: ${activeGoals.length}）');
+      AppLogger.instance.d(
+        '今日の目標時間: $todayTargetMinutes分（アクティブな目標数: ${activeGoals.length}）',
+      );
       return todayTargetMinutes;
     } catch (e) {
       AppLogger.instance.e('今日の目標時間取得エラー', e);
@@ -181,7 +188,8 @@ class StudyStatisticsService {
       final dailyMinutes = <String, int>{};
       for (final log in userLogs) {
         final dateKey = _formatDate(log.date);
-        dailyMinutes[dateKey] = (dailyMinutes[dateKey] ?? 0) + (log.totalSeconds ~/ 60);
+        dailyMinutes[dateKey] =
+            (dailyMinutes[dateKey] ?? 0) + (log.totalSeconds ~/ 60);
       }
 
       // 連続学習日数を計算
@@ -242,7 +250,8 @@ class StudyStatisticsService {
       final dailyMinutes = <String, int>{};
       for (final log in goalLogs) {
         final dateKey = _formatDate(log.date);
-        dailyMinutes[dateKey] = (dailyMinutes[dateKey] ?? 0) + (log.totalSeconds ~/ 60);
+        dailyMinutes[dateKey] =
+            (dailyMinutes[dateKey] ?? 0) + (log.totalSeconds ~/ 60);
       }
 
       // 連続学習日数を計算

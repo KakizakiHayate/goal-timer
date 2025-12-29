@@ -12,7 +12,8 @@ part of 'product_info.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods',
+);
 
 ProductInfo _$ProductInfoFromJson(Map<String, dynamic> json) {
   return _ProductInfo.fromJson(json);
@@ -40,20 +41,22 @@ mixin _$ProductInfo {
 /// @nodoc
 abstract class $ProductInfoCopyWith<$Res> {
   factory $ProductInfoCopyWith(
-          ProductInfo value, $Res Function(ProductInfo) then) =
-      _$ProductInfoCopyWithImpl<$Res, ProductInfo>;
+    ProductInfo value,
+    $Res Function(ProductInfo) then,
+  ) = _$ProductInfoCopyWithImpl<$Res, ProductInfo>;
   @useResult
-  $Res call(
-      {String identifier,
-      String title,
-      String description,
-      String price,
-      String currencyCode,
-      double priceAmount,
-      String? introductoryPrice,
-      String? introductoryPeriod,
-      String subscriptionPeriod,
-      bool isAvailable});
+  $Res call({
+    String identifier,
+    String title,
+    String description,
+    String price,
+    String currencyCode,
+    double priceAmount,
+    String? introductoryPrice,
+    String? introductoryPeriod,
+    String subscriptionPeriod,
+    bool isAvailable,
+  });
 }
 
 /// @nodoc
@@ -80,48 +83,61 @@ class _$ProductInfoCopyWithImpl<$Res, $Val extends ProductInfo>
     Object? subscriptionPeriod = null,
     Object? isAvailable = null,
   }) {
-    return _then(_value.copyWith(
-      identifier: null == identifier
-          ? _value.identifier
-          : identifier // ignore: cast_nullable_to_non_nullable
-              as String,
-      title: null == title
-          ? _value.title
-          : title // ignore: cast_nullable_to_non_nullable
-              as String,
-      description: null == description
-          ? _value.description
-          : description // ignore: cast_nullable_to_non_nullable
-              as String,
-      price: null == price
-          ? _value.price
-          : price // ignore: cast_nullable_to_non_nullable
-              as String,
-      currencyCode: null == currencyCode
-          ? _value.currencyCode
-          : currencyCode // ignore: cast_nullable_to_non_nullable
-              as String,
-      priceAmount: null == priceAmount
-          ? _value.priceAmount
-          : priceAmount // ignore: cast_nullable_to_non_nullable
-              as double,
-      introductoryPrice: freezed == introductoryPrice
-          ? _value.introductoryPrice
-          : introductoryPrice // ignore: cast_nullable_to_non_nullable
-              as String?,
-      introductoryPeriod: freezed == introductoryPeriod
-          ? _value.introductoryPeriod
-          : introductoryPeriod // ignore: cast_nullable_to_non_nullable
-              as String?,
-      subscriptionPeriod: null == subscriptionPeriod
-          ? _value.subscriptionPeriod
-          : subscriptionPeriod // ignore: cast_nullable_to_non_nullable
-              as String,
-      isAvailable: null == isAvailable
-          ? _value.isAvailable
-          : isAvailable // ignore: cast_nullable_to_non_nullable
-              as bool,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            identifier:
+                null == identifier
+                    ? _value.identifier
+                    : identifier // ignore: cast_nullable_to_non_nullable
+                        as String,
+            title:
+                null == title
+                    ? _value.title
+                    : title // ignore: cast_nullable_to_non_nullable
+                        as String,
+            description:
+                null == description
+                    ? _value.description
+                    : description // ignore: cast_nullable_to_non_nullable
+                        as String,
+            price:
+                null == price
+                    ? _value.price
+                    : price // ignore: cast_nullable_to_non_nullable
+                        as String,
+            currencyCode:
+                null == currencyCode
+                    ? _value.currencyCode
+                    : currencyCode // ignore: cast_nullable_to_non_nullable
+                        as String,
+            priceAmount:
+                null == priceAmount
+                    ? _value.priceAmount
+                    : priceAmount // ignore: cast_nullable_to_non_nullable
+                        as double,
+            introductoryPrice:
+                freezed == introductoryPrice
+                    ? _value.introductoryPrice
+                    : introductoryPrice // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            introductoryPeriod:
+                freezed == introductoryPeriod
+                    ? _value.introductoryPeriod
+                    : introductoryPeriod // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            subscriptionPeriod:
+                null == subscriptionPeriod
+                    ? _value.subscriptionPeriod
+                    : subscriptionPeriod // ignore: cast_nullable_to_non_nullable
+                        as String,
+            isAvailable:
+                null == isAvailable
+                    ? _value.isAvailable
+                    : isAvailable // ignore: cast_nullable_to_non_nullable
+                        as bool,
+          )
+          as $Val,
+    );
   }
 }
 
@@ -129,21 +145,23 @@ class _$ProductInfoCopyWithImpl<$Res, $Val extends ProductInfo>
 abstract class _$$ProductInfoImplCopyWith<$Res>
     implements $ProductInfoCopyWith<$Res> {
   factory _$$ProductInfoImplCopyWith(
-          _$ProductInfoImpl value, $Res Function(_$ProductInfoImpl) then) =
-      __$$ProductInfoImplCopyWithImpl<$Res>;
+    _$ProductInfoImpl value,
+    $Res Function(_$ProductInfoImpl) then,
+  ) = __$$ProductInfoImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {String identifier,
-      String title,
-      String description,
-      String price,
-      String currencyCode,
-      double priceAmount,
-      String? introductoryPrice,
-      String? introductoryPeriod,
-      String subscriptionPeriod,
-      bool isAvailable});
+  $Res call({
+    String identifier,
+    String title,
+    String description,
+    String price,
+    String currencyCode,
+    double priceAmount,
+    String? introductoryPrice,
+    String? introductoryPeriod,
+    String subscriptionPeriod,
+    bool isAvailable,
+  });
 }
 
 /// @nodoc
@@ -151,8 +169,9 @@ class __$$ProductInfoImplCopyWithImpl<$Res>
     extends _$ProductInfoCopyWithImpl<$Res, _$ProductInfoImpl>
     implements _$$ProductInfoImplCopyWith<$Res> {
   __$$ProductInfoImplCopyWithImpl(
-      _$ProductInfoImpl _value, $Res Function(_$ProductInfoImpl) _then)
-      : super(_value, _then);
+    _$ProductInfoImpl _value,
+    $Res Function(_$ProductInfoImpl) _then,
+  ) : super(_value, _then);
 
   @pragma('vm:prefer-inline')
   @override
@@ -168,65 +187,78 @@ class __$$ProductInfoImplCopyWithImpl<$Res>
     Object? subscriptionPeriod = null,
     Object? isAvailable = null,
   }) {
-    return _then(_$ProductInfoImpl(
-      identifier: null == identifier
-          ? _value.identifier
-          : identifier // ignore: cast_nullable_to_non_nullable
-              as String,
-      title: null == title
-          ? _value.title
-          : title // ignore: cast_nullable_to_non_nullable
-              as String,
-      description: null == description
-          ? _value.description
-          : description // ignore: cast_nullable_to_non_nullable
-              as String,
-      price: null == price
-          ? _value.price
-          : price // ignore: cast_nullable_to_non_nullable
-              as String,
-      currencyCode: null == currencyCode
-          ? _value.currencyCode
-          : currencyCode // ignore: cast_nullable_to_non_nullable
-              as String,
-      priceAmount: null == priceAmount
-          ? _value.priceAmount
-          : priceAmount // ignore: cast_nullable_to_non_nullable
-              as double,
-      introductoryPrice: freezed == introductoryPrice
-          ? _value.introductoryPrice
-          : introductoryPrice // ignore: cast_nullable_to_non_nullable
-              as String?,
-      introductoryPeriod: freezed == introductoryPeriod
-          ? _value.introductoryPeriod
-          : introductoryPeriod // ignore: cast_nullable_to_non_nullable
-              as String?,
-      subscriptionPeriod: null == subscriptionPeriod
-          ? _value.subscriptionPeriod
-          : subscriptionPeriod // ignore: cast_nullable_to_non_nullable
-              as String,
-      isAvailable: null == isAvailable
-          ? _value.isAvailable
-          : isAvailable // ignore: cast_nullable_to_non_nullable
-              as bool,
-    ));
+    return _then(
+      _$ProductInfoImpl(
+        identifier:
+            null == identifier
+                ? _value.identifier
+                : identifier // ignore: cast_nullable_to_non_nullable
+                    as String,
+        title:
+            null == title
+                ? _value.title
+                : title // ignore: cast_nullable_to_non_nullable
+                    as String,
+        description:
+            null == description
+                ? _value.description
+                : description // ignore: cast_nullable_to_non_nullable
+                    as String,
+        price:
+            null == price
+                ? _value.price
+                : price // ignore: cast_nullable_to_non_nullable
+                    as String,
+        currencyCode:
+            null == currencyCode
+                ? _value.currencyCode
+                : currencyCode // ignore: cast_nullable_to_non_nullable
+                    as String,
+        priceAmount:
+            null == priceAmount
+                ? _value.priceAmount
+                : priceAmount // ignore: cast_nullable_to_non_nullable
+                    as double,
+        introductoryPrice:
+            freezed == introductoryPrice
+                ? _value.introductoryPrice
+                : introductoryPrice // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        introductoryPeriod:
+            freezed == introductoryPeriod
+                ? _value.introductoryPeriod
+                : introductoryPeriod // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        subscriptionPeriod:
+            null == subscriptionPeriod
+                ? _value.subscriptionPeriod
+                : subscriptionPeriod // ignore: cast_nullable_to_non_nullable
+                    as String,
+        isAvailable:
+            null == isAvailable
+                ? _value.isAvailable
+                : isAvailable // ignore: cast_nullable_to_non_nullable
+                    as bool,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$ProductInfoImpl implements _ProductInfo {
-  const _$ProductInfoImpl(
-      {required this.identifier,
-      required this.title,
-      required this.description,
-      required this.price,
-      required this.currencyCode,
-      required this.priceAmount,
-      required this.introductoryPrice,
-      required this.introductoryPeriod,
-      required this.subscriptionPeriod,
-      required this.isAvailable});
+  const _$ProductInfoImpl({
+    required this.identifier,
+    required this.title,
+    required this.description,
+    required this.price,
+    required this.currencyCode,
+    required this.priceAmount,
+    required this.introductoryPrice,
+    required this.introductoryPeriod,
+    required this.subscriptionPeriod,
+    required this.isAvailable,
+  });
 
   factory _$ProductInfoImpl.fromJson(Map<String, dynamic> json) =>
       _$$ProductInfoImplFromJson(json);
@@ -285,17 +317,18 @@ class _$ProductInfoImpl implements _ProductInfo {
   @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
-      runtimeType,
-      identifier,
-      title,
-      description,
-      price,
-      currencyCode,
-      priceAmount,
-      introductoryPrice,
-      introductoryPeriod,
-      subscriptionPeriod,
-      isAvailable);
+    runtimeType,
+    identifier,
+    title,
+    description,
+    price,
+    currencyCode,
+    priceAmount,
+    introductoryPrice,
+    introductoryPeriod,
+    subscriptionPeriod,
+    isAvailable,
+  );
 
   @JsonKey(ignore: true)
   @override
@@ -305,24 +338,23 @@ class _$ProductInfoImpl implements _ProductInfo {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$ProductInfoImplToJson(
-      this,
-    );
+    return _$$ProductInfoImplToJson(this);
   }
 }
 
 abstract class _ProductInfo implements ProductInfo {
-  const factory _ProductInfo(
-      {required final String identifier,
-      required final String title,
-      required final String description,
-      required final String price,
-      required final String currencyCode,
-      required final double priceAmount,
-      required final String? introductoryPrice,
-      required final String? introductoryPeriod,
-      required final String subscriptionPeriod,
-      required final bool isAvailable}) = _$ProductInfoImpl;
+  const factory _ProductInfo({
+    required final String identifier,
+    required final String title,
+    required final String description,
+    required final String price,
+    required final String currencyCode,
+    required final double priceAmount,
+    required final String? introductoryPrice,
+    required final String? introductoryPeriod,
+    required final String subscriptionPeriod,
+    required final bool isAvailable,
+  }) = _$ProductInfoImpl;
 
   factory _ProductInfo.fromJson(Map<String, dynamic> json) =
       _$ProductInfoImpl.fromJson;
@@ -376,17 +408,19 @@ mixin _$EntitlementInfo {
 /// @nodoc
 abstract class $EntitlementInfoCopyWith<$Res> {
   factory $EntitlementInfoCopyWith(
-          EntitlementInfo value, $Res Function(EntitlementInfo) then) =
-      _$EntitlementInfoCopyWithImpl<$Res, EntitlementInfo>;
+    EntitlementInfo value,
+    $Res Function(EntitlementInfo) then,
+  ) = _$EntitlementInfoCopyWithImpl<$Res, EntitlementInfo>;
   @useResult
-  $Res call(
-      {String identifier,
-      bool isActive,
-      DateTime? expirationDate,
-      DateTime? latestPurchaseDate,
-      DateTime? originalPurchaseDate,
-      String? productIdentifier,
-      bool willRenew});
+  $Res call({
+    String identifier,
+    bool isActive,
+    DateTime? expirationDate,
+    DateTime? latestPurchaseDate,
+    DateTime? originalPurchaseDate,
+    String? productIdentifier,
+    bool willRenew,
+  });
 }
 
 /// @nodoc
@@ -410,55 +444,67 @@ class _$EntitlementInfoCopyWithImpl<$Res, $Val extends EntitlementInfo>
     Object? productIdentifier = freezed,
     Object? willRenew = null,
   }) {
-    return _then(_value.copyWith(
-      identifier: null == identifier
-          ? _value.identifier
-          : identifier // ignore: cast_nullable_to_non_nullable
-              as String,
-      isActive: null == isActive
-          ? _value.isActive
-          : isActive // ignore: cast_nullable_to_non_nullable
-              as bool,
-      expirationDate: freezed == expirationDate
-          ? _value.expirationDate
-          : expirationDate // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-      latestPurchaseDate: freezed == latestPurchaseDate
-          ? _value.latestPurchaseDate
-          : latestPurchaseDate // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-      originalPurchaseDate: freezed == originalPurchaseDate
-          ? _value.originalPurchaseDate
-          : originalPurchaseDate // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-      productIdentifier: freezed == productIdentifier
-          ? _value.productIdentifier
-          : productIdentifier // ignore: cast_nullable_to_non_nullable
-              as String?,
-      willRenew: null == willRenew
-          ? _value.willRenew
-          : willRenew // ignore: cast_nullable_to_non_nullable
-              as bool,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            identifier:
+                null == identifier
+                    ? _value.identifier
+                    : identifier // ignore: cast_nullable_to_non_nullable
+                        as String,
+            isActive:
+                null == isActive
+                    ? _value.isActive
+                    : isActive // ignore: cast_nullable_to_non_nullable
+                        as bool,
+            expirationDate:
+                freezed == expirationDate
+                    ? _value.expirationDate
+                    : expirationDate // ignore: cast_nullable_to_non_nullable
+                        as DateTime?,
+            latestPurchaseDate:
+                freezed == latestPurchaseDate
+                    ? _value.latestPurchaseDate
+                    : latestPurchaseDate // ignore: cast_nullable_to_non_nullable
+                        as DateTime?,
+            originalPurchaseDate:
+                freezed == originalPurchaseDate
+                    ? _value.originalPurchaseDate
+                    : originalPurchaseDate // ignore: cast_nullable_to_non_nullable
+                        as DateTime?,
+            productIdentifier:
+                freezed == productIdentifier
+                    ? _value.productIdentifier
+                    : productIdentifier // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            willRenew:
+                null == willRenew
+                    ? _value.willRenew
+                    : willRenew // ignore: cast_nullable_to_non_nullable
+                        as bool,
+          )
+          as $Val,
+    );
   }
 }
 
 /// @nodoc
 abstract class _$$EntitlementInfoImplCopyWith<$Res>
     implements $EntitlementInfoCopyWith<$Res> {
-  factory _$$EntitlementInfoImplCopyWith(_$EntitlementInfoImpl value,
-          $Res Function(_$EntitlementInfoImpl) then) =
-      __$$EntitlementInfoImplCopyWithImpl<$Res>;
+  factory _$$EntitlementInfoImplCopyWith(
+    _$EntitlementInfoImpl value,
+    $Res Function(_$EntitlementInfoImpl) then,
+  ) = __$$EntitlementInfoImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {String identifier,
-      bool isActive,
-      DateTime? expirationDate,
-      DateTime? latestPurchaseDate,
-      DateTime? originalPurchaseDate,
-      String? productIdentifier,
-      bool willRenew});
+  $Res call({
+    String identifier,
+    bool isActive,
+    DateTime? expirationDate,
+    DateTime? latestPurchaseDate,
+    DateTime? originalPurchaseDate,
+    String? productIdentifier,
+    bool willRenew,
+  });
 }
 
 /// @nodoc
@@ -466,8 +512,9 @@ class __$$EntitlementInfoImplCopyWithImpl<$Res>
     extends _$EntitlementInfoCopyWithImpl<$Res, _$EntitlementInfoImpl>
     implements _$$EntitlementInfoImplCopyWith<$Res> {
   __$$EntitlementInfoImplCopyWithImpl(
-      _$EntitlementInfoImpl _value, $Res Function(_$EntitlementInfoImpl) _then)
-      : super(_value, _then);
+    _$EntitlementInfoImpl _value,
+    $Res Function(_$EntitlementInfoImpl) _then,
+  ) : super(_value, _then);
 
   @pragma('vm:prefer-inline')
   @override
@@ -480,50 +527,60 @@ class __$$EntitlementInfoImplCopyWithImpl<$Res>
     Object? productIdentifier = freezed,
     Object? willRenew = null,
   }) {
-    return _then(_$EntitlementInfoImpl(
-      identifier: null == identifier
-          ? _value.identifier
-          : identifier // ignore: cast_nullable_to_non_nullable
-              as String,
-      isActive: null == isActive
-          ? _value.isActive
-          : isActive // ignore: cast_nullable_to_non_nullable
-              as bool,
-      expirationDate: freezed == expirationDate
-          ? _value.expirationDate
-          : expirationDate // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-      latestPurchaseDate: freezed == latestPurchaseDate
-          ? _value.latestPurchaseDate
-          : latestPurchaseDate // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-      originalPurchaseDate: freezed == originalPurchaseDate
-          ? _value.originalPurchaseDate
-          : originalPurchaseDate // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-      productIdentifier: freezed == productIdentifier
-          ? _value.productIdentifier
-          : productIdentifier // ignore: cast_nullable_to_non_nullable
-              as String?,
-      willRenew: null == willRenew
-          ? _value.willRenew
-          : willRenew // ignore: cast_nullable_to_non_nullable
-              as bool,
-    ));
+    return _then(
+      _$EntitlementInfoImpl(
+        identifier:
+            null == identifier
+                ? _value.identifier
+                : identifier // ignore: cast_nullable_to_non_nullable
+                    as String,
+        isActive:
+            null == isActive
+                ? _value.isActive
+                : isActive // ignore: cast_nullable_to_non_nullable
+                    as bool,
+        expirationDate:
+            freezed == expirationDate
+                ? _value.expirationDate
+                : expirationDate // ignore: cast_nullable_to_non_nullable
+                    as DateTime?,
+        latestPurchaseDate:
+            freezed == latestPurchaseDate
+                ? _value.latestPurchaseDate
+                : latestPurchaseDate // ignore: cast_nullable_to_non_nullable
+                    as DateTime?,
+        originalPurchaseDate:
+            freezed == originalPurchaseDate
+                ? _value.originalPurchaseDate
+                : originalPurchaseDate // ignore: cast_nullable_to_non_nullable
+                    as DateTime?,
+        productIdentifier:
+            freezed == productIdentifier
+                ? _value.productIdentifier
+                : productIdentifier // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        willRenew:
+            null == willRenew
+                ? _value.willRenew
+                : willRenew // ignore: cast_nullable_to_non_nullable
+                    as bool,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$EntitlementInfoImpl implements _EntitlementInfo {
-  const _$EntitlementInfoImpl(
-      {required this.identifier,
-      required this.isActive,
-      required this.expirationDate,
-      required this.latestPurchaseDate,
-      required this.originalPurchaseDate,
-      required this.productIdentifier,
-      required this.willRenew});
+  const _$EntitlementInfoImpl({
+    required this.identifier,
+    required this.isActive,
+    required this.expirationDate,
+    required this.latestPurchaseDate,
+    required this.originalPurchaseDate,
+    required this.productIdentifier,
+    required this.willRenew,
+  });
 
   factory _$EntitlementInfoImpl.fromJson(Map<String, dynamic> json) =>
       _$$EntitlementInfoImplFromJson(json);
@@ -572,39 +629,41 @@ class _$EntitlementInfoImpl implements _EntitlementInfo {
   @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
-      runtimeType,
-      identifier,
-      isActive,
-      expirationDate,
-      latestPurchaseDate,
-      originalPurchaseDate,
-      productIdentifier,
-      willRenew);
+    runtimeType,
+    identifier,
+    isActive,
+    expirationDate,
+    latestPurchaseDate,
+    originalPurchaseDate,
+    productIdentifier,
+    willRenew,
+  );
 
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$EntitlementInfoImplCopyWith<_$EntitlementInfoImpl> get copyWith =>
       __$$EntitlementInfoImplCopyWithImpl<_$EntitlementInfoImpl>(
-          this, _$identity);
+        this,
+        _$identity,
+      );
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$EntitlementInfoImplToJson(
-      this,
-    );
+    return _$$EntitlementInfoImplToJson(this);
   }
 }
 
 abstract class _EntitlementInfo implements EntitlementInfo {
-  const factory _EntitlementInfo(
-      {required final String identifier,
-      required final bool isActive,
-      required final DateTime? expirationDate,
-      required final DateTime? latestPurchaseDate,
-      required final DateTime? originalPurchaseDate,
-      required final String? productIdentifier,
-      required final bool willRenew}) = _$EntitlementInfoImpl;
+  const factory _EntitlementInfo({
+    required final String identifier,
+    required final bool isActive,
+    required final DateTime? expirationDate,
+    required final DateTime? latestPurchaseDate,
+    required final DateTime? originalPurchaseDate,
+    required final String? productIdentifier,
+    required final bool willRenew,
+  }) = _$EntitlementInfoImpl;
 
   factory _EntitlementInfo.fromJson(Map<String, dynamic> json) =
       _$EntitlementInfoImpl.fromJson;
@@ -654,16 +713,18 @@ mixin _$CustomerInfo {
 /// @nodoc
 abstract class $CustomerInfoCopyWith<$Res> {
   factory $CustomerInfoCopyWith(
-          CustomerInfo value, $Res Function(CustomerInfo) then) =
-      _$CustomerInfoCopyWithImpl<$Res, CustomerInfo>;
+    CustomerInfo value,
+    $Res Function(CustomerInfo) then,
+  ) = _$CustomerInfoCopyWithImpl<$Res, CustomerInfo>;
   @useResult
-  $Res call(
-      {String originalAppUserId,
-      Map<String, EntitlementInfo> entitlements,
-      DateTime? originalPurchaseDate,
-      DateTime? latestExpirationDate,
-      Map<String, DateTime?> allPurchaseDates,
-      Map<String, DateTime?> allExpirationDates});
+  $Res call({
+    String originalAppUserId,
+    Map<String, EntitlementInfo> entitlements,
+    DateTime? originalPurchaseDate,
+    DateTime? latestExpirationDate,
+    Map<String, DateTime?> allPurchaseDates,
+    Map<String, DateTime?> allExpirationDates,
+  });
 }
 
 /// @nodoc
@@ -686,32 +747,41 @@ class _$CustomerInfoCopyWithImpl<$Res, $Val extends CustomerInfo>
     Object? allPurchaseDates = null,
     Object? allExpirationDates = null,
   }) {
-    return _then(_value.copyWith(
-      originalAppUserId: null == originalAppUserId
-          ? _value.originalAppUserId
-          : originalAppUserId // ignore: cast_nullable_to_non_nullable
-              as String,
-      entitlements: null == entitlements
-          ? _value.entitlements
-          : entitlements // ignore: cast_nullable_to_non_nullable
-              as Map<String, EntitlementInfo>,
-      originalPurchaseDate: freezed == originalPurchaseDate
-          ? _value.originalPurchaseDate
-          : originalPurchaseDate // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-      latestExpirationDate: freezed == latestExpirationDate
-          ? _value.latestExpirationDate
-          : latestExpirationDate // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-      allPurchaseDates: null == allPurchaseDates
-          ? _value.allPurchaseDates
-          : allPurchaseDates // ignore: cast_nullable_to_non_nullable
-              as Map<String, DateTime?>,
-      allExpirationDates: null == allExpirationDates
-          ? _value.allExpirationDates
-          : allExpirationDates // ignore: cast_nullable_to_non_nullable
-              as Map<String, DateTime?>,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            originalAppUserId:
+                null == originalAppUserId
+                    ? _value.originalAppUserId
+                    : originalAppUserId // ignore: cast_nullable_to_non_nullable
+                        as String,
+            entitlements:
+                null == entitlements
+                    ? _value.entitlements
+                    : entitlements // ignore: cast_nullable_to_non_nullable
+                        as Map<String, EntitlementInfo>,
+            originalPurchaseDate:
+                freezed == originalPurchaseDate
+                    ? _value.originalPurchaseDate
+                    : originalPurchaseDate // ignore: cast_nullable_to_non_nullable
+                        as DateTime?,
+            latestExpirationDate:
+                freezed == latestExpirationDate
+                    ? _value.latestExpirationDate
+                    : latestExpirationDate // ignore: cast_nullable_to_non_nullable
+                        as DateTime?,
+            allPurchaseDates:
+                null == allPurchaseDates
+                    ? _value.allPurchaseDates
+                    : allPurchaseDates // ignore: cast_nullable_to_non_nullable
+                        as Map<String, DateTime?>,
+            allExpirationDates:
+                null == allExpirationDates
+                    ? _value.allExpirationDates
+                    : allExpirationDates // ignore: cast_nullable_to_non_nullable
+                        as Map<String, DateTime?>,
+          )
+          as $Val,
+    );
   }
 }
 
@@ -719,17 +789,19 @@ class _$CustomerInfoCopyWithImpl<$Res, $Val extends CustomerInfo>
 abstract class _$$CustomerInfoImplCopyWith<$Res>
     implements $CustomerInfoCopyWith<$Res> {
   factory _$$CustomerInfoImplCopyWith(
-          _$CustomerInfoImpl value, $Res Function(_$CustomerInfoImpl) then) =
-      __$$CustomerInfoImplCopyWithImpl<$Res>;
+    _$CustomerInfoImpl value,
+    $Res Function(_$CustomerInfoImpl) then,
+  ) = __$$CustomerInfoImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {String originalAppUserId,
-      Map<String, EntitlementInfo> entitlements,
-      DateTime? originalPurchaseDate,
-      DateTime? latestExpirationDate,
-      Map<String, DateTime?> allPurchaseDates,
-      Map<String, DateTime?> allExpirationDates});
+  $Res call({
+    String originalAppUserId,
+    Map<String, EntitlementInfo> entitlements,
+    DateTime? originalPurchaseDate,
+    DateTime? latestExpirationDate,
+    Map<String, DateTime?> allPurchaseDates,
+    Map<String, DateTime?> allExpirationDates,
+  });
 }
 
 /// @nodoc
@@ -737,8 +809,9 @@ class __$$CustomerInfoImplCopyWithImpl<$Res>
     extends _$CustomerInfoCopyWithImpl<$Res, _$CustomerInfoImpl>
     implements _$$CustomerInfoImplCopyWith<$Res> {
   __$$CustomerInfoImplCopyWithImpl(
-      _$CustomerInfoImpl _value, $Res Function(_$CustomerInfoImpl) _then)
-      : super(_value, _then);
+    _$CustomerInfoImpl _value,
+    $Res Function(_$CustomerInfoImpl) _then,
+  ) : super(_value, _then);
 
   @pragma('vm:prefer-inline')
   @override
@@ -750,49 +823,57 @@ class __$$CustomerInfoImplCopyWithImpl<$Res>
     Object? allPurchaseDates = null,
     Object? allExpirationDates = null,
   }) {
-    return _then(_$CustomerInfoImpl(
-      originalAppUserId: null == originalAppUserId
-          ? _value.originalAppUserId
-          : originalAppUserId // ignore: cast_nullable_to_non_nullable
-              as String,
-      entitlements: null == entitlements
-          ? _value._entitlements
-          : entitlements // ignore: cast_nullable_to_non_nullable
-              as Map<String, EntitlementInfo>,
-      originalPurchaseDate: freezed == originalPurchaseDate
-          ? _value.originalPurchaseDate
-          : originalPurchaseDate // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-      latestExpirationDate: freezed == latestExpirationDate
-          ? _value.latestExpirationDate
-          : latestExpirationDate // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-      allPurchaseDates: null == allPurchaseDates
-          ? _value._allPurchaseDates
-          : allPurchaseDates // ignore: cast_nullable_to_non_nullable
-              as Map<String, DateTime?>,
-      allExpirationDates: null == allExpirationDates
-          ? _value._allExpirationDates
-          : allExpirationDates // ignore: cast_nullable_to_non_nullable
-              as Map<String, DateTime?>,
-    ));
+    return _then(
+      _$CustomerInfoImpl(
+        originalAppUserId:
+            null == originalAppUserId
+                ? _value.originalAppUserId
+                : originalAppUserId // ignore: cast_nullable_to_non_nullable
+                    as String,
+        entitlements:
+            null == entitlements
+                ? _value._entitlements
+                : entitlements // ignore: cast_nullable_to_non_nullable
+                    as Map<String, EntitlementInfo>,
+        originalPurchaseDate:
+            freezed == originalPurchaseDate
+                ? _value.originalPurchaseDate
+                : originalPurchaseDate // ignore: cast_nullable_to_non_nullable
+                    as DateTime?,
+        latestExpirationDate:
+            freezed == latestExpirationDate
+                ? _value.latestExpirationDate
+                : latestExpirationDate // ignore: cast_nullable_to_non_nullable
+                    as DateTime?,
+        allPurchaseDates:
+            null == allPurchaseDates
+                ? _value._allPurchaseDates
+                : allPurchaseDates // ignore: cast_nullable_to_non_nullable
+                    as Map<String, DateTime?>,
+        allExpirationDates:
+            null == allExpirationDates
+                ? _value._allExpirationDates
+                : allExpirationDates // ignore: cast_nullable_to_non_nullable
+                    as Map<String, DateTime?>,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$CustomerInfoImpl extends _CustomerInfo {
-  const _$CustomerInfoImpl(
-      {required this.originalAppUserId,
-      required final Map<String, EntitlementInfo> entitlements,
-      required this.originalPurchaseDate,
-      required this.latestExpirationDate,
-      final Map<String, DateTime?> allPurchaseDates = const {},
-      final Map<String, DateTime?> allExpirationDates = const {}})
-      : _entitlements = entitlements,
-        _allPurchaseDates = allPurchaseDates,
-        _allExpirationDates = allExpirationDates,
-        super._();
+  const _$CustomerInfoImpl({
+    required this.originalAppUserId,
+    required final Map<String, EntitlementInfo> entitlements,
+    required this.originalPurchaseDate,
+    required this.latestExpirationDate,
+    final Map<String, DateTime?> allPurchaseDates = const {},
+    final Map<String, DateTime?> allExpirationDates = const {},
+  }) : _entitlements = entitlements,
+       _allPurchaseDates = allPurchaseDates,
+       _allExpirationDates = allExpirationDates,
+       super._();
 
   factory _$CustomerInfoImpl.fromJson(Map<String, dynamic> json) =>
       _$$CustomerInfoImplFromJson(json);
@@ -842,28 +923,35 @@ class _$CustomerInfoImpl extends _CustomerInfo {
             other is _$CustomerInfoImpl &&
             (identical(other.originalAppUserId, originalAppUserId) ||
                 other.originalAppUserId == originalAppUserId) &&
-            const DeepCollectionEquality()
-                .equals(other._entitlements, _entitlements) &&
+            const DeepCollectionEquality().equals(
+              other._entitlements,
+              _entitlements,
+            ) &&
             (identical(other.originalPurchaseDate, originalPurchaseDate) ||
                 other.originalPurchaseDate == originalPurchaseDate) &&
             (identical(other.latestExpirationDate, latestExpirationDate) ||
                 other.latestExpirationDate == latestExpirationDate) &&
-            const DeepCollectionEquality()
-                .equals(other._allPurchaseDates, _allPurchaseDates) &&
-            const DeepCollectionEquality()
-                .equals(other._allExpirationDates, _allExpirationDates));
+            const DeepCollectionEquality().equals(
+              other._allPurchaseDates,
+              _allPurchaseDates,
+            ) &&
+            const DeepCollectionEquality().equals(
+              other._allExpirationDates,
+              _allExpirationDates,
+            ));
   }
 
   @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
-      runtimeType,
-      originalAppUserId,
-      const DeepCollectionEquality().hash(_entitlements),
-      originalPurchaseDate,
-      latestExpirationDate,
-      const DeepCollectionEquality().hash(_allPurchaseDates),
-      const DeepCollectionEquality().hash(_allExpirationDates));
+    runtimeType,
+    originalAppUserId,
+    const DeepCollectionEquality().hash(_entitlements),
+    originalPurchaseDate,
+    latestExpirationDate,
+    const DeepCollectionEquality().hash(_allPurchaseDates),
+    const DeepCollectionEquality().hash(_allExpirationDates),
+  );
 
   @JsonKey(ignore: true)
   @override
@@ -873,20 +961,19 @@ class _$CustomerInfoImpl extends _CustomerInfo {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$CustomerInfoImplToJson(
-      this,
-    );
+    return _$$CustomerInfoImplToJson(this);
   }
 }
 
 abstract class _CustomerInfo extends CustomerInfo {
-  const factory _CustomerInfo(
-      {required final String originalAppUserId,
-      required final Map<String, EntitlementInfo> entitlements,
-      required final DateTime? originalPurchaseDate,
-      required final DateTime? latestExpirationDate,
-      final Map<String, DateTime?> allPurchaseDates,
-      final Map<String, DateTime?> allExpirationDates}) = _$CustomerInfoImpl;
+  const factory _CustomerInfo({
+    required final String originalAppUserId,
+    required final Map<String, EntitlementInfo> entitlements,
+    required final DateTime? originalPurchaseDate,
+    required final DateTime? latestExpirationDate,
+    final Map<String, DateTime?> allPurchaseDates,
+    final Map<String, DateTime?> allExpirationDates,
+  }) = _$CustomerInfoImpl;
   const _CustomerInfo._() : super._();
 
   factory _CustomerInfo.fromJson(Map<String, dynamic> json) =

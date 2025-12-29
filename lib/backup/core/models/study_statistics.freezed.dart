@@ -12,7 +12,8 @@ part of 'study_statistics.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods',
+);
 
 /// @nodoc
 mixin _$StudyStatistics {
@@ -48,18 +49,20 @@ mixin _$StudyStatistics {
 /// @nodoc
 abstract class $StudyStatisticsCopyWith<$Res> {
   factory $StudyStatisticsCopyWith(
-          StudyStatistics value, $Res Function(StudyStatistics) then) =
-      _$StudyStatisticsCopyWithImpl<$Res, StudyStatistics>;
+    StudyStatistics value,
+    $Res Function(StudyStatistics) then,
+  ) = _$StudyStatisticsCopyWithImpl<$Res, StudyStatistics>;
   @useResult
-  $Res call(
-      {double todayProgress,
-      int totalMinutes,
-      int targetMinutes,
-      int currentStreak,
-      int totalGoals,
-      int completedGoals,
-      int remainingMinutes,
-      DateTime? lastUpdated});
+  $Res call({
+    double todayProgress,
+    int totalMinutes,
+    int targetMinutes,
+    int currentStreak,
+    int totalGoals,
+    int completedGoals,
+    int remainingMinutes,
+    DateTime? lastUpdated,
+  });
 }
 
 /// @nodoc
@@ -84,60 +87,73 @@ class _$StudyStatisticsCopyWithImpl<$Res, $Val extends StudyStatistics>
     Object? remainingMinutes = null,
     Object? lastUpdated = freezed,
   }) {
-    return _then(_value.copyWith(
-      todayProgress: null == todayProgress
-          ? _value.todayProgress
-          : todayProgress // ignore: cast_nullable_to_non_nullable
-              as double,
-      totalMinutes: null == totalMinutes
-          ? _value.totalMinutes
-          : totalMinutes // ignore: cast_nullable_to_non_nullable
-              as int,
-      targetMinutes: null == targetMinutes
-          ? _value.targetMinutes
-          : targetMinutes // ignore: cast_nullable_to_non_nullable
-              as int,
-      currentStreak: null == currentStreak
-          ? _value.currentStreak
-          : currentStreak // ignore: cast_nullable_to_non_nullable
-              as int,
-      totalGoals: null == totalGoals
-          ? _value.totalGoals
-          : totalGoals // ignore: cast_nullable_to_non_nullable
-              as int,
-      completedGoals: null == completedGoals
-          ? _value.completedGoals
-          : completedGoals // ignore: cast_nullable_to_non_nullable
-              as int,
-      remainingMinutes: null == remainingMinutes
-          ? _value.remainingMinutes
-          : remainingMinutes // ignore: cast_nullable_to_non_nullable
-              as int,
-      lastUpdated: freezed == lastUpdated
-          ? _value.lastUpdated
-          : lastUpdated // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            todayProgress:
+                null == todayProgress
+                    ? _value.todayProgress
+                    : todayProgress // ignore: cast_nullable_to_non_nullable
+                        as double,
+            totalMinutes:
+                null == totalMinutes
+                    ? _value.totalMinutes
+                    : totalMinutes // ignore: cast_nullable_to_non_nullable
+                        as int,
+            targetMinutes:
+                null == targetMinutes
+                    ? _value.targetMinutes
+                    : targetMinutes // ignore: cast_nullable_to_non_nullable
+                        as int,
+            currentStreak:
+                null == currentStreak
+                    ? _value.currentStreak
+                    : currentStreak // ignore: cast_nullable_to_non_nullable
+                        as int,
+            totalGoals:
+                null == totalGoals
+                    ? _value.totalGoals
+                    : totalGoals // ignore: cast_nullable_to_non_nullable
+                        as int,
+            completedGoals:
+                null == completedGoals
+                    ? _value.completedGoals
+                    : completedGoals // ignore: cast_nullable_to_non_nullable
+                        as int,
+            remainingMinutes:
+                null == remainingMinutes
+                    ? _value.remainingMinutes
+                    : remainingMinutes // ignore: cast_nullable_to_non_nullable
+                        as int,
+            lastUpdated:
+                freezed == lastUpdated
+                    ? _value.lastUpdated
+                    : lastUpdated // ignore: cast_nullable_to_non_nullable
+                        as DateTime?,
+          )
+          as $Val,
+    );
   }
 }
 
 /// @nodoc
 abstract class _$$StudyStatisticsImplCopyWith<$Res>
     implements $StudyStatisticsCopyWith<$Res> {
-  factory _$$StudyStatisticsImplCopyWith(_$StudyStatisticsImpl value,
-          $Res Function(_$StudyStatisticsImpl) then) =
-      __$$StudyStatisticsImplCopyWithImpl<$Res>;
+  factory _$$StudyStatisticsImplCopyWith(
+    _$StudyStatisticsImpl value,
+    $Res Function(_$StudyStatisticsImpl) then,
+  ) = __$$StudyStatisticsImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {double todayProgress,
-      int totalMinutes,
-      int targetMinutes,
-      int currentStreak,
-      int totalGoals,
-      int completedGoals,
-      int remainingMinutes,
-      DateTime? lastUpdated});
+  $Res call({
+    double todayProgress,
+    int totalMinutes,
+    int targetMinutes,
+    int currentStreak,
+    int totalGoals,
+    int completedGoals,
+    int remainingMinutes,
+    DateTime? lastUpdated,
+  });
 }
 
 /// @nodoc
@@ -145,8 +161,9 @@ class __$$StudyStatisticsImplCopyWithImpl<$Res>
     extends _$StudyStatisticsCopyWithImpl<$Res, _$StudyStatisticsImpl>
     implements _$$StudyStatisticsImplCopyWith<$Res> {
   __$$StudyStatisticsImplCopyWithImpl(
-      _$StudyStatisticsImpl _value, $Res Function(_$StudyStatisticsImpl) _then)
-      : super(_value, _then);
+    _$StudyStatisticsImpl _value,
+    $Res Function(_$StudyStatisticsImpl) _then,
+  ) : super(_value, _then);
 
   @pragma('vm:prefer-inline')
   @override
@@ -160,55 +177,66 @@ class __$$StudyStatisticsImplCopyWithImpl<$Res>
     Object? remainingMinutes = null,
     Object? lastUpdated = freezed,
   }) {
-    return _then(_$StudyStatisticsImpl(
-      todayProgress: null == todayProgress
-          ? _value.todayProgress
-          : todayProgress // ignore: cast_nullable_to_non_nullable
-              as double,
-      totalMinutes: null == totalMinutes
-          ? _value.totalMinutes
-          : totalMinutes // ignore: cast_nullable_to_non_nullable
-              as int,
-      targetMinutes: null == targetMinutes
-          ? _value.targetMinutes
-          : targetMinutes // ignore: cast_nullable_to_non_nullable
-              as int,
-      currentStreak: null == currentStreak
-          ? _value.currentStreak
-          : currentStreak // ignore: cast_nullable_to_non_nullable
-              as int,
-      totalGoals: null == totalGoals
-          ? _value.totalGoals
-          : totalGoals // ignore: cast_nullable_to_non_nullable
-              as int,
-      completedGoals: null == completedGoals
-          ? _value.completedGoals
-          : completedGoals // ignore: cast_nullable_to_non_nullable
-              as int,
-      remainingMinutes: null == remainingMinutes
-          ? _value.remainingMinutes
-          : remainingMinutes // ignore: cast_nullable_to_non_nullable
-              as int,
-      lastUpdated: freezed == lastUpdated
-          ? _value.lastUpdated
-          : lastUpdated // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-    ));
+    return _then(
+      _$StudyStatisticsImpl(
+        todayProgress:
+            null == todayProgress
+                ? _value.todayProgress
+                : todayProgress // ignore: cast_nullable_to_non_nullable
+                    as double,
+        totalMinutes:
+            null == totalMinutes
+                ? _value.totalMinutes
+                : totalMinutes // ignore: cast_nullable_to_non_nullable
+                    as int,
+        targetMinutes:
+            null == targetMinutes
+                ? _value.targetMinutes
+                : targetMinutes // ignore: cast_nullable_to_non_nullable
+                    as int,
+        currentStreak:
+            null == currentStreak
+                ? _value.currentStreak
+                : currentStreak // ignore: cast_nullable_to_non_nullable
+                    as int,
+        totalGoals:
+            null == totalGoals
+                ? _value.totalGoals
+                : totalGoals // ignore: cast_nullable_to_non_nullable
+                    as int,
+        completedGoals:
+            null == completedGoals
+                ? _value.completedGoals
+                : completedGoals // ignore: cast_nullable_to_non_nullable
+                    as int,
+        remainingMinutes:
+            null == remainingMinutes
+                ? _value.remainingMinutes
+                : remainingMinutes // ignore: cast_nullable_to_non_nullable
+                    as int,
+        lastUpdated:
+            freezed == lastUpdated
+                ? _value.lastUpdated
+                : lastUpdated // ignore: cast_nullable_to_non_nullable
+                    as DateTime?,
+      ),
+    );
   }
 }
 
 /// @nodoc
 
 class _$StudyStatisticsImpl implements _StudyStatistics {
-  const _$StudyStatisticsImpl(
-      {this.todayProgress = 0.0,
-      this.totalMinutes = 0,
-      this.targetMinutes = 0,
-      this.currentStreak = 0,
-      this.totalGoals = 0,
-      this.completedGoals = 0,
-      this.remainingMinutes = 0,
-      this.lastUpdated});
+  const _$StudyStatisticsImpl({
+    this.todayProgress = 0.0,
+    this.totalMinutes = 0,
+    this.targetMinutes = 0,
+    this.currentStreak = 0,
+    this.totalGoals = 0,
+    this.completedGoals = 0,
+    this.remainingMinutes = 0,
+    this.lastUpdated,
+  });
 
   /// 今日の進捗率（0.0 - 1.0）
   @override
@@ -279,65 +307,61 @@ class _$StudyStatisticsImpl implements _StudyStatistics {
 
   @override
   int get hashCode => Object.hash(
-      runtimeType,
-      todayProgress,
-      totalMinutes,
-      targetMinutes,
-      currentStreak,
-      totalGoals,
-      completedGoals,
-      remainingMinutes,
-      lastUpdated);
+    runtimeType,
+    todayProgress,
+    totalMinutes,
+    targetMinutes,
+    currentStreak,
+    totalGoals,
+    completedGoals,
+    remainingMinutes,
+    lastUpdated,
+  );
 
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$StudyStatisticsImplCopyWith<_$StudyStatisticsImpl> get copyWith =>
       __$$StudyStatisticsImplCopyWithImpl<_$StudyStatisticsImpl>(
-          this, _$identity);
+        this,
+        _$identity,
+      );
 }
 
 abstract class _StudyStatistics implements StudyStatistics {
-  const factory _StudyStatistics(
-      {final double todayProgress,
-      final int totalMinutes,
-      final int targetMinutes,
-      final int currentStreak,
-      final int totalGoals,
-      final int completedGoals,
-      final int remainingMinutes,
-      final DateTime? lastUpdated}) = _$StudyStatisticsImpl;
+  const factory _StudyStatistics({
+    final double todayProgress,
+    final int totalMinutes,
+    final int targetMinutes,
+    final int currentStreak,
+    final int totalGoals,
+    final int completedGoals,
+    final int remainingMinutes,
+    final DateTime? lastUpdated,
+  }) = _$StudyStatisticsImpl;
 
   @override
-
   /// 今日の進捗率（0.0 - 1.0）
   double get todayProgress;
   @override
-
   /// 今日の学習時間（分）
   int get totalMinutes;
   @override
-
   /// 今日の目標時間（分）
   int get targetMinutes;
   @override
-
   /// 連続学習日数（ストリーク）
   int get currentStreak;
   @override
-
   /// 総目標数
   int get totalGoals;
   @override
-
   /// 完了済み目標数
   int get completedGoals;
   @override
-
   /// 今日の残り時間（分）
   int get remainingMinutes;
   @override
-
   /// データ更新日時
   DateTime? get lastUpdated;
   @override

@@ -39,7 +39,9 @@ extension AuthStateX on AuthState {
   /// アプリを使用可能な状態かどうか（認証済みまたはゲスト）
   bool get canUseApp {
     final canUse = isAuthenticated || isGuest;
-    print('🔍 AuthState.canUseApp - State: $this, isAuthenticated: $isAuthenticated, isGuest: $isGuest, canUseApp: $canUse');
+    print(
+      '🔍 AuthState.canUseApp - State: $this, isAuthenticated: $isAuthenticated, isGuest: $isGuest, canUseApp: $canUse',
+    );
     return canUse;
   }
 

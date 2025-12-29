@@ -17,12 +17,14 @@ _$GoalsModelImpl _$$GoalsModelImplFromJson(Map<String, dynamic> json) =>
       avoidMessage: json['avoidMessage'] as String,
       targetMinutes: json['targetMinutes'] as int,
       spentMinutes: json['spentMinutes'] as int,
-      updatedAt: json['updatedAt'] == null
-          ? null
-          : DateTime.parse(json['updatedAt'] as String),
-      syncUpdatedAt: json['syncUpdatedAt'] == null
-          ? null
-          : DateTime.parse(json['syncUpdatedAt'] as String),
+      updatedAt:
+          json['updatedAt'] == null
+              ? null
+              : DateTime.parse(json['updatedAt'] as String),
+      syncUpdatedAt:
+          json['syncUpdatedAt'] == null
+              ? null
+              : DateTime.parse(json['syncUpdatedAt'] as String),
       isSynced: json['isSynced'] as bool? ?? false,
     );
 

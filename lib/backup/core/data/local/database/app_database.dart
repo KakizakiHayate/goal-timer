@@ -364,7 +364,9 @@ class AppDatabase {
 
       if (oldVersion < 6) {
         // バージョン6へのマイグレーション: minutes -> total_seconds
-        AppLogger.instance.i('daily_study_logsテーブルのminutes → total_secondsへの移行を開始します...');
+        AppLogger.instance.i(
+          'daily_study_logsテーブルのminutes → total_secondsへの移行を開始します...',
+        );
 
         // まず既存のカラムが存在するか確認
         final result = await db.rawQuery("PRAGMA table_info(daily_study_logs)");
@@ -386,7 +388,9 @@ class AppDatabase {
           ''');
 
           // 3. 既存のminutesカラムを削除するため、テーブルを再作成
-          await db.execute('ALTER TABLE daily_study_logs RENAME TO daily_study_logs_old');
+          await db.execute(
+            'ALTER TABLE daily_study_logs RENAME TO daily_study_logs_old',
+          );
 
           // 4. 新しい構造でdaily_study_logsテーブルを再作成
           await db.execute('''

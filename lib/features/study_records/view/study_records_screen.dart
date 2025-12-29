@@ -43,9 +43,7 @@ class _StudyRecordsScreenState extends State<StudyRecordsScreen> {
           final state = viewModel.state;
 
           if (state.isLoading) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
+            return const Center(child: CircularProgressIndicator());
           }
 
           return SingleChildScrollView(
@@ -77,29 +75,30 @@ class _StudyRecordsScreenState extends State<StudyRecordsScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
-            onPressed: state.canGoPrevious
-                ? () => viewModel.goToPreviousMonth()
-                : null,
+            onPressed:
+                state.canGoPrevious
+                    ? () => viewModel.goToPreviousMonth()
+                    : null,
             icon: Icon(
               Icons.chevron_left,
-              color: state.canGoPrevious
-                  ? ColorConsts.textPrimary
-                  : ColorConsts.disabled,
+              color:
+                  state.canGoPrevious
+                      ? ColorConsts.textPrimary
+                      : ColorConsts.disabled,
             ),
           ),
           Text(
             _formatMonth(state.currentMonth),
-            style: TextConsts.h3.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+            style: TextConsts.h3.copyWith(fontWeight: FontWeight.w600),
           ),
           IconButton(
-            onPressed:
-                state.canGoNext ? () => viewModel.goToNextMonth() : null,
+            onPressed: state.canGoNext ? () => viewModel.goToNextMonth() : null,
             icon: Icon(
               Icons.chevron_right,
               color:
-                  state.canGoNext ? ColorConsts.textPrimary : ColorConsts.disabled,
+                  state.canGoNext
+                      ? ColorConsts.textPrimary
+                      : ColorConsts.disabled,
             ),
           ),
         ],
@@ -159,11 +158,7 @@ class _StudyRecordsScreenState extends State<StudyRecordsScreen> {
               icon: '🔥',
             ),
           ),
-          Container(
-            width: 1,
-            height: 48,
-            color: ColorConsts.disabled,
-          ),
+          Container(width: 1, height: 48, color: ColorConsts.disabled),
           Expanded(
             child: _buildStreakItem(
               title: '最長ストリーク',
@@ -184,10 +179,7 @@ class _StudyRecordsScreenState extends State<StudyRecordsScreen> {
   }) {
     return Column(
       children: [
-        Text(
-          icon,
-          style: const TextStyle(fontSize: 24),
-        ),
+        Text(icon, style: const TextStyle(fontSize: 24)),
         const SizedBox(height: SpacingConsts.xs),
         Text(
           value,

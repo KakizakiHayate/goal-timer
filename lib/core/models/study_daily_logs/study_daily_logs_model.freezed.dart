@@ -12,7 +12,8 @@ part of 'study_daily_logs_model.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods',
+);
 
 StudyDailyLogsModel _$StudyDailyLogsModelFromJson(Map<String, dynamic> json) {
   return _StudyDailyLogsModel.fromJson(json);
@@ -45,18 +46,20 @@ mixin _$StudyDailyLogsModel {
 /// @nodoc
 abstract class $StudyDailyLogsModelCopyWith<$Res> {
   factory $StudyDailyLogsModelCopyWith(
-          StudyDailyLogsModel value, $Res Function(StudyDailyLogsModel) then) =
-      _$StudyDailyLogsModelCopyWithImpl<$Res, StudyDailyLogsModel>;
+    StudyDailyLogsModel value,
+    $Res Function(StudyDailyLogsModel) then,
+  ) = _$StudyDailyLogsModelCopyWithImpl<$Res, StudyDailyLogsModel>;
   @useResult
-  $Res call(
-      {String id,
-      @JsonKey(name: 'created_at') DateTime? createdAt,
-      @JsonKey(name: 'goal_id') String goalId,
-      @JsonKey(name: 'updated_at') DateTime? updatedAt,
-      @JsonKey(name: 'study_date') DateTime studyDate,
-      @JsonKey(name: 'sync_updated_at') DateTime? syncUpdatedAt,
-      @JsonKey(name: 'total_seconds') int totalSeconds,
-      @JsonKey(name: 'user_id') String? userId});
+  $Res call({
+    String id,
+    @JsonKey(name: 'created_at') DateTime? createdAt,
+    @JsonKey(name: 'goal_id') String goalId,
+    @JsonKey(name: 'updated_at') DateTime? updatedAt,
+    @JsonKey(name: 'study_date') DateTime studyDate,
+    @JsonKey(name: 'sync_updated_at') DateTime? syncUpdatedAt,
+    @JsonKey(name: 'total_seconds') int totalSeconds,
+    @JsonKey(name: 'user_id') String? userId,
+  });
 }
 
 /// @nodoc
@@ -81,69 +84,83 @@ class _$StudyDailyLogsModelCopyWithImpl<$Res, $Val extends StudyDailyLogsModel>
     Object? totalSeconds = null,
     Object? userId = freezed,
   }) {
-    return _then(_value.copyWith(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      createdAt: freezed == createdAt
-          ? _value.createdAt
-          : createdAt // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-      goalId: null == goalId
-          ? _value.goalId
-          : goalId // ignore: cast_nullable_to_non_nullable
-              as String,
-      updatedAt: freezed == updatedAt
-          ? _value.updatedAt
-          : updatedAt // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-      studyDate: null == studyDate
-          ? _value.studyDate
-          : studyDate // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-      syncUpdatedAt: freezed == syncUpdatedAt
-          ? _value.syncUpdatedAt
-          : syncUpdatedAt // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-      totalSeconds: null == totalSeconds
-          ? _value.totalSeconds
-          : totalSeconds // ignore: cast_nullable_to_non_nullable
-              as int,
-      userId: freezed == userId
-          ? _value.userId
-          : userId // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            id:
+                null == id
+                    ? _value.id
+                    : id // ignore: cast_nullable_to_non_nullable
+                        as String,
+            createdAt:
+                freezed == createdAt
+                    ? _value.createdAt
+                    : createdAt // ignore: cast_nullable_to_non_nullable
+                        as DateTime?,
+            goalId:
+                null == goalId
+                    ? _value.goalId
+                    : goalId // ignore: cast_nullable_to_non_nullable
+                        as String,
+            updatedAt:
+                freezed == updatedAt
+                    ? _value.updatedAt
+                    : updatedAt // ignore: cast_nullable_to_non_nullable
+                        as DateTime?,
+            studyDate:
+                null == studyDate
+                    ? _value.studyDate
+                    : studyDate // ignore: cast_nullable_to_non_nullable
+                        as DateTime,
+            syncUpdatedAt:
+                freezed == syncUpdatedAt
+                    ? _value.syncUpdatedAt
+                    : syncUpdatedAt // ignore: cast_nullable_to_non_nullable
+                        as DateTime?,
+            totalSeconds:
+                null == totalSeconds
+                    ? _value.totalSeconds
+                    : totalSeconds // ignore: cast_nullable_to_non_nullable
+                        as int,
+            userId:
+                freezed == userId
+                    ? _value.userId
+                    : userId // ignore: cast_nullable_to_non_nullable
+                        as String?,
+          )
+          as $Val,
+    );
   }
 }
 
 /// @nodoc
 abstract class _$$StudyDailyLogsModelImplCopyWith<$Res>
     implements $StudyDailyLogsModelCopyWith<$Res> {
-  factory _$$StudyDailyLogsModelImplCopyWith(_$StudyDailyLogsModelImpl value,
-          $Res Function(_$StudyDailyLogsModelImpl) then) =
-      __$$StudyDailyLogsModelImplCopyWithImpl<$Res>;
+  factory _$$StudyDailyLogsModelImplCopyWith(
+    _$StudyDailyLogsModelImpl value,
+    $Res Function(_$StudyDailyLogsModelImpl) then,
+  ) = __$$StudyDailyLogsModelImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {String id,
-      @JsonKey(name: 'created_at') DateTime? createdAt,
-      @JsonKey(name: 'goal_id') String goalId,
-      @JsonKey(name: 'updated_at') DateTime? updatedAt,
-      @JsonKey(name: 'study_date') DateTime studyDate,
-      @JsonKey(name: 'sync_updated_at') DateTime? syncUpdatedAt,
-      @JsonKey(name: 'total_seconds') int totalSeconds,
-      @JsonKey(name: 'user_id') String? userId});
+  $Res call({
+    String id,
+    @JsonKey(name: 'created_at') DateTime? createdAt,
+    @JsonKey(name: 'goal_id') String goalId,
+    @JsonKey(name: 'updated_at') DateTime? updatedAt,
+    @JsonKey(name: 'study_date') DateTime studyDate,
+    @JsonKey(name: 'sync_updated_at') DateTime? syncUpdatedAt,
+    @JsonKey(name: 'total_seconds') int totalSeconds,
+    @JsonKey(name: 'user_id') String? userId,
+  });
 }
 
 /// @nodoc
 class __$$StudyDailyLogsModelImplCopyWithImpl<$Res>
     extends _$StudyDailyLogsModelCopyWithImpl<$Res, _$StudyDailyLogsModelImpl>
     implements _$$StudyDailyLogsModelImplCopyWith<$Res> {
-  __$$StudyDailyLogsModelImplCopyWithImpl(_$StudyDailyLogsModelImpl _value,
-      $Res Function(_$StudyDailyLogsModelImpl) _then)
-      : super(_value, _then);
+  __$$StudyDailyLogsModelImplCopyWithImpl(
+    _$StudyDailyLogsModelImpl _value,
+    $Res Function(_$StudyDailyLogsModelImpl) _then,
+  ) : super(_value, _then);
 
   @pragma('vm:prefer-inline')
   @override
@@ -157,56 +174,66 @@ class __$$StudyDailyLogsModelImplCopyWithImpl<$Res>
     Object? totalSeconds = null,
     Object? userId = freezed,
   }) {
-    return _then(_$StudyDailyLogsModelImpl(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      createdAt: freezed == createdAt
-          ? _value.createdAt
-          : createdAt // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-      goalId: null == goalId
-          ? _value.goalId
-          : goalId // ignore: cast_nullable_to_non_nullable
-              as String,
-      updatedAt: freezed == updatedAt
-          ? _value.updatedAt
-          : updatedAt // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-      studyDate: null == studyDate
-          ? _value.studyDate
-          : studyDate // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-      syncUpdatedAt: freezed == syncUpdatedAt
-          ? _value.syncUpdatedAt
-          : syncUpdatedAt // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-      totalSeconds: null == totalSeconds
-          ? _value.totalSeconds
-          : totalSeconds // ignore: cast_nullable_to_non_nullable
-              as int,
-      userId: freezed == userId
-          ? _value.userId
-          : userId // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ));
+    return _then(
+      _$StudyDailyLogsModelImpl(
+        id:
+            null == id
+                ? _value.id
+                : id // ignore: cast_nullable_to_non_nullable
+                    as String,
+        createdAt:
+            freezed == createdAt
+                ? _value.createdAt
+                : createdAt // ignore: cast_nullable_to_non_nullable
+                    as DateTime?,
+        goalId:
+            null == goalId
+                ? _value.goalId
+                : goalId // ignore: cast_nullable_to_non_nullable
+                    as String,
+        updatedAt:
+            freezed == updatedAt
+                ? _value.updatedAt
+                : updatedAt // ignore: cast_nullable_to_non_nullable
+                    as DateTime?,
+        studyDate:
+            null == studyDate
+                ? _value.studyDate
+                : studyDate // ignore: cast_nullable_to_non_nullable
+                    as DateTime,
+        syncUpdatedAt:
+            freezed == syncUpdatedAt
+                ? _value.syncUpdatedAt
+                : syncUpdatedAt // ignore: cast_nullable_to_non_nullable
+                    as DateTime?,
+        totalSeconds:
+            null == totalSeconds
+                ? _value.totalSeconds
+                : totalSeconds // ignore: cast_nullable_to_non_nullable
+                    as int,
+        userId:
+            freezed == userId
+                ? _value.userId
+                : userId // ignore: cast_nullable_to_non_nullable
+                    as String?,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$StudyDailyLogsModelImpl extends _StudyDailyLogsModel {
-  const _$StudyDailyLogsModelImpl(
-      {required this.id,
-      @JsonKey(name: 'created_at') this.createdAt,
-      @JsonKey(name: 'goal_id') required this.goalId,
-      @JsonKey(name: 'updated_at') this.updatedAt,
-      @JsonKey(name: 'study_date') required this.studyDate,
-      @JsonKey(name: 'sync_updated_at') this.syncUpdatedAt,
-      @JsonKey(name: 'total_seconds') required this.totalSeconds,
-      @JsonKey(name: 'user_id') this.userId})
-      : super._();
+  const _$StudyDailyLogsModelImpl({
+    required this.id,
+    @JsonKey(name: 'created_at') this.createdAt,
+    @JsonKey(name: 'goal_id') required this.goalId,
+    @JsonKey(name: 'updated_at') this.updatedAt,
+    @JsonKey(name: 'study_date') required this.studyDate,
+    @JsonKey(name: 'sync_updated_at') this.syncUpdatedAt,
+    @JsonKey(name: 'total_seconds') required this.totalSeconds,
+    @JsonKey(name: 'user_id') this.userId,
+  }) : super._();
 
   factory _$StudyDailyLogsModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$StudyDailyLogsModelImplFromJson(json);
@@ -262,35 +289,44 @@ class _$StudyDailyLogsModelImpl extends _StudyDailyLogsModel {
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, id, createdAt, goalId, updatedAt,
-      studyDate, syncUpdatedAt, totalSeconds, userId);
+  int get hashCode => Object.hash(
+    runtimeType,
+    id,
+    createdAt,
+    goalId,
+    updatedAt,
+    studyDate,
+    syncUpdatedAt,
+    totalSeconds,
+    userId,
+  );
 
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$StudyDailyLogsModelImplCopyWith<_$StudyDailyLogsModelImpl> get copyWith =>
       __$$StudyDailyLogsModelImplCopyWithImpl<_$StudyDailyLogsModelImpl>(
-          this, _$identity);
+        this,
+        _$identity,
+      );
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$StudyDailyLogsModelImplToJson(
-      this,
-    );
+    return _$$StudyDailyLogsModelImplToJson(this);
   }
 }
 
 abstract class _StudyDailyLogsModel extends StudyDailyLogsModel {
-  const factory _StudyDailyLogsModel(
-          {required final String id,
-          @JsonKey(name: 'created_at') final DateTime? createdAt,
-          @JsonKey(name: 'goal_id') required final String goalId,
-          @JsonKey(name: 'updated_at') final DateTime? updatedAt,
-          @JsonKey(name: 'study_date') required final DateTime studyDate,
-          @JsonKey(name: 'sync_updated_at') final DateTime? syncUpdatedAt,
-          @JsonKey(name: 'total_seconds') required final int totalSeconds,
-          @JsonKey(name: 'user_id') final String? userId}) =
-      _$StudyDailyLogsModelImpl;
+  const factory _StudyDailyLogsModel({
+    required final String id,
+    @JsonKey(name: 'created_at') final DateTime? createdAt,
+    @JsonKey(name: 'goal_id') required final String goalId,
+    @JsonKey(name: 'updated_at') final DateTime? updatedAt,
+    @JsonKey(name: 'study_date') required final DateTime studyDate,
+    @JsonKey(name: 'sync_updated_at') final DateTime? syncUpdatedAt,
+    @JsonKey(name: 'total_seconds') required final int totalSeconds,
+    @JsonKey(name: 'user_id') final String? userId,
+  }) = _$StudyDailyLogsModelImpl;
   const _StudyDailyLogsModel._() : super._();
 
   factory _StudyDailyLogsModel.fromJson(Map<String, dynamic> json) =

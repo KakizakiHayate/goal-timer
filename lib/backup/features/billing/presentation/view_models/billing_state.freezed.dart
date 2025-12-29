@@ -12,7 +12,8 @@ part of 'billing_state.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods',
+);
 
 /// @nodoc
 mixin _$BillingState {
@@ -34,18 +35,20 @@ mixin _$BillingState {
 /// @nodoc
 abstract class $BillingStateCopyWith<$Res> {
   factory $BillingStateCopyWith(
-          BillingState value, $Res Function(BillingState) then) =
-      _$BillingStateCopyWithImpl<$Res, BillingState>;
+    BillingState value,
+    $Res Function(BillingState) then,
+  ) = _$BillingStateCopyWithImpl<$Res, BillingState>;
   @useResult
-  $Res call(
-      {bool isLoading,
-      bool isPurchasing,
-      SubscriptionStatus? subscriptionStatus,
-      List<ProductInfo> availableProducts,
-      String? selectedProductId,
-      String? errorMessage,
-      PurchaseResult? lastPurchaseResult,
-      RestoreResult? lastRestoreResult});
+  $Res call({
+    bool isLoading,
+    bool isPurchasing,
+    SubscriptionStatus? subscriptionStatus,
+    List<ProductInfo> availableProducts,
+    String? selectedProductId,
+    String? errorMessage,
+    PurchaseResult? lastPurchaseResult,
+    RestoreResult? lastRestoreResult,
+  });
 
   $SubscriptionStatusCopyWith<$Res>? get subscriptionStatus;
   $PurchaseResultCopyWith<$Res>? get lastPurchaseResult;
@@ -74,40 +77,51 @@ class _$BillingStateCopyWithImpl<$Res, $Val extends BillingState>
     Object? lastPurchaseResult = freezed,
     Object? lastRestoreResult = freezed,
   }) {
-    return _then(_value.copyWith(
-      isLoading: null == isLoading
-          ? _value.isLoading
-          : isLoading // ignore: cast_nullable_to_non_nullable
-              as bool,
-      isPurchasing: null == isPurchasing
-          ? _value.isPurchasing
-          : isPurchasing // ignore: cast_nullable_to_non_nullable
-              as bool,
-      subscriptionStatus: freezed == subscriptionStatus
-          ? _value.subscriptionStatus
-          : subscriptionStatus // ignore: cast_nullable_to_non_nullable
-              as SubscriptionStatus?,
-      availableProducts: null == availableProducts
-          ? _value.availableProducts
-          : availableProducts // ignore: cast_nullable_to_non_nullable
-              as List<ProductInfo>,
-      selectedProductId: freezed == selectedProductId
-          ? _value.selectedProductId
-          : selectedProductId // ignore: cast_nullable_to_non_nullable
-              as String?,
-      errorMessage: freezed == errorMessage
-          ? _value.errorMessage
-          : errorMessage // ignore: cast_nullable_to_non_nullable
-              as String?,
-      lastPurchaseResult: freezed == lastPurchaseResult
-          ? _value.lastPurchaseResult
-          : lastPurchaseResult // ignore: cast_nullable_to_non_nullable
-              as PurchaseResult?,
-      lastRestoreResult: freezed == lastRestoreResult
-          ? _value.lastRestoreResult
-          : lastRestoreResult // ignore: cast_nullable_to_non_nullable
-              as RestoreResult?,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            isLoading:
+                null == isLoading
+                    ? _value.isLoading
+                    : isLoading // ignore: cast_nullable_to_non_nullable
+                        as bool,
+            isPurchasing:
+                null == isPurchasing
+                    ? _value.isPurchasing
+                    : isPurchasing // ignore: cast_nullable_to_non_nullable
+                        as bool,
+            subscriptionStatus:
+                freezed == subscriptionStatus
+                    ? _value.subscriptionStatus
+                    : subscriptionStatus // ignore: cast_nullable_to_non_nullable
+                        as SubscriptionStatus?,
+            availableProducts:
+                null == availableProducts
+                    ? _value.availableProducts
+                    : availableProducts // ignore: cast_nullable_to_non_nullable
+                        as List<ProductInfo>,
+            selectedProductId:
+                freezed == selectedProductId
+                    ? _value.selectedProductId
+                    : selectedProductId // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            errorMessage:
+                freezed == errorMessage
+                    ? _value.errorMessage
+                    : errorMessage // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            lastPurchaseResult:
+                freezed == lastPurchaseResult
+                    ? _value.lastPurchaseResult
+                    : lastPurchaseResult // ignore: cast_nullable_to_non_nullable
+                        as PurchaseResult?,
+            lastRestoreResult:
+                freezed == lastRestoreResult
+                    ? _value.lastRestoreResult
+                    : lastRestoreResult // ignore: cast_nullable_to_non_nullable
+                        as RestoreResult?,
+          )
+          as $Val,
+    );
   }
 
   @override
@@ -117,8 +131,9 @@ class _$BillingStateCopyWithImpl<$Res, $Val extends BillingState>
       return null;
     }
 
-    return $SubscriptionStatusCopyWith<$Res>(_value.subscriptionStatus!,
-        (value) {
+    return $SubscriptionStatusCopyWith<$Res>(_value.subscriptionStatus!, (
+      value,
+    ) {
       return _then(_value.copyWith(subscriptionStatus: value) as $Val);
     });
   }
@@ -152,19 +167,21 @@ class _$BillingStateCopyWithImpl<$Res, $Val extends BillingState>
 abstract class _$$BillingStateImplCopyWith<$Res>
     implements $BillingStateCopyWith<$Res> {
   factory _$$BillingStateImplCopyWith(
-          _$BillingStateImpl value, $Res Function(_$BillingStateImpl) then) =
-      __$$BillingStateImplCopyWithImpl<$Res>;
+    _$BillingStateImpl value,
+    $Res Function(_$BillingStateImpl) then,
+  ) = __$$BillingStateImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {bool isLoading,
-      bool isPurchasing,
-      SubscriptionStatus? subscriptionStatus,
-      List<ProductInfo> availableProducts,
-      String? selectedProductId,
-      String? errorMessage,
-      PurchaseResult? lastPurchaseResult,
-      RestoreResult? lastRestoreResult});
+  $Res call({
+    bool isLoading,
+    bool isPurchasing,
+    SubscriptionStatus? subscriptionStatus,
+    List<ProductInfo> availableProducts,
+    String? selectedProductId,
+    String? errorMessage,
+    PurchaseResult? lastPurchaseResult,
+    RestoreResult? lastRestoreResult,
+  });
 
   @override
   $SubscriptionStatusCopyWith<$Res>? get subscriptionStatus;
@@ -179,8 +196,9 @@ class __$$BillingStateImplCopyWithImpl<$Res>
     extends _$BillingStateCopyWithImpl<$Res, _$BillingStateImpl>
     implements _$$BillingStateImplCopyWith<$Res> {
   __$$BillingStateImplCopyWithImpl(
-      _$BillingStateImpl _value, $Res Function(_$BillingStateImpl) _then)
-      : super(_value, _then);
+    _$BillingStateImpl _value,
+    $Res Function(_$BillingStateImpl) _then,
+  ) : super(_value, _then);
 
   @pragma('vm:prefer-inline')
   @override
@@ -194,56 +212,66 @@ class __$$BillingStateImplCopyWithImpl<$Res>
     Object? lastPurchaseResult = freezed,
     Object? lastRestoreResult = freezed,
   }) {
-    return _then(_$BillingStateImpl(
-      isLoading: null == isLoading
-          ? _value.isLoading
-          : isLoading // ignore: cast_nullable_to_non_nullable
-              as bool,
-      isPurchasing: null == isPurchasing
-          ? _value.isPurchasing
-          : isPurchasing // ignore: cast_nullable_to_non_nullable
-              as bool,
-      subscriptionStatus: freezed == subscriptionStatus
-          ? _value.subscriptionStatus
-          : subscriptionStatus // ignore: cast_nullable_to_non_nullable
-              as SubscriptionStatus?,
-      availableProducts: null == availableProducts
-          ? _value._availableProducts
-          : availableProducts // ignore: cast_nullable_to_non_nullable
-              as List<ProductInfo>,
-      selectedProductId: freezed == selectedProductId
-          ? _value.selectedProductId
-          : selectedProductId // ignore: cast_nullable_to_non_nullable
-              as String?,
-      errorMessage: freezed == errorMessage
-          ? _value.errorMessage
-          : errorMessage // ignore: cast_nullable_to_non_nullable
-              as String?,
-      lastPurchaseResult: freezed == lastPurchaseResult
-          ? _value.lastPurchaseResult
-          : lastPurchaseResult // ignore: cast_nullable_to_non_nullable
-              as PurchaseResult?,
-      lastRestoreResult: freezed == lastRestoreResult
-          ? _value.lastRestoreResult
-          : lastRestoreResult // ignore: cast_nullable_to_non_nullable
-              as RestoreResult?,
-    ));
+    return _then(
+      _$BillingStateImpl(
+        isLoading:
+            null == isLoading
+                ? _value.isLoading
+                : isLoading // ignore: cast_nullable_to_non_nullable
+                    as bool,
+        isPurchasing:
+            null == isPurchasing
+                ? _value.isPurchasing
+                : isPurchasing // ignore: cast_nullable_to_non_nullable
+                    as bool,
+        subscriptionStatus:
+            freezed == subscriptionStatus
+                ? _value.subscriptionStatus
+                : subscriptionStatus // ignore: cast_nullable_to_non_nullable
+                    as SubscriptionStatus?,
+        availableProducts:
+            null == availableProducts
+                ? _value._availableProducts
+                : availableProducts // ignore: cast_nullable_to_non_nullable
+                    as List<ProductInfo>,
+        selectedProductId:
+            freezed == selectedProductId
+                ? _value.selectedProductId
+                : selectedProductId // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        errorMessage:
+            freezed == errorMessage
+                ? _value.errorMessage
+                : errorMessage // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        lastPurchaseResult:
+            freezed == lastPurchaseResult
+                ? _value.lastPurchaseResult
+                : lastPurchaseResult // ignore: cast_nullable_to_non_nullable
+                    as PurchaseResult?,
+        lastRestoreResult:
+            freezed == lastRestoreResult
+                ? _value.lastRestoreResult
+                : lastRestoreResult // ignore: cast_nullable_to_non_nullable
+                    as RestoreResult?,
+      ),
+    );
   }
 }
 
 /// @nodoc
 
 class _$BillingStateImpl implements _BillingState {
-  const _$BillingStateImpl(
-      {this.isLoading = false,
-      this.isPurchasing = false,
-      this.subscriptionStatus = null,
-      final List<ProductInfo> availableProducts = const [],
-      this.selectedProductId = null,
-      this.errorMessage = null,
-      this.lastPurchaseResult = null,
-      this.lastRestoreResult = null})
-      : _availableProducts = availableProducts;
+  const _$BillingStateImpl({
+    this.isLoading = false,
+    this.isPurchasing = false,
+    this.subscriptionStatus = null,
+    final List<ProductInfo> availableProducts = const [],
+    this.selectedProductId = null,
+    this.errorMessage = null,
+    this.lastPurchaseResult = null,
+    this.lastRestoreResult = null,
+  }) : _availableProducts = availableProducts;
 
   @override
   @JsonKey()
@@ -293,8 +321,10 @@ class _$BillingStateImpl implements _BillingState {
                 other.isPurchasing == isPurchasing) &&
             (identical(other.subscriptionStatus, subscriptionStatus) ||
                 other.subscriptionStatus == subscriptionStatus) &&
-            const DeepCollectionEquality()
-                .equals(other._availableProducts, _availableProducts) &&
+            const DeepCollectionEquality().equals(
+              other._availableProducts,
+              _availableProducts,
+            ) &&
             (identical(other.selectedProductId, selectedProductId) ||
                 other.selectedProductId == selectedProductId) &&
             (identical(other.errorMessage, errorMessage) ||
@@ -307,15 +337,16 @@ class _$BillingStateImpl implements _BillingState {
 
   @override
   int get hashCode => Object.hash(
-      runtimeType,
-      isLoading,
-      isPurchasing,
-      subscriptionStatus,
-      const DeepCollectionEquality().hash(_availableProducts),
-      selectedProductId,
-      errorMessage,
-      lastPurchaseResult,
-      lastRestoreResult);
+    runtimeType,
+    isLoading,
+    isPurchasing,
+    subscriptionStatus,
+    const DeepCollectionEquality().hash(_availableProducts),
+    selectedProductId,
+    errorMessage,
+    lastPurchaseResult,
+    lastRestoreResult,
+  );
 
   @JsonKey(ignore: true)
   @override
@@ -325,15 +356,16 @@ class _$BillingStateImpl implements _BillingState {
 }
 
 abstract class _BillingState implements BillingState {
-  const factory _BillingState(
-      {final bool isLoading,
-      final bool isPurchasing,
-      final SubscriptionStatus? subscriptionStatus,
-      final List<ProductInfo> availableProducts,
-      final String? selectedProductId,
-      final String? errorMessage,
-      final PurchaseResult? lastPurchaseResult,
-      final RestoreResult? lastRestoreResult}) = _$BillingStateImpl;
+  const factory _BillingState({
+    final bool isLoading,
+    final bool isPurchasing,
+    final SubscriptionStatus? subscriptionStatus,
+    final List<ProductInfo> availableProducts,
+    final String? selectedProductId,
+    final String? errorMessage,
+    final PurchaseResult? lastPurchaseResult,
+    final RestoreResult? lastRestoreResult,
+  }) = _$BillingStateImpl;
 
   @override
   bool get isLoading;
