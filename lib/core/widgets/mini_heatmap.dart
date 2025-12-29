@@ -10,9 +10,6 @@ class MiniHeatmap extends StatelessWidget {
 
   const MiniHeatmap({super.key, required this.studyDates});
 
-  /// 今日の学習済みドットの色（濃い緑）
-  static const Color todayStudiedColor = Color(0xFF059669);
-
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
@@ -52,7 +49,7 @@ class MiniHeatmap extends StatelessWidget {
     if (isToday) {
       if (isStudied) {
         decoration = BoxDecoration(
-          color: todayStudiedColor,
+          color: ColorConsts.success,
           borderRadius: BorderRadius.circular(StreakConsts.dotBorderRadius),
         );
       } else {
