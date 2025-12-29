@@ -3,6 +3,7 @@ import 'package:goal_timer/core/data/local/app_database.dart';
 import 'package:goal_timer/core/data/local/local_goals_datasource.dart';
 import 'package:goal_timer/core/data/local/local_study_daily_logs_datasource.dart';
 import 'package:goal_timer/core/data/local/local_users_datasource.dart';
+import 'package:goal_timer/core/services/streak_service.dart';
 import 'package:goal_timer/core/utils/app_logger.dart';
 
 /// 日別学習記録データ
@@ -75,25 +76,29 @@ class StudyRecordsState {
 class StudyRecordsViewModel extends GetxController {
   final LocalStudyDailyLogsDatasource _studyLogsDatasource;
   final LocalGoalsDatasource _goalsDatasource;
-  final LocalUsersDatasource _usersDatasource;
+  final StreakService _streakService;
 
   StudyRecordsState _state = StudyRecordsState(
     currentMonth: DateTime(DateTime.now().year, DateTime.now().month),
   );
   StudyRecordsState get state => _state;
 
-  /// コンストラクタ
-  /// テスト時にはDataSourceを注入可能
+  /// コンストラクタ（DIパターン適用）
+  /// テスト時にはDataSource/Serviceを注入可能
   StudyRecordsViewModel({
     LocalStudyDailyLogsDatasource? studyLogsDatasource,
     LocalGoalsDatasource? goalsDatasource,
-    LocalUsersDatasource? usersDatasource,
+    StreakService? streakService,
   })  : _studyLogsDatasource = studyLogsDatasource ??
             LocalStudyDailyLogsDatasource(database: AppDatabase()),
         _goalsDatasource =
             goalsDatasource ?? LocalGoalsDatasource(database: AppDatabase()),
-        _usersDatasource =
-            usersDatasource ?? LocalUsersDatasource(database: AppDatabase());
+        _streakService = streakService ??
+            StreakService(
+              logsDatasource:
+                  LocalStudyDailyLogsDatasource(database: AppDatabase()),
+              usersDatasource: LocalUsersDatasource(database: AppDatabase()),
+            );
 
   @override
   void onInit() {
@@ -108,10 +113,11 @@ class StudyRecordsViewModel extends GetxController {
 
     try {
       // 並列で取得（Dart 3 レコード構文で型安全に）
+      // getOrCalculateLongestStreak: 最長ストリークがない場合は計算・保存する
       final (firstStudyDate, currentStreak, longestStreak) = await (
         _studyLogsDatasource.fetchFirstStudyDate(),
-        _studyLogsDatasource.calculateCurrentStreak(),
-        _usersDatasource.getLongestStreak(),
+        _streakService.getCurrentStreak(),
+        _streakService.getOrCalculateLongestStreak(),
       ).wait;
 
       _state = _state.copyWith(

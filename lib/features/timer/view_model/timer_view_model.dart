@@ -7,6 +7,8 @@ import 'package:goal_timer/core/utils/time_utils.dart';
 import 'package:goal_timer/core/data/local/local_study_daily_logs_datasource.dart';
 import 'package:goal_timer/core/data/local/local_users_datasource.dart';
 import 'package:goal_timer/core/data/local/app_database.dart';
+import 'package:goal_timer/core/services/streak_service.dart';
+// LocalUsersDatasourceはStreakService内で使用
 import 'package:goal_timer/features/settings/view_model/settings_view_model.dart';
 import 'package:goal_timer/core/services/notification_service.dart';
 import 'package:uuid/uuid.dart';
@@ -42,7 +44,7 @@ class TimerState {
   final bool needsCompletionConfirm;
 
   // デフォルト値の定数
-  static final int _defaultSeconds =
+  static const int _defaultSeconds =
       TimerConstants.pomodoroWorkMinutes * TimeUtils.secondsPerMinute;
 
   TimerState({
@@ -97,15 +99,15 @@ class TimerState {
 
 // タイマーのViewModel
 class TimerViewModel extends GetxController {
-  late final LocalStudyDailyLogsDatasource _datasource;
-  late final LocalUsersDatasource _usersDatasource;
+  final LocalStudyDailyLogsDatasource _datasource;
+  final StreakService _streakService;
   final GoalsModel goal;
 
   // PRコメント対応: インスタンス変数として一度だけ取得
   final SettingsViewModel _settingsViewModel;
 
   // 通知サービス
-  final NotificationService _notificationService = NotificationService();
+  final NotificationService _notificationService;
 
   Timer? _timer;
   int _elapsedSeconds = TimerConstants.initialElapsedSeconds;
@@ -125,12 +127,27 @@ class TimerViewModel extends GetxController {
   // 経過時間を取得するgetter
   int get elapsedSeconds => _elapsedSeconds;
 
-  TimerViewModel({required this.goal})
-      : _settingsViewModel = Get.find<SettingsViewModel>() {
-    final database = Get.find<AppDatabase>();
-    _datasource = LocalStudyDailyLogsDatasource(database: database);
-    _usersDatasource = LocalUsersDatasource(database: database);
-
+  /// コンストラクタ（DIパターン適用）
+  /// テスト時にはDataSource/Serviceを注入可能
+  TimerViewModel({
+    required this.goal,
+    LocalStudyDailyLogsDatasource? datasource,
+    StreakService? streakService,
+    SettingsViewModel? settingsViewModel,
+    NotificationService? notificationService,
+  })  : _settingsViewModel = settingsViewModel ?? Get.find<SettingsViewModel>(),
+        _notificationService = notificationService ?? NotificationService(),
+        _datasource = datasource ??
+            LocalStudyDailyLogsDatasource(database: Get.find<AppDatabase>()),
+        _streakService = streakService ??
+            StreakService(
+              logsDatasource: LocalStudyDailyLogsDatasource(
+                database: Get.find<AppDatabase>(),
+              ),
+              usersDatasource: LocalUsersDatasource(
+                database: Get.find<AppDatabase>(),
+              ),
+            ) {
     final defaultSeconds = _settingsViewModel.defaultTimerSeconds.value;
 
     _state.value = TimerState(
@@ -176,7 +193,7 @@ class TimerViewModel extends GetxController {
         currentSeconds: TimerConstants.countdownCompleteThreshold,
       );
     } else if (mode == TimerMode.pomodoro) {
-      final pomodoroSeconds =
+      const pomodoroSeconds =
           TimerConstants.pomodoroWorkMinutes * TimeUtils.secondsPerMinute;
       _state.value = state.copyWith(
         totalSeconds: pomodoroSeconds,
@@ -431,23 +448,9 @@ class TimerViewModel extends GetxController {
   }
 
   /// 現在のストリークが最長を超えていれば更新する
+  /// StreakServiceに委譲して関心を分離
   Future<void> _updateLongestStreakIfNeeded() async {
-    try {
-      // 現在のストリークを計算
-      final currentStreak = await _datasource.calculateCurrentStreak();
-
-      // 最長ストリークと比較して必要なら更新
-      final updated =
-          await _usersDatasource.updateLongestStreakIfNeeded(currentStreak);
-
-      if (updated) {
-        AppLogger.instance.i('最長ストリークを更新しました: $currentStreak日');
-      }
-    } catch (error, stackTrace) {
-      // 最長ストリーク更新の失敗は学習記録保存の失敗とは別に扱う
-      // ログを出力するが、例外は再スローしない
-      AppLogger.instance.e('最長ストリークの更新に失敗しました', error, stackTrace);
-    }
+    await _streakService.updateLongestStreakIfNeeded();
   }
 
   /// 🔍 デバッグ用: 保存されているログを全件取得して表示
