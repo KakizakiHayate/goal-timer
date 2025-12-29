@@ -45,10 +45,13 @@ class HomeState {
   }
 
   /// 目標の進捗率を計算（0.0〜1.0）
+  /// totalTargetMinutesを使用して進捗率を計算
   double getProgressForGoal(GoalsModel goal) {
     final studiedMinutes = getStudiedMinutesForGoal(goal);
+    // totalTargetMinutesがnullの場合はtargetMinutesを使用（後方互換性）
+    final targetMinutes = goal.totalTargetMinutes ?? goal.targetMinutes;
     return TimeUtils.calculateProgressRateFromMinutes(
-      goal.targetMinutes,
+      targetMinutes,
       studiedMinutes,
     );
   }
@@ -93,6 +96,9 @@ class HomeViewModel extends GetxController {
       _state = state.copyWith(isLoading: true);
       update();
 
+      // 期限切れの目標を更新
+      await _goalsDatasource.updateExpiredGoals();
+
       // 目標、学習時間、ストリークデータを並列で取得（Dart 3 Recordsで型安全に）
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
@@ -102,7 +108,7 @@ class HomeViewModel extends GetxController {
 
       final (goals, studiedSeconds, recentStudyDates, currentStreak) =
           await (
-            _goalsDatasource.fetchAllGoals(),
+            _goalsDatasource.fetchActiveGoals(),
             _studyLogsDatasource.fetchTotalSecondsForAllGoals(),
             _studyLogsDatasource.fetchStudyDatesInRange(
               startDate: startDate,
@@ -142,12 +148,21 @@ class HomeViewModel extends GetxController {
   }) async {
     try {
       final now = DateTime.now();
+
+      // 残り日数と総目標時間を計算
+      final remainingDays = TimeUtils.calculateRemainingDays(deadline);
+      final totalTargetMinutes = TimeUtils.calculateTotalTargetMinutes(
+        targetMinutes: targetMinutes,
+        remainingDays: remainingDays,
+      );
+
       final goal = GoalsModel(
         id: const Uuid().v4(),
         userId: null,
         title: title,
         description: description.isEmpty ? null : description,
         targetMinutes: targetMinutes,
+        totalTargetMinutes: totalTargetMinutes,
         avoidMessage: avoidMessage,
         deadline: deadline,
         createdAt: now,
@@ -183,10 +198,19 @@ class HomeViewModel extends GetxController {
   }) async {
     try {
       final now = DateTime.now();
+
+      // 残り日数と総目標時間を再計算
+      final remainingDays = TimeUtils.calculateRemainingDays(deadline);
+      final totalTargetMinutes = TimeUtils.calculateTotalTargetMinutes(
+        targetMinutes: targetMinutes,
+        remainingDays: remainingDays,
+      );
+
       final updatedGoal = original.copyWith(
         title: title,
         description: description.isEmpty ? null : description,
         targetMinutes: targetMinutes,
+        totalTargetMinutes: totalTargetMinutes,
         avoidMessage: avoidMessage,
         deadline: deadline,
         updatedAt: now,

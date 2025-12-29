@@ -77,7 +77,7 @@ class TimeUtils {
     final remainingMinutes = targetMinutes - spentMinutes;
 
     if (remainingMinutes <= minValidMinutes) {
-      return '${minValidMinutes}時間${minValidMinutes}分';
+      return '$minValidMinutes時間$minValidMinutes分';
     }
 
     // 時間と分に変換
@@ -116,5 +116,43 @@ class TimeUtils {
   ) {
     if (targetMinutes <= minValidMinutes) return 1.0;
     return (spentMinutes / targetMinutes).clamp(0.0, 1.0);
+  }
+
+  /// 残り日数を計算（今日を含む）
+  /// 期限が過去の場合でも最低1日を返す
+  static int calculateRemainingDays(DateTime deadline) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final deadlineDate =
+        DateTime(deadline.year, deadline.month, deadline.day);
+
+    // 日数差を計算（今日を含むため+1）
+    final difference = deadlineDate.difference(today).inDays + 1;
+
+    // 最低1日を保証
+    return difference < 1 ? 1 : difference;
+  }
+
+  /// 総目標時間（分）を計算
+  /// 1日の目標時間 × 残り日数
+  static int calculateTotalTargetMinutes({
+    required int targetMinutes,
+    required int remainingDays,
+  }) {
+    // 残り日数が0以下の場合は最低1日分
+    final effectiveDays = remainingDays < 1 ? 1 : remainingDays;
+    return targetMinutes * effectiveDays;
+  }
+
+  /// 期限が有効かどうかを検証
+  /// 今日または未来の日付のみ有効
+  static bool isValidDeadline(DateTime deadline) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final deadlineDate =
+        DateTime(deadline.year, deadline.month, deadline.day);
+
+    // 期限が今日以降であれば有効
+    return !deadlineDate.isBefore(today);
   }
 }

@@ -14,27 +14,26 @@ _$GoalsModelImpl _$$GoalsModelImplFromJson(Map<String, dynamic> json) =>
       description: json['description'] as String?,
       deadline: DateTime.parse(json['deadline'] as String),
       avoidMessage: json['avoid_message'] as String,
-      updatedAt:
-          json['updated_at'] == null
-              ? null
-              : DateTime.parse(json['updated_at'] as String),
-      syncUpdatedAt:
-          json['sync_updated_at'] == null
-              ? null
-              : DateTime.parse(json['sync_updated_at'] as String),
+      updatedAt: json['updated_at'] == null
+          ? null
+          : DateTime.parse(json['updated_at'] as String),
+      syncUpdatedAt: json['sync_updated_at'] == null
+          ? null
+          : DateTime.parse(json['sync_updated_at'] as String),
       targetMinutes: json['target_minutes'] as int,
-      createdAt:
-          json['created_at'] == null
-              ? null
-              : DateTime.parse(json['created_at'] as String),
-      completedAt:
-          json['completed_at'] == null
-              ? null
-              : DateTime.parse(json['completed_at'] as String),
-      deletedAt:
-          json['deleted_at'] == null
-              ? null
-              : DateTime.parse(json['deleted_at'] as String),
+      totalTargetMinutes: json['total_target_minutes'] as int?,
+      createdAt: json['created_at'] == null
+          ? null
+          : DateTime.parse(json['created_at'] as String),
+      completedAt: json['completed_at'] == null
+          ? null
+          : DateTime.parse(json['completed_at'] as String),
+      deletedAt: json['deleted_at'] == null
+          ? null
+          : DateTime.parse(json['deleted_at'] as String),
+      expiredAt: json['expired_at'] == null
+          ? null
+          : DateTime.parse(json['expired_at'] as String),
     );
 
 Map<String, dynamic> _$$GoalsModelImplToJson(_$GoalsModelImpl instance) =>
@@ -48,7 +47,9 @@ Map<String, dynamic> _$$GoalsModelImplToJson(_$GoalsModelImpl instance) =>
       'updated_at': instance.updatedAt?.toIso8601String(),
       'sync_updated_at': instance.syncUpdatedAt?.toIso8601String(),
       'target_minutes': instance.targetMinutes,
+      'total_target_minutes': instance.totalTargetMinutes,
       'created_at': instance.createdAt?.toIso8601String(),
       'completed_at': instance.completedAt?.toIso8601String(),
       'deleted_at': instance.deletedAt?.toIso8601String(),
+      'expired_at': instance.expiredAt?.toIso8601String(),
     };

@@ -12,8 +12,7 @@ part of 'users_model.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
 
 UsersModel _$UsersModelFromJson(Map<String, dynamic> json) {
   return _UsersModel.fromJson(json);
@@ -43,19 +42,17 @@ mixin _$UsersModel {
 /// @nodoc
 abstract class $UsersModelCopyWith<$Res> {
   factory $UsersModelCopyWith(
-    UsersModel value,
-    $Res Function(UsersModel) then,
-  ) = _$UsersModelCopyWithImpl<$Res, UsersModel>;
+          UsersModel value, $Res Function(UsersModel) then) =
+      _$UsersModelCopyWithImpl<$Res, UsersModel>;
   @useResult
-  $Res call({
-    String id,
-    String? email,
-    @JsonKey(name: 'display_name') String? displayName,
-    @JsonKey(name: 'created_at') DateTime? createdAt,
-    @JsonKey(name: 'updated_at') DateTime? updatedAt,
-    @JsonKey(name: 'last_login') DateTime? lastLogin,
-    @JsonKey(name: 'sync_updated_at') DateTime? syncUpdatedAt,
-  });
+  $Res call(
+      {String id,
+      String? email,
+      @JsonKey(name: 'display_name') String? displayName,
+      @JsonKey(name: 'created_at') DateTime? createdAt,
+      @JsonKey(name: 'updated_at') DateTime? updatedAt,
+      @JsonKey(name: 'last_login') DateTime? lastLogin,
+      @JsonKey(name: 'sync_updated_at') DateTime? syncUpdatedAt});
 }
 
 /// @nodoc
@@ -79,46 +76,36 @@ class _$UsersModelCopyWithImpl<$Res, $Val extends UsersModel>
     Object? lastLogin = freezed,
     Object? syncUpdatedAt = freezed,
   }) {
-    return _then(
-      _value.copyWith(
-            id:
-                null == id
-                    ? _value.id
-                    : id // ignore: cast_nullable_to_non_nullable
-                        as String,
-            email:
-                freezed == email
-                    ? _value.email
-                    : email // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            displayName:
-                freezed == displayName
-                    ? _value.displayName
-                    : displayName // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            createdAt:
-                freezed == createdAt
-                    ? _value.createdAt
-                    : createdAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime?,
-            updatedAt:
-                freezed == updatedAt
-                    ? _value.updatedAt
-                    : updatedAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime?,
-            lastLogin:
-                freezed == lastLogin
-                    ? _value.lastLogin
-                    : lastLogin // ignore: cast_nullable_to_non_nullable
-                        as DateTime?,
-            syncUpdatedAt:
-                freezed == syncUpdatedAt
-                    ? _value.syncUpdatedAt
-                    : syncUpdatedAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime?,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      email: freezed == email
+          ? _value.email
+          : email // ignore: cast_nullable_to_non_nullable
+              as String?,
+      displayName: freezed == displayName
+          ? _value.displayName
+          : displayName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      createdAt: freezed == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      updatedAt: freezed == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      lastLogin: freezed == lastLogin
+          ? _value.lastLogin
+          : lastLogin // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      syncUpdatedAt: freezed == syncUpdatedAt
+          ? _value.syncUpdatedAt
+          : syncUpdatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+    ) as $Val);
   }
 }
 
@@ -126,20 +113,18 @@ class _$UsersModelCopyWithImpl<$Res, $Val extends UsersModel>
 abstract class _$$UsersModelImplCopyWith<$Res>
     implements $UsersModelCopyWith<$Res> {
   factory _$$UsersModelImplCopyWith(
-    _$UsersModelImpl value,
-    $Res Function(_$UsersModelImpl) then,
-  ) = __$$UsersModelImplCopyWithImpl<$Res>;
+          _$UsersModelImpl value, $Res Function(_$UsersModelImpl) then) =
+      __$$UsersModelImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    String id,
-    String? email,
-    @JsonKey(name: 'display_name') String? displayName,
-    @JsonKey(name: 'created_at') DateTime? createdAt,
-    @JsonKey(name: 'updated_at') DateTime? updatedAt,
-    @JsonKey(name: 'last_login') DateTime? lastLogin,
-    @JsonKey(name: 'sync_updated_at') DateTime? syncUpdatedAt,
-  });
+  $Res call(
+      {String id,
+      String? email,
+      @JsonKey(name: 'display_name') String? displayName,
+      @JsonKey(name: 'created_at') DateTime? createdAt,
+      @JsonKey(name: 'updated_at') DateTime? updatedAt,
+      @JsonKey(name: 'last_login') DateTime? lastLogin,
+      @JsonKey(name: 'sync_updated_at') DateTime? syncUpdatedAt});
 }
 
 /// @nodoc
@@ -147,9 +132,8 @@ class __$$UsersModelImplCopyWithImpl<$Res>
     extends _$UsersModelCopyWithImpl<$Res, _$UsersModelImpl>
     implements _$$UsersModelImplCopyWith<$Res> {
   __$$UsersModelImplCopyWithImpl(
-    _$UsersModelImpl _value,
-    $Res Function(_$UsersModelImpl) _then,
-  ) : super(_value, _then);
+      _$UsersModelImpl _value, $Res Function(_$UsersModelImpl) _then)
+      : super(_value, _then);
 
   @pragma('vm:prefer-inline')
   @override
@@ -162,60 +146,51 @@ class __$$UsersModelImplCopyWithImpl<$Res>
     Object? lastLogin = freezed,
     Object? syncUpdatedAt = freezed,
   }) {
-    return _then(
-      _$UsersModelImpl(
-        id:
-            null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                    as String,
-        email:
-            freezed == email
-                ? _value.email
-                : email // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        displayName:
-            freezed == displayName
-                ? _value.displayName
-                : displayName // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        createdAt:
-            freezed == createdAt
-                ? _value.createdAt
-                : createdAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime?,
-        updatedAt:
-            freezed == updatedAt
-                ? _value.updatedAt
-                : updatedAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime?,
-        lastLogin:
-            freezed == lastLogin
-                ? _value.lastLogin
-                : lastLogin // ignore: cast_nullable_to_non_nullable
-                    as DateTime?,
-        syncUpdatedAt:
-            freezed == syncUpdatedAt
-                ? _value.syncUpdatedAt
-                : syncUpdatedAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime?,
-      ),
-    );
+    return _then(_$UsersModelImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      email: freezed == email
+          ? _value.email
+          : email // ignore: cast_nullable_to_non_nullable
+              as String?,
+      displayName: freezed == displayName
+          ? _value.displayName
+          : displayName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      createdAt: freezed == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      updatedAt: freezed == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      lastLogin: freezed == lastLogin
+          ? _value.lastLogin
+          : lastLogin // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      syncUpdatedAt: freezed == syncUpdatedAt
+          ? _value.syncUpdatedAt
+          : syncUpdatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$UsersModelImpl extends _UsersModel {
-  const _$UsersModelImpl({
-    required this.id,
-    this.email,
-    @JsonKey(name: 'display_name') this.displayName,
-    @JsonKey(name: 'created_at') this.createdAt,
-    @JsonKey(name: 'updated_at') this.updatedAt,
-    @JsonKey(name: 'last_login') this.lastLogin,
-    @JsonKey(name: 'sync_updated_at') this.syncUpdatedAt,
-  }) : super._();
+  const _$UsersModelImpl(
+      {required this.id,
+      this.email,
+      @JsonKey(name: 'display_name') this.displayName,
+      @JsonKey(name: 'created_at') this.createdAt,
+      @JsonKey(name: 'updated_at') this.updatedAt,
+      @JsonKey(name: 'last_login') this.lastLogin,
+      @JsonKey(name: 'sync_updated_at') this.syncUpdatedAt})
+      : super._();
 
   factory _$UsersModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$UsersModelImplFromJson(json);
@@ -266,16 +241,8 @@ class _$UsersModelImpl extends _UsersModel {
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    email,
-    displayName,
-    createdAt,
-    updatedAt,
-    lastLogin,
-    syncUpdatedAt,
-  );
+  int get hashCode => Object.hash(runtimeType, id, email, displayName,
+      createdAt, updatedAt, lastLogin, syncUpdatedAt);
 
   @JsonKey(ignore: true)
   @override
@@ -285,20 +252,22 @@ class _$UsersModelImpl extends _UsersModel {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$UsersModelImplToJson(this);
+    return _$$UsersModelImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _UsersModel extends UsersModel {
-  const factory _UsersModel({
-    required final String id,
-    final String? email,
-    @JsonKey(name: 'display_name') final String? displayName,
-    @JsonKey(name: 'created_at') final DateTime? createdAt,
-    @JsonKey(name: 'updated_at') final DateTime? updatedAt,
-    @JsonKey(name: 'last_login') final DateTime? lastLogin,
-    @JsonKey(name: 'sync_updated_at') final DateTime? syncUpdatedAt,
-  }) = _$UsersModelImpl;
+  const factory _UsersModel(
+          {required final String id,
+          final String? email,
+          @JsonKey(name: 'display_name') final String? displayName,
+          @JsonKey(name: 'created_at') final DateTime? createdAt,
+          @JsonKey(name: 'updated_at') final DateTime? updatedAt,
+          @JsonKey(name: 'last_login') final DateTime? lastLogin,
+          @JsonKey(name: 'sync_updated_at') final DateTime? syncUpdatedAt}) =
+      _$UsersModelImpl;
   const _UsersModel._() : super._();
 
   factory _UsersModel.fromJson(Map<String, dynamic> json) =
