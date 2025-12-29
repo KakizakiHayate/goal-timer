@@ -7,8 +7,6 @@ import 'package:goal_timer/core/utils/time_utils.dart';
 import 'package:goal_timer/core/data/local/local_study_daily_logs_datasource.dart';
 import 'package:goal_timer/core/data/local/local_users_datasource.dart';
 import 'package:goal_timer/core/data/local/app_database.dart';
-import 'package:goal_timer/core/services/streak_service.dart';
-// LocalUsersDatasourceはStreakService内で使用
 import 'package:goal_timer/features/settings/view_model/settings_view_model.dart';
 import 'package:goal_timer/core/services/notification_service.dart';
 import 'package:uuid/uuid.dart';
@@ -100,7 +98,7 @@ class TimerState {
 // タイマーのViewModel
 class TimerViewModel extends GetxController {
   final LocalStudyDailyLogsDatasource _datasource;
-  final StreakService _streakService;
+  final LocalUsersDatasource _usersDatasource;
   final GoalsModel goal;
 
   // PRコメント対応: インスタンス変数として一度だけ取得
@@ -128,26 +126,19 @@ class TimerViewModel extends GetxController {
   int get elapsedSeconds => _elapsedSeconds;
 
   /// コンストラクタ（DIパターン適用）
-  /// テスト時にはDataSource/Serviceを注入可能
+  /// テスト時にはDataSourceを注入可能
   TimerViewModel({
     required this.goal,
     LocalStudyDailyLogsDatasource? datasource,
-    StreakService? streakService,
+    LocalUsersDatasource? usersDatasource,
     SettingsViewModel? settingsViewModel,
     NotificationService? notificationService,
   })  : _settingsViewModel = settingsViewModel ?? Get.find<SettingsViewModel>(),
         _notificationService = notificationService ?? NotificationService(),
         _datasource = datasource ??
             LocalStudyDailyLogsDatasource(database: Get.find<AppDatabase>()),
-        _streakService = streakService ??
-            StreakService(
-              logsDatasource: LocalStudyDailyLogsDatasource(
-                database: Get.find<AppDatabase>(),
-              ),
-              usersDatasource: LocalUsersDatasource(
-                database: Get.find<AppDatabase>(),
-              ),
-            ) {
+        _usersDatasource = usersDatasource ??
+            LocalUsersDatasource(database: Get.find<AppDatabase>()) {
     final defaultSeconds = _settingsViewModel.defaultTimerSeconds.value;
 
     _state.value = TimerState(
@@ -448,9 +439,22 @@ class TimerViewModel extends GetxController {
   }
 
   /// 現在のストリークが最長を超えていれば更新する
-  /// StreakServiceに委譲して関心を分離
   Future<void> _updateLongestStreakIfNeeded() async {
-    await _streakService.updateLongestStreakIfNeeded();
+    try {
+      // 現在のストリークを計算
+      final currentStreak = await _datasource.calculateCurrentStreak();
+
+      // 最長ストリークと比較して必要なら更新
+      final updated =
+          await _usersDatasource.updateLongestStreakIfNeeded(currentStreak);
+
+      if (updated) {
+        AppLogger.instance.i('最長ストリークを更新しました: $currentStreak日');
+      }
+    } catch (error, stackTrace) {
+      // 最長ストリーク更新の失敗はログのみ（致命的エラーとしては扱わない）
+      AppLogger.instance.e('最長ストリークの更新に失敗しました', error, stackTrace);
+    }
   }
 
   /// 🔍 デバッグ用: 保存されているログを全件取得して表示

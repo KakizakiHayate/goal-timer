@@ -3,7 +3,6 @@ import 'package:goal_timer/core/data/local/app_database.dart';
 import 'package:goal_timer/core/data/local/local_goals_datasource.dart';
 import 'package:goal_timer/core/data/local/local_study_daily_logs_datasource.dart';
 import 'package:goal_timer/core/data/local/local_users_datasource.dart';
-import 'package:goal_timer/core/services/streak_service.dart';
 import 'package:goal_timer/core/utils/app_logger.dart';
 
 /// 日別学習記録データ
@@ -76,7 +75,7 @@ class StudyRecordsState {
 class StudyRecordsViewModel extends GetxController {
   final LocalStudyDailyLogsDatasource _studyLogsDatasource;
   final LocalGoalsDatasource _goalsDatasource;
-  final StreakService _streakService;
+  final LocalUsersDatasource _usersDatasource;
 
   StudyRecordsState _state = StudyRecordsState(
     currentMonth: DateTime(DateTime.now().year, DateTime.now().month),
@@ -84,21 +83,17 @@ class StudyRecordsViewModel extends GetxController {
   StudyRecordsState get state => _state;
 
   /// コンストラクタ（DIパターン適用）
-  /// テスト時にはDataSource/Serviceを注入可能
+  /// テスト時にはDataSourceを注入可能
   StudyRecordsViewModel({
     LocalStudyDailyLogsDatasource? studyLogsDatasource,
     LocalGoalsDatasource? goalsDatasource,
-    StreakService? streakService,
+    LocalUsersDatasource? usersDatasource,
   })  : _studyLogsDatasource = studyLogsDatasource ??
             LocalStudyDailyLogsDatasource(database: AppDatabase()),
         _goalsDatasource =
             goalsDatasource ?? LocalGoalsDatasource(database: AppDatabase()),
-        _streakService = streakService ??
-            StreakService(
-              logsDatasource:
-                  LocalStudyDailyLogsDatasource(database: AppDatabase()),
-              usersDatasource: LocalUsersDatasource(database: AppDatabase()),
-            );
+        _usersDatasource =
+            usersDatasource ?? LocalUsersDatasource(database: AppDatabase());
 
   @override
   void onInit() {
@@ -113,11 +108,10 @@ class StudyRecordsViewModel extends GetxController {
 
     try {
       // 並列で取得（Dart 3 レコード構文で型安全に）
-      // getOrCalculateLongestStreak: 最長ストリークがない場合は計算・保存する
       final (firstStudyDate, currentStreak, longestStreak) = await (
         _studyLogsDatasource.fetchFirstStudyDate(),
-        _streakService.getCurrentStreak(),
-        _streakService.getOrCalculateLongestStreak(),
+        _studyLogsDatasource.calculateCurrentStreak(),
+        _getOrCalculateLongestStreak(),
       ).wait;
 
       _state = _state.copyWith(
@@ -133,6 +127,34 @@ class StudyRecordsViewModel extends GetxController {
     } finally {
       _state = _state.copyWith(isLoading: false);
       update();
+    }
+  }
+
+  /// 最長ストリークを取得する
+  /// データがない場合は履歴から計算して保存し、その値を返す
+  Future<int> _getOrCalculateLongestStreak() async {
+    try {
+      // 最長ストリークを取得
+      final longestStreak = await _usersDatasource.getLongestStreak();
+
+      // 最長ストリークが0の場合、履歴から計算して設定
+      if (longestStreak == 0) {
+        final historicalLongestStreak =
+            await _studyLogsDatasource.calculateHistoricalLongestStreak();
+
+        if (historicalLongestStreak > 0) {
+          // 履歴から計算した最長ストリークを保存
+          await _usersDatasource.updateLongestStreak(historicalLongestStreak);
+          AppLogger.instance
+              .i('最長ストリークを履歴から計算・保存しました: $historicalLongestStreak日');
+          return historicalLongestStreak;
+        }
+      }
+
+      return longestStreak;
+    } catch (error, stackTrace) {
+      AppLogger.instance.e('最長ストリークの取得に失敗しました', error, stackTrace);
+      return 0;
     }
   }
 

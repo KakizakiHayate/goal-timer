@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:goal_timer/core/data/local/local_goals_datasource.dart';
 import 'package:goal_timer/core/data/local/local_study_daily_logs_datasource.dart';
-import 'package:goal_timer/core/services/streak_service.dart';
+import 'package:goal_timer/core/data/local/local_users_datasource.dart';
 import 'package:goal_timer/core/models/goals/goals_model.dart';
 import 'package:goal_timer/features/study_records/view_model/study_records_view_model.dart';
 
@@ -11,13 +11,13 @@ class MockLocalStudyDailyLogsDatasource extends Mock
 
 class MockLocalGoalsDatasource extends Mock implements LocalGoalsDatasource {}
 
-class MockStreakService extends Mock implements StreakService {}
+class MockLocalUsersDatasource extends Mock implements LocalUsersDatasource {}
 
 void main() {
   late StudyRecordsViewModel viewModel;
   late MockLocalStudyDailyLogsDatasource mockStudyLogsDatasource;
   late MockLocalGoalsDatasource mockGoalsDatasource;
-  late MockStreakService mockStreakService;
+  late MockLocalUsersDatasource mockUsersDatasource;
 
   final testGoal = GoalsModel(
     id: 'test-goal-id',
@@ -47,14 +47,14 @@ void main() {
   setUp(() {
     mockStudyLogsDatasource = MockLocalStudyDailyLogsDatasource();
     mockGoalsDatasource = MockLocalGoalsDatasource();
-    mockStreakService = MockStreakService();
+    mockUsersDatasource = MockLocalUsersDatasource();
 
     // Default mock behaviors
     when(() => mockStudyLogsDatasource.fetchFirstStudyDate())
         .thenAnswer((_) async => DateTime(2025, 1, 1));
-    when(() => mockStreakService.getCurrentStreak())
+    when(() => mockStudyLogsDatasource.calculateCurrentStreak())
         .thenAnswer((_) async => 5);
-    when(() => mockStreakService.getOrCalculateLongestStreak())
+    when(() => mockUsersDatasource.getLongestStreak())
         .thenAnswer((_) async => 10);
     when(() => mockStudyLogsDatasource.fetchStudyDatesInRange(
           startDate: any(named: 'startDate'),
@@ -64,7 +64,7 @@ void main() {
     viewModel = StudyRecordsViewModel(
       studyLogsDatasource: mockStudyLogsDatasource,
       goalsDatasource: mockGoalsDatasource,
-      streakService: mockStreakService,
+      usersDatasource: mockUsersDatasource,
     );
   });
 
