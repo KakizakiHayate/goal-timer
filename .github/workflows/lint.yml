@@ -59,5 +59,4 @@ jobs:
         run: dart analyze
 
       - name: Run custom_lint
-        run: dart run custom_lint || true
-        # NOTE: || true を追加して警告があっても続行（既存コードの警告対応後に削除予定）
+        run: dart run custom_lint

@@ -141,12 +141,13 @@ class _GoalCreateModalContentState extends State<_GoalCreateModalContent> {
   void initState() {
     super.initState();
     // 編集モードの場合は既存の値を設定
-    if (widget.existingGoal != null) {
-      _title = widget.existingGoal!.title;
-      _description = widget.existingGoal!.description ?? '';
-      _avoidMessage = widget.existingGoal!.avoidMessage;
-      _targetMinutes = widget.existingGoal!.targetMinutes;
-      _deadline = widget.existingGoal!.deadline;
+    final existingGoal = widget.existingGoal;
+    if (existingGoal != null) {
+      _title = existingGoal.title;
+      _description = existingGoal.description ?? '';
+      _avoidMessage = existingGoal.avoidMessage;
+      _targetMinutes = existingGoal.targetMinutes;
+      _deadline = existingGoal.deadline;
     } else {
       // 新規作成の場合は30日後をデフォルトに設定
       _deadline = DateTime.now().add(const Duration(days: 30));
@@ -709,6 +710,9 @@ class _GoalCreateModalContentState extends State<_GoalCreateModalContent> {
   }
 
   Future<void> _handleDeleteGoal() async {
+    final existingGoal = widget.existingGoal;
+    if (existingGoal == null) return;
+
     // 削除確認ダイアログを表示
     final confirmed =
         await showDialog<bool>(
@@ -717,7 +721,7 @@ class _GoalCreateModalContentState extends State<_GoalCreateModalContent> {
               (context) => AlertDialog(
                 title: const Text('目標を削除しますか？'),
                 content: Text(
-                  '「${widget.existingGoal!.title}」を削除すると、'
+                  '「${existingGoal.title}」を削除すると、'
                   '関連する学習記録も全て削除されます。\n'
                   'この操作は取り消せません。',
                 ),

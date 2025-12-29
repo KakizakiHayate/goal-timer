@@ -62,6 +62,7 @@ class _AddGoalModalState extends State<AddGoalModal> {
         const Duration(days: UIConsts.maxDeadlineDays),
       ),
       builder: (context, child) {
+        if (child == null) return const SizedBox.shrink();
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
@@ -70,7 +71,7 @@ class _AddGoalModalState extends State<AddGoalModal> {
               onSurface: ColorConsts.textPrimary,
             ),
           ),
-          child: child!,
+          child: child,
         );
       },
     );
@@ -83,11 +84,13 @@ class _AddGoalModalState extends State<AddGoalModal> {
   }
 
   Future<void> _saveGoal() async {
-    if (!_formKey.currentState!.validate()) {
+    final formState = _formKey.currentState;
+    if (formState == null || !formState.validate()) {
       return;
     }
 
-    if (_selectedDeadline == null) {
+    final selectedDeadline = _selectedDeadline;
+    if (selectedDeadline == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(StringConsts.selectDeadlineMessage),
@@ -107,14 +110,15 @@ class _AddGoalModalState extends State<AddGoalModal> {
 
     try {
       final homeViewModel = Get.find<HomeViewModel>();
-      if (_isEdit) {
+      final goal = widget.goal;
+      if (_isEdit && goal != null) {
         await homeViewModel.updateGoal(
-          original: widget.goal!,
+          original: goal,
           title: _titleController.text.trim(),
           description: _descriptionController.text.trim(),
           targetMinutes: _targetMinutes,
           avoidMessage: _avoidMessageController.text.trim(),
-          deadline: _selectedDeadline!,
+          deadline: selectedDeadline,
         );
       } else {
         await homeViewModel.addGoal(
@@ -122,7 +126,7 @@ class _AddGoalModalState extends State<AddGoalModal> {
           description: _descriptionController.text.trim(),
           targetMinutes: _targetMinutes,
           avoidMessage: _avoidMessageController.text.trim(),
-          deadline: _selectedDeadline!,
+          deadline: selectedDeadline,
         );
       }
 
@@ -376,6 +380,8 @@ class _AddGoalModalState extends State<AddGoalModal> {
   }
 
   Widget _buildDeadlineField() {
+    final selectedDeadline = _selectedDeadline;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -405,14 +411,14 @@ class _AddGoalModalState extends State<AddGoalModal> {
                 const SizedBox(width: SpacingConsts.m),
                 Expanded(
                   child: Text(
-                    _selectedDeadline == null
-                        ? StringConsts.selectDeadlinePlaceholder
-                        : DateFormat('yyyy年M月d日').format(_selectedDeadline!),
+                    selectedDeadline != null
+                        ? DateFormat('yyyy年M月d日').format(selectedDeadline)
+                        : StringConsts.selectDeadlinePlaceholder,
                     style: TextConsts.body.copyWith(
                       color:
-                          _selectedDeadline == null
-                              ? ColorConsts.textTertiary
-                              : ColorConsts.textPrimary,
+                          selectedDeadline != null
+                              ? ColorConsts.textPrimary
+                              : ColorConsts.textTertiary,
                     ),
                   ),
                 ),

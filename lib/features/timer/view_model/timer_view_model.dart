@@ -174,26 +174,27 @@ class TimerViewModel extends GetxController {
     }
 
     _state.value = state.copyWith(mode: mode);
-    if (mode == TimerMode.countdown) {
-      // PRコメント対応: インスタンス変数を使用
-      final defaultSeconds = _settingsViewModel.defaultTimerSeconds.value;
-      _state.value = state.copyWith(
-        totalSeconds: defaultSeconds,
-        currentSeconds: defaultSeconds,
-      );
-    } else if (mode == TimerMode.countup) {
-      // カウントアップモード: 上限なし
-      _state.value = state.copyWith(
-        totalSeconds: TimerConstants.countupInitialSeconds,
-        currentSeconds: TimerConstants.countdownCompleteThreshold,
-      );
-    } else if (mode == TimerMode.pomodoro) {
-      const pomodoroSeconds =
-          TimerConstants.pomodoroWorkMinutes * TimeUtils.secondsPerMinute;
-      _state.value = state.copyWith(
-        totalSeconds: pomodoroSeconds,
-        currentSeconds: pomodoroSeconds,
-      );
+    switch (mode) {
+      case TimerMode.countdown:
+        // PRコメント対応: インスタンス変数を使用
+        final defaultSeconds = _settingsViewModel.defaultTimerSeconds.value;
+        _state.value = state.copyWith(
+          totalSeconds: defaultSeconds,
+          currentSeconds: defaultSeconds,
+        );
+      case TimerMode.countup:
+        // カウントアップモード: 上限なし
+        _state.value = state.copyWith(
+          totalSeconds: TimerConstants.countupInitialSeconds,
+          currentSeconds: TimerConstants.countdownCompleteThreshold,
+        );
+      case TimerMode.pomodoro:
+        const pomodoroSeconds =
+            TimerConstants.pomodoroWorkMinutes * TimeUtils.secondsPerMinute;
+        _state.value = state.copyWith(
+          totalSeconds: pomodoroSeconds,
+          currentSeconds: pomodoroSeconds,
+        );
     }
     return true;
   }

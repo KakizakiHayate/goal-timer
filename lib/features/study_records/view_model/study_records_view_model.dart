@@ -58,8 +58,12 @@ class StudyRecordsState {
 
   /// 前月に遷移可能か
   bool get canGoPrevious {
-    if (firstStudyDate == null) return false;
-    final firstMonth = DateTime(firstStudyDate!.year, firstStudyDate!.month);
+    final localFirstStudyDate = firstStudyDate;
+    if (localFirstStudyDate == null) return false;
+    final firstMonth = DateTime(
+      localFirstStudyDate.year,
+      localFirstStudyDate.month,
+    );
     return currentMonth.isAfter(firstMonth);
   }
 
