@@ -82,7 +82,7 @@ class StudyRecordsViewModel extends GetxController {
   );
   StudyRecordsState get state => _state;
 
-  /// コンストラクタ
+  /// コンストラクタ（DIパターン適用）
   /// テスト時にはDataSourceを注入可能
   StudyRecordsViewModel({
     LocalStudyDailyLogsDatasource? studyLogsDatasource,
@@ -111,7 +111,7 @@ class StudyRecordsViewModel extends GetxController {
       final (firstStudyDate, currentStreak, longestStreak) = await (
         _studyLogsDatasource.fetchFirstStudyDate(),
         _studyLogsDatasource.calculateCurrentStreak(),
-        _usersDatasource.getLongestStreak(),
+        _getOrCalculateLongestStreak(),
       ).wait;
 
       _state = _state.copyWith(
@@ -127,6 +127,34 @@ class StudyRecordsViewModel extends GetxController {
     } finally {
       _state = _state.copyWith(isLoading: false);
       update();
+    }
+  }
+
+  /// 最長ストリークを取得する
+  /// データがない場合は履歴から計算して保存し、その値を返す
+  Future<int> _getOrCalculateLongestStreak() async {
+    try {
+      // 最長ストリークを取得
+      final longestStreak = await _usersDatasource.getLongestStreak();
+
+      // 最長ストリークが0の場合、履歴から計算して設定
+      if (longestStreak == 0) {
+        final historicalLongestStreak =
+            await _studyLogsDatasource.calculateHistoricalLongestStreak();
+
+        if (historicalLongestStreak > 0) {
+          // 履歴から計算した最長ストリークを保存
+          await _usersDatasource.updateLongestStreak(historicalLongestStreak);
+          AppLogger.instance
+              .i('最長ストリークを履歴から計算・保存しました: $historicalLongestStreak日');
+          return historicalLongestStreak;
+        }
+      }
+
+      return longestStreak;
+    } catch (error, stackTrace) {
+      AppLogger.instance.e('最長ストリークの取得に失敗しました', error, stackTrace);
+      return 0;
     }
   }
 

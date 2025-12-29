@@ -5,6 +5,7 @@ import 'package:goal_timer/core/models/goals/goals_model.dart';
 import 'package:goal_timer/core/utils/app_logger.dart';
 import 'package:goal_timer/core/utils/time_utils.dart';
 import 'package:goal_timer/core/data/local/local_study_daily_logs_datasource.dart';
+import 'package:goal_timer/core/data/local/local_users_datasource.dart';
 import 'package:goal_timer/core/data/local/app_database.dart';
 import 'package:goal_timer/features/settings/view_model/settings_view_model.dart';
 import 'package:goal_timer/core/services/notification_service.dart';
@@ -41,7 +42,7 @@ class TimerState {
   final bool needsCompletionConfirm;
 
   // デフォルト値の定数
-  static final int _defaultSeconds =
+  static const int _defaultSeconds =
       TimerConstants.pomodoroWorkMinutes * TimeUtils.secondsPerMinute;
 
   TimerState({
@@ -96,14 +97,15 @@ class TimerState {
 
 // タイマーのViewModel
 class TimerViewModel extends GetxController {
-  late final LocalStudyDailyLogsDatasource _datasource;
+  final LocalStudyDailyLogsDatasource _datasource;
+  final LocalUsersDatasource _usersDatasource;
   final GoalsModel goal;
 
   // PRコメント対応: インスタンス変数として一度だけ取得
   final SettingsViewModel _settingsViewModel;
 
   // 通知サービス
-  final NotificationService _notificationService = NotificationService();
+  final NotificationService _notificationService;
 
   Timer? _timer;
   int _elapsedSeconds = TimerConstants.initialElapsedSeconds;
@@ -123,11 +125,20 @@ class TimerViewModel extends GetxController {
   // 経過時間を取得するgetter
   int get elapsedSeconds => _elapsedSeconds;
 
-  TimerViewModel({required this.goal})
-      : _settingsViewModel = Get.find<SettingsViewModel>() {
-    final database = Get.find<AppDatabase>();
-    _datasource = LocalStudyDailyLogsDatasource(database: database);
-
+  /// コンストラクタ（DIパターン適用）
+  /// テスト時にはDataSourceを注入可能
+  TimerViewModel({
+    required this.goal,
+    LocalStudyDailyLogsDatasource? datasource,
+    LocalUsersDatasource? usersDatasource,
+    SettingsViewModel? settingsViewModel,
+    NotificationService? notificationService,
+  })  : _settingsViewModel = settingsViewModel ?? Get.find<SettingsViewModel>(),
+        _notificationService = notificationService ?? NotificationService(),
+        _datasource = datasource ??
+            LocalStudyDailyLogsDatasource(database: Get.find<AppDatabase>()),
+        _usersDatasource = usersDatasource ??
+            LocalUsersDatasource(database: Get.find<AppDatabase>()) {
     final defaultSeconds = _settingsViewModel.defaultTimerSeconds.value;
 
     _state.value = TimerState(
@@ -173,7 +184,7 @@ class TimerViewModel extends GetxController {
         currentSeconds: TimerConstants.countdownCompleteThreshold,
       );
     } else if (mode == TimerMode.pomodoro) {
-      final pomodoroSeconds =
+      const pomodoroSeconds =
           TimerConstants.pomodoroWorkMinutes * TimeUtils.secondsPerMinute;
       _state.value = state.copyWith(
         totalSeconds: pomodoroSeconds,
@@ -418,9 +429,31 @@ class TimerViewModel extends GetxController {
       _studySessionStartDay = null;
 
       AppLogger.instance.i('学習記録を保存しました: ${log.id}, 学習日: ${log.studyDate}');
+
+      // 最長ストリークを更新
+      await _updateLongestStreakIfNeeded();
     } catch (error, stackTrace) {
       AppLogger.instance.e('学習記録の保存に失敗しました', error, stackTrace);
       rethrow;
+    }
+  }
+
+  /// 現在のストリークが最長を超えていれば更新する
+  Future<void> _updateLongestStreakIfNeeded() async {
+    try {
+      // 現在のストリークを計算
+      final currentStreak = await _datasource.calculateCurrentStreak();
+
+      // 最長ストリークと比較して必要なら更新
+      final updated =
+          await _usersDatasource.updateLongestStreakIfNeeded(currentStreak);
+
+      if (updated) {
+        AppLogger.instance.i('最長ストリークを更新しました: $currentStreak日');
+      }
+    } catch (error, stackTrace) {
+      // 最長ストリーク更新の失敗はログのみ（致命的エラーとしては扱わない）
+      AppLogger.instance.e('最長ストリークの更新に失敗しました', error, stackTrace);
     }
   }
 

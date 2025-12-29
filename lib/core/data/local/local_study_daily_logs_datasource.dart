@@ -201,6 +201,59 @@ class LocalStudyDailyLogsDatasource {
     return streak;
   }
 
+  /// 過去の全学習ログから最長連続日数を計算
+  /// 現在のストリークではなく、履歴全体から最長を算出
+  Future<int> calculateHistoricalLongestStreak() async {
+    final db = await _database.database;
+
+    // 1分以上学習した日を日付順（昇順）で取得
+    final result = await db.rawQuery(
+      '''
+      SELECT DATE(${DatabaseConsts.columnStudyDate}) as study_day,
+             SUM(${DatabaseConsts.columnTotalSeconds}) as total
+      FROM ${DatabaseConsts.tableStudyDailyLogs}
+      GROUP BY DATE(${DatabaseConsts.columnStudyDate})
+      HAVING SUM(${DatabaseConsts.columnTotalSeconds}) >= ?
+      ORDER BY study_day ASC
+      ''',
+      [StreakConsts.minStudySeconds],
+    );
+
+    if (result.isEmpty) {
+      return 0;
+    }
+
+    // 日付リストに変換
+    final studyDates = result.map((row) {
+      final dateStr = row['study_day'] as String;
+      return DateTime.parse(dateStr);
+    }).toList();
+
+    // 最長連続日数を計算
+    int longestStreak = 1;
+    int currentStreak = 1;
+
+    for (var i = 1; i < studyDates.length; i++) {
+      final previousDate = studyDates[i - 1];
+      final currentDate = studyDates[i];
+
+      // 前日との差が1日なら連続
+      final difference = currentDate.difference(previousDate).inDays;
+
+      if (difference == 1) {
+        currentStreak++;
+        if (currentStreak > longestStreak) {
+          longestStreak = currentStreak;
+        }
+      } else {
+        // 連続が途切れた
+        currentStreak = 1;
+      }
+    }
+
+    return longestStreak;
+  }
+
   /// 最初の学習記録日を取得
   /// 学習記録がない場合はnullを返す
   Future<DateTime?> fetchFirstStudyDate() async {
