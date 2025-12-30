@@ -37,6 +37,13 @@ alwaysApply: true
 - **設計指針**：Clean Architecture を基本構造とする
 - **構造モデル**：MVVM（Model-View-ViewModel）パターンを併用すること
 - 各層の責務を明確に分離し、ドメイン層のロジックを中心とした実装とする
+- 基本的なフローは以下のようになります  
+  - `view (screen)` → `viewmodel` → `usecase` → `repository interface` → `datasource`
+- それぞれの間は、Riverpod で DI する Provider を用いて依存関係を注入すること
+- `usecase`、`repository interface`、`datasource`、`model` のいずれかが **2画面以上で使用される場合** は、`lib/core/(usecase, repository interface, datasource, model)` にファイルを作成してコードを実装すること
+- `repository interface`、`datasource` のいずれかが **1画面でしか使用されない場合** は、`lib/features/機能モジュール(画面によってモジュールを分ける)/data/(repository interface, datasource)` に記載すること
+- `usecase` が **1画面でしか使用されない場合** は、`lib/features/機能モジュール(画面によってモジュールを分ける)/domain/usecase` に記載すること
+- `model` が **1画面でしか使用されない場合** は、`lib/features/機能モジュール(画面によってモジュールを分ける)/domain/model` に記載すること
 
 ---
 

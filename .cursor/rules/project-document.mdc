@@ -1,0 +1,302 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: Apply this rule to the entire repository
+globs:
+    - "*"
+alwaysApply: true
+---
+
+# Project Specification - Goal Timer App (v1.0)
+
+## Project Purpose
+
+Create a mobile app that helps users take action towards becoming their ideal self by focusing on goals and building habits. The app targets people who often waste time on entertainment or procrastination and want to reclaim that time to work on important personal goals.
+
+---
+
+## Target Users
+
+- Age: Primarily up to 20s (students, young professionals)
+- Gender: Both male and female
+- Characteristics:
+  - Easily distracted by SNS, short videos, games
+  - Have a vague feeling of "I should do this" but fail to take action
+  - Lose track of their long-term goals due to daily distractions
+
+---
+
+## Key User Scenarios
+
+- Start timer when allocating time to work on a goal
+- Review progress and streak history to maintain motivation
+
+---
+
+## Differentiators
+
+- "Negative Avoidance" input: User defines what will happen if they don't work on the goal
+- Pomodoro Timer Mode (paid feature)
+- Duolingo-inspired habit reinforcement (reminders, streaks, gamification)
+- Making the act of continuing feel enjoyable and rewarding
+
+---
+
+## Design & UI Guidelines
+
+### Design System
+
+- Base color: White (clean, simple background)
+- Main color: #3B82F6 (blue - focus, positive energy)
+- Accent colors: Grays for structure, Gold for reward moments
+- Font: Sans-serif (SF Pro, Roboto, platform native)
+
+### UI Pattern
+
+- Minimal & native-feeling
+- Generous spacing for stress-free operation
+- One-purpose-per-screen principle
+- Large and easy-to-tap buttons
+
+### UX Priorities
+
+- 1️⃣ Ease of use
+- 2️⃣ Motivation to continue
+- 3️⃣ Visual aesthetics
+
+### Visual Inspiration
+
+- Duolingo
+- Streaks
+- Forest
+- Apple Reminders
+
+### Worldview Tagline
+
+> "Don’t waste your youth. A few minutes every day can change your future."
+
+---
+
+## Technical & Implementation Guidelines
+
+### Platform
+- iOS & Android (cross-platform)
+
+### Development Approach
+
+- Flutter
+
+### Authentication
+
+- Google Login
+- Apple Login (iOS only)
+- Email & Password login
+
+#### Platform-specific login UI:
+- Android: Google, Email & Password
+- iOS: Google, Apple, Email & Password
+
+### Data Storage
+
+- Cloud: Supabase
+- Local: SQLite (for offline use)
+
+### External Services
+
+- Crashlytics (crash monitoring)
+- Google Analytics (behavior analysis)
+- RevenueCat (subscription management)
+
+### Notifications
+
+- Local push notifications
+- Daily reminder: 2 hours & 30 minutes before the new day starts (based on device time)
+
+### Subscription
+
+- Pomodoro Timer behind paid plan
+- Other paid features under consideration post-MVP
+
+---
+
+## MVP Scope (v1.0)
+
+### Core Features
+
+- User registration (Apple, Google, Email & Password)
+- Goal management (create, edit, delete, multiple goals)
+- Timer (simple count-up timer, pause/resume)
+- Progress tracking (daily records, streak display, achievement rate)
+- Negative Avoidance input during goal creation
+- Local notifications for reminders
+- SQLite local persistence
+- Crashlytics & Analytics integration
+
+### Post-MVP Candidates
+
+- Pomodoro Timer (paid)
+- Badges, gamification rewards
+- Advanced analytics (weekly/monthly graphs)
+- Subscription plan expansion
+- Device sync via Supabase
+
+---
+
+## Development Process
+
+- MVP phase: Flexible to adjust requirements during development
+- Post-MVP phase: Requirements freeze and stability focus
+
+---
+
+## Notes
+
+- This document defines the initial v1.0 spec.
+- Next steps: Screen list, wireframes, and Flutter directory structure.
+
+
+# ja
+
+# 目標タイマーアプリ - 初期設計ドキュメント（v1.0仕様書・完全版）
+
+---
+
+## 1. 基本コンセプト
+
+### アプリの目的・解決したい課題
+- 「なりたい自分」に少しでも近づくための行動を促進する
+- 若い時に本来やるべき行動を後回しにしがちな人が、目標に向き合い行動する時間を作るサポート
+
+### ターゲットユーザー
+- 20代までの学生・社会人の男女
+- SNS・ショート動画・ゲームに時間を使いがちな人
+- モヤモヤした「やらなきゃ」を抱えているが行動に移せていない人
+
+### 使用シーン
+- 目標達成のための時間確保時にタイマーを起動
+- 継続状況や進捗を確認・分析する時
+
+### 差別化ポイント
+- ネガティブ回避設定
+- ポモドーロタイマーモード（有料）
+- Duolingo的な継続促進UX（通知・習慣化支援）
+- 継続することが楽しいUX設計
+
+---
+
+## 2. デザイン・UI要件
+
+### デザインシステム
+- ベースカラー：ホワイト（白基調）
+- メインカラー：#3B82F6（ブルー）
+- アクセントカラー：グレー系、ゴールド系（達成報酬時）
+- フォント：サンセリフ体（SF Pro、Robotoなど）
+
+### UIパターン
+- ミニマル・ネイティブ寄り
+- 余白多めで直感的操作
+- 1画面1目的、わかりやすいボタン配置
+
+### 重視する要素
+- 迷わせない操作性 > 継続したくなる気持ちよさ > 視覚的美しさ
+
+### 参考アプリ
+- Duolingo
+- Streaks
+- Forest
+- Apple純正リマインダー
+
+### 世界観キャッチコピー
+- 「若い時間を無駄にしない。1分の積み重ねが未来を変える」
+
+---
+
+## 3. 技術・実装方針
+
+### プラットフォーム
+- iOS / Android 両対応
+
+### 開発アプローチ
+- Flutter
+
+### 認証
+- Googleログイン
+- Appleログイン（iOSのみ表示）
+- メールアドレス＆パスワード認証
+
+#### 認証UI出し分け
+- Android：Google、メール＆パスワード
+- iOS：Google、Apple、メール＆パスワード
+
+### データ保存
+- クラウド：Supabase
+- ローカル：SQLite（オフライン対応）
+
+### 外部サービス
+- Crashlytics（障害監視）
+- Google Analytics（行動分析）
+- RevenueCat（サブスクリプション管理）
+
+### 通知
+- ローカルプッシュ通知
+- 日付が切り替わる2時間前・30分前にリマインド通知
+
+### サブスクリプション
+- ポモドーロタイマーは課金プランで提供予定
+- その他有料機能は今後検討
+
+---
+
+## 4. プロジェクト進行計画
+
+### MVP版で実装する機能
+
+#### ユーザー登録
+- Apple・Google・メール＆パスワード認証
+- 認証UIはOSごとに出し分け
+
+#### 目標管理
+- 目標の作成・編集・削除
+- 複数目標登録対応
+
+#### タイマー
+- シンプルなカウントアップタイマー
+- 計測中の途中終了・再開対応
+
+#### 進捗管理
+- 日単位の記録
+- 継続日数・達成率の可視化
+
+#### ネガティブ回避設定
+- 目標登録時にネガティブワード入力
+
+#### 通知
+- ローカル通知によるリマインド
+
+#### ローカルデータ保存
+- SQLiteでオフライン対応
+
+#### 障害監視・分析
+- Crashlytics、Google Analytics導入
+
+### MVP後に追加検討する機能
+
+- ポモドーロタイマー（有料）
+- バッジ・報酬・ゲーミフィケーション要素
+- 詳細な進捗分析（週・月グラフ）
+- サブスクプランの拡張
+- Supabase連携による端末間同期
+
+### 変更への柔軟性
+- MVP開発中は仕様調整OK（アジャイル進行）
+- MVPリリース後は仕様凍結・安定化フェーズへ移行
+
+---
+
+## 5. 備考
+
+- 現在はv1.0設計フェーズ完了
+- 次ステップ：画面一覧・ディレクトリ構成・ワイヤーフレーム作成

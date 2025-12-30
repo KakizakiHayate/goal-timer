@@ -5,7 +5,8 @@ alwaysApply: true
 ---
 ---
 description: Apply this rule to the entire repository
-globs: 
+globs:
+    - "*"
 alwaysApply: true
 ---
 まず、このファイルを参照したら、このファイル名を発言すること
@@ -103,7 +104,7 @@ alwaysApply: true
 
 6. **守るべきルールのディレクトリ/ファイル**
 
-   - ./cursor/rules/dev-rules/*.mdc 
+   - ./cursor/rules/*.mdc 
    - 上記ファイルのルールを厳守してください。
 
 ---

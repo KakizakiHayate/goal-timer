@@ -1,28 +1,80 @@
-# This file configures the analyzer, which statically analyzes Dart code to
-# check for errors, warnings, and lints.
-#
-# The issues identified by the analyzer are surfaced in the UI of Dart-enabled
-# IDEs (https://dart.dev/tools#ides-and-editors). The analyzer can also be
-# invoked from the command line by running `flutter analyze`.
+# Analysis Options for AI-Generated Code Maintainability
+# Run: flutter analyze / dart analyze
 
-# The following line activates a set of recommended lints for Flutter apps,
-# packages, and plugins designed to encourage good coding practices.
 include: package:flutter_lints/flutter.yaml
 
-linter:
-  # The lint rules applied to this project can be customized in the
-  # section below to disable rules from the `package:flutter_lints/flutter.yaml`
-  # included above or to enable additional rules. A list of all available lints
-  # and their documentation is published at https://dart.dev/lints.
-  #
-  # Instead of disabling a lint rule for the entire project in the
-  # section below, it can also be suppressed for a single line of code
-  # or a specific dart file by using the `// ignore: name_of_lint` and
-  # `// ignore_for_file: name_of_lint` syntax on the line or in the file
-  # producing the lint.
-  rules:
-    # avoid_print: false  # Uncomment to disable the `avoid_print` rule
-    # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
+analyzer:
+  plugins:
+    - custom_lint
 
-# Additional information about this file can be found at
-# https://dart.dev/guides/language/analysis-options
+  # 型安全性の強化
+  language:
+    strict-casts: true
+    strict-raw-types: true
+
+  errors:
+    unused_import: error
+    unused_local_variable: warning
+    dead_code: warning
+    # Disable non_nullable_equals_parameter for Freezed generated files
+    non_nullable_equals_parameter: ignore
+    invalid_annotation_target: ignore
+    # Disable asset_does_not_exist for .env file (not included in repository)
+    asset_does_not_exist: ignore
+
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - "**/*.mocks.dart"
+    - "build/**"
+    - ".dart_tool/**"
+    - "test/**"
+    # Exclude backup directory from all lint checks
+    - "lib/backup/**"
+
+linter:
+  rules:
+    # 未使用コード検出（analyzerのerrorsセクションで設定済み）
+    - unnecessary_late
+
+    # イミュータビリティ（変更に強い）
+    - prefer_final_fields
+    - prefer_final_locals
+    - prefer_const_constructors
+    - prefer_const_declarations
+    - prefer_const_literals_to_create_immutables
+
+    # 型安全性
+    - avoid_dynamic_calls
+    - avoid_types_as_parameter_names
+    - prefer_typing_uninitialized_variables
+    - always_declare_return_types
+    - type_annotate_public_apis
+
+    # null安全
+    - avoid_null_checks_in_equality_operators
+    - null_check_on_nullable_type_parameter
+    - avoid_returning_null_for_future
+
+    # コード構造・可読性
+    - directives_ordering
+    - sort_child_properties_last
+    - require_trailing_commas
+    - prefer_single_quotes
+    - prefer_relative_imports
+    - sort_pub_dependencies
+
+    # エラー防止
+    - avoid_print
+    - cancel_subscriptions
+    - close_sinks
+    - no_duplicate_case_values
+    - avoid_empty_else
+    - avoid_returning_null_for_void
+    - empty_catches
+
+    # Flutter固有
+    - use_key_in_widget_constructors
+    - avoid_unnecessary_containers
+    - sized_box_for_whitespace
+    - use_full_hex_values_for_flutter_colors

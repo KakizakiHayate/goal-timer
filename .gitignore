@@ -5,9 +5,11 @@
 *.swp
 .DS_Store
 .atom/
+.build/
 .buildlog/
 .history
 .svn/
+.swiftpm/
 migrate_working_dir/
 
 # IntelliJ related
@@ -43,3 +45,39 @@ app.*.map.json
 /android/app/release
 
 pubspec.lock
+
+# 環境変数ファイル
+.env
+.env.local
+.env.production
+
+# MCP設定ファイル（機密情報を含む）
+.mcp.json
+
+# iOS
+ios/Runner/GoogleService-Info.plist
+ios/build/*
+ios/Flutter/Debug.xcconfig
+ios/Flutter/Release.xcconfig
+ios/Flutter/Profile.xcconfig
+
+android/app/google-services.json
+
+docs/
+
+ai-rules/*
+!ai-rules/plans/
+!ai-rules/plans/*.md
+.serena/
+.claude/commands/exec-issue.md
+ios/Runner/GoogleService-Info.plist.backup
+ios/Runner.xcodeproj/project.pbxproj.backup
+
+.vscode
+# プランニング・メモファイル
+*.md
+!README.md
+!CHANGELOG.md
+!CONTRIBUTING.md
+!LICENSE.md
+!ai-rules/plans/*.md
