@@ -5,35 +5,114 @@ publish_to: 'none'
 version: 1.0.0+7
 
 environment:
-  sdk: '3.7.0'
+  sdk: '>=3.7.0 <4.0.0'
   flutter: '3.29.0'
 
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   cupertino_icons: '1.0.8'
   
   # 状態管理
-  flutter_riverpod: '2.3.6'
-  riverpod_annotation: '2.1.1'
+  flutter_riverpod: '2.4.9'
+  riverpod_annotation: '2.3.3'
   
   # APIクライアント
   dio: '5.4.1'
   
   # Supabase連携
   supabase_flutter: '2.3.4'
-  intl: '0.18.1'
+  fl_chart: '0.71.0'
+  uuid: ^4.5.1
+  
+  # 環境変数
+  flutter_dotenv: '5.1.0'
+  
+  # ロギング
+  logger: '2.0.2+1'
+
+  freezed_annotation: '2.4.1'
+  json_annotation: '4.8.1'
+
+  frontend_server_client: '4.0.0'
+  
+  # ローカルDB
+  sqflite: '2.4.2'
+  path: '1.9.1'
+  path_provider: '2.1.2'
+  
+  # 接続状態管理
+  connectivity_plus: '5.0.2'
+  
+  # 認証関連パッケージ
+  google_sign_in: ^6.2.1
+  sign_in_with_apple: ^6.1.0
+  crypto: ^3.0.3
+  
+  # フォームバリデーション
+  formz: ^0.7.0
+  
+  # 共有設定
+  shared_preferences: ^2.2.2
+  
+  # 生体認証（オプション）
+  local_auth: ^2.1.8
+  firebase_core: ^3.14.0
+  
+  # 課金機能（RevenueCat）
+  purchases_flutter: ^8.1.2
+  get: 4.7.2
+  
+  # URL起動
+  url_launcher: ^6.3.0
+  
+  # App Tracking Transparency (iOS)
+  app_tracking_transparency: ^2.0.6
+  flutter_local_notifications: ^19.5.0
+  timezone: ^0.10.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  
+
   # Riverpodのコード生成
-  riverpod_generator: '2.2.3'
-  build_runner: '2.3.3'
-  
-  flutter_lints: '3.0.1'
+  riverpod_generator: '2.3.9'
+  build_runner: '2.4.13'
+
+  freezed: '2.4.5'
+  json_serializable: '6.7.1'
+
+  flutter_lints: '4.0.0'
+
+  # カスタムリント
+  custom_lint: 0.7.0
+  tanzam_lints:
+    path: tanzam_lints
+
+  # テスト用モック
+  mockito: ^5.4.4
+
+  # アプリアイコン生成
+  flutter_launcher_icons: ^0.13.1
+  mocktail: ^1.0.4
+
+  sqflite_common_ffi: ^2.3.6
 
 flutter:
   uses-material-design: true
+  
+  # 環境変数ファイルのアセット登録
+  assets:
+    - .env
+    - assets/icons/
+
+# アプリアイコン設定
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/goal_timer_app_icon.png"
+  adaptive_icon_background: "#1976D2"
+  adaptive_icon_foreground: "assets/icons/goal_timer_app_icon.png"

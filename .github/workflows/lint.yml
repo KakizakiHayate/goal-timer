@@ -1,0 +1,62 @@
+name: Lint Check
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+      - develop-mvvm
+      - 'feature/**'
+      - 'feat/**'
+      - 'fix/**'
+
+jobs:
+  # backupフォルダの変更チェック
+  check-backup-folder:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check if backup folder is modified
+        run: |
+          # ベースブランチとの差分でbackupフォルダの変更をチェック
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- 'lib/backup/' || true)
+          if [ -n "$CHANGED_FILES" ]; then
+            echo "❌ Error: backup folder should not be modified!"
+            echo "Changed files:"
+            echo "$CHANGED_FILES"
+            exit 1
+          else
+            echo "✅ backup folder is not modified"
+          fi
+
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.29.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Get tanzam_lints dependencies
+        run: |
+          cd tanzam_lints
+          dart pub get
+
+      - name: Run dart analyze
+        run: dart analyze
+
+      - name: Run custom_lint
+        run: dart run custom_lint
