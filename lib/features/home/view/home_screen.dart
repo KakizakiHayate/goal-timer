@@ -360,6 +360,7 @@ class _HomeTabContent extends StatelessWidget {
           progress: progress,
           streakDays: 0,
           avoidMessage: goal.avoidMessage.isNotEmpty ? goal.avoidMessage : null,
+          deadline: goal.deadline,
           onTap: () {
             // 目標詳細画面（Coming Soon）
           },

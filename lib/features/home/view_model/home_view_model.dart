@@ -48,10 +48,9 @@ class HomeState {
   /// totalTargetMinutesを使用して進捗率を計算
   double getProgressForGoal(GoalsModel goal) {
     final studiedMinutes = getStudiedMinutesForGoal(goal);
-    // totalTargetMinutesがnullの場合はtargetMinutesを使用（後方互換性）
-    final targetMinutes = goal.totalTargetMinutes ?? goal.targetMinutes;
+    final totalTargetMinutes = goal.totalTargetMinutes ?? 0;
     return TimeUtils.calculateProgressRateFromMinutes(
-      targetMinutes,
+      totalTargetMinutes,
       studiedMinutes,
     );
   }
@@ -98,6 +97,9 @@ class HomeViewModel extends GetxController {
 
       // 期限切れの目標を更新
       await _goalsDatasource.updateExpiredGoals();
+
+      // 既存目標のtotalTargetMinutesを補完（Issue #111実装前に作成された目標対応）
+      await _goalsDatasource.populateMissingTotalTargetMinutes();
 
       // 目標、学習時間、ストリークデータを並列で取得（Dart 3 Recordsで型安全に）
       final now = DateTime.now();
