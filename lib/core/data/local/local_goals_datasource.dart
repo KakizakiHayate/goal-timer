@@ -218,11 +218,14 @@ class LocalGoalsDatasource {
           'AND ${DatabaseConsts.columnDeletedAt} IS NULL',
     );
 
+    if (goals.isEmpty) return;
+
+    // Batchを使用してパフォーマンスを向上
+    final batch = db.batch();
+
     for (final goalMap in goals) {
-      final targetMinutes =
-          goalMap[DatabaseConsts.columnTargetMinutes] as int;
-      final deadlineStr =
-          goalMap[DatabaseConsts.columnDeadline] as String;
+      final targetMinutes = goalMap[DatabaseConsts.columnTargetMinutes] as int;
+      final deadlineStr = goalMap[DatabaseConsts.columnDeadline] as String;
       final deadline = DateTime.parse(deadlineStr);
 
       // 残り日数を計算
@@ -234,13 +237,16 @@ class LocalGoalsDatasource {
         remainingDays: remainingDays,
       );
 
-      // 更新
-      await db.update(
+      // Batchに更新を追加
+      batch.update(
         DatabaseConsts.tableGoals,
         {DatabaseConsts.columnTotalTargetMinutes: totalTargetMinutes},
         where: '${DatabaseConsts.columnId} = ?',
         whereArgs: [goalMap[DatabaseConsts.columnId]],
       );
     }
+
+    // 全ての更新を一括でコミット
+    await batch.commit(noResult: true);
   }
 }
