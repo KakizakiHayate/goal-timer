@@ -431,7 +431,27 @@ class _AddGoalModalState extends State<AddGoalModal> {
             ),
           ),
         ),
+        // 総目標時間の表示（期限が選択されている場合のみ）
+        if (selectedDeadline != null) ...[
+          const SizedBox(height: SpacingConsts.s),
+          _buildTotalTargetTimeText(selectedDeadline),
+        ],
       ],
+    );
+  }
+
+  Widget _buildTotalTargetTimeText(DateTime deadline) {
+    final remainingDays = TimeUtils.calculateRemainingDays(deadline);
+    final totalTargetMinutes = TimeUtils.calculateTotalTargetMinutes(
+      targetMinutes: _targetMinutes,
+      remainingDays: remainingDays,
+    );
+
+    return Text(
+      '残り$remainingDays日 → 総目標時間: ${TimeUtils.formatMinutesToHoursAndMinutes(totalTargetMinutes)}',
+      style: TextConsts.bodySmall.copyWith(
+        color: ColorConsts.textSecondary,
+      ),
     );
   }
 

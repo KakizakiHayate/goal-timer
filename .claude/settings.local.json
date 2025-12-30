@@ -84,7 +84,8 @@
       "Bash(tree:*)",
       "Bash(gh api:*)",
       "WebFetch(domain:zenn.dev)",
-      "Bash(dart run:*)"
+      "Bash(dart run:*)",
+      "Bash(git stash:*)"
     ],
     "deny": []
   },

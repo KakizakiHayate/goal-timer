@@ -1,6 +1,7 @@
 import 'package:goal_timer/core/data/local/app_database.dart';
 import 'package:goal_timer/core/data/local/database_consts.dart';
 import 'package:goal_timer/core/models/goals/goals_model.dart';
+import 'package:goal_timer/core/utils/time_utils.dart';
 import 'package:sqflite/sqflite.dart';
 
 class LocalGoalsDatasource {
@@ -203,5 +204,43 @@ class LocalGoalsDatasource {
     );
 
     return maps.map((map) => _mapToModel(map)).toList();
+  }
+
+  /// 既存目標のtotalTargetMinutesを計算・更新する
+  /// Issue #111実装前に作成された目標に対応
+  Future<void> populateMissingTotalTargetMinutes() async {
+    final db = await _database.database;
+
+    // totalTargetMinutesがNULLの目標を取得（削除済みを除く）
+    final goals = await db.query(
+      DatabaseConsts.tableGoals,
+      where: '${DatabaseConsts.columnTotalTargetMinutes} IS NULL '
+          'AND ${DatabaseConsts.columnDeletedAt} IS NULL',
+    );
+
+    for (final goalMap in goals) {
+      final targetMinutes =
+          goalMap[DatabaseConsts.columnTargetMinutes] as int;
+      final deadlineStr =
+          goalMap[DatabaseConsts.columnDeadline] as String;
+      final deadline = DateTime.parse(deadlineStr);
+
+      // 残り日数を計算
+      final remainingDays = TimeUtils.calculateRemainingDays(deadline);
+
+      // 総目標時間 = 1日の目標時間 × 残り日数
+      final totalTargetMinutes = TimeUtils.calculateTotalTargetMinutes(
+        targetMinutes: targetMinutes,
+        remainingDays: remainingDays,
+      );
+
+      // 更新
+      await db.update(
+        DatabaseConsts.tableGoals,
+        {DatabaseConsts.columnTotalTargetMinutes: totalTargetMinutes},
+        where: '${DatabaseConsts.columnId} = ?',
+        whereArgs: [goalMap[DatabaseConsts.columnId]],
+      );
+    }
   }
 }

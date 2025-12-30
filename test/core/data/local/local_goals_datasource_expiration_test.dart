@@ -233,4 +233,90 @@ void main() {
       expect(savedGoal!.totalTargetMinutes, equals(900));
     });
   });
+
+  group('populateMissingTotalTargetMinutes', () {
+    test('sets totalTargetMinutes for goals with null value', () async {
+      // Arrange - totalTargetMinutesがnullの目標を直接DBに挿入
+      final goalId = const Uuid().v4();
+      final now = DateTime.now();
+      final deadline = now.add(const Duration(days: 10));
+      final db = await database.database;
+
+      await db.insert('goals', {
+        'id': goalId,
+        'user_id': 'test-user-1',
+        'title': 'テスト目標',
+        'description': 'テスト',
+        'target_minutes': 60, // 1時間/日
+        'total_target_minutes': null, // NULL
+        'avoid_message': 'テスト',
+        'deadline': deadline.toIso8601String(),
+        'created_at': now.toIso8601String(),
+      });
+
+      // Act
+      await datasource.populateMissingTotalTargetMinutes();
+
+      // Assert
+      final updatedGoal = await datasource.fetchGoalById(goalId);
+      expect(updatedGoal!.totalTargetMinutes, isNotNull);
+      // 10日間 + 今日 = 11日 × 60分 = 660分
+      expect(updatedGoal.totalTargetMinutes, equals(660));
+    });
+
+    test('does not modify goals with existing totalTargetMinutes', () async {
+      // Arrange - 既にtotalTargetMinutesが設定されている目標
+      final goal = GoalsModel(
+        id: const Uuid().v4(),
+        userId: 'test-user-1',
+        title: 'テスト目標',
+        description: 'テスト',
+        targetMinutes: 60,
+        totalTargetMinutes: 1000, // 既存の値
+        avoidMessage: 'テスト',
+        deadline: DateTime.now().add(const Duration(days: 10)),
+        createdAt: DateTime.now(),
+      );
+      await datasource.saveGoal(goal);
+
+      // Act
+      await datasource.populateMissingTotalTargetMinutes();
+
+      // Assert
+      final updatedGoal = await datasource.fetchGoalById(goal.id);
+      expect(updatedGoal!.totalTargetMinutes, equals(1000)); // 変更なし
+    });
+
+    test('does not update deleted goals', () async {
+      // Arrange - 削除済みでtotalTargetMinutesがnullの目標を直接DBに挿入
+      final goalId = const Uuid().v4();
+      final now = DateTime.now();
+      final deadline = now.add(const Duration(days: 10));
+      final db = await database.database;
+
+      await db.insert('goals', {
+        'id': goalId,
+        'user_id': 'test-user-1',
+        'title': '削除済み目標',
+        'description': 'テスト',
+        'target_minutes': 60,
+        'total_target_minutes': null, // NULL
+        'avoid_message': 'テスト',
+        'deadline': deadline.toIso8601String(),
+        'deleted_at': now.toIso8601String(), // 削除済み
+        'created_at': now.toIso8601String(),
+      });
+
+      // Act
+      await datasource.populateMissingTotalTargetMinutes();
+
+      // Assert - 削除済み目標は更新されない
+      final result = await db.query(
+        'goals',
+        where: 'id = ?',
+        whereArgs: [goalId],
+      );
+      expect(result.first['total_target_minutes'], isNull);
+    });
+  });
 }
