@@ -41,10 +41,12 @@ class NotificationService {
       '@mipmap/ic_launcher',
     );
 
+    // 初期化時に自動で許可を求めない（ATTダイアログとの競合を防ぐため）
+    // 許可は requestPermission() で明示的に求める
     const iosSettings = DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
+      requestAlertPermission: false,
+      requestBadgePermission: false,
+      requestSoundPermission: false,
     );
 
     const initSettings = InitializationSettings(

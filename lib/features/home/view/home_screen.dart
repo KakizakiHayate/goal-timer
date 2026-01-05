@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/models/goals/goals_model.dart';
 import '../../../core/services/att_service.dart';
+import '../../../core/services/notification_service.dart';
 import '../../../core/utils/color_consts.dart';
 import '../../../core/utils/text_consts.dart';
 import '../../../core/utils/spacing_consts.dart';
@@ -69,16 +70,23 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     _fabAnimationController.forward();
 
-    // ATTダイアログを表示（iOS 14.5以降）
-    // 最初のフレームがレンダリングされた後に表示する
+    // ATTダイアログと通知許可ダイアログを順次表示（iOS）
+    // iOSは複数のネイティブダイアログを同時に表示できないため、
+    // ATT → 通知の順で表示する
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _requestTrackingAuthorization();
+      _requestPermissions();
     });
   }
 
-  /// ATT（App Tracking Transparency）の許可をリクエストする
-  Future<void> _requestTrackingAuthorization() async {
+  /// ATTと通知の許可を順次リクエストする
+  /// iOSでは複数のネイティブダイアログを同時に表示できないため、
+  /// ATT → 通知の順で表示する
+  Future<void> _requestPermissions() async {
+    // 1. ATTダイアログを表示（iOS 14.5以降）
     await AttService.requestTrackingAuthorization();
+
+    // 2. ATT完了後に通知許可を表示
+    await NotificationService().requestPermission();
   }
 
   @override
