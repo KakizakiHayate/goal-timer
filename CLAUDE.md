@@ -135,7 +135,12 @@ View → ViewModel → DataSource → SQLite
 ## 5. Repository設定
 
 - **リポジトリ名**: `KakizakiHayate/goal-timer`
-- **GitHub操作**: ghコマンドを使用
+- **GitHub操作**: 必ず `gh` コマンドを使用すること（git push/pull以外のGitHub API操作）
+  - PR作成: `gh pr create`
+  - PR確認: `gh pr view`
+  - PRマージ: `gh pr merge`
+  - Issue操作: `gh issue view`, `gh issue create`
+  - 認証確認: `gh auth status`
 
 ---
 
