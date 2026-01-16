@@ -60,7 +60,11 @@ dependencies:
   
   # 生体認証（オプション）
   local_auth: ^2.1.8
+
+  # Firebase
   firebase_core: ^3.14.0
+  firebase_analytics: ^11.4.4
+  firebase_crashlytics: ^4.3.3
   
   # 課金機能（RevenueCat）
   purchases_flutter: ^8.1.2
