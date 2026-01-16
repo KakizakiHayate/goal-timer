@@ -1,15 +1,16 @@
 import 'dart:async';
 import 'package:get/get.dart';
-import 'package:goal_timer/core/models/study_daily_logs/study_daily_logs_model.dart';
-import 'package:goal_timer/core/models/goals/goals_model.dart';
-import 'package:goal_timer/core/utils/app_logger.dart';
-import 'package:goal_timer/core/utils/time_utils.dart';
+import 'package:goal_timer/core/data/local/app_database.dart';
 import 'package:goal_timer/core/data/local/local_study_daily_logs_datasource.dart';
 import 'package:goal_timer/core/data/local/local_users_datasource.dart';
-import 'package:goal_timer/core/data/local/app_database.dart';
-import 'package:goal_timer/features/settings/view_model/settings_view_model.dart';
+import 'package:goal_timer/core/models/goals/goals_model.dart';
+import 'package:goal_timer/core/models/study_daily_logs/study_daily_logs_model.dart';
 import 'package:goal_timer/core/services/notification_service.dart';
+import 'package:goal_timer/core/services/rating_service.dart';
+import 'package:goal_timer/core/utils/app_logger.dart';
 import 'package:goal_timer/core/utils/streak_consts.dart';
+import 'package:goal_timer/core/utils/time_utils.dart';
+import 'package:goal_timer/features/settings/view_model/settings_view_model.dart';
 import 'package:uuid/uuid.dart';
 
 // タイマー関連の定数
@@ -445,6 +446,9 @@ class TimerViewModel extends GetxController {
       } else {
         AppLogger.instance.i('学習時間が1分未満のためストリーク処理をスキップ');
       }
+
+      // 学習完了時に評価モーダル表示判定を実行
+      await RatingService().onStudyCompleted();
     } catch (error, stackTrace) {
       AppLogger.instance.e('学習記録の保存に失敗しました', error, stackTrace);
       rethrow;

@@ -78,6 +78,9 @@ dependencies:
   flutter_local_notifications: ^19.5.0
   timezone: ^0.10.1
 
+  # アプリ評価
+  in_app_review: ^2.0.9
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
