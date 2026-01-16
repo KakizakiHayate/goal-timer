@@ -1,14 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+import 'core/data/local/app_database.dart';
+import 'core/services/firebase_service.dart';
+import 'core/services/notification_service.dart';
+import 'core/utils/app_logger.dart';
+import 'core/utils/color_consts.dart';
 import 'features/home/view/home_screen.dart';
 import 'features/settings/view_model/settings_view_model.dart';
-import 'core/utils/color_consts.dart';
-import 'core/data/local/app_database.dart';
-import 'core/utils/app_logger.dart';
-import 'core/services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Firebaseを初期化（Analytics & Crashlytics）
+  try {
+    await FirebaseService().init();
+  } catch (error, stackTrace) {
+    AppLogger.instance.e('Firebase初期化に失敗しました', error, stackTrace);
+  }
 
   // ✅ DIコンテナに登録（シングルトンとして）
   Get.put<AppDatabase>(AppDatabase(), permanent: true);
