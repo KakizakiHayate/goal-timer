@@ -59,10 +59,8 @@ void main() {
         expect(ratingService.shouldShowRatingDialog(10, true), isFalse);
       });
 
-      test('0回目の完了時は評価ダイアログを表示しない', () {
+      test('0回目の完了時は評価ダイアログを表示する', () {
         expect(ratingService.shouldShowRatingDialog(0, false), isTrue);
-        // 注: 0 % 5 == 0 なので true になる
-        // 実際には0回目は発生しない（1から開始）
       });
     });
 
