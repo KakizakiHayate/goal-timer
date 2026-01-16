@@ -85,7 +85,12 @@
       "Bash(gh api:*)",
       "WebFetch(domain:zenn.dev)",
       "Bash(dart run:*)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(gh pr merge:*)",
+      "WebFetch(domain:apps.apple.com)",
+      "Bash(gh label create:*)",
+      "Bash(gh auth:*)",
+      "Bash(gh pr checks:*)"
     ],
     "deny": []
   },
