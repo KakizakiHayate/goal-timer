@@ -48,7 +48,7 @@ dependencies:
   connectivity_plus: ^7.0.0
   
   # 認証関連パッケージ
-  google_sign_in: ^7.2.0
+  google_sign_in: ^6.2.0
   sign_in_with_apple: ^7.0.1
   crypto: ^3.0.3
   

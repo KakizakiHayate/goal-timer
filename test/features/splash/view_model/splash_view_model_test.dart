@@ -45,9 +45,9 @@ void main() {
 
     group('checkNetwork', () {
       test('オフライン時はoffline状態になる', () async {
-        // connectivity_plus 5.x は単一の ConnectivityResult を返す
+        // connectivity_plus 6.x+ は List<ConnectivityResult> を返す
         when(() => mockConnectivity.checkConnectivity())
-            .thenAnswer((_) async => ConnectivityResult.none);
+            .thenAnswer((_) async => [ConnectivityResult.none]);
 
         final viewModel = SplashViewModel(connectivity: mockConnectivity);
         await viewModel.initialize();
@@ -58,7 +58,7 @@ void main() {
 
       test('WiFi接続時はoffline状態にならない', () async {
         when(() => mockConnectivity.checkConnectivity())
-            .thenAnswer((_) async => ConnectivityResult.wifi);
+            .thenAnswer((_) async => [ConnectivityResult.wifi]);
 
         final viewModel = SplashViewModel(connectivity: mockConnectivity);
         // Supabaseが初期化されていないのでエラーになるが、
@@ -74,7 +74,7 @@ void main() {
 
       test('モバイル接続時はoffline状態にならない', () async {
         when(() => mockConnectivity.checkConnectivity())
-            .thenAnswer((_) async => ConnectivityResult.mobile);
+            .thenAnswer((_) async => [ConnectivityResult.mobile]);
 
         final viewModel = SplashViewModel(connectivity: mockConnectivity);
         // Supabaseが初期化されていないのでエラーになるが、
@@ -92,7 +92,7 @@ void main() {
     group('retryFromOffline', () {
       test('リトライ時は初期状態にリセットされる', () async {
         when(() => mockConnectivity.checkConnectivity())
-            .thenAnswer((_) async => ConnectivityResult.none);
+            .thenAnswer((_) async => [ConnectivityResult.none]);
 
         final viewModel = SplashViewModel(connectivity: mockConnectivity);
         await viewModel.initialize();

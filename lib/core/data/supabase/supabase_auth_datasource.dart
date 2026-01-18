@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:crypto/crypto.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -22,7 +23,7 @@ class SupabaseAuthDatasource {
             GoogleSignIn(
               scopes: ['email', 'profile'],
               serverClientId: Platform.isAndroid
-                  ? 'YOUR_ANDROID_CLIENT_ID' // TODO: 実際のClient IDに置き換え
+                  ? dotenv.env['GOOGLE_SIGNIN_ANDROID_CLIENT_ID']
                   : null,
             );
 
@@ -55,6 +56,8 @@ class SupabaseAuthDatasource {
   }
 
   /// Googleアカウントでアイデンティティを連携
+  ///
+  /// signInWithIdTokenを使用して、匿名ユーザーをGoogleアカウントにリンクします
   Future<bool> linkWithGoogle() async {
     try {
       AppLogger.instance.i('Googleアカウント連携を開始します');
@@ -82,8 +85,13 @@ class SupabaseAuthDatasource {
         throw Exception('Googleトークンの取得に失敗しました');
       }
 
-      // linkIdentityを使用してアカウントを連携
-      await _supabase.auth.linkIdentity(OAuthProvider.google);
+      // signInWithIdTokenを使用してアカウントを連携
+      // 現在の匿名セッションが新しいGoogleアカウントに自動的にリンクされます
+      await _supabase.auth.signInWithIdToken(
+        provider: OAuthProvider.google,
+        idToken: idToken,
+        accessToken: accessToken,
+      );
 
       AppLogger.instance.i('Googleアカウント連携成功');
       return true;
@@ -94,6 +102,8 @@ class SupabaseAuthDatasource {
   }
 
   /// Appleアカウントでアイデンティティを連携
+  ///
+  /// signInWithIdTokenを使用して、匿名ユーザーをAppleアカウントにリンクします
   Future<bool> linkWithApple() async {
     try {
       AppLogger.instance.i('Appleアカウント連携を開始します');
@@ -115,8 +125,13 @@ class SupabaseAuthDatasource {
         throw Exception('AppleIDトークンの取得に失敗しました');
       }
 
-      // linkIdentityを使用してアカウントを連携
-      await _supabase.auth.linkIdentity(OAuthProvider.apple);
+      // signInWithIdTokenを使用してアカウントを連携
+      // 現在の匿名セッションが新しいAppleアカウントに自動的にリンクされます
+      await _supabase.auth.signInWithIdToken(
+        provider: OAuthProvider.apple,
+        idToken: idToken,
+        nonce: rawNonce,
+      );
 
       AppLogger.instance.i('Appleアカウント連携成功');
       return true;

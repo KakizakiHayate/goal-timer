@@ -5,11 +5,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/data/local/app_database.dart';
 import '../../../core/data/local/local_goals_datasource.dart';
 import '../../../core/data/local/local_study_daily_logs_datasource.dart';
-import '../../../core/data/local/local_users_datasource.dart';
 import '../../../core/data/supabase/supabase_auth_datasource.dart';
 import '../../../core/data/supabase/supabase_goals_datasource.dart';
 import '../../../core/data/supabase/supabase_study_logs_datasource.dart';
-import '../../../core/data/supabase/supabase_users_datasource.dart';
 import '../../../core/services/migration_service.dart';
 import '../../../core/utils/app_logger.dart';
 
@@ -123,11 +121,9 @@ class SplashViewModel extends GetxController {
       localGoalsDatasource: LocalGoalsDatasource(database: appDatabase),
       localStudyLogsDatasource:
           LocalStudyDailyLogsDatasource(database: appDatabase),
-      localUsersDatasource: LocalUsersDatasource(database: appDatabase),
       supabaseGoalsDatasource: SupabaseGoalsDatasource(supabase: supabase),
       supabaseStudyLogsDatasource:
           SupabaseStudyLogsDatasource(supabase: supabase),
-      supabaseUsersDatasource: SupabaseUsersDatasource(supabase: supabase),
     );
   }
 

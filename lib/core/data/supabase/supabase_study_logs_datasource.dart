@@ -22,7 +22,8 @@ class SupabaseStudyLogsDatasource {
           .order('study_date', ascending: false);
 
       return (response as List)
-          .map((json) => StudyDailyLogsModel.fromJson(json))
+          .map((json) =>
+              StudyDailyLogsModel.fromJson(json as Map<String, dynamic>))
           .toList();
     } catch (error, stackTrace) {
       AppLogger.instance.e('学習ログ取得に失敗しました', error, stackTrace);
@@ -40,7 +41,8 @@ class SupabaseStudyLogsDatasource {
           .order('study_date', ascending: false);
 
       return (response as List)
-          .map((json) => StudyDailyLogsModel.fromJson(json))
+          .map((json) =>
+              StudyDailyLogsModel.fromJson(json as Map<String, dynamic>))
           .toList();
     } catch (error, stackTrace) {
       AppLogger.instance.e('目標別学習ログ取得に失敗しました', error, stackTrace);

@@ -23,7 +23,7 @@ class SupabaseGoalsDatasource {
           .order('created_at', ascending: false);
 
       return (response as List)
-          .map((json) => GoalsModel.fromJson(json))
+          .map((json) => GoalsModel.fromJson(json as Map<String, dynamic>))
           .toList();
     } catch (error, stackTrace) {
       AppLogger.instance.e('目標取得に失敗しました', error, stackTrace);

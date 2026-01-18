@@ -2,10 +2,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/local/local_goals_datasource.dart';
 import '../data/local/local_study_daily_logs_datasource.dart';
-import '../data/local/local_users_datasource.dart';
 import '../data/supabase/supabase_goals_datasource.dart';
 import '../data/supabase/supabase_study_logs_datasource.dart';
-import '../data/supabase/supabase_users_datasource.dart';
 import '../utils/app_logger.dart';
 
 /// ローカルデータをSupabaseに移行するサービス
@@ -21,10 +19,8 @@ class MigrationService {
   MigrationService({
     required LocalGoalsDatasource localGoalsDatasource,
     required LocalStudyDailyLogsDatasource localStudyLogsDatasource,
-    required LocalUsersDatasource localUsersDatasource,
     required SupabaseGoalsDatasource supabaseGoalsDatasource,
     required SupabaseStudyLogsDatasource supabaseStudyLogsDatasource,
-    required SupabaseUsersDatasource supabaseUsersDatasource,
   })  : _localGoalsDatasource = localGoalsDatasource,
         _localStudyLogsDatasource = localStudyLogsDatasource,
         _supabaseGoalsDatasource = supabaseGoalsDatasource,
