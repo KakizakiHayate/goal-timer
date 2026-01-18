@@ -63,7 +63,9 @@ ios/Flutter/Profile.xcconfig
 
 android/app/google-services.json
 
-docs/
+# docs folder - except HTML files for GitHub Pages
+docs/*
+!docs/*.html
 
 ai-rules/*
 !ai-rules/plans/
