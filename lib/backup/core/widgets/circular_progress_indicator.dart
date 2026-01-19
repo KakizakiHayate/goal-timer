@@ -96,7 +96,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
             boxShadow: [
               if (progressValue > 0.8) // 高達成時にグロー効果
                 BoxShadow(
-                  color: progressColor.withValues(alpha: 0.3),
+                  color: progressColor.withOpacity(0.3),
                   blurRadius: 16,
                   spreadRadius: 2,
                 ),

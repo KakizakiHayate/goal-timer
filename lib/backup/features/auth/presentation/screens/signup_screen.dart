@@ -370,7 +370,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen>
             height: 1,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [ColorConsts.border.withValues(alpha: 0), ColorConsts.border],
+                colors: [ColorConsts.border.withOpacity(0), ColorConsts.border],
               ),
             ),
           ),
@@ -390,7 +390,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen>
             height: 1,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [ColorConsts.border, ColorConsts.border.withValues(alpha: 0)],
+                colors: [ColorConsts.border, ColorConsts.border.withOpacity(0)],
               ),
             ),
           ),

@@ -125,7 +125,7 @@ class _MetricCardState extends State<MetricCard>
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: (widget.iconColor ?? ColorConsts.primary).withValues(alpha: 0.1),
+            color: (widget.iconColor ?? ColorConsts.primary).withOpacity(0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
@@ -190,7 +190,7 @@ class _MetricCardState extends State<MetricCard>
         vertical: SpacingConsts.xs,
       ),
       decoration: BoxDecoration(
-        color: (widget.changeColor ?? defaultColor).withValues(alpha: 0.1),
+        color: (widget.changeColor ?? defaultColor).withOpacity(0.1),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Row(

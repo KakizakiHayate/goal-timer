@@ -392,7 +392,7 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen>
     return PressableCard(
       margin: EdgeInsets.zero,
       padding: const EdgeInsets.all(SpacingConsts.l),
-      backgroundColor: ColorConsts.error.withValues(alpha: 0.05),
+      backgroundColor: ColorConsts.error.withOpacity(0.05),
       borderRadius: 20.0,
       elevation: 1.0,
       child: Column(

@@ -189,7 +189,7 @@ class _AuthTextFieldState extends State<AuthTextField>
                   disabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
                     borderSide: BorderSide(
-                      color: ColorConsts.border.withValues(alpha: 0.5),
+                      color: ColorConsts.border.withOpacity(0.5),
                       width: 1.5,
                     ),
                   ),

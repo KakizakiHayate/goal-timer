@@ -83,9 +83,9 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
               margin: const EdgeInsets.all(SpacingConsts.md),
               padding: const EdgeInsets.all(SpacingConsts.md),
               decoration: BoxDecoration(
-                color: ColorConsts.error.withValues(alpha: 0.1),
+                color: ColorConsts.error.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: ColorConsts.error.withValues(alpha: 0.3)),
+                border: Border.all(color: ColorConsts.error.withOpacity(0.3)),
               ),
               child: Row(
                 children: [

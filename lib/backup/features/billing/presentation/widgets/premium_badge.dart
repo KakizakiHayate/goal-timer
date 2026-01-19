@@ -51,7 +51,7 @@ class PremiumBadge extends ConsumerWidget {
         borderRadius: BorderRadius.circular(_getBorderRadius()),
         boxShadow: [
           BoxShadow(
-            color: badgeColor.withValues(alpha: 0.3),
+            color: badgeColor.withOpacity(0.3),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -161,9 +161,9 @@ class SubscriptionStatusWidget extends ConsumerWidget {
             vertical: SpacingConsts.sm,
           ),
           decoration: BoxDecoration(
-            color: ColorConsts.primary.withValues(alpha: 0.1),
+            color: ColorConsts.primary.withOpacity(0.1),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: ColorConsts.primary.withValues(alpha: 0.2)),
+            border: Border.all(color: ColorConsts.primary.withOpacity(0.2)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

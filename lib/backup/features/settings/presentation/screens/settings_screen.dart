@@ -209,7 +209,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                 //     vertical: SpacingConsts.xs,
                 //   ),
                 //   decoration: BoxDecoration(
-                //     color: ColorConsts.success.withValues(alpha: 0.1),
+                //     color: ColorConsts.success.withOpacity(0.1),
                 //     borderRadius: BorderRadius.circular(6),
                 //   ),
                 //   child: Text(
@@ -403,7 +403,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: ColorConsts.primary.withValues(alpha: 0.1),
+                    color: ColorConsts.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(Icons.sync, color: ColorConsts.primary, size: 24),

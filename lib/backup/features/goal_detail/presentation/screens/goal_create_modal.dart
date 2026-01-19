@@ -191,15 +191,15 @@ class _GoalCreateModalContentState
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            ColorConsts.primary.withValues(alpha: 0.1),
-            ColorConsts.primaryLight.withValues(alpha: 0.05),
+            ColorConsts.primary.withOpacity(0.1),
+            ColorConsts.primaryLight.withOpacity(0.05),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: ColorConsts.primary.withValues(alpha: 0.2),
+          color: ColorConsts.primary.withOpacity(0.2),
           width: 1,
         ),
       ),
@@ -427,12 +427,12 @@ class _GoalCreateModalContentState
           padding: const EdgeInsets.all(SpacingConsts.l),
           decoration: BoxDecoration(
             color: isEditMode 
-                ? ColorConsts.backgroundSecondary.withValues(alpha: 0.5)
+                ? ColorConsts.backgroundSecondary.withOpacity(0.5)
                 : ColorConsts.backgroundSecondary,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isEditMode 
-                  ? ColorConsts.border.withValues(alpha: 0.5)
+                  ? ColorConsts.border.withOpacity(0.5)
                   : ColorConsts.border,
               width: 1.5,
             ),
@@ -520,7 +520,7 @@ class _GoalCreateModalContentState
                     color: ColorConsts.backgroundSecondary,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: ColorConsts.border.withValues(alpha: 0.5),
+                      color: ColorConsts.border.withOpacity(0.5),
                       width: 1.5,
                     ),
                   ),

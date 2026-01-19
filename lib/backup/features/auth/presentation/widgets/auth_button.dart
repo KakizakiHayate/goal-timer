@@ -176,7 +176,7 @@ class _AuthButtonState extends State<AuthButton>
     if (widget.type == AuthButtonType.email) {
       return [
         BoxShadow(
-          color: ColorConsts.primary.withValues(alpha: 0.3),
+          color: ColorConsts.primary.withOpacity(0.3),
           offset: const Offset(0, 4),
           blurRadius: 12,
           spreadRadius: 0,

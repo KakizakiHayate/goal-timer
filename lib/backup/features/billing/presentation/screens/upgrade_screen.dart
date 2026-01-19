@@ -228,8 +228,8 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
             decoration: BoxDecoration(
               color:
                   isPremium
-                      ? ColorConsts.primary.withValues(alpha: 0.1)
-                      : ColorConsts.textTertiary.withValues(alpha: 0.1),
+                      ? ColorConsts.primary.withOpacity(0.1)
+                      : ColorConsts.textTertiary.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
@@ -270,7 +270,7 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
                 vertical: SpacingConsts.xs,
               ),
               decoration: BoxDecoration(
-                color: ColorConsts.primary.withValues(alpha: 0.1),
+                color: ColorConsts.primary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
@@ -305,7 +305,7 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
           decoration: BoxDecoration(
             color:
                 !_isYearlyPlan
-                    ? ColorConsts.primary.withValues(alpha: 0.1)
+                    ? ColorConsts.primary.withOpacity(0.1)
                     : ColorConsts.cardBackground,
             border:
                 !_isYearlyPlan
@@ -314,7 +314,7 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
             borderRadius: BorderRadius.circular(16.0),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
+                color: Colors.black.withOpacity(0.1),
                 blurRadius: 8.0,
                 offset: const Offset(0, 2),
               ),
@@ -376,7 +376,7 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
                       vertical: SpacingConsts.xs,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF10B981).withValues(alpha: 0.1),
+                      color: const Color(0xFF10B981).withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -400,7 +400,7 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
           decoration: BoxDecoration(
             color:
                 _isYearlyPlan
-                    ? ColorConsts.primary.withValues(alpha: 0.1)
+                    ? ColorConsts.primary.withOpacity(0.1)
                     : ColorConsts.cardBackground,
             border:
                 _isYearlyPlan
@@ -409,7 +409,7 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
             borderRadius: BorderRadius.circular(16.0),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
+                color: Colors.black.withOpacity(0.1),
                 blurRadius: 8.0,
                 offset: const Offset(0, 2),
               ),
@@ -482,7 +482,7 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
                       vertical: SpacingConsts.xs,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFF6B35).withValues(alpha: 0.1),
+                      color: const Color(0xFFFF6B35).withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -594,7 +594,7 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen>
             Container(
               padding: const EdgeInsets.all(SpacingConsts.md),
               decoration: BoxDecoration(
-                color: ColorConsts.primary.withValues(alpha: 0.05),
+                color: ColorConsts.primary.withOpacity(0.05),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
