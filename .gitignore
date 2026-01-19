@@ -82,3 +82,6 @@ ios/Runner.xcodeproj/project.pbxproj.backup
 !CHANGELOG.md
 !CONTRIBUTING.md
 !LICENSE.md
+
+# Firebase CLI cache
+.firebase/
