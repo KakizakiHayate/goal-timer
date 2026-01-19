@@ -168,7 +168,7 @@ class _AddGoalModalState extends State<AddGoalModal> {
           mainAxisSize: MainAxisSize.min,
           children: [
             _buildHeader(),
-            Expanded(
+            Flexible(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(SpacingConsts.l),
                 child: Form(
@@ -201,16 +201,16 @@ class _AddGoalModalState extends State<AddGoalModal> {
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.all(SpacingConsts.l),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: ColorConsts.cardBackground,
-        borderRadius: const BorderRadius.only(
+        borderRadius: BorderRadius.only(
           topLeft: Radius.circular(24),
           topRight: Radius.circular(24),
         ),
         boxShadow: [
           BoxShadow(
             color: ColorConsts.shadowLight,
-            offset: const Offset(0, 2),
+            offset: Offset(0, 2),
             blurRadius: 8,
           ),
         ],

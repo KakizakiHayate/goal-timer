@@ -181,7 +181,7 @@ class _HomeScreenState extends State<HomeScreen>
               ),
               boxShadow: [
                 BoxShadow(
-                  color: ColorConsts.primary.withOpacity(0.4),
+                  color: ColorConsts.primary.withValues(alpha: 0.4),
                   offset: const Offset(0, 8),
                   blurRadius: 24,
                   spreadRadius: 0,
@@ -206,9 +206,17 @@ class _HomeScreenState extends State<HomeScreen>
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
-        return FractionallySizedBox(
-          heightFactor: UIConsts.modalHeightFactor,
-          child: const AddGoalModal(),
+        final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+        final screenHeight = MediaQuery.of(context).size.height;
+        // キーボードを除いた領域の高さ（最大95%）
+        final maxHeight = (screenHeight - keyboardHeight) * UIConsts.modalHeightFactor;
+
+        return Padding(
+          padding: EdgeInsets.only(bottom: keyboardHeight),
+          child: Container(
+            constraints: BoxConstraints(maxHeight: maxHeight),
+            child: const AddGoalModal(),
+          ),
         );
       },
     );
@@ -371,16 +379,24 @@ class _HomeTabContent extends StatelessWidget {
             onTimerTap: () => _navigateToTimerAndReload(context, viewModel, goal),
             onEditTap: () {
               showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                backgroundColor: Colors.transparent,
-                builder: (context) {
-                  return FractionallySizedBox(
-                    heightFactor: UIConsts.modalHeightFactor,
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (context) {
+                final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+                final screenHeight = MediaQuery.of(context).size.height;
+                final maxHeight =
+                    (screenHeight - keyboardHeight) * UIConsts.modalHeightFactor;
+
+                return Padding(
+                  padding: EdgeInsets.only(bottom: keyboardHeight),
+                  child: Container(
+                    constraints: BoxConstraints(maxHeight: maxHeight),
                     child: AddGoalModal(goal: goal),
-                  );
-                },
-              );
+                  ),
+                );
+              },
+            );
             },
             onDeleteTap: () {
               _showDeleteConfirmationDialog(context, viewModel, goal);
@@ -551,7 +567,7 @@ class _TimerTabContent extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: ColorConsts.primary.withOpacity(0.1),
+                color: ColorConsts.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(
