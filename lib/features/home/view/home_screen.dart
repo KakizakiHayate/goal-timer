@@ -10,7 +10,6 @@ import '../../../core/utils/spacing_consts.dart';
 import '../../../core/utils/string_consts.dart';
 import '../../../core/utils/text_consts.dart';
 import '../../../core/utils/time_utils.dart';
-import '../../../core/utils/ui_consts.dart';
 import '../../../core/widgets/goal_card.dart';
 import '../../../core/widgets/pressable_card.dart';
 import '../../../core/widgets/streak_card.dart';
@@ -214,12 +213,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) {
-        return const FractionallySizedBox(
-          heightFactor: UIConsts.modalHeightFactor,
-          child: AddGoalModal(),
-        );
-      },
+      builder: (context) => const AddGoalModal(),
     );
   }
 }
@@ -379,12 +373,7 @@ class _HomeTabContent extends StatelessWidget {
               context: context,
               isScrollControlled: true,
               backgroundColor: Colors.transparent,
-              builder: (context) {
-                return FractionallySizedBox(
-                  heightFactor: UIConsts.modalHeightFactor,
-                  child: AddGoalModal(goal: goal),
-                );
-              },
+              builder: (context) => AddGoalModal(goal: goal),
             );
           },
           onDeleteTap: () {

@@ -168,20 +168,28 @@ class _AddGoalModalState extends State<AddGoalModal> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: ColorConsts.backgroundPrimary,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+    final screenHeight = MediaQuery.of(context).size.height;
+    // キーボードを除いた領域の高さ（最大95%）
+    final maxHeight = (screenHeight - keyboardHeight) * UIConsts.modalHeightFactor;
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: keyboardHeight),
+      child: Container(
+        constraints: BoxConstraints(maxHeight: maxHeight),
+        decoration: const BoxDecoration(
+          color: ColorConsts.backgroundPrimary,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
+          ),
         ),
-      ),
-      child: SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildHeader(),
-            Expanded(
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildHeader(),
+            Flexible(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(SpacingConsts.l),
                 child: Form(
@@ -205,7 +213,8 @@ class _AddGoalModalState extends State<AddGoalModal> {
                 ),
               ),
             ),
-          ],
+            ],
+          ),
         ),
       ),
     );
