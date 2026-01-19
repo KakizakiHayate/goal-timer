@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../../../core/models/goals/goals_model.dart';
 import '../../../core/services/att_service.dart';
 import '../../../core/services/notification_service.dart';
-import '../../../core/utils/color_consts.dart';
-import '../../../core/utils/text_consts.dart';
-import '../../../core/utils/spacing_consts.dart';
 import '../../../core/utils/animation_consts.dart';
+import '../../../core/utils/color_consts.dart';
+import '../../../core/utils/spacing_consts.dart';
 import '../../../core/utils/string_consts.dart';
+import '../../../core/utils/text_consts.dart';
 import '../../../core/utils/time_utils.dart';
 import '../../../core/widgets/goal_card.dart';
 import '../../../core/widgets/pressable_card.dart';
 import '../../../core/widgets/streak_card.dart';
-import '../view_model/home_view_model.dart';
 import '../../settings/view/settings_screen.dart';
 import '../../study_records/view/study_records_screen.dart';
 import '../../timer/view/timer_screen.dart';
+import '../view_model/home_view_model.dart';
 import 'widgets/add_goal_modal.dart';
 
 /// タイマー画面に遷移し、学習完了時にデータを再読み込みするヘルパー関数
@@ -118,8 +119,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return AnimatedBuilder(
       animation: _tabController,
       builder: (context, child) {
-        return const Container(
-          decoration: BoxDecoration(
+        return Container(
+          decoration: const BoxDecoration(
             color: ColorConsts.cardBackground,
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(24),
@@ -149,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               fontWeight: FontWeight.w600,
             ),
             unselectedLabelStyle: TextConsts.caption,
-            items: [
+            items: const [
               BottomNavigationBarItem(
                 icon: Icon(Icons.home_outlined),
                 activeIcon: Icon(Icons.home),
