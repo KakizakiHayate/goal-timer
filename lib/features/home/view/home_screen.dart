@@ -6,7 +6,6 @@ import '../../../core/utils/color_consts.dart';
 import '../../../core/utils/text_consts.dart';
 import '../../../core/utils/spacing_consts.dart';
 import '../../../core/utils/animation_consts.dart';
-import '../../../core/utils/ui_consts.dart';
 import '../../../core/utils/string_consts.dart';
 import '../../../core/utils/time_utils.dart';
 import '../../../core/widgets/goal_card.dart';
@@ -111,17 +110,17 @@ class _HomeScreenState extends State<HomeScreen>
     return AnimatedBuilder(
       animation: _tabController,
       builder: (context, child) {
-        return Container(
+        return const Container(
           decoration: BoxDecoration(
             color: ColorConsts.cardBackground,
-            borderRadius: const BorderRadius.only(
+            borderRadius: BorderRadius.only(
               topLeft: Radius.circular(24),
               topRight: Radius.circular(24),
             ),
             boxShadow: [
               BoxShadow(
                 color: ColorConsts.shadowMedium,
-                offset: const Offset(0, -4),
+                offset: Offset(0, -4),
                 blurRadius: 16,
                 spreadRadius: 0,
               ),
@@ -142,7 +141,7 @@ class _HomeScreenState extends State<HomeScreen>
               fontWeight: FontWeight.w600,
             ),
             unselectedLabelStyle: TextConsts.caption,
-            items: const [
+            items: [
               BottomNavigationBarItem(
                 icon: Icon(Icons.home_outlined),
                 activeIcon: Icon(Icons.home),
@@ -174,7 +173,7 @@ class _HomeScreenState extends State<HomeScreen>
           child: Container(
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: LinearGradient(
+              gradient: const LinearGradient(
                 colors: [ColorConsts.primary, ColorConsts.primaryLight],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -205,20 +204,7 @@ class _HomeScreenState extends State<HomeScreen>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) {
-        final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
-        final screenHeight = MediaQuery.of(context).size.height;
-        // キーボードを除いた領域の高さ（最大95%）
-        final maxHeight = (screenHeight - keyboardHeight) * UIConsts.modalHeightFactor;
-
-        return Padding(
-          padding: EdgeInsets.only(bottom: keyboardHeight),
-          child: Container(
-            constraints: BoxConstraints(maxHeight: maxHeight),
-            child: const AddGoalModal(),
-          ),
-        );
-      },
+      builder: (context) => const AddGoalModal(),
     );
   }
 }
@@ -332,7 +318,7 @@ class _HomeTabContent extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
+              const Icon(
                 Icons.flag_outlined,
                 size: 80,
                 color: ColorConsts.textTertiary,
@@ -382,20 +368,7 @@ class _HomeTabContent extends StatelessWidget {
               context: context,
               isScrollControlled: true,
               backgroundColor: Colors.transparent,
-              builder: (context) {
-                final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
-                final screenHeight = MediaQuery.of(context).size.height;
-                final maxHeight =
-                    (screenHeight - keyboardHeight) * UIConsts.modalHeightFactor;
-
-                return Padding(
-                  padding: EdgeInsets.only(bottom: keyboardHeight),
-                  child: Container(
-                    constraints: BoxConstraints(maxHeight: maxHeight),
-                    child: AddGoalModal(goal: goal),
-                  ),
-                );
-              },
+              builder: (context) => AddGoalModal(goal: goal),
             );
             },
             onDeleteTap: () {
