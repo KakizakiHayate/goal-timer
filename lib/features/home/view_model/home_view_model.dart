@@ -9,10 +9,7 @@ import '../../../core/utils/time_utils.dart';
 import '../../../core/utils/streak_consts.dart';
 
 /// 目標削除操作の結果
-enum DeleteGoalResult {
-  success,
-  failure,
-}
+enum DeleteGoalResult { success, failure }
 
 // Home画面の状態
 class HomeState {
@@ -39,7 +36,8 @@ class HomeState {
   }) {
     return HomeState(
       goals: goals ?? this.goals,
-      studiedSecondsByGoalId: studiedSecondsByGoalId ?? this.studiedSecondsByGoalId,
+      studiedSecondsByGoalId:
+          studiedSecondsByGoalId ?? this.studiedSecondsByGoalId,
       isLoading: isLoading ?? this.isLoading,
       currentStreak: currentStreak ?? this.currentStreak,
       recentStudyDates: recentStudyDates ?? this.recentStudyDates,
@@ -47,10 +45,12 @@ class HomeState {
   }
 
   /// 目標の進捗率を計算（0.0〜1.0）
+  /// totalTargetMinutesを使用して進捗率を計算
   double getProgressForGoal(GoalsModel goal) {
     final studiedMinutes = getStudiedMinutesForGoal(goal);
+    final totalTargetMinutes = goal.totalTargetMinutes ?? 0;
     return TimeUtils.calculateProgressRateFromMinutes(
-      goal.targetMinutes,
+      totalTargetMinutes,
       studiedMinutes,
     );
   }
@@ -76,8 +76,11 @@ class HomeViewModel extends GetxController {
     LocalStudyDailyLogsDatasource? studyLogsDatasource,
   }) {
     final database = AppDatabase();
-    _goalsDatasource = goalsDatasource ?? LocalGoalsDatasource(database: database);
-    _studyLogsDatasource = studyLogsDatasource ?? LocalStudyDailyLogsDatasource(database: database);
+    _goalsDatasource =
+        goalsDatasource ?? LocalGoalsDatasource(database: database);
+    _studyLogsDatasource =
+        studyLogsDatasource ??
+        LocalStudyDailyLogsDatasource(database: database);
   }
 
   @override
@@ -92,6 +95,12 @@ class HomeViewModel extends GetxController {
       _state = state.copyWith(isLoading: true);
       update();
 
+      // 期限切れの目標を更新
+      await _goalsDatasource.updateExpiredGoals();
+
+      // 既存目標のtotalTargetMinutesを補完（Issue #111実装前に作成された目標対応）
+      await _goalsDatasource.populateMissingTotalTargetMinutes();
+
       // 目標、学習時間、ストリークデータを並列で取得（Dart 3 Recordsで型安全に）
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
@@ -99,19 +108,22 @@ class HomeViewModel extends GetxController {
         Duration(days: StreakConsts.recentDaysCount - 1),
       );
 
-      final (goals, studiedSeconds, recentStudyDates, currentStreak) = await (
-        _goalsDatasource.fetchAllGoals(),
-        _studyLogsDatasource.fetchTotalSecondsForAllGoals(),
-        _studyLogsDatasource.fetchStudyDatesInRange(
-          startDate: startDate,
-          endDate: today,
-        ),
-        _studyLogsDatasource.calculateCurrentStreak(),
-      ).wait;
+      final (goals, studiedSeconds, recentStudyDates, currentStreak) =
+          await (
+            _goalsDatasource.fetchActiveGoals(),
+            _studyLogsDatasource.fetchTotalSecondsForAllGoals(),
+            _studyLogsDatasource.fetchStudyDatesInRange(
+              startDate: startDate,
+              endDate: today,
+            ),
+            _studyLogsDatasource.calculateCurrentStreak(),
+          ).wait;
 
       AppLogger.instance.i('目標を${goals.length}件読み込みました');
       AppLogger.instance.i('学習時間データを${studiedSeconds.length}件読み込みました');
-      AppLogger.instance.i('ストリーク: $currentStreak日, 直近学習日: ${recentStudyDates.length}日');
+      AppLogger.instance.i(
+        'ストリーク: $currentStreak日, 直近学習日: ${recentStudyDates.length}日',
+      );
 
       _state = state.copyWith(
         goals: goals,
@@ -138,12 +150,21 @@ class HomeViewModel extends GetxController {
   }) async {
     try {
       final now = DateTime.now();
+
+      // 残り日数と総目標時間を計算
+      final remainingDays = TimeUtils.calculateRemainingDays(deadline);
+      final totalTargetMinutes = TimeUtils.calculateTotalTargetMinutes(
+        targetMinutes: targetMinutes,
+        remainingDays: remainingDays,
+      );
+
       final goal = GoalsModel(
         id: const Uuid().v4(),
         userId: null,
         title: title,
         description: description.isEmpty ? null : description,
         targetMinutes: targetMinutes,
+        totalTargetMinutes: totalTargetMinutes,
         avoidMessage: avoidMessage,
         deadline: deadline,
         createdAt: now,
@@ -179,10 +200,19 @@ class HomeViewModel extends GetxController {
   }) async {
     try {
       final now = DateTime.now();
+
+      // 残り日数と総目標時間を再計算
+      final remainingDays = TimeUtils.calculateRemainingDays(deadline);
+      final totalTargetMinutes = TimeUtils.calculateTotalTargetMinutes(
+        targetMinutes: targetMinutes,
+        remainingDays: remainingDays,
+      );
+
       final updatedGoal = original.copyWith(
         title: title,
         description: description.isEmpty ? null : description,
         targetMinutes: targetMinutes,
+        totalTargetMinutes: totalTargetMinutes,
         avoidMessage: avoidMessage,
         deadline: deadline,
         updatedAt: now,
@@ -192,9 +222,10 @@ class HomeViewModel extends GetxController {
       AppLogger.instance.i('目標を更新しました: ${updatedGoal.id}');
 
       // 状態を直接更新（パフォーマンス改善: DBからの再読み込みを回避）
-      final updatedGoals = state.goals
-          .map((g) => g.id == updatedGoal.id ? updatedGoal : g)
-          .toList();
+      final updatedGoals =
+          state.goals
+              .map((g) => g.id == updatedGoal.id ? updatedGoal : g)
+              .toList();
       _state = state.copyWith(goals: updatedGoals);
       update();
     } catch (error, stackTrace) {

@@ -124,8 +124,7 @@ class _GoalCreateModalContent extends StatefulWidget {
       _GoalCreateModalContentState();
 }
 
-class _GoalCreateModalContentState
-    extends State<_GoalCreateModalContent> {
+class _GoalCreateModalContentState extends State<_GoalCreateModalContent> {
   final _formKey = GlobalKey<FormState>();
 
   String _title = '';
@@ -142,12 +141,13 @@ class _GoalCreateModalContentState
   void initState() {
     super.initState();
     // 編集モードの場合は既存の値を設定
-    if (widget.existingGoal != null) {
-      _title = widget.existingGoal!.title;
-      _description = widget.existingGoal!.description ?? '';
-      _avoidMessage = widget.existingGoal!.avoidMessage;
-      _targetMinutes = widget.existingGoal!.targetMinutes;
-      _deadline = widget.existingGoal!.deadline;
+    final existingGoal = widget.existingGoal;
+    if (existingGoal != null) {
+      _title = existingGoal.title;
+      _description = existingGoal.description ?? '';
+      _avoidMessage = existingGoal.avoidMessage;
+      _targetMinutes = existingGoal.targetMinutes;
+      _deadline = existingGoal.deadline;
     } else {
       // 新規作成の場合は30日後をデフォルトに設定
       _deadline = DateTime.now().add(const Duration(days: 30));
@@ -314,11 +314,18 @@ class _GoalCreateModalContentState
   }
 
   Widget _buildTargetTimeSelector() {
+    // 残り日数と総目標時間を計算
+    final remainingDays = TimeUtils.calculateRemainingDays(_deadline);
+    final totalTargetMinutes = TimeUtils.calculateTotalTargetMinutes(
+      targetMinutes: _targetMinutes,
+      remainingDays: remainingDays,
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '総目標時間',
+          '1日の勉強時間',
           style: TextConsts.labelLarge.copyWith(
             color: ColorConsts.textSecondary,
             fontWeight: FontWeight.w600,
@@ -351,6 +358,45 @@ class _GoalCreateModalContentState
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: SpacingConsts.m),
+              // 残り日数と総目標時間の表示
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: SpacingConsts.m,
+                  vertical: SpacingConsts.s,
+                ),
+                decoration: BoxDecoration(
+                  color: ColorConsts.primaryExtraLight,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '残り$remainingDays日',
+                      style: TextConsts.bodySmall.copyWith(
+                        color: ColorConsts.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(width: SpacingConsts.s),
+                    Text(
+                      '→',
+                      style: TextConsts.bodySmall.copyWith(
+                        color: ColorConsts.primary,
+                      ),
+                    ),
+                    const SizedBox(width: SpacingConsts.s),
+                    Text(
+                      '総目標: ${TimeUtils.formatDurationFromMinutes(totalTargetMinutes)}',
+                      style: TextConsts.bodySmall.copyWith(
+                        color: ColorConsts.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: SpacingConsts.m),
               GestureDetector(
@@ -423,14 +469,16 @@ class _GoalCreateModalContentState
         Container(
           padding: const EdgeInsets.all(SpacingConsts.l),
           decoration: BoxDecoration(
-            color: isEditMode
-                ? ColorConsts.backgroundSecondary.withOpacity(0.5)
-                : ColorConsts.backgroundSecondary,
+            color:
+                isEditMode
+                    ? ColorConsts.backgroundSecondary.withOpacity(0.5)
+                    : ColorConsts.backgroundSecondary,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: isEditMode
-                  ? ColorConsts.border.withOpacity(0.5)
-                  : ColorConsts.border,
+              color:
+                  isEditMode
+                      ? ColorConsts.border.withOpacity(0.5)
+                      : ColorConsts.border,
               width: 1.5,
             ),
           ),
@@ -440,19 +488,23 @@ class _GoalCreateModalContentState
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    isEditMode ? Icons.lock_outlined : Icons.calendar_today_outlined,
-                    color: isEditMode
-                        ? ColorConsts.textTertiary
-                        : ColorConsts.primary,
+                    isEditMode
+                        ? Icons.lock_outlined
+                        : Icons.calendar_today_outlined,
+                    color:
+                        isEditMode
+                            ? ColorConsts.textTertiary
+                            : ColorConsts.primary,
                     size: 24,
                   ),
                   const SizedBox(width: SpacingConsts.s),
                   Text(
                     '${_deadline.year}年${_deadline.month}月${_deadline.day}日',
                     style: TextConsts.h3.copyWith(
-                      color: isEditMode
-                          ? ColorConsts.textTertiary
-                          : ColorConsts.primary,
+                      color:
+                          isEditMode
+                              ? ColorConsts.textTertiary
+                              : ColorConsts.primary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -462,11 +514,13 @@ class _GoalCreateModalContentState
                 const SizedBox(height: SpacingConsts.m),
                 GestureDetector(
                   onTap: () async {
-                    final DateTime tomorrow = DateTime.now().add(const Duration(days: 1));
+                    final now = DateTime.now();
+                    final DateTime today = DateTime(now.year, now.month, now.day);
                     final DateTime? picked = await showDatePicker(
                       context: context,
-                      initialDate: _deadline.isBefore(tomorrow) ? tomorrow : _deadline,
-                      firstDate: tomorrow,
+                      initialDate:
+                          _deadline.isBefore(today) ? today : _deadline,
+                      firstDate: today,
                       lastDate: DateTime(2100),
                       locale: const Locale('ja', 'JP'),
                     );
@@ -484,7 +538,10 @@ class _GoalCreateModalContentState
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: ColorConsts.primary, width: 1.5),
+                      border: Border.all(
+                        color: ColorConsts.primary,
+                        width: 1.5,
+                      ),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -558,28 +615,31 @@ class _GoalCreateModalContentState
             style: ElevatedButton.styleFrom(
               backgroundColor: ColorConsts.primary,
               foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: SpacingConsts.m + 4),
+              padding: const EdgeInsets.symmetric(
+                vertical: SpacingConsts.m + 4,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
               elevation: 0,
             ),
-            child: _isLoading
-                ? const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            child:
+                _isLoading
+                    ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                    : Text(
+                      widget.existingGoal != null ? '変更を保存' : '目標を作成',
+                      style: TextConsts.bodyLarge.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  )
-                : Text(
-                    widget.existingGoal != null ? '変更を保存' : '目標を作成',
-                    style: TextConsts.bodyLarge.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
           ),
         ),
 
@@ -695,6 +755,9 @@ class _GoalCreateModalContentState
   }
 
   Future<void> _handleDeleteGoal() async {
+    final existingGoal = widget.existingGoal;
+    if (existingGoal == null) return;
+
     // 削除確認ダイアログを表示
     final confirmed =
         await showDialog<bool>(
@@ -703,7 +766,7 @@ class _GoalCreateModalContentState
               (context) => AlertDialog(
                 title: const Text('目標を削除しますか？'),
                 content: Text(
-                  '「${widget.existingGoal!.title}」を削除すると、'
+                  '「${existingGoal.title}」を削除すると、'
                   '関連する学習記録も全て削除されます。\n'
                   'この操作は取り消せません。',
                 ),
@@ -925,7 +988,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
                     onPressed: () {
                       final totalMinutes =
                           _selectedHours * TimeUtils.minutesPerHour +
-                              _selectedMinutes;
+                          _selectedMinutes;
                       if (totalMinutes > TimeUtils.minValidMinutes) {
                         widget.onTimeSelected(totalMinutes);
                         Navigator.of(context).pop();

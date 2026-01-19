@@ -19,12 +19,7 @@ void main() {
     testWidgets('ストリーク0日 → 「今日から始めよう！」表示', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: StreakCard(
-              streakDays: 0,
-              studyDates: [],
-            ),
-          ),
+          home: Scaffold(body: StreakCard(streakDays: 0, studyDates: [])),
         ),
       );
 
@@ -35,10 +30,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: StreakCard(
-              streakDays: 1,
-              studyDates: [today()],
-            ),
+            body: StreakCard(streakDays: 1, studyDates: [today()]),
           ),
         ),
       );
@@ -79,7 +71,10 @@ void main() {
         ),
       );
 
-      expect(find.textContaining(StreakConsts.messageWeekMilestone), findsOneWidget);
+      expect(
+        find.textContaining(StreakConsts.messageWeekMilestone),
+        findsOneWidget,
+      );
     });
 
     testWidgets('ストリーク30日 → 「🏆 1ヶ月達成！」表示', (tester) async {
@@ -94,7 +89,10 @@ void main() {
         ),
       );
 
-      expect(find.textContaining(StreakConsts.messageMonthMilestone), findsOneWidget);
+      expect(
+        find.textContaining(StreakConsts.messageMonthMilestone),
+        findsOneWidget,
+      );
     });
 
     testWidgets('カードにミニヒートマップが表示される', (tester) async {
@@ -137,13 +135,7 @@ void main() {
   group('MiniHeatmap', () {
     testWidgets('7つのドットが表示される', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: MiniHeatmap(
-              studyDates: [],
-            ),
-          ),
-        ),
+        const MaterialApp(home: Scaffold(body: MiniHeatmap(studyDates: []))),
       );
 
       final containers = find.byType(Container);
@@ -152,13 +144,7 @@ void main() {
 
     testWidgets('今日学習済み → 今日のドットが濃い緑', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: MiniHeatmap(
-              studyDates: [today()],
-            ),
-          ),
-        ),
+        MaterialApp(home: Scaffold(body: MiniHeatmap(studyDates: [today()]))),
       );
 
       await tester.pumpAndSettle();
@@ -176,13 +162,7 @@ void main() {
 
     testWidgets('今日未学習 → 今日のドットが青枠線のみ', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: MiniHeatmap(
-              studyDates: [],
-            ),
-          ),
-        ),
+        const MaterialApp(home: Scaffold(body: MiniHeatmap(studyDates: []))),
       );
 
       await tester.pumpAndSettle();
@@ -190,8 +170,7 @@ void main() {
       final todayDotFinder = find.byWidgetPredicate((widget) {
         if (widget is Container && widget.decoration is BoxDecoration) {
           final decoration = widget.decoration as BoxDecoration;
-          return decoration.border != null &&
-              decoration.color == null;
+          return decoration.border != null && decoration.color == null;
         }
         return false;
       });
@@ -202,11 +181,7 @@ void main() {
     testWidgets('過去の日・学習あり → 緑のドット', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: MiniHeatmap(
-              studyDates: [daysAgo(1)],
-            ),
-          ),
+          home: Scaffold(body: MiniHeatmap(studyDates: [daysAgo(1)])),
         ),
       );
 
@@ -225,13 +200,7 @@ void main() {
 
     testWidgets('過去の日・学習なし → グレーのドット', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: MiniHeatmap(
-              studyDates: [],
-            ),
-          ),
-        ),
+        const MaterialApp(home: Scaffold(body: MiniHeatmap(studyDates: []))),
       );
 
       await tester.pumpAndSettle();

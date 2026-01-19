@@ -89,9 +89,10 @@ class _GoalInputFieldState extends State<GoalInputField>
     final text = _controller.text;
     widget.onChanged(text);
 
-    if (widget.validator != null) {
+    final validator = widget.validator;
+    if (validator != null) {
       setState(() {
-        _errorText = widget.validator!(text);
+        _errorText = validator(text);
       });
     }
   }
@@ -106,7 +107,8 @@ class _GoalInputFieldState extends State<GoalInputField>
 
   @override
   Widget build(BuildContext context) {
-    final hasError = _errorText != null && _errorText!.isNotEmpty;
+    final errorText = _errorText;
+    final hasError = errorText != null && errorText.isNotEmpty;
 
     return AnimatedBuilder(
       animation: _focusAnimation,
@@ -247,7 +249,7 @@ class _GoalInputFieldState extends State<GoalInputField>
                   horizontal: SpacingConsts.l,
                 ),
                 child: Text(
-                  _errorText!,
+                  errorText,
                   style: TextConsts.caption.copyWith(
                     color: ColorConsts.error,
                     fontWeight: FontWeight.w500,
@@ -257,7 +259,7 @@ class _GoalInputFieldState extends State<GoalInputField>
             ],
 
             // 文字数制限表示
-            if (widget.maxLength != null && _isFocused) ...[
+            if (widget.maxLength case final maxLength? when _isFocused) ...[
               const SizedBox(height: SpacingConsts.s),
               Padding(
                 padding: const EdgeInsets.symmetric(
@@ -266,12 +268,11 @@ class _GoalInputFieldState extends State<GoalInputField>
                 child: Align(
                   alignment: Alignment.centerRight,
                   child: Text(
-                    '${_controller.text.length}/${widget.maxLength}',
+                    '${_controller.text.length}/$maxLength',
                     style: TextConsts.caption.copyWith(
-                      color:
-                          _controller.text.length > (widget.maxLength! * 0.9)
-                              ? ColorConsts.warning
-                              : ColorConsts.textTertiary,
+                      color: _controller.text.length > (maxLength * 0.9)
+                          ? ColorConsts.warning
+                          : ColorConsts.textTertiary,
                     ),
                   ),
                 ),

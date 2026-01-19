@@ -36,9 +36,7 @@ class MonthlyCalendar extends StatelessWidget {
 
   /// studyDatesをSetに変換（日付のみで比較するため正規化）
   Set<DateTime> _createStudyDateSet() {
-    return studyDates
-        .map((d) => DateTime(d.year, d.month, d.day))
-        .toSet();
+    return studyDates.map((d) => DateTime(d.year, d.month, d.day)).toSet();
   }
 
   /// 曜日ヘッダー（月曜始まり）
@@ -47,20 +45,21 @@ class MonthlyCalendar extends StatelessWidget {
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: weekdays.map((day) {
-        return SizedBox(
-          width: 40,
-          child: Center(
-            child: Text(
-              day,
-              style: TextConsts.bodySmall.copyWith(
-                fontWeight: FontWeight.w500,
-                color: ColorConsts.textSecondary,
+      children:
+          weekdays.map((day) {
+            return SizedBox(
+              width: 40,
+              child: Center(
+                child: Text(
+                  day,
+                  style: TextConsts.bodySmall.copyWith(
+                    fontWeight: FontWeight.w500,
+                    color: ColorConsts.textSecondary,
+                  ),
+                ),
               ),
-            ),
-          ),
-        );
-      }).toList(),
+            );
+          }).toList(),
     );
   }
 
@@ -197,8 +196,11 @@ class MonthlyCalendar extends StatelessWidget {
   /// カレンダーの日付リストを生成（月曜始まり）
   List<DateTime?> _generateCalendarDays() {
     final firstDayOfMonth = DateTime(currentMonth.year, currentMonth.month, 1);
-    final lastDayOfMonth =
-        DateTime(currentMonth.year, currentMonth.month + 1, 0);
+    final lastDayOfMonth = DateTime(
+      currentMonth.year,
+      currentMonth.month + 1,
+      0,
+    );
 
     // 月曜始まりのため、1=月曜, 7=日曜に変換
     // DateTime.weekdayは1=月曜, 7=日曜なので調整不要

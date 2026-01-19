@@ -34,12 +34,16 @@ mixin _$GoalsModel {
   DateTime? get syncUpdatedAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'target_minutes')
   int get targetMinutes => throw _privateConstructorUsedError;
+  @JsonKey(name: 'total_target_minutes')
+  int? get totalTargetMinutes => throw _privateConstructorUsedError;
   @JsonKey(name: 'created_at')
   DateTime? get createdAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'completed_at')
   DateTime? get completedAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'deleted_at')
   DateTime? get deletedAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'expired_at')
+  DateTime? get expiredAt => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -63,9 +67,11 @@ abstract class $GoalsModelCopyWith<$Res> {
       @JsonKey(name: 'updated_at') DateTime? updatedAt,
       @JsonKey(name: 'sync_updated_at') DateTime? syncUpdatedAt,
       @JsonKey(name: 'target_minutes') int targetMinutes,
+      @JsonKey(name: 'total_target_minutes') int? totalTargetMinutes,
       @JsonKey(name: 'created_at') DateTime? createdAt,
       @JsonKey(name: 'completed_at') DateTime? completedAt,
-      @JsonKey(name: 'deleted_at') DateTime? deletedAt});
+      @JsonKey(name: 'deleted_at') DateTime? deletedAt,
+      @JsonKey(name: 'expired_at') DateTime? expiredAt});
 }
 
 /// @nodoc
@@ -90,9 +96,11 @@ class _$GoalsModelCopyWithImpl<$Res, $Val extends GoalsModel>
     Object? updatedAt = freezed,
     Object? syncUpdatedAt = freezed,
     Object? targetMinutes = null,
+    Object? totalTargetMinutes = freezed,
     Object? createdAt = freezed,
     Object? completedAt = freezed,
     Object? deletedAt = freezed,
+    Object? expiredAt = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -131,6 +139,10 @@ class _$GoalsModelCopyWithImpl<$Res, $Val extends GoalsModel>
           ? _value.targetMinutes
           : targetMinutes // ignore: cast_nullable_to_non_nullable
               as int,
+      totalTargetMinutes: freezed == totalTargetMinutes
+          ? _value.totalTargetMinutes
+          : totalTargetMinutes // ignore: cast_nullable_to_non_nullable
+              as int?,
       createdAt: freezed == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -142,6 +154,10 @@ class _$GoalsModelCopyWithImpl<$Res, $Val extends GoalsModel>
       deletedAt: freezed == deletedAt
           ? _value.deletedAt
           : deletedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      expiredAt: freezed == expiredAt
+          ? _value.expiredAt
+          : expiredAt // ignore: cast_nullable_to_non_nullable
               as DateTime?,
     ) as $Val);
   }
@@ -165,9 +181,11 @@ abstract class _$$GoalsModelImplCopyWith<$Res>
       @JsonKey(name: 'updated_at') DateTime? updatedAt,
       @JsonKey(name: 'sync_updated_at') DateTime? syncUpdatedAt,
       @JsonKey(name: 'target_minutes') int targetMinutes,
+      @JsonKey(name: 'total_target_minutes') int? totalTargetMinutes,
       @JsonKey(name: 'created_at') DateTime? createdAt,
       @JsonKey(name: 'completed_at') DateTime? completedAt,
-      @JsonKey(name: 'deleted_at') DateTime? deletedAt});
+      @JsonKey(name: 'deleted_at') DateTime? deletedAt,
+      @JsonKey(name: 'expired_at') DateTime? expiredAt});
 }
 
 /// @nodoc
@@ -190,9 +208,11 @@ class __$$GoalsModelImplCopyWithImpl<$Res>
     Object? updatedAt = freezed,
     Object? syncUpdatedAt = freezed,
     Object? targetMinutes = null,
+    Object? totalTargetMinutes = freezed,
     Object? createdAt = freezed,
     Object? completedAt = freezed,
     Object? deletedAt = freezed,
+    Object? expiredAt = freezed,
   }) {
     return _then(_$GoalsModelImpl(
       id: null == id
@@ -231,6 +251,10 @@ class __$$GoalsModelImplCopyWithImpl<$Res>
           ? _value.targetMinutes
           : targetMinutes // ignore: cast_nullable_to_non_nullable
               as int,
+      totalTargetMinutes: freezed == totalTargetMinutes
+          ? _value.totalTargetMinutes
+          : totalTargetMinutes // ignore: cast_nullable_to_non_nullable
+              as int?,
       createdAt: freezed == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -242,6 +266,10 @@ class __$$GoalsModelImplCopyWithImpl<$Res>
       deletedAt: freezed == deletedAt
           ? _value.deletedAt
           : deletedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      expiredAt: freezed == expiredAt
+          ? _value.expiredAt
+          : expiredAt // ignore: cast_nullable_to_non_nullable
               as DateTime?,
     ));
   }
@@ -260,9 +288,11 @@ class _$GoalsModelImpl extends _GoalsModel {
       @JsonKey(name: 'updated_at') this.updatedAt,
       @JsonKey(name: 'sync_updated_at') this.syncUpdatedAt,
       @JsonKey(name: 'target_minutes') required this.targetMinutes,
+      @JsonKey(name: 'total_target_minutes') this.totalTargetMinutes,
       @JsonKey(name: 'created_at') this.createdAt,
       @JsonKey(name: 'completed_at') this.completedAt,
-      @JsonKey(name: 'deleted_at') this.deletedAt})
+      @JsonKey(name: 'deleted_at') this.deletedAt,
+      @JsonKey(name: 'expired_at') this.expiredAt})
       : super._();
 
   factory _$GoalsModelImpl.fromJson(Map<String, dynamic> json) =>
@@ -293,6 +323,9 @@ class _$GoalsModelImpl extends _GoalsModel {
   @JsonKey(name: 'target_minutes')
   final int targetMinutes;
   @override
+  @JsonKey(name: 'total_target_minutes')
+  final int? totalTargetMinutes;
+  @override
   @JsonKey(name: 'created_at')
   final DateTime? createdAt;
   @override
@@ -301,10 +334,13 @@ class _$GoalsModelImpl extends _GoalsModel {
   @override
   @JsonKey(name: 'deleted_at')
   final DateTime? deletedAt;
+  @override
+  @JsonKey(name: 'expired_at')
+  final DateTime? expiredAt;
 
   @override
   String toString() {
-    return 'GoalsModel(id: $id, userId: $userId, title: $title, description: $description, deadline: $deadline, avoidMessage: $avoidMessage, updatedAt: $updatedAt, syncUpdatedAt: $syncUpdatedAt, targetMinutes: $targetMinutes, createdAt: $createdAt, completedAt: $completedAt, deletedAt: $deletedAt)';
+    return 'GoalsModel(id: $id, userId: $userId, title: $title, description: $description, deadline: $deadline, avoidMessage: $avoidMessage, updatedAt: $updatedAt, syncUpdatedAt: $syncUpdatedAt, targetMinutes: $targetMinutes, totalTargetMinutes: $totalTargetMinutes, createdAt: $createdAt, completedAt: $completedAt, deletedAt: $deletedAt, expiredAt: $expiredAt)';
   }
 
   @override
@@ -327,12 +363,16 @@ class _$GoalsModelImpl extends _GoalsModel {
                 other.syncUpdatedAt == syncUpdatedAt) &&
             (identical(other.targetMinutes, targetMinutes) ||
                 other.targetMinutes == targetMinutes) &&
+            (identical(other.totalTargetMinutes, totalTargetMinutes) ||
+                other.totalTargetMinutes == totalTargetMinutes) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.completedAt, completedAt) ||
                 other.completedAt == completedAt) &&
             (identical(other.deletedAt, deletedAt) ||
-                other.deletedAt == deletedAt));
+                other.deletedAt == deletedAt) &&
+            (identical(other.expiredAt, expiredAt) ||
+                other.expiredAt == expiredAt));
   }
 
   @JsonKey(ignore: true)
@@ -348,9 +388,11 @@ class _$GoalsModelImpl extends _GoalsModel {
       updatedAt,
       syncUpdatedAt,
       targetMinutes,
+      totalTargetMinutes,
       createdAt,
       completedAt,
-      deletedAt);
+      deletedAt,
+      expiredAt);
 
   @JsonKey(ignore: true)
   @override
@@ -377,9 +419,11 @@ abstract class _GoalsModel extends GoalsModel {
           @JsonKey(name: 'updated_at') final DateTime? updatedAt,
           @JsonKey(name: 'sync_updated_at') final DateTime? syncUpdatedAt,
           @JsonKey(name: 'target_minutes') required final int targetMinutes,
+          @JsonKey(name: 'total_target_minutes') final int? totalTargetMinutes,
           @JsonKey(name: 'created_at') final DateTime? createdAt,
           @JsonKey(name: 'completed_at') final DateTime? completedAt,
-          @JsonKey(name: 'deleted_at') final DateTime? deletedAt}) =
+          @JsonKey(name: 'deleted_at') final DateTime? deletedAt,
+          @JsonKey(name: 'expired_at') final DateTime? expiredAt}) =
       _$GoalsModelImpl;
   const _GoalsModel._() : super._();
 
@@ -410,6 +454,9 @@ abstract class _GoalsModel extends GoalsModel {
   @JsonKey(name: 'target_minutes')
   int get targetMinutes;
   @override
+  @JsonKey(name: 'total_target_minutes')
+  int? get totalTargetMinutes;
+  @override
   @JsonKey(name: 'created_at')
   DateTime? get createdAt;
   @override
@@ -418,6 +465,9 @@ abstract class _GoalsModel extends GoalsModel {
   @override
   @JsonKey(name: 'deleted_at')
   DateTime? get deletedAt;
+  @override
+  @JsonKey(name: 'expired_at')
+  DateTime? get expiredAt;
   @override
   @JsonKey(ignore: true)
   _$$GoalsModelImplCopyWith<_$GoalsModelImpl> get copyWith =>

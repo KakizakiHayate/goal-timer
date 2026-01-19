@@ -255,6 +255,115 @@ void main() {
     });
   });
 
+  group('calculateHistoricalLongestStreak', () {
+    test('学習記録なし → 0を返す', () async {
+      final result = await datasource.calculateHistoricalLongestStreak();
+
+      expect(result, equals(0));
+    });
+
+    test('1日だけ学習記録がある（1分以上） → 1を返す', () async {
+      await createStudyLog(studyDate: daysAgo(5), totalSeconds: 60);
+
+      final result = await datasource.calculateHistoricalLongestStreak();
+
+      expect(result, equals(1));
+    });
+
+    test('3日連続学習 → 3を返す', () async {
+      await createStudyLog(studyDate: daysAgo(2), totalSeconds: 60);
+      await createStudyLog(studyDate: daysAgo(1), totalSeconds: 60);
+      await createStudyLog(studyDate: today(), totalSeconds: 60);
+
+      final result = await datasource.calculateHistoricalLongestStreak();
+
+      expect(result, equals(3));
+    });
+
+    test('過去に長い連続があり、現在は途切れている → 過去の最長を返す', () async {
+      // 過去: 5日連続（10日前〜6日前）
+      for (var i = 10; i >= 6; i--) {
+        await createStudyLog(studyDate: daysAgo(i), totalSeconds: 60);
+      }
+      // 現在: 2日連続（昨日と今日）
+      await createStudyLog(studyDate: daysAgo(1), totalSeconds: 60);
+      await createStudyLog(studyDate: today(), totalSeconds: 60);
+
+      final result = await datasource.calculateHistoricalLongestStreak();
+
+      expect(result, equals(5));
+    });
+
+    test('複数の連続期間がある → 最長の連続日数を返す', () async {
+      // 期間1: 3日連続（15日前〜13日前）
+      await createStudyLog(studyDate: daysAgo(15), totalSeconds: 60);
+      await createStudyLog(studyDate: daysAgo(14), totalSeconds: 60);
+      await createStudyLog(studyDate: daysAgo(13), totalSeconds: 60);
+      // 期間2: 7日連続（10日前〜4日前）
+      for (var i = 10; i >= 4; i--) {
+        await createStudyLog(studyDate: daysAgo(i), totalSeconds: 60);
+      }
+      // 期間3: 2日連続（昨日と今日）
+      await createStudyLog(studyDate: daysAgo(1), totalSeconds: 60);
+      await createStudyLog(studyDate: today(), totalSeconds: 60);
+
+      final result = await datasource.calculateHistoricalLongestStreak();
+
+      expect(result, equals(7));
+    });
+
+    test('1分未満の学習は学習日としてカウントしない', () async {
+      await createStudyLog(studyDate: daysAgo(2), totalSeconds: 60);
+      await createStudyLog(studyDate: daysAgo(1), totalSeconds: 59); // 1分未満
+      await createStudyLog(studyDate: today(), totalSeconds: 60);
+
+      final result = await datasource.calculateHistoricalLongestStreak();
+
+      // daysAgo(1)は学習日としてカウントされないので、連続は途切れる
+      expect(result, equals(1));
+    });
+
+    test('同じ日の複数記録は合算して1分以上なら学習日', () async {
+      await createStudyLog(studyDate: daysAgo(1), totalSeconds: 30);
+      await createStudyLog(studyDate: daysAgo(1), totalSeconds: 30);
+      await createStudyLog(studyDate: today(), totalSeconds: 60);
+
+      final result = await datasource.calculateHistoricalLongestStreak();
+
+      expect(result, equals(2));
+    });
+
+    test('今日学習していなくても過去の最長は正しく計算される', () async {
+      // 10日前〜6日前: 5日連続
+      for (var i = 10; i >= 6; i--) {
+        await createStudyLog(studyDate: daysAgo(i), totalSeconds: 60);
+      }
+      // 今日は学習していない
+
+      final result = await datasource.calculateHistoricalLongestStreak();
+
+      expect(result, equals(5));
+    });
+
+    test('複数の目標の学習記録を合算してカウント', () async {
+      await createStudyLog(
+        studyDate: daysAgo(1),
+        totalSeconds: 30,
+        goalId: 'goal-1',
+      );
+      await createStudyLog(
+        studyDate: daysAgo(1),
+        totalSeconds: 30,
+        goalId: 'goal-2',
+      );
+      await createStudyLog(studyDate: today(), totalSeconds: 60);
+
+      final result = await datasource.calculateHistoricalLongestStreak();
+
+      expect(result, equals(2));
+    });
+  });
+
   group('fetchDailyRecordsByDate', () {
     test('指定日に学習記録なし → 空のMapを返す', () async {
       final result = await datasource.fetchDailyRecordsByDate(today());

@@ -83,7 +83,18 @@
       "Bash(xargs:*)",
       "Bash(tree:*)",
       "Bash(gh api:*)",
-      "WebFetch(domain:zenn.dev)"
+      "WebFetch(domain:zenn.dev)",
+      "Bash(gh auth:*)",
+      "Bash(git status:*)",
+      "Bash(git check-ignore:*)",
+      "Bash(gh pr checks:*)",
+      "Bash(gh run view:*)",
+      "Bash(gh run:*)",
+      "Bash(cat:*)",
+      "Bash(firebase hosting:sites:list:*)",
+      "Bash(firebase deploy:*)",
+      "WebFetch(domain:goal-timer-43a41.web.app)",
+      "Bash(git stash:*)"
     ],
     "deny": []
   },

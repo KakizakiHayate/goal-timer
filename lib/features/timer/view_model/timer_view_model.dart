@@ -1,13 +1,16 @@
 import 'dart:async';
 import 'package:get/get.dart';
-import 'package:goal_timer/core/models/study_daily_logs/study_daily_logs_model.dart';
-import 'package:goal_timer/core/models/goals/goals_model.dart';
-import 'package:goal_timer/core/utils/app_logger.dart';
-import 'package:goal_timer/core/utils/time_utils.dart';
-import 'package:goal_timer/core/data/local/local_study_daily_logs_datasource.dart';
 import 'package:goal_timer/core/data/local/app_database.dart';
-import 'package:goal_timer/features/settings/view_model/settings_view_model.dart';
+import 'package:goal_timer/core/data/local/local_study_daily_logs_datasource.dart';
+import 'package:goal_timer/core/data/local/local_users_datasource.dart';
+import 'package:goal_timer/core/models/goals/goals_model.dart';
+import 'package:goal_timer/core/models/study_daily_logs/study_daily_logs_model.dart';
 import 'package:goal_timer/core/services/notification_service.dart';
+import 'package:goal_timer/core/services/rating_service.dart';
+import 'package:goal_timer/core/utils/app_logger.dart';
+import 'package:goal_timer/core/utils/streak_consts.dart';
+import 'package:goal_timer/core/utils/time_utils.dart';
+import 'package:goal_timer/features/settings/view_model/settings_view_model.dart';
 import 'package:uuid/uuid.dart';
 
 // タイマー関連の定数
@@ -41,7 +44,7 @@ class TimerState {
   final bool needsCompletionConfirm;
 
   // デフォルト値の定数
-  static final int _defaultSeconds =
+  static const int _defaultSeconds =
       TimerConstants.pomodoroWorkMinutes * TimeUtils.secondsPerMinute;
 
   TimerState({
@@ -52,8 +55,8 @@ class TimerState {
     this.isPomodoroBreak = false,
     this.pomodoroRound = TimerConstants.initialPomodoroRound,
     this.needsCompletionConfirm = false,
-  })  : totalSeconds = totalSeconds ?? _defaultSeconds,
-        currentSeconds = currentSeconds ?? _defaultSeconds;
+  }) : totalSeconds = totalSeconds ?? _defaultSeconds,
+       currentSeconds = currentSeconds ?? _defaultSeconds;
 
   TimerState copyWith({
     int? totalSeconds,
@@ -96,14 +99,15 @@ class TimerState {
 
 // タイマーのViewModel
 class TimerViewModel extends GetxController {
-  late final LocalStudyDailyLogsDatasource _datasource;
+  final LocalStudyDailyLogsDatasource _datasource;
+  final LocalUsersDatasource _usersDatasource;
   final GoalsModel goal;
 
   // PRコメント対応: インスタンス変数として一度だけ取得
   final SettingsViewModel _settingsViewModel;
 
   // 通知サービス
-  final NotificationService _notificationService = NotificationService();
+  final NotificationService _notificationService;
 
   Timer? _timer;
   int _elapsedSeconds = TimerConstants.initialElapsedSeconds;
@@ -123,11 +127,22 @@ class TimerViewModel extends GetxController {
   // 経過時間を取得するgetter
   int get elapsedSeconds => _elapsedSeconds;
 
-  TimerViewModel({required this.goal})
-      : _settingsViewModel = Get.find<SettingsViewModel>() {
-    final database = Get.find<AppDatabase>();
-    _datasource = LocalStudyDailyLogsDatasource(database: database);
-
+  /// コンストラクタ（DIパターン適用）
+  /// テスト時にはDataSourceを注入可能
+  TimerViewModel({
+    required this.goal,
+    LocalStudyDailyLogsDatasource? datasource,
+    LocalUsersDatasource? usersDatasource,
+    SettingsViewModel? settingsViewModel,
+    NotificationService? notificationService,
+  }) : _settingsViewModel = settingsViewModel ?? Get.find<SettingsViewModel>(),
+       _notificationService = notificationService ?? NotificationService(),
+       _datasource =
+           datasource ??
+           LocalStudyDailyLogsDatasource(database: Get.find<AppDatabase>()),
+       _usersDatasource =
+           usersDatasource ??
+           LocalUsersDatasource(database: Get.find<AppDatabase>()) {
     final defaultSeconds = _settingsViewModel.defaultTimerSeconds.value;
 
     _state.value = TimerState(
@@ -146,7 +161,8 @@ class TimerViewModel extends GetxController {
   @override
   void onClose() {
     _timer?.cancel();
-    _notificationService.cancelAllNotifications();
+    // タイマー完了通知のみキャンセル（ストリークリマインダーは維持）
+    _notificationService.cancelScheduledNotification();
     super.onClose();
   }
 
@@ -159,26 +175,27 @@ class TimerViewModel extends GetxController {
     }
 
     _state.value = state.copyWith(mode: mode);
-    if (mode == TimerMode.countdown) {
-      // PRコメント対応: インスタンス変数を使用
-      final defaultSeconds = _settingsViewModel.defaultTimerSeconds.value;
-      _state.value = state.copyWith(
-        totalSeconds: defaultSeconds,
-        currentSeconds: defaultSeconds,
-      );
-    } else if (mode == TimerMode.countup) {
-      // カウントアップモード: 上限なし
-      _state.value = state.copyWith(
-        totalSeconds: TimerConstants.countupInitialSeconds,
-        currentSeconds: TimerConstants.countdownCompleteThreshold,
-      );
-    } else if (mode == TimerMode.pomodoro) {
-      final pomodoroSeconds =
-          TimerConstants.pomodoroWorkMinutes * TimeUtils.secondsPerMinute;
-      _state.value = state.copyWith(
-        totalSeconds: pomodoroSeconds,
-        currentSeconds: pomodoroSeconds,
-      );
+    switch (mode) {
+      case TimerMode.countdown:
+        // PRコメント対応: インスタンス変数を使用
+        final defaultSeconds = _settingsViewModel.defaultTimerSeconds.value;
+        _state.value = state.copyWith(
+          totalSeconds: defaultSeconds,
+          currentSeconds: defaultSeconds,
+        );
+      case TimerMode.countup:
+        // カウントアップモード: 上限なし
+        _state.value = state.copyWith(
+          totalSeconds: TimerConstants.countupInitialSeconds,
+          currentSeconds: TimerConstants.countdownCompleteThreshold,
+        );
+      case TimerMode.pomodoro:
+        const pomodoroSeconds =
+            TimerConstants.pomodoroWorkMinutes * TimeUtils.secondsPerMinute;
+        _state.value = state.copyWith(
+          totalSeconds: pomodoroSeconds,
+          currentSeconds: pomodoroSeconds,
+        );
     }
     return true;
   }
@@ -213,7 +230,8 @@ class TimerViewModel extends GetxController {
             state.mode == TimerMode.pomodoro) {
           if (state.currentSeconds > TimeUtils.minValidSeconds) {
             _state.value = state.copyWith(
-              currentSeconds: state.currentSeconds - TimerConstants.decrementValue,
+              currentSeconds:
+                  state.currentSeconds - TimerConstants.decrementValue,
             );
           } else {
             completeTimer();
@@ -221,7 +239,8 @@ class TimerViewModel extends GetxController {
         } else {
           // カウントアップモード: 上限なしで継続
           _state.value = state.copyWith(
-            currentSeconds: state.currentSeconds + TimerConstants.incrementValue,
+            currentSeconds:
+                state.currentSeconds + TimerConstants.incrementValue,
           );
         }
       },
@@ -250,8 +269,8 @@ class TimerViewModel extends GetxController {
       status: TimerStatus.initial,
       needsCompletionConfirm: false,
     );
-    // 通知をキャンセル
-    _notificationService.cancelAllNotifications();
+    // タイマー完了通知のみキャンセル（ストリークリマインダーは維持）
+    _notificationService.cancelScheduledNotification();
     AppLogger.instance.i('タイマーをリセットしました');
   }
 
@@ -340,7 +359,8 @@ class TimerViewModel extends GetxController {
             state.mode == TimerMode.pomodoro) {
           if (state.currentSeconds > TimeUtils.minValidSeconds) {
             _state.value = state.copyWith(
-              currentSeconds: state.currentSeconds - TimerConstants.decrementValue,
+              currentSeconds:
+                  state.currentSeconds - TimerConstants.decrementValue,
             );
           } else {
             completeTimer();
@@ -348,7 +368,8 @@ class TimerViewModel extends GetxController {
         } else {
           // カウントアップモード: 上限なしで継続
           _state.value = state.copyWith(
-            currentSeconds: state.currentSeconds + TimerConstants.incrementValue,
+            currentSeconds:
+                state.currentSeconds + TimerConstants.incrementValue,
           );
         }
       },
@@ -418,9 +439,67 @@ class TimerViewModel extends GetxController {
       _studySessionStartDay = null;
 
       AppLogger.instance.i('学習記録を保存しました: ${log.id}, 学習日: ${log.studyDate}');
+
+      // 1分以上学習した場合のみストリーク関連の処理を実行
+      if (_elapsedSeconds >= StreakConsts.minStudySeconds) {
+        await _updateLongestStreakIfNeeded();
+      } else {
+        AppLogger.instance.i('学習時間が1分未満のためストリーク処理をスキップ');
+      }
+
+      // 学習完了時に評価モーダル表示判定を実行
+      await RatingService().onStudyCompleted();
     } catch (error, stackTrace) {
       AppLogger.instance.e('学習記録の保存に失敗しました', error, stackTrace);
       rethrow;
+    }
+  }
+
+  /// 現在のストリークが最長を超えていれば更新する
+  Future<void> _updateLongestStreakIfNeeded() async {
+    try {
+      // 現在のストリークを計算
+      final currentStreak = await _datasource.calculateCurrentStreak();
+
+      // 最長ストリークと比較して必要なら更新
+      final updated = await _usersDatasource.updateLongestStreakIfNeeded(
+        currentStreak,
+      );
+
+      if (updated) {
+        AppLogger.instance.i('最長ストリークを更新しました: $currentStreak日');
+      }
+
+      // 明日のストリークリマインダーをスケジュール
+      await _scheduleTomorrowStreakReminders(currentStreak);
+    } catch (error, stackTrace) {
+      // 最長ストリーク更新の失敗はログのみ（致命的エラーとしては扱わない）
+      AppLogger.instance.e('最長ストリークの更新に失敗しました', error, stackTrace);
+    }
+  }
+
+  /// 明日のストリークリマインダーをスケジュールする
+  Future<void> _scheduleTomorrowStreakReminders(int currentStreak) async {
+    try {
+      // リマインダー設定が有効かどうかを確認
+      final reminderEnabled = await _usersDatasource.getStreakReminderEnabled();
+      if (!reminderEnabled) {
+        AppLogger.instance.i('ストリークリマインダーはOFFのためスケジュールをスキップ');
+        return;
+      }
+
+      // 今日のリマインダーをキャンセル（学習完了したため）
+      await _notificationService.cancelTodayStreakReminders();
+
+      // 明日のリマインダーをスケジュール
+      await _notificationService.scheduleTomorrowStreakReminders(
+        streakDays: currentStreak,
+      );
+
+      AppLogger.instance.i('明日のストリークリマインダーをスケジュールしました: $currentStreak日');
+    } catch (error, stackTrace) {
+      // リマインダースケジュールの失敗はログのみ（致命的エラーとしては扱わない）
+      AppLogger.instance.e('ストリークリマインダーのスケジュールに失敗しました', error, stackTrace);
     }
   }
 

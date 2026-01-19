@@ -35,11 +35,13 @@ class _AddGoalModalState extends State<AddGoalModal> {
     super.initState();
     final goal = widget.goal;
     _titleController = TextEditingController(text: goal?.title ?? '');
-    _descriptionController =
-        TextEditingController(text: goal?.description ?? '');
+    _descriptionController = TextEditingController(
+      text: goal?.description ?? '',
+    );
     _targetMinutes = goal?.targetMinutes ?? 30;
-    _avoidMessageController =
-        TextEditingController(text: goal?.avoidMessage ?? '');
+    _avoidMessageController = TextEditingController(
+      text: goal?.avoidMessage ?? '',
+    );
     _selectedDeadline = goal?.deadline;
   }
 
@@ -56,8 +58,11 @@ class _AddGoalModalState extends State<AddGoalModal> {
       context: context,
       initialDate: DateTime.now().add(const Duration(days: 30)),
       firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: UIConsts.maxDeadlineDays)),
+      lastDate: DateTime.now().add(
+        const Duration(days: UIConsts.maxDeadlineDays),
+      ),
       builder: (context, child) {
+        if (child == null) return const SizedBox.shrink();
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
@@ -66,7 +71,7 @@ class _AddGoalModalState extends State<AddGoalModal> {
               onSurface: ColorConsts.textPrimary,
             ),
           ),
-          child: child!,
+          child: child,
         );
       },
     );
@@ -79,11 +84,13 @@ class _AddGoalModalState extends State<AddGoalModal> {
   }
 
   Future<void> _saveGoal() async {
-    if (!_formKey.currentState!.validate()) {
+    final formState = _formKey.currentState;
+    if (formState == null || !formState.validate()) {
       return;
     }
 
-    if (_selectedDeadline == null) {
+    final selectedDeadline = _selectedDeadline;
+    if (selectedDeadline == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(StringConsts.selectDeadlineMessage),
@@ -103,14 +110,15 @@ class _AddGoalModalState extends State<AddGoalModal> {
 
     try {
       final homeViewModel = Get.find<HomeViewModel>();
-      if (_isEdit) {
+      final goal = widget.goal;
+      if (_isEdit && goal != null) {
         await homeViewModel.updateGoal(
-          original: widget.goal!,
+          original: goal,
           title: _titleController.text.trim(),
           description: _descriptionController.text.trim(),
           targetMinutes: _targetMinutes,
           avoidMessage: _avoidMessageController.text.trim(),
-          deadline: _selectedDeadline!,
+          deadline: selectedDeadline,
         );
       } else {
         await homeViewModel.addGoal(
@@ -118,7 +126,7 @@ class _AddGoalModalState extends State<AddGoalModal> {
           description: _descriptionController.text.trim(),
           targetMinutes: _targetMinutes,
           avoidMessage: _avoidMessageController.text.trim(),
-          deadline: _selectedDeadline!,
+          deadline: selectedDeadline,
         );
       }
 
@@ -126,9 +134,11 @@ class _AddGoalModalState extends State<AddGoalModal> {
         navigator.pop();
         scaffoldMessenger.showSnackBar(
           SnackBar(
-            content: Text(_isEdit
-                ? StringConsts.goalUpdatedMessage
-                : StringConsts.goalAddedMessage),
+            content: Text(
+              _isEdit
+                  ? StringConsts.goalUpdatedMessage
+                  : StringConsts.goalAddedMessage,
+            ),
             backgroundColor: ColorConsts.success,
           ),
         );
@@ -137,14 +147,16 @@ class _AddGoalModalState extends State<AddGoalModal> {
       if (mounted) {
         scaffoldMessenger.showSnackBar(
           SnackBar(
-            content: Text(_isEdit
-                ? StringConsts.goalUpdateFailedMessage
-                : StringConsts.goalAddFailedMessage),
+            content: Text(
+              _isEdit
+                  ? StringConsts.goalUpdateFailedMessage
+                  : StringConsts.goalAddFailedMessage,
+            ),
             backgroundColor: ColorConsts.error,
           ),
         );
       }
-    }finally {
+    } finally {
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -228,9 +240,7 @@ class _AddGoalModalState extends State<AddGoalModal> {
         children: [
           Expanded(
             child: Text(
-              _isEdit
-                  ? StringConsts.editGoalTitle
-                  : StringConsts.addGoalTitle,
+              _isEdit ? StringConsts.editGoalTitle : StringConsts.addGoalTitle,
               style: TextConsts.h3.copyWith(
                 color: ColorConsts.textPrimary,
                 fontWeight: FontWeight.bold,
@@ -379,6 +389,8 @@ class _AddGoalModalState extends State<AddGoalModal> {
   }
 
   Widget _buildDeadlineField() {
+    final selectedDeadline = _selectedDeadline;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -408,13 +420,14 @@ class _AddGoalModalState extends State<AddGoalModal> {
                 const SizedBox(width: SpacingConsts.m),
                 Expanded(
                   child: Text(
-                    _selectedDeadline == null
-                        ? StringConsts.selectDeadlinePlaceholder
-                        : DateFormat('yyyy年M月d日').format(_selectedDeadline!),
+                    selectedDeadline != null
+                        ? DateFormat('yyyy年M月d日').format(selectedDeadline)
+                        : StringConsts.selectDeadlinePlaceholder,
                     style: TextConsts.body.copyWith(
-                      color: _selectedDeadline == null
-                          ? ColorConsts.textTertiary
-                          : ColorConsts.textPrimary,
+                      color:
+                          selectedDeadline != null
+                              ? ColorConsts.textPrimary
+                              : ColorConsts.textTertiary,
                     ),
                   ),
                 ),
@@ -427,7 +440,27 @@ class _AddGoalModalState extends State<AddGoalModal> {
             ),
           ),
         ),
+        // 総目標時間の表示（期限が選択されている場合のみ）
+        if (selectedDeadline != null) ...[
+          const SizedBox(height: SpacingConsts.s),
+          _buildTotalTargetTimeText(selectedDeadline),
+        ],
       ],
+    );
+  }
+
+  Widget _buildTotalTargetTimeText(DateTime deadline) {
+    final remainingDays = TimeUtils.calculateRemainingDays(deadline);
+    final totalTargetMinutes = TimeUtils.calculateTotalTargetMinutes(
+      targetMinutes: _targetMinutes,
+      remainingDays: remainingDays,
+    );
+
+    return Text(
+      '残り$remainingDays日 → 総目標時間: ${TimeUtils.formatMinutesToHoursAndMinutes(totalTargetMinutes)}',
+      style: TextConsts.bodySmall.copyWith(
+        color: ColorConsts.textSecondary,
+      ),
     );
   }
 
@@ -445,9 +478,7 @@ class _AddGoalModalState extends State<AddGoalModal> {
         const SizedBox(height: SpacingConsts.xs),
         Text(
           StringConsts.avoidMessageHint,
-          style: TextConsts.caption.copyWith(
-            color: ColorConsts.textTertiary,
-          ),
+          style: TextConsts.caption.copyWith(color: ColorConsts.textTertiary),
         ),
         const SizedBox(height: SpacingConsts.s),
         TextFormField(
@@ -489,24 +520,23 @@ class _AddGoalModalState extends State<AddGoalModal> {
           ),
           elevation: 0,
         ),
-        child: _isLoading
-            ? const SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+        child:
+            _isLoading
+                ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                )
+                : Text(
+                  _isEdit ? StringConsts.updateButton : StringConsts.saveButton,
+                  style: TextConsts.h4.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              )
-            : Text(
-                _isEdit
-                    ? StringConsts.updateButton
-                    : StringConsts.saveButton,
-                style: TextConsts.h4.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
       ),
     );
   }
@@ -673,7 +703,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
                     onPressed: () {
                       final totalMinutes =
                           _selectedHours * TimeUtils.minutesPerHour +
-                              _selectedMinutes;
+                          _selectedMinutes;
                       if (totalMinutes > TimeUtils.minValidMinutes) {
                         widget.onTimeSelected(totalMinutes);
                         Navigator.of(context).pop();

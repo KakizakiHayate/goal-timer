@@ -2,11 +2,11 @@ name: goal_timer
 description: "A new Flutter project."
 publish_to: 'none'
 
-version: 0.0.19+1
+version: 1.0.0+7
 
 environment:
   sdk: '>=3.7.0 <4.0.0'
-  flutter: '3.29.0'
+  flutter: '>=3.29.0'
 
 dependencies:
   flutter:
@@ -17,55 +17,58 @@ dependencies:
   cupertino_icons: '1.0.8'
   
   # 状態管理
-  flutter_riverpod: '2.4.9'
-  riverpod_annotation: '2.3.3'
+  flutter_riverpod: ^3.1.0
+  riverpod_annotation: ^4.0.0
   
   # APIクライアント
-  dio: '5.4.1'
+  dio: ^5.9.0
   
   # Supabase連携
   supabase_flutter: '2.3.4'
-  intl: '0.20.2'
   fl_chart: '0.71.0'
-  uuid: '4.4.0'
+  uuid: ^4.5.1
   
   # 環境変数
-  flutter_dotenv: '5.1.0'
+  flutter_dotenv: ^6.0.0
   
   # ロギング
-  logger: '2.0.2+1'
+  logger: ^2.6.2
 
-  freezed_annotation: '2.4.1'
-  json_annotation: '4.8.1'
+  freezed_annotation: ^3.0.0
+  json_annotation: ^4.9.0
 
   frontend_server_client: '4.0.0'
   
   # ローカルDB
   sqflite: '2.4.2'
   path: '1.9.1'
-  path_provider: '2.1.2'
+  path_provider: ^2.1.5
   
   # 接続状態管理
-  connectivity_plus: '5.0.2'
+  connectivity_plus: ^7.0.0
   
   # 認証関連パッケージ
-  google_sign_in: ^6.2.1
-  sign_in_with_apple: ^6.1.0
+  google_sign_in: ^7.2.0
+  sign_in_with_apple: ^7.0.1
   crypto: ^3.0.3
   
   # フォームバリデーション
-  formz: ^0.7.0
+  formz: ^0.8.0
   
   # 共有設定
   shared_preferences: ^2.2.2
   
   # 生体認証（オプション）
-  local_auth: ^2.1.8
-  firebase_core: ^3.14.0
+  local_auth: ^3.0.0
+
+  # Firebase
+  firebase_core: ^4.3.0
+  firebase_analytics: ^12.1.0
+  firebase_crashlytics: ^5.0.6
   
   # 課金機能（RevenueCat）
-  purchases_flutter: ^8.1.2
-  get: 4.7.2
+  purchases_flutter: ^9.0.0
+  get: ^4.7.3
   
   # URL起動
   url_launcher: ^6.3.0
@@ -75,26 +78,34 @@ dependencies:
   flutter_local_notifications: ^19.5.0
   timezone: ^0.10.1
 
+  # アプリ評価
+  in_app_review: ^2.0.9
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  
-  # Riverpodのコード生成
-  riverpod_generator: '2.3.9'
-  build_runner: '2.4.13'
 
-  freezed: '2.4.5'
-  json_serializable: '6.7.1'
-  
-  flutter_lints: '3.0.1'
-  
+  # Riverpodのコード生成
+  riverpod_generator: ^4.0.0+1
+  build_runner: ^2.7.1
+
+  freezed: ^3.0.0
+  json_serializable: ^6.9.0
+
+  flutter_lints: ^6.0.0
+
+  # カスタムリント
+  custom_lint: ^0.8.0
+  tanzam_lints:
+    path: tanzam_lints
+
   # テスト用モック
   mockito: ^5.4.4
-  
+
   # アプリアイコン生成
-  flutter_launcher_icons: ^0.13.1
+  flutter_launcher_icons: ^0.14.4
   mocktail: ^1.0.4
-  
+
   sqflite_common_ffi: ^2.3.6
 
 flutter:

@@ -60,10 +60,7 @@ class StreakCard extends StatelessWidget {
 
     return Row(
       children: [
-        Text(
-          icon,
-          style: const TextStyle(fontSize: 24),
-        ),
+        Text(icon, style: const TextStyle(fontSize: 24)),
         const SizedBox(width: SpacingConsts.s),
         Expanded(
           child: Text(
@@ -79,27 +76,21 @@ class StreakCard extends StatelessWidget {
   }
 
   String _getStreakMessage() {
-    if (streakDays == 0) {
-      return StreakConsts.messageZeroStreak;
-    } else if (streakDays >= StreakConsts.monthMilestone) {
+    if (streakDays == 0) return StreakConsts.messageZeroStreak;
+    if (streakDays >= StreakConsts.monthMilestone) {
       return '🏆 ${StreakConsts.messageMonthMilestone}';
-    } else if (streakDays >= StreakConsts.weekMilestone) {
-      return '🎉 ${StreakConsts.messageWeekMilestone}';
-    } else {
-      return StreakConsts.messageStreakDays(streakDays);
     }
+    if (streakDays >= StreakConsts.weekMilestone) {
+      return '🎉 ${StreakConsts.messageWeekMilestone}';
+    }
+    return StreakConsts.messageStreakDays(streakDays);
   }
 
   String _getStreakIcon() {
-    if (streakDays == 0) {
-      return '✨';
-    } else if (streakDays >= StreakConsts.monthMilestone) {
-      return '';
-    } else if (streakDays >= StreakConsts.weekMilestone) {
-      return '';
-    } else {
-      return '🔥';
-    }
+    if (streakDays == 0) return '✨';
+    if (streakDays >= StreakConsts.monthMilestone) return '';
+    if (streakDays >= StreakConsts.weekMilestone) return '';
+    return '🔥';
   }
 
   Widget _buildDetailLink() {
@@ -114,11 +105,7 @@ class StreakCard extends StatelessWidget {
           ),
         ),
         const SizedBox(width: SpacingConsts.xs),
-        Icon(
-          Icons.chevron_right,
-          size: 16,
-          color: ColorConsts.textSecondary,
-        ),
+        Icon(Icons.chevron_right, size: 16, color: ColorConsts.textSecondary),
       ],
     );
   }
