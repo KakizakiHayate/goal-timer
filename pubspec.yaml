@@ -25,7 +25,7 @@ dependencies:
   
   # Supabase連携
   supabase_flutter: '2.3.4'
-  intl: '0.20.2'
+  intl: '0.19.0'
   fl_chart: '0.71.0'
   uuid: '4.4.0'
   
