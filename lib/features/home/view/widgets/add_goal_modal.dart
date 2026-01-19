@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+
 import '../../../../core/models/goals/goals_model.dart';
 import '../../../../core/utils/color_consts.dart';
-import '../../../../core/utils/text_consts.dart';
 import '../../../../core/utils/spacing_consts.dart';
-import '../../../../core/utils/ui_consts.dart';
 import '../../../../core/utils/string_consts.dart';
+import '../../../../core/utils/text_consts.dart';
 import '../../../../core/utils/time_utils.dart';
+import '../../../../core/utils/ui_consts.dart';
 import '../../view_model/home_view_model.dart';
 
 class AddGoalModal extends StatefulWidget {

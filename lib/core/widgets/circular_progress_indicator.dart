@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/material.dart' as material;
-import '../utils/color_consts.dart';
+import 'package:flutter/material.dart';
+
 import '../utils/animation_consts.dart';
+import '../utils/color_consts.dart';
 
 /// 改善されたサーキュラープログレスインジケーター
 /// 達成感を演出するデザインに強化
@@ -97,7 +98,7 @@ class _CustomCircularProgressIndicatorState
             boxShadow: [
               if (progressValue > 0.8) // 高達成時にグロー効果
                 BoxShadow(
-                  color: progressColor.withOpacity(0.3),
+                  color: progressColor.withValues(alpha: 0.3),
                   blurRadius: 16,
                   spreadRadius: 2,
                 ),

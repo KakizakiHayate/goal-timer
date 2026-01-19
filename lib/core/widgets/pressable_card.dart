@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../utils/color_consts.dart';
+
 import '../utils/animation_consts.dart';
+import '../utils/color_consts.dart';
 
 /// タップ可能なカードウィジェット
 /// マイクロインタラクションとフィードバックを提供
