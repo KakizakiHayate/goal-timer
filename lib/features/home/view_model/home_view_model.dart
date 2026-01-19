@@ -1,12 +1,13 @@
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
-import '../../../core/models/goals/goals_model.dart';
+
+import '../../../core/data/local/app_database.dart';
 import '../../../core/data/local/local_goals_datasource.dart';
 import '../../../core/data/local/local_study_daily_logs_datasource.dart';
-import '../../../core/data/local/app_database.dart';
+import '../../../core/models/goals/goals_model.dart';
 import '../../../core/utils/app_logger.dart';
-import '../../../core/utils/time_utils.dart';
 import '../../../core/utils/streak_consts.dart';
+import '../../../core/utils/time_utils.dart';
 
 /// 目標削除操作の結果
 enum DeleteGoalResult { success, failure }
@@ -105,7 +106,7 @@ class HomeViewModel extends GetxController {
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
       final startDate = today.subtract(
-        Duration(days: StreakConsts.recentDaysCount - 1),
+        const Duration(days: StreakConsts.recentDaysCount - 1),
       );
 
       final (goals, studiedSeconds, recentStudyDates, currentStreak) =

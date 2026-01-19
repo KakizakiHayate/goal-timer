@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../utils/color_consts.dart';
+
 import '../utils/animation_consts.dart';
+import '../utils/color_consts.dart';
 
 /// アニメーション付きチェックマークアイコン
 /// 達成感を演出するために使用

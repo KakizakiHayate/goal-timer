@@ -155,7 +155,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: ColorConsts.primary.withOpacity(0.3),
+                color: ColorConsts.primary.withValues(alpha: 0.3),
                 offset: const Offset(0, 4),
                 blurRadius: 20,
                 spreadRadius: 0,
@@ -241,7 +241,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             height: 1,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [ColorConsts.border.withOpacity(0), ColorConsts.border],
+                colors: [ColorConsts.border.withValues(alpha: 0), ColorConsts.border],
               ),
             ),
           ),
@@ -261,7 +261,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             height: 1,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [ColorConsts.border, ColorConsts.border.withOpacity(0)],
+                colors: [ColorConsts.border, ColorConsts.border.withValues(alpha: 0)],
               ),
             ),
           ),

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:goal_timer/core/models/goals/goals_model.dart';
-import '../view_model/timer_view_model.dart';
+
+import '../../../core/models/goals/goals_model.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/color_consts.dart';
-import '../../../core/utils/text_consts.dart';
 import '../../../core/utils/spacing_consts.dart';
+import '../../../core/utils/text_consts.dart';
 import '../../../core/utils/time_utils.dart';
 import '../../../core/widgets/circular_progress_indicator.dart' as custom;
+import '../view_model/timer_view_model.dart';
 
 /// タイマー画面
 class TimerScreen extends StatefulWidget {
@@ -249,7 +250,7 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
     return Container(
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
+        color: Colors.white.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -340,7 +341,7 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
               isActive
                   ? [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       offset: const Offset(0, 2),
                       blurRadius: 8,
                     ),
@@ -394,10 +395,10 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
       height: 280,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
         boxShadow: [
           BoxShadow(
-            color: Colors.white.withOpacity(0.2),
+            color: Colors.white.withValues(alpha: 0.2),
             offset: const Offset(0, 8),
             blurRadius: 32,
             spreadRadius: 0,
@@ -416,7 +417,7 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
             size: 260.0,
             strokeWidth: 12.0,
             progressColor: Colors.white,
-            backgroundColor: Colors.white.withOpacity(0.3),
+            backgroundColor: Colors.white.withValues(alpha: 0.3),
             showAnimation: false,
             centerWidget: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -440,7 +441,7 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                 Text(
                   _getTimerStatusText(timerState),
                   style: TextConsts.body.copyWith(
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white.withValues(alpha: 0.8),
                     fontWeight: FontWeight.w600,
                   ),
                   textAlign: TextAlign.center,
@@ -476,7 +477,7 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
         _buildControlButton(
           icon: Icons.refresh_rounded,
           onPressed: () => timerViewModel.resetTimer(),
-          backgroundColor: Colors.white.withOpacity(0.2),
+          backgroundColor: Colors.white.withValues(alpha: 0.2),
           iconColor: Colors.white,
         ),
 
@@ -504,7 +505,7 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                 timerViewModel.pauseTimer();
                 _showCompleteConfirmDialog(context, timerState, timerViewModel);
               },
-              backgroundColor: Colors.green.withOpacity(0.2),
+              backgroundColor: Colors.green.withValues(alpha: 0.2),
               iconColor: Colors.white,
             )
             : const SizedBox(width: 64), // ボタンサイズ分のスペースを確保
@@ -529,7 +530,7 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               offset: const Offset(0, 4),
               blurRadius: 12,
             ),
@@ -554,7 +555,7 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
+              color: Colors.black.withValues(alpha: 0.2),
               offset: const Offset(0, 8),
               blurRadius: 24,
             ),

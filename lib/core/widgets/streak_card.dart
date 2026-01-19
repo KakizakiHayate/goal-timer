@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:goal_timer/core/utils/color_consts.dart';
-import 'package:goal_timer/core/utils/spacing_consts.dart';
-import 'package:goal_timer/core/utils/text_consts.dart';
-import 'package:goal_timer/core/utils/streak_consts.dart';
-import 'package:goal_timer/core/widgets/mini_heatmap.dart';
+
+import '../utils/color_consts.dart';
+import '../utils/spacing_consts.dart';
+import '../utils/streak_consts.dart';
+import '../utils/text_consts.dart';
+import 'mini_heatmap.dart';
 
 /// ストリークカードウィジェット
 /// 連続学習日数とミニヒートマップを表示する
@@ -34,7 +35,7 @@ class StreakCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
@@ -105,7 +106,7 @@ class StreakCard extends StatelessWidget {
           ),
         ),
         const SizedBox(width: SpacingConsts.xs),
-        Icon(Icons.chevron_right, size: 16, color: ColorConsts.textSecondary),
+        const Icon(Icons.chevron_right, size: 16, color: ColorConsts.textSecondary),
       ],
     );
   }

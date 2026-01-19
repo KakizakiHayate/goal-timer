@@ -1,17 +1,19 @@
 import 'dart:async';
+
 import 'package:get/get.dart';
-import 'package:goal_timer/core/data/local/app_database.dart';
-import 'package:goal_timer/core/data/local/local_study_daily_logs_datasource.dart';
-import 'package:goal_timer/core/data/local/local_users_datasource.dart';
-import 'package:goal_timer/core/models/goals/goals_model.dart';
-import 'package:goal_timer/core/models/study_daily_logs/study_daily_logs_model.dart';
-import 'package:goal_timer/core/services/notification_service.dart';
-import 'package:goal_timer/core/services/rating_service.dart';
-import 'package:goal_timer/core/utils/app_logger.dart';
-import 'package:goal_timer/core/utils/streak_consts.dart';
-import 'package:goal_timer/core/utils/time_utils.dart';
-import 'package:goal_timer/features/settings/view_model/settings_view_model.dart';
 import 'package:uuid/uuid.dart';
+
+import '../../../core/data/local/app_database.dart';
+import '../../../core/data/local/local_study_daily_logs_datasource.dart';
+import '../../../core/data/local/local_users_datasource.dart';
+import '../../../core/models/goals/goals_model.dart';
+import '../../../core/models/study_daily_logs/study_daily_logs_model.dart';
+import '../../../core/services/notification_service.dart';
+import '../../../core/services/rating_service.dart';
+import '../../../core/utils/app_logger.dart';
+import '../../../core/utils/streak_consts.dart';
+import '../../../core/utils/time_utils.dart';
+import '../../settings/view_model/settings_view_model.dart';
 
 // タイマー関連の定数
 class TimerConstants {

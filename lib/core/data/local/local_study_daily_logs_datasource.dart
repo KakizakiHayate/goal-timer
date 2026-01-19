@@ -1,11 +1,12 @@
 import 'dart:math';
 
-import 'package:goal_timer/core/data/local/app_database.dart';
-import 'package:goal_timer/core/data/local/database_consts.dart';
-import 'package:goal_timer/core/models/study_daily_logs/study_daily_logs_model.dart';
-import 'package:goal_timer/core/utils/streak_consts.dart';
-import 'package:goal_timer/core/utils/time_utils.dart';
 import 'package:sqflite/sqflite.dart';
+
+import '../../models/study_daily_logs/study_daily_logs_model.dart';
+import '../../utils/streak_consts.dart';
+import '../../utils/time_utils.dart';
+import 'app_database.dart';
+import 'database_consts.dart';
 
 class LocalStudyDailyLogsDatasource {
   final AppDatabase _database;
@@ -47,7 +48,7 @@ class LocalStudyDailyLogsDatasource {
   }
 
   /// 全目標の学習時間合計をまとめて取得
-  /// Map<goalId, totalSeconds>の形式で返す
+  /// Map`goalId, totalSeconds`の形式で返す
   Future<Map<String, int>> fetchTotalSecondsForAllGoals() async {
     final db = await _database.database;
     final result = await db.rawQuery(
@@ -278,7 +279,7 @@ class LocalStudyDailyLogsDatasource {
   }
 
   /// 指定日の目標別学習時間を取得
-  /// Map<goalId, totalSeconds>の形式で返す
+  /// Map`goalId, totalSeconds`の形式で返す
   Future<Map<String, int>> fetchDailyRecordsByDate(DateTime date) async {
     final db = await _database.database;
     final dateStr = _formatDateOnly(date);

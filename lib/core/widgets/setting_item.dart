@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import '../utils/color_consts.dart';
-import '../utils/text_consts.dart';
-import '../utils/spacing_consts.dart';
+
 import '../utils/animation_consts.dart';
+import '../utils/color_consts.dart';
+import '../utils/spacing_consts.dart';
+import '../utils/text_consts.dart';
 import 'pressable_card.dart';
 
 /// 改善された設定項目ウィジェット
@@ -74,8 +75,8 @@ class _SettingItemState extends State<SettingItem>
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: (widget.iconColor ?? ColorConsts.primary).withOpacity(
-                  0.1,
+                color: (widget.iconColor ?? ColorConsts.primary).withValues(
+                  alpha: 0.1,
                 ),
                 borderRadius: BorderRadius.circular(10),
               ),

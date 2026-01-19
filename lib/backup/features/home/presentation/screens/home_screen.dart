@@ -409,7 +409,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               ),
               boxShadow: [
                 BoxShadow(
-                  color: ColorConsts.primary.withOpacity(0.4),
+                  color: ColorConsts.primary.withValues(alpha: 0.4),
                   offset: const Offset(0, 8),
                   blurRadius: 24,
                   spreadRadius: 0,
@@ -909,7 +909,7 @@ class _TimerPage extends ConsumerWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: ColorConsts.primary.withOpacity(0.1),
+                color: ColorConsts.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(

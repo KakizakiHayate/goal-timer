@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import '../utils/color_consts.dart';
-import '../utils/text_consts.dart';
-import '../utils/spacing_consts.dart';
+
 import '../utils/animation_consts.dart';
+import '../utils/color_consts.dart';
+import '../utils/spacing_consts.dart';
+import '../utils/text_consts.dart';
 import '../utils/time_utils.dart';
 import 'pressable_card.dart';
 
@@ -125,7 +126,7 @@ class GoalCard extends StatelessWidget {
               vertical: SpacingConsts.xs,
             ),
             decoration: BoxDecoration(
-              color: ColorConsts.success.withOpacity(0.1),
+              color: ColorConsts.success.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
@@ -203,9 +204,9 @@ class GoalCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(SpacingConsts.m),
       decoration: BoxDecoration(
-        color: ColorConsts.error.withOpacity(0.05),
+        color: ColorConsts.error.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: ColorConsts.error.withOpacity(0.2), width: 1),
+        border: Border.all(color: ColorConsts.error.withValues(alpha: 0.2), width: 1),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -283,7 +284,7 @@ class GoalCard extends StatelessWidget {
         const SizedBox(width: SpacingConsts.s),
         _IconButton(
           icon: Icons.delete_outline,
-          backgroundColor: ColorConsts.error.withOpacity(0.1),
+          backgroundColor: ColorConsts.error.withValues(alpha: 0.1),
           iconColor: ColorConsts.error,
           onTap: onDeleteTap,
         ),
@@ -394,7 +395,7 @@ class _ActionButton extends StatelessWidget {
               backgroundColor == ColorConsts.primary
                   ? [
                     BoxShadow(
-                      color: ColorConsts.primary.withOpacity(0.3),
+                      color: ColorConsts.primary.withValues(alpha: 0.3),
                       offset: const Offset(0, 2),
                       blurRadius: 8,
                     ),

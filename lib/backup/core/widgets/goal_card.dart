@@ -165,9 +165,9 @@ class GoalCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(SpacingConsts.m),
       decoration: BoxDecoration(
-        color: ColorConsts.error.withOpacity(0.05),
+        color: ColorConsts.error.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: ColorConsts.error.withOpacity(0.2), width: 1),
+        border: Border.all(color: ColorConsts.error.withValues(alpha: 0.2), width: 1),
       ),
       child: Row(
         children: [
@@ -304,7 +304,7 @@ class _ActionButtonState extends State<_ActionButton>
                     widget.backgroundColor == ColorConsts.primary
                         ? [
                           BoxShadow(
-                            color: ColorConsts.primary.withOpacity(0.3),
+                            color: ColorConsts.primary.withValues(alpha: 0.3),
                             offset: const Offset(0, 2),
                             blurRadius: 8,
                           ),

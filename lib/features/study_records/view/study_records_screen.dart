@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:goal_timer/core/utils/color_consts.dart';
-import 'package:goal_timer/core/utils/spacing_consts.dart';
-import 'package:goal_timer/core/utils/text_consts.dart';
-import 'package:goal_timer/features/study_records/view/widgets/daily_record_bottom_sheet.dart';
-import 'package:goal_timer/features/study_records/view/widgets/monthly_calendar.dart';
-import 'package:goal_timer/features/study_records/view_model/study_records_view_model.dart';
+
+import '../../../core/utils/color_consts.dart';
+import '../../../core/utils/spacing_consts.dart';
+import '../../../core/utils/text_consts.dart';
+import '../view_model/study_records_view_model.dart';
+import 'widgets/daily_record_bottom_sheet.dart';
+import 'widgets/monthly_calendar.dart';
 
 /// 学習記録画面
 class StudyRecordsScreen extends StatefulWidget {
@@ -119,7 +120,7 @@ class _StudyRecordsScreenState extends State<StudyRecordsScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -143,7 +144,7 @@ class _StudyRecordsScreenState extends State<StudyRecordsScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),

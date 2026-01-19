@@ -33,15 +33,15 @@ class TodayProgressWidget extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            ColorConsts.primary.withOpacity(0.1),
-            ColorConsts.primaryLight.withOpacity(0.05),
+            ColorConsts.primary.withValues(alpha: 0.1),
+            ColorConsts.primaryLight.withValues(alpha: 0.05),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: ColorConsts.primary.withOpacity(0.2),
+          color: ColorConsts.primary.withValues(alpha: 0.2),
           width: 1,
         ),
       ),

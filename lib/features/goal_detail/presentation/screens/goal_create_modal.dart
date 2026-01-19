@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+import '../../../../core/models/goals/goals_model.dart';
 import '../../../../core/utils/color_consts.dart';
-import '../../../../core/utils/text_consts.dart';
 import '../../../../core/utils/spacing_consts.dart';
+import '../../../../core/utils/text_consts.dart';
 import '../../../../core/utils/time_utils.dart';
 import '../../../../core/widgets/goal_input_field.dart';
-import '../../../../core/models/goals/goals_model.dart';
 
 /// 改善された目標作成モーダル
 class GoalCreateModal extends StatelessWidget {
@@ -188,15 +189,15 @@ class _GoalCreateModalContentState extends State<_GoalCreateModalContent> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            ColorConsts.primary.withOpacity(0.1),
-            ColorConsts.primaryLight.withOpacity(0.05),
+            ColorConsts.primary.withValues(alpha: 0.1),
+            ColorConsts.primaryLight.withValues(alpha: 0.05),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: ColorConsts.primary.withOpacity(0.2),
+          color: ColorConsts.primary.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -471,13 +472,13 @@ class _GoalCreateModalContentState extends State<_GoalCreateModalContent> {
           decoration: BoxDecoration(
             color:
                 isEditMode
-                    ? ColorConsts.backgroundSecondary.withOpacity(0.5)
+                    ? ColorConsts.backgroundSecondary.withValues(alpha: 0.5)
                     : ColorConsts.backgroundSecondary,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color:
                   isEditMode
-                      ? ColorConsts.border.withOpacity(0.5)
+                      ? ColorConsts.border.withValues(alpha: 0.5)
                       : ColorConsts.border,
               width: 1.5,
             ),
@@ -574,14 +575,14 @@ class _GoalCreateModalContentState extends State<_GoalCreateModalContent> {
                     color: ColorConsts.backgroundSecondary,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: ColorConsts.border.withOpacity(0.5),
+                      color: ColorConsts.border.withValues(alpha: 0.5),
                       width: 1.5,
                     ),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.lock,
                         color: ColorConsts.textTertiary,
                         size: 20,
@@ -647,7 +648,7 @@ class _GoalCreateModalContentState extends State<_GoalCreateModalContent> {
         if (widget.existingGoal != null) ...[
           const SizedBox(height: SpacingConsts.m),
           TextButton.icon(
-            icon: Icon(Icons.delete_outline, color: ColorConsts.error),
+            icon: const Icon(Icons.delete_outline, color: ColorConsts.error),
             label: Text(
               'この目標を削除',
               style: TextConsts.body.copyWith(
@@ -879,13 +880,13 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
               style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: SpacingConsts.l),
-            Container(
+            SizedBox(
               height: 200,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // 時間ピッカー
-                  Container(
+                  SizedBox(
                     width: 80,
                     child: ListWheelScrollView.useDelegate(
                       controller: _hoursController,
@@ -926,7 +927,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
                   ),
                   const SizedBox(width: SpacingConsts.l),
                   // 分ピッカー
-                  Container(
+                  SizedBox(
                     width: 80,
                     child: ListWheelScrollView.useDelegate(
                       controller: _minutesController,

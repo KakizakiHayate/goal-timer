@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../../../core/models/goals/goals_model.dart';
 import '../../../core/services/att_service.dart';
 import '../../../core/services/notification_service.dart';
-import '../../../core/utils/color_consts.dart';
-import '../../../core/utils/text_consts.dart';
-import '../../../core/utils/spacing_consts.dart';
 import '../../../core/utils/animation_consts.dart';
-import '../../../core/utils/ui_consts.dart';
+import '../../../core/utils/color_consts.dart';
+import '../../../core/utils/spacing_consts.dart';
 import '../../../core/utils/string_consts.dart';
+import '../../../core/utils/text_consts.dart';
 import '../../../core/utils/time_utils.dart';
+import '../../../core/utils/ui_consts.dart';
 import '../../../core/widgets/goal_card.dart';
 import '../../../core/widgets/pressable_card.dart';
 import '../../../core/widgets/streak_card.dart';
-import '../view_model/home_view_model.dart';
 import '../../settings/view/settings_screen.dart';
 import '../../study_records/view/study_records_screen.dart';
 import '../../timer/view/timer_screen.dart';
+import '../view_model/home_view_model.dart';
 import 'widgets/add_goal_modal.dart';
 
 /// タイマー画面に遷移し、学習完了時にデータを再読み込みするヘルパー関数
@@ -120,16 +121,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       animation: _tabController,
       builder: (context, child) {
         return Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: ColorConsts.cardBackground,
-            borderRadius: const BorderRadius.only(
+            borderRadius: BorderRadius.only(
               topLeft: Radius.circular(24),
               topRight: Radius.circular(24),
             ),
             boxShadow: [
               BoxShadow(
                 color: ColorConsts.shadowMedium,
-                offset: const Offset(0, -4),
+                offset: Offset(0, -4),
                 blurRadius: 16,
                 spreadRadius: 0,
               ),
@@ -182,14 +183,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           child: Container(
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: LinearGradient(
+              gradient: const LinearGradient(
                 colors: [ColorConsts.primary, ColorConsts.primaryLight],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: ColorConsts.primary.withOpacity(0.4),
+                  color: ColorConsts.primary.withValues(alpha: 0.4),
                   offset: const Offset(0, 8),
                   blurRadius: 24,
                   spreadRadius: 0,
@@ -214,9 +215,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
-        return FractionallySizedBox(
+        return const FractionallySizedBox(
           heightFactor: UIConsts.modalHeightFactor,
-          child: const AddGoalModal(),
+          child: AddGoalModal(),
         );
       },
     );
@@ -328,7 +329,7 @@ class _HomeTabContent extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
+              const Icon(
                 Icons.flag_outlined,
                 size: 80,
                 color: ColorConsts.textTertiary,
@@ -562,7 +563,7 @@ class _TimerTabContent extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: ColorConsts.primary.withOpacity(0.1),
+                color: ColorConsts.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(

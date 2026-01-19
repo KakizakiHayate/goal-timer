@@ -252,7 +252,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
       child: Container(
         padding: const EdgeInsets.all(2), // 余白を削減
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.2),
+          color: Colors.white.withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(20),
         ),
         child: IntrinsicHeight(
@@ -427,10 +427,10 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
             height: 280,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withValues(alpha: 0.1),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   offset: const Offset(0, 8),
                   blurRadius: 32,
                   spreadRadius: 0,
@@ -449,7 +449,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
                   size: 260.0,
                   strokeWidth: 12.0,
                   progressColor: Colors.white,
-                  backgroundColor: Colors.white.withOpacity(0.3),
+                  backgroundColor: Colors.white.withValues(alpha: 0.3),
                   showAnimation: false,
                   centerWidget: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -496,7 +496,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
         _buildControlButton(
           icon: Icons.refresh_rounded,
           onPressed: () => timerViewModel.resetTimer(),
-          backgroundColor: Colors.white.withOpacity(0.2),
+          backgroundColor: Colors.white.withValues(alpha: 0.2),
           iconColor: Colors.white,
         ),
 
@@ -527,7 +527,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
                     timerState,
                     timerViewModel,
                   ),
-              backgroundColor: Colors.green.withOpacity(0.2),
+              backgroundColor: Colors.green.withValues(alpha: 0.2),
               iconColor: Colors.white,
             )
             : const SizedBox(width: 64), // ボタンサイズ分のスペースを確保
@@ -552,7 +552,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               offset: const Offset(0, 4),
               blurRadius: 12,
             ),
@@ -579,7 +579,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
+              color: Colors.black.withValues(alpha: 0.2),
               offset: const Offset(0, 8),
               blurRadius: 24,
             ),
@@ -594,7 +594,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
     return PressableCard(
       margin: EdgeInsets.zero,
       padding: const EdgeInsets.all(SpacingConsts.l),
-      backgroundColor: Colors.white.withOpacity(0.1),
+      backgroundColor: Colors.white.withValues(alpha: 0.1),
       borderRadius: 20.0,
       child: Row(
         children: [
@@ -605,7 +605,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
               value: '2時間 30分', // TODO: 実際のデータに置き換え
             ),
           ),
-          Container(width: 1, height: 40, color: Colors.white.withOpacity(0.3)),
+          Container(width: 1, height: 40, color: Colors.white.withValues(alpha: 0.3)),
           Expanded(
             child: _buildStatItem(
               icon: Icons.whatshot_rounded,
@@ -637,7 +637,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
         Text(
           label,
           style: TextConsts.caption.copyWith(
-            color: Colors.white.withOpacity(0.8),
+            color: Colors.white.withValues(alpha: 0.8),
           ),
           textAlign: TextAlign.center,
         ),
@@ -647,7 +647,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
 
   Widget _buildCompletionOverlay() {
     return Container(
-      color: Colors.black.withOpacity(0.8),
+      color: Colors.black.withValues(alpha: 0.8),
       child: Center(
         child: AnimatedCheckIcon(
           show: _showCompletionAnimation,
