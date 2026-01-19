@@ -50,16 +50,21 @@ void main() {
     mockUsersDatasource = MockLocalUsersDatasource();
 
     // Default mock behaviors
-    when(() => mockStudyLogsDatasource.fetchFirstStudyDate())
-        .thenAnswer((_) async => DateTime(2025, 1, 1));
-    when(() => mockStudyLogsDatasource.calculateCurrentStreak())
-        .thenAnswer((_) async => 5);
-    when(() => mockUsersDatasource.getLongestStreak())
-        .thenAnswer((_) async => 10);
-    when(() => mockStudyLogsDatasource.fetchStudyDatesInRange(
-          startDate: any(named: 'startDate'),
-          endDate: any(named: 'endDate'),
-        )).thenAnswer((_) async => [DateTime(2025, 12, 1), DateTime(2025, 12, 15)]);
+    when(
+      () => mockStudyLogsDatasource.fetchFirstStudyDate(),
+    ).thenAnswer((_) async => DateTime(2025, 1, 1));
+    when(
+      () => mockStudyLogsDatasource.calculateCurrentStreak(),
+    ).thenAnswer((_) async => 5);
+    when(
+      () => mockUsersDatasource.getLongestStreak(),
+    ).thenAnswer((_) async => 10);
+    when(
+      () => mockStudyLogsDatasource.fetchStudyDatesInRange(
+        startDate: any(named: 'startDate'),
+        endDate: any(named: 'endDate'),
+      ),
+    ).thenAnswer((_) async => [DateTime(2025, 12, 1), DateTime(2025, 12, 15)]);
 
     viewModel = StudyRecordsViewModel(
       studyLogsDatasource: mockStudyLogsDatasource,
@@ -84,8 +89,9 @@ void main() {
     group('goToPreviousMonth', () {
       test('前月に移動できること', () async {
         // Set up initial state with firstStudyDate in the past
-        when(() => mockStudyLogsDatasource.fetchFirstStudyDate())
-            .thenAnswer((_) async => DateTime(2024, 1, 1));
+        when(
+          () => mockStudyLogsDatasource.fetchFirstStudyDate(),
+        ).thenAnswer((_) async => DateTime(2024, 1, 1));
 
         viewModel.onInit();
         await Future.delayed(const Duration(milliseconds: 100));
@@ -95,18 +101,21 @@ void main() {
         await viewModel.goToPreviousMonth();
 
         expect(viewModel.state.currentMonth.month, currentMonth.month - 1);
-        verify(() => mockStudyLogsDatasource.fetchStudyDatesInRange(
-              startDate: any(named: 'startDate'),
-              endDate: any(named: 'endDate'),
-            )).called(greaterThan(1));
+        verify(
+          () => mockStudyLogsDatasource.fetchStudyDatesInRange(
+            startDate: any(named: 'startDate'),
+            endDate: any(named: 'endDate'),
+          ),
+        ).called(greaterThan(1));
       });
 
       test('最初の学習日より前には移動できないこと', () async {
         final now = DateTime.now();
         final firstStudyDate = DateTime(now.year, now.month);
 
-        when(() => mockStudyLogsDatasource.fetchFirstStudyDate())
-            .thenAnswer((_) async => firstStudyDate);
+        when(
+          () => mockStudyLogsDatasource.fetchFirstStudyDate(),
+        ).thenAnswer((_) async => firstStudyDate);
 
         viewModel.onInit();
         await Future.delayed(const Duration(milliseconds: 100));
@@ -127,8 +136,9 @@ void main() {
         final now = DateTime.now();
         final pastMonth = DateTime(now.year, now.month - 2);
 
-        when(() => mockStudyLogsDatasource.fetchFirstStudyDate())
-            .thenAnswer((_) async => pastMonth);
+        when(
+          () => mockStudyLogsDatasource.fetchFirstStudyDate(),
+        ).thenAnswer((_) async => pastMonth);
 
         viewModel.onInit();
         await Future.delayed(const Duration(milliseconds: 100));
@@ -142,20 +152,24 @@ void main() {
         await viewModel.goToNextMonth();
 
         // Should have moved forward one month
-        verify(() => mockStudyLogsDatasource.fetchStudyDatesInRange(
-              startDate: any(named: 'startDate'),
-              endDate: any(named: 'endDate'),
-            )).called(greaterThan(1));
+        verify(
+          () => mockStudyLogsDatasource.fetchStudyDatesInRange(
+            startDate: any(named: 'startDate'),
+            endDate: any(named: 'endDate'),
+          ),
+        ).called(greaterThan(1));
       });
     });
 
     group('hasStudyRecord', () {
       test('学習記録がある日はtrueを返すこと', () async {
         final studyDate = DateTime(2025, 12, 1);
-        when(() => mockStudyLogsDatasource.fetchStudyDatesInRange(
-              startDate: any(named: 'startDate'),
-              endDate: any(named: 'endDate'),
-            )).thenAnswer((_) async => [studyDate]);
+        when(
+          () => mockStudyLogsDatasource.fetchStudyDatesInRange(
+            startDate: any(named: 'startDate'),
+            endDate: any(named: 'endDate'),
+          ),
+        ).thenAnswer((_) async => [studyDate]);
 
         viewModel.onInit();
         await Future.delayed(const Duration(milliseconds: 100));
@@ -164,10 +178,12 @@ void main() {
       });
 
       test('学習記録がない日はfalseを返すこと', () async {
-        when(() => mockStudyLogsDatasource.fetchStudyDatesInRange(
-              startDate: any(named: 'startDate'),
-              endDate: any(named: 'endDate'),
-            )).thenAnswer((_) async => [DateTime(2025, 12, 1)]);
+        when(
+          () => mockStudyLogsDatasource.fetchStudyDatesInRange(
+            startDate: any(named: 'startDate'),
+            endDate: any(named: 'endDate'),
+          ),
+        ).thenAnswer((_) async => [DateTime(2025, 12, 1)]);
 
         viewModel.onInit();
         await Future.delayed(const Duration(milliseconds: 100));
@@ -181,10 +197,12 @@ void main() {
         final testDate = DateTime(2025, 12, 1);
         final records = {'test-goal-id': 3600}; // 1時間
 
-        when(() => mockStudyLogsDatasource.fetchDailyRecordsByDate(testDate))
-            .thenAnswer((_) async => records);
-        when(() => mockGoalsDatasource.fetchAllGoalsIncludingDeleted())
-            .thenAnswer((_) async => [testGoal]);
+        when(
+          () => mockStudyLogsDatasource.fetchDailyRecordsByDate(testDate),
+        ).thenAnswer((_) async => records);
+        when(
+          () => mockGoalsDatasource.fetchAllGoalsIncludingDeleted(),
+        ).thenAnswer((_) async => [testGoal]);
 
         viewModel.onInit();
         await Future.delayed(const Duration(milliseconds: 100));
@@ -202,10 +220,12 @@ void main() {
         final testDate = DateTime(2025, 12, 1);
         final records = {'deleted-goal-id': 1800}; // 30分
 
-        when(() => mockStudyLogsDatasource.fetchDailyRecordsByDate(testDate))
-            .thenAnswer((_) async => records);
-        when(() => mockGoalsDatasource.fetchAllGoalsIncludingDeleted())
-            .thenAnswer((_) async => [testDeletedGoal]);
+        when(
+          () => mockStudyLogsDatasource.fetchDailyRecordsByDate(testDate),
+        ).thenAnswer((_) async => records);
+        when(
+          () => mockGoalsDatasource.fetchAllGoalsIncludingDeleted(),
+        ).thenAnswer((_) async => [testDeletedGoal]);
 
         viewModel.onInit();
         await Future.delayed(const Duration(milliseconds: 100));
@@ -222,10 +242,12 @@ void main() {
         final testDate = DateTime(2025, 12, 1);
         final records = {'unknown-goal-id': 1200};
 
-        when(() => mockStudyLogsDatasource.fetchDailyRecordsByDate(testDate))
-            .thenAnswer((_) async => records);
-        when(() => mockGoalsDatasource.fetchAllGoalsIncludingDeleted())
-            .thenAnswer((_) async => []); // No goals found
+        when(
+          () => mockStudyLogsDatasource.fetchDailyRecordsByDate(testDate),
+        ).thenAnswer((_) async => records);
+        when(
+          () => mockGoalsDatasource.fetchAllGoalsIncludingDeleted(),
+        ).thenAnswer((_) async => []); // No goals found
 
         viewModel.onInit();
         await Future.delayed(const Duration(milliseconds: 100));
@@ -240,8 +262,9 @@ void main() {
       test('学習記録がない場合は空リストを返すこと', () async {
         final testDate = DateTime(2025, 12, 1);
 
-        when(() => mockStudyLogsDatasource.fetchDailyRecordsByDate(testDate))
-            .thenAnswer((_) async => {});
+        when(
+          () => mockStudyLogsDatasource.fetchDailyRecordsByDate(testDate),
+        ).thenAnswer((_) async => {});
 
         viewModel.onInit();
         await Future.delayed(const Duration(milliseconds: 100));
@@ -263,9 +286,7 @@ void main() {
       });
 
       test('firstStudyDateがnullの場合canGoPreviousはfalseになること', () {
-        final state = StudyRecordsState(
-          currentMonth: DateTime(2025, 6),
-        );
+        final state = StudyRecordsState(currentMonth: DateTime(2025, 6));
 
         expect(state.canGoPrevious, false);
       });
@@ -274,9 +295,7 @@ void main() {
         final now = DateTime.now();
         final pastMonth = DateTime(now.year, now.month - 1);
 
-        final state = StudyRecordsState(
-          currentMonth: pastMonth,
-        );
+        final state = StudyRecordsState(currentMonth: pastMonth);
 
         expect(state.canGoNext, true);
       });

@@ -43,19 +43,24 @@ void main() {
     mockGoalsDatasource = MockLocalGoalsDatasource();
     mockStudyLogsDatasource = MockLocalStudyDailyLogsDatasource();
 
-    when(() => mockGoalsDatasource.fetchAllGoals())
-        .thenAnswer((_) async => [testGoal, testGoal2]);
+    when(
+      () => mockGoalsDatasource.fetchAllGoals(),
+    ).thenAnswer((_) async => [testGoal, testGoal2]);
 
-    when(() => mockStudyLogsDatasource.fetchTotalSecondsForAllGoals())
-        .thenAnswer((_) async => <String, int>{});
+    when(
+      () => mockStudyLogsDatasource.fetchTotalSecondsForAllGoals(),
+    ).thenAnswer((_) async => <String, int>{});
 
-    when(() => mockStudyLogsDatasource.fetchStudyDatesInRange(
-          startDate: any(named: 'startDate'),
-          endDate: any(named: 'endDate'),
-        )).thenAnswer((_) async => <DateTime>[]);
+    when(
+      () => mockStudyLogsDatasource.fetchStudyDatesInRange(
+        startDate: any(named: 'startDate'),
+        endDate: any(named: 'endDate'),
+      ),
+    ).thenAnswer((_) async => <DateTime>[]);
 
-    when(() => mockStudyLogsDatasource.calculateCurrentStreak())
-        .thenAnswer((_) async => 0);
+    when(
+      () => mockStudyLogsDatasource.calculateCurrentStreak(),
+    ).thenAnswer((_) async => 0);
 
     viewModel = HomeViewModel(
       goalsDatasource: mockGoalsDatasource,
@@ -66,8 +71,9 @@ void main() {
   group('HomeViewModel', () {
     group('onDeleteGoalConfirmed', () {
       test('should delete goal only (preserving study logs)', () async {
-        when(() => mockGoalsDatasource.deleteGoal(testGoal.id))
-            .thenAnswer((_) async {});
+        when(
+          () => mockGoalsDatasource.deleteGoal(testGoal.id),
+        ).thenAnswer((_) async {});
 
         await viewModel.loadGoals();
         expect(viewModel.state.goals.length, 2);
@@ -79,27 +85,26 @@ void main() {
       });
 
       test('should remove goal from state after deletion', () async {
-        when(() => mockGoalsDatasource.deleteGoal(testGoal.id))
-            .thenAnswer((_) async {});
+        when(
+          () => mockGoalsDatasource.deleteGoal(testGoal.id),
+        ).thenAnswer((_) async {});
 
         await viewModel.loadGoals();
         expect(viewModel.state.goals.length, 2);
-        expect(
-            viewModel.state.goals.any((g) => g.id == testGoal.id), isTrue);
+        expect(viewModel.state.goals.any((g) => g.id == testGoal.id), isTrue);
 
         final result = await viewModel.onDeleteGoalConfirmed(testGoal);
 
         expect(result, DeleteGoalResult.success);
         expect(viewModel.state.goals.length, 1);
-        expect(
-            viewModel.state.goals.any((g) => g.id == testGoal.id), isFalse);
-        expect(
-            viewModel.state.goals.any((g) => g.id == testGoal2.id), isTrue);
+        expect(viewModel.state.goals.any((g) => g.id == testGoal.id), isFalse);
+        expect(viewModel.state.goals.any((g) => g.id == testGoal2.id), isTrue);
       });
 
       test('should return failure when deletion fails', () async {
-        when(() => mockGoalsDatasource.deleteGoal(testGoal.id))
-            .thenThrow(Exception('Database error'));
+        when(
+          () => mockGoalsDatasource.deleteGoal(testGoal.id),
+        ).thenThrow(Exception('Database error'));
 
         await viewModel.loadGoals();
 
@@ -109,8 +114,9 @@ void main() {
       });
 
       test('should not modify state when deletion fails', () async {
-        when(() => mockGoalsDatasource.deleteGoal(testGoal.id))
-            .thenThrow(Exception('Database error'));
+        when(
+          () => mockGoalsDatasource.deleteGoal(testGoal.id),
+        ).thenThrow(Exception('Database error'));
 
         await viewModel.loadGoals();
         final initialGoalsCount = viewModel.state.goals.length;

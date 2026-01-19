@@ -1,15 +1,48 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:goal_timer/core/data/local/app_database.dart';
+import 'package:goal_timer/core/data/local/local_settings_datasource.dart';
 import 'package:goal_timer/core/models/goals/goals_model.dart';
+import 'package:goal_timer/core/services/notification_service.dart';
+import 'package:goal_timer/features/settings/view_model/settings_view_model.dart';
 import 'package:goal_timer/features/timer/view_model/timer_view_model.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class MockAppDatabase extends Mock implements AppDatabase {}
 
+/// GetxControllerを継承したFakeクラス（Mockではなく）
+class FakeSettingsViewModel extends GetxController
+    implements SettingsViewModel {
+  @override
+  final RxInt defaultTimerSeconds =
+      LocalSettingsDataSource.defaultTimerSeconds.obs;
+
+  @override
+  final RxBool streakReminderEnabled = true.obs;
+
+  @override
+  Future<void> init() async {}
+
+  @override
+  Future<void> updateDefaultTimerDuration(Duration duration) async {}
+
+  @override
+  Future<void> updateStreakReminderEnabled(bool enabled) async {
+    streakReminderEnabled.value = enabled;
+  }
+
+  @override
+  String get formattedDefaultTime => '25:00';
+}
+
+/// テスト用MockNotificationService
+class MockNotificationService extends Mock implements NotificationService {}
+
 void main() {
   late MockAppDatabase mockDatabase;
+  late FakeSettingsViewModel fakeSettingsViewModel;
+  late MockNotificationService mockNotificationService;
   late GoalsModel testGoal;
 
   setUpAll(() {
@@ -19,6 +52,8 @@ void main() {
 
   setUp(() {
     mockDatabase = MockAppDatabase();
+    fakeSettingsViewModel = FakeSettingsViewModel();
+    mockNotificationService = MockNotificationService();
     testGoal = GoalsModel(
       id: 'test-goal-id',
       userId: 'test-user-id',
@@ -32,7 +67,39 @@ void main() {
     );
 
     Get.put<AppDatabase>(mockDatabase);
+    Get.put<SettingsViewModel>(fakeSettingsViewModel);
+
+    // MockNotificationServiceのスタブ設定
+    when(() => mockNotificationService.init()).thenAnswer((_) async {});
+    when(
+      () => mockNotificationService.cancelAllNotifications(),
+    ).thenAnswer((_) async {});
+    when(
+      () => mockNotificationService.cancelScheduledNotification(),
+    ).thenAnswer((_) async {});
+    when(
+      () => mockNotificationService.requestPermission(),
+    ).thenAnswer((_) async => true);
+    when(
+      () => mockNotificationService.scheduleTimerCompletionNotification(
+        seconds: any(named: 'seconds'),
+        goalTitle: any(named: 'goalTitle'),
+      ),
+    ).thenAnswer((_) async {});
+    when(
+      () => mockNotificationService.showTimerCompletionNotification(
+        goalTitle: any(named: 'goalTitle'),
+      ),
+    ).thenAnswer((_) async {});
   });
+
+  /// テスト用のTimerViewModelを作成するヘルパー関数
+  TimerViewModel createTestViewModel() {
+    return TimerViewModel(
+      goal: testGoal,
+      notificationService: mockNotificationService,
+    );
+  }
 
   tearDown(() {
     Get.reset();
@@ -115,8 +182,9 @@ void main() {
         expect(runningState.isModeSwitchable, isFalse);
 
         // Act
-        final completedState =
-            runningState.copyWith(status: TimerStatus.completed);
+        final completedState = runningState.copyWith(
+          status: TimerStatus.completed,
+        );
 
         // Assert
         expect(completedState.isModeSwitchable, isTrue);
@@ -165,7 +233,7 @@ void main() {
   group('TimerViewModel setMode Tests', () {
     test('initial状態でsetModeを呼ぶとtrueを返しモードが変更されること', () {
       // Arrange
-      final viewModel = TimerViewModel(goal: testGoal);
+      final viewModel = createTestViewModel();
       expect(viewModel.state.mode, equals(TimerMode.countdown));
       expect(viewModel.state.status, equals(TimerStatus.initial));
 
@@ -181,7 +249,7 @@ void main() {
 
     test('running状態でsetModeを呼ぶとfalseを返しモードが変更されないこと', () {
       // Arrange
-      final viewModel = TimerViewModel(goal: testGoal);
+      final viewModel = createTestViewModel();
       viewModel.startTimer();
       expect(viewModel.state.status, equals(TimerStatus.running));
       final originalMode = viewModel.state.mode;
@@ -198,7 +266,7 @@ void main() {
 
     test('paused状態でsetModeを呼ぶとfalseを返しモードが変更されないこと', () {
       // Arrange
-      final viewModel = TimerViewModel(goal: testGoal);
+      final viewModel = createTestViewModel();
       viewModel.startTimer();
       viewModel.pauseTimer();
       expect(viewModel.state.status, equals(TimerStatus.paused));
@@ -216,7 +284,7 @@ void main() {
 
     test('completed状態でsetModeを呼ぶとtrueを返しモードが変更されること', () {
       // Arrange
-      final viewModel = TimerViewModel(goal: testGoal);
+      final viewModel = createTestViewModel();
       viewModel.completeTimer();
       expect(viewModel.state.status, equals(TimerStatus.completed));
 
@@ -232,7 +300,7 @@ void main() {
 
     test('resetTimer後にsetModeを呼ぶとtrueを返しモードが変更されること', () {
       // Arrange
-      final viewModel = TimerViewModel(goal: testGoal);
+      final viewModel = createTestViewModel();
       viewModel.startTimer();
       viewModel.pauseTimer();
       viewModel.resetTimer();
@@ -252,7 +320,7 @@ void main() {
   group('TimerViewModel Scenario Tests', () {
     test('タイマー開始後にモード切り替えを試みるとブロックされること', () {
       // Arrange
-      final viewModel = TimerViewModel(goal: testGoal);
+      final viewModel = createTestViewModel();
       expect(viewModel.state.mode, equals(TimerMode.countdown));
 
       // Act - タイマーを開始
@@ -270,7 +338,7 @@ void main() {
 
     test('タイマー開始→一時停止後にモード切り替えを試みるとブロックされること', () {
       // Arrange
-      final viewModel = TimerViewModel(goal: testGoal);
+      final viewModel = createTestViewModel();
 
       // Act - タイマーを開始して一時停止
       viewModel.startTimer();
@@ -288,7 +356,7 @@ void main() {
 
     test('タイマー開始→リセット後にモード切り替えができること', () {
       // Arrange
-      final viewModel = TimerViewModel(goal: testGoal);
+      final viewModel = createTestViewModel();
 
       // Act - タイマーを開始してリセット
       viewModel.startTimer();
@@ -306,7 +374,7 @@ void main() {
 
     test('countdownからcountupへの切り替え（initial状態）が成功すること', () {
       // Arrange
-      final viewModel = TimerViewModel(goal: testGoal);
+      final viewModel = createTestViewModel();
       expect(viewModel.state.mode, equals(TimerMode.countdown));
 
       // Act
@@ -321,7 +389,7 @@ void main() {
 
     test('countupからcountdownへの切り替え（initial状態）が成功すること', () {
       // Arrange
-      final viewModel = TimerViewModel(goal: testGoal);
+      final viewModel = createTestViewModel();
       viewModel.setMode(TimerMode.countup);
       expect(viewModel.state.mode, equals(TimerMode.countup));
 

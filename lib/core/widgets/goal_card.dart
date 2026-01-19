@@ -3,6 +3,7 @@ import '../utils/color_consts.dart';
 import '../utils/text_consts.dart';
 import '../utils/spacing_consts.dart';
 import '../utils/animation_consts.dart';
+import '../utils/time_utils.dart';
 import 'pressable_card.dart';
 
 /// 改善された目標カードウィジェット
@@ -13,6 +14,7 @@ class GoalCard extends StatelessWidget {
   final double progress; // 0.0 - 1.0
   final int streakDays;
   final String? avoidMessage;
+  final DateTime? deadline; // 期限日
   final VoidCallback? onTap;
   final VoidCallback? onTimerTap;
   final VoidCallback? onEditTap;
@@ -28,6 +30,7 @@ class GoalCard extends StatelessWidget {
     required this.progress,
     required this.streakDays,
     this.avoidMessage,
+    this.deadline,
     this.onTap,
     this.onTimerTap,
     this.onEditTap,
@@ -53,6 +56,12 @@ class GoalCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // 回避メッセージを最上部に表示（最も目立たせる）
+          if (avoidMessage != null) ...[
+            _buildAvoidanceMessage(),
+            const SizedBox(height: SpacingConsts.m),
+          ],
+
           // ヘッダー行
           _buildHeader(),
 
@@ -61,9 +70,10 @@ class GoalCard extends StatelessWidget {
           // プログレス表示
           _buildProgress(),
 
-          if (avoidMessage != null) ...[
-            const SizedBox(height: SpacingConsts.m),
-            _buildAvoidanceMessage(),
+          // 期限表示
+          if (deadline != null) ...[
+            const SizedBox(height: SpacingConsts.s),
+            _buildDeadlineInfo(),
           ],
 
           const SizedBox(height: SpacingConsts.m),
@@ -76,6 +86,7 @@ class GoalCard extends StatelessWidget {
   }
 
   Widget _buildHeader() {
+    final localDescription = description;
     return Row(
       children: [
         Expanded(
@@ -84,17 +95,17 @@ class GoalCard extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: TextConsts.h3.copyWith(
+                style: TextConsts.bodyLarge.copyWith(
                   color: ColorConsts.textPrimary,
                   fontWeight: FontWeight.bold,
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-              if (description != null) ...[
+              if (localDescription != null) ...[
                 const SizedBox(height: SpacingConsts.xs),
                 Text(
-                  description!,
+                  localDescription,
                   style: TextConsts.body.copyWith(
                     color: ColorConsts.textSecondary,
                   ),
@@ -120,8 +131,11 @@ class GoalCard extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.local_fire_department,
-                    color: ColorConsts.success, size: 16),
+                const Icon(
+                  Icons.local_fire_department,
+                  color: ColorConsts.success,
+                  size: 16,
+                ),
                 const SizedBox(width: 4),
                 Text(
                   '$streakDays',
@@ -184,6 +198,7 @@ class GoalCard extends StatelessWidget {
   }
 
   Widget _buildAvoidanceMessage() {
+    final localAvoidMessage = avoidMessage ?? '';
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(SpacingConsts.m),
@@ -193,16 +208,20 @@ class GoalCard extends StatelessWidget {
         border: Border.all(color: ColorConsts.error.withOpacity(0.2), width: 1),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.warning_amber_rounded, color: ColorConsts.error, size: 18),
+          const Icon(
+            Icons.warning_amber_rounded,
+            color: ColorConsts.error,
+            size: 24,
+          ),
           const SizedBox(width: SpacingConsts.s),
           Expanded(
             child: Text(
-              avoidMessage!,
-              style: TextConsts.caption.copyWith(
+              localAvoidMessage,
+              style: TextConsts.h4.copyWith(
                 color: ColorConsts.error,
-                fontWeight: FontWeight.w600,
-                fontStyle: FontStyle.italic,
+                fontWeight: FontWeight.bold,
               ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -210,6 +229,32 @@ class GoalCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildDeadlineInfo() {
+    final localDeadline = deadline;
+    if (localDeadline == null) return const SizedBox.shrink();
+
+    final remainingDays = TimeUtils.calculateRemainingDays(localDeadline);
+    final month = localDeadline.month;
+    final day = localDeadline.day;
+
+    return Row(
+      children: [
+        const Icon(
+          Icons.calendar_today_outlined,
+          size: 14,
+          color: ColorConsts.textSecondary,
+        ),
+        const SizedBox(width: SpacingConsts.xs),
+        Text(
+          '$month月$day日まで（あと$remainingDays日）',
+          style: TextConsts.caption.copyWith(
+            color: ColorConsts.textSecondary,
+          ),
+        ),
+      ],
     );
   }
 
@@ -247,17 +292,11 @@ class GoalCard extends StatelessWidget {
   }
 
   Color _getProgressColor() {
-    if (progress >= 1.0) {
-      return ColorConsts.success;
-    } else if (progress >= 0.8) {
-      return ColorConsts.success;
-    } else if (progress >= 0.5) {
-      return ColorConsts.primary;
-    } else if (progress >= 0.3) {
-      return ColorConsts.warning;
-    } else {
-      return ColorConsts.textTertiary;
-    }
+    if (progress >= 1.0) return ColorConsts.success;
+    if (progress >= 0.8) return ColorConsts.success;
+    if (progress >= 0.5) return ColorConsts.primary;
+    if (progress >= 0.3) return ColorConsts.warning;
+    return ColorConsts.textTertiary;
   }
 }
 
@@ -267,10 +306,7 @@ class _AnimatedTapWrapper extends StatefulWidget {
   final Widget child;
   final VoidCallback? onTap;
 
-  const _AnimatedTapWrapper({
-    required this.child,
-    this.onTap,
-  });
+  const _AnimatedTapWrapper({required this.child, this.onTap});
 
   @override
   State<_AnimatedTapWrapper> createState() => _AnimatedTapWrapperState();
@@ -354,15 +390,16 @@ class _ActionButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: backgroundColor,
           borderRadius: BorderRadius.circular(12),
-          boxShadow: backgroundColor == ColorConsts.primary
-              ? [
-                  BoxShadow(
-                    color: ColorConsts.primary.withOpacity(0.3),
-                    offset: const Offset(0, 2),
-                    blurRadius: 8,
-                  ),
-                ]
-              : null,
+          boxShadow:
+              backgroundColor == ColorConsts.primary
+                  ? [
+                    BoxShadow(
+                      color: ColorConsts.primary.withOpacity(0.3),
+                      offset: const Offset(0, 2),
+                      blurRadius: 8,
+                    ),
+                  ]
+                  : null,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,

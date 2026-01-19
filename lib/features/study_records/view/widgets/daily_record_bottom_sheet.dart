@@ -26,10 +26,8 @@ class DailyRecordBottomSheet extends StatelessWidget {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (context) => DailyRecordBottomSheet(
-        date: date,
-        records: records,
-      ),
+      builder:
+          (context) => DailyRecordBottomSheet(date: date, records: records),
     );
   }
 
@@ -38,9 +36,7 @@ class DailyRecordBottomSheet extends StatelessWidget {
     return Container(
       decoration: const BoxDecoration(
         color: ColorConsts.cardBackground,
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(20),
-        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: SafeArea(
         child: Column(
@@ -81,10 +77,7 @@ class DailyRecordBottomSheet extends StatelessWidget {
       padding: const EdgeInsets.all(SpacingConsts.m),
       child: Column(
         children: [
-          Text(
-            _formatDate(date),
-            style: TextConsts.h4,
-          ),
+          Text(_formatDate(date), style: TextConsts.h4),
           const SizedBox(height: SpacingConsts.xs),
           Text(
             '合計: ${TimeUtils.formatSecondsToHoursAndMinutes(totalSeconds)}',
@@ -111,9 +104,8 @@ class DailyRecordBottomSheet extends StatelessWidget {
               vertical: SpacingConsts.s,
             ),
             itemCount: records.length,
-            separatorBuilder: (context, index) => const SizedBox(
-              height: SpacingConsts.s,
-            ),
+            separatorBuilder:
+                (context, index) => const SizedBox(height: SpacingConsts.s),
             itemBuilder: (context, index) {
               final record = records[index];
               return _buildRecordItem(record);
@@ -138,9 +130,10 @@ class DailyRecordBottomSheet extends StatelessWidget {
             child: Text(
               record.goalTitle,
               style: TextConsts.bodyMedium.copyWith(
-                color: record.isDeleted
-                    ? ColorConsts.textTertiary
-                    : ColorConsts.textPrimary,
+                color:
+                    record.isDeleted
+                        ? ColorConsts.textTertiary
+                        : ColorConsts.textPrimary,
               ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,

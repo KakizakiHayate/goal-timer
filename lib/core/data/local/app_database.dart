@@ -10,9 +10,7 @@ class AppDatabase {
   Database? _database;
 
   Future<Database> get database async {
-    if (_database != null) return _database!;
-    _database = await _initDatabase();
-    return _database!;
+    return _database ??= await _initDatabase();
   }
 
   Future<Database> _initDatabase() async {
@@ -53,8 +51,28 @@ class AppDatabase {
         ADD COLUMN ${DatabaseConsts.columnLongestStreak} INTEGER DEFAULT 0
       ''');
     }
+    if (oldVersion < 4) {
+      // バージョン4へのマイグレーション:
+      // usersテーブルにstreak_reminder_enabledカラムを追加（デフォルト: 有効）
+      await db.execute('''
+        ALTER TABLE ${DatabaseConsts.tableUsers}
+        ADD COLUMN ${DatabaseConsts.columnStreakReminderEnabled} INTEGER DEFAULT 1
+      ''');
+    }
+    if (oldVersion < 5) {
+      // バージョン5へのマイグレーション:
+      // goalsテーブルにtotal_target_minutesカラムとexpired_atカラムを追加
+      await db.execute('''
+        ALTER TABLE ${DatabaseConsts.tableGoals}
+        ADD COLUMN ${DatabaseConsts.columnTotalTargetMinutes} INTEGER
+      ''');
+      await db.execute('''
+        ALTER TABLE ${DatabaseConsts.tableGoals}
+        ADD COLUMN ${DatabaseConsts.columnExpiredAt} TEXT
+      ''');
+    }
     // 今後のバージョンアップ時は、ここに追加のマイグレーションロジックを記述
-    // if (oldVersion < 4) { ... }
+    // if (oldVersion < 6) { ... }
   }
 
   /// テーブルを作成
@@ -81,10 +99,12 @@ class AppDatabase {
         ${DatabaseConsts.columnTitle} TEXT NOT NULL,
         ${DatabaseConsts.columnDescription} TEXT,
         ${DatabaseConsts.columnTargetMinutes} INTEGER NOT NULL,
+        ${DatabaseConsts.columnTotalTargetMinutes} INTEGER,
         ${DatabaseConsts.columnAvoidMessage} TEXT NOT NULL,
         ${DatabaseConsts.columnDeadline} TEXT NOT NULL,
         ${DatabaseConsts.columnCompletedAt} TEXT,
         ${DatabaseConsts.columnDeletedAt} TEXT,
+        ${DatabaseConsts.columnExpiredAt} TEXT,
         ${DatabaseConsts.columnCreatedAt} TEXT,
         ${DatabaseConsts.columnUpdatedAt} TEXT,
         ${DatabaseConsts.columnSyncUpdatedAt} TEXT
@@ -101,6 +121,7 @@ class AppDatabase {
         ${DatabaseConsts.columnUpdatedAt} TEXT,
         ${DatabaseConsts.columnLastLogin} TEXT,
         ${DatabaseConsts.columnLongestStreak} INTEGER DEFAULT 0,
+        ${DatabaseConsts.columnStreakReminderEnabled} INTEGER DEFAULT 1,
         ${DatabaseConsts.columnSyncUpdatedAt} TEXT
       )
     ''');

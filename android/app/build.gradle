@@ -5,6 +5,8 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
     // Google Services plugin for authentication
     id 'com.google.gms.google-services'
+    // Firebase Crashlytics
+    id 'com.google.firebase.crashlytics'
 }
 
 def keystorePropertiesFile = rootProject.file("key.properties")
@@ -15,6 +17,8 @@ android {
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
+        // flutter_local_notifications requires coreLibraryDesugaring
+        coreLibraryDesugaringEnabled true
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
@@ -72,4 +76,9 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    // flutter_local_notifications requires coreLibraryDesugaring
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'
 }

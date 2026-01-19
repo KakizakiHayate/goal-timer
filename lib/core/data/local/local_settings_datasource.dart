@@ -17,15 +17,16 @@ class LocalSettingsDataSource {
       _defaultTimerMinutes * TimeUtils.secondsPerMinute;
   static const int minTimerSeconds =
       _minTimerMinutes * TimeUtils.secondsPerMinute;
-  static const int maxTimerSeconds =
-      _maxTimerHours * TimeUtils.secondsPerHour;
+  static const int maxTimerSeconds = _maxTimerHours * TimeUtils.secondsPerHour;
 
   /// デフォルトタイマー時間を取得
   Future<int> fetchDefaultTimerSeconds() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final stored = prefs.getInt(_keyDefaultTimerSeconds);
-      if (stored != null && stored >= minTimerSeconds && stored <= maxTimerSeconds) {
+      if (stored != null &&
+          stored >= minTimerSeconds &&
+          stored <= maxTimerSeconds) {
         AppLogger.instance.i('デフォルトタイマー時間を読み込みました: $stored秒');
         return stored;
       }

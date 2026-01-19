@@ -17,9 +17,11 @@ class GoalsModel with _$GoalsModel {
     @JsonKey(name: 'updated_at') DateTime? updatedAt,
     @JsonKey(name: 'sync_updated_at') DateTime? syncUpdatedAt,
     @JsonKey(name: 'target_minutes') required int targetMinutes,
+    @JsonKey(name: 'total_target_minutes') int? totalTargetMinutes,
     @JsonKey(name: 'created_at') DateTime? createdAt,
     @JsonKey(name: 'completed_at') DateTime? completedAt,
     @JsonKey(name: 'deleted_at') DateTime? deletedAt,
+    @JsonKey(name: 'expired_at') DateTime? expiredAt,
   }) = _GoalsModel;
 
   /// Supabaseからのデータを元にGoalsModelを生成
@@ -27,4 +29,7 @@ class GoalsModel with _$GoalsModel {
       _$GoalsModelFromJson(json);
 
   bool get isGoalCompleted => completedAt != null;
+
+  /// 期限切れかどうかを判定
+  bool get isExpired => expiredAt != null;
 }

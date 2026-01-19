@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:goal_timer/core/data/local/app_database.dart';
 import 'package:goal_timer/core/data/local/database_consts.dart';
 import 'package:goal_timer/core/models/study_daily_logs/study_daily_logs_model.dart';
@@ -9,13 +11,14 @@ class LocalStudyDailyLogsDatasource {
   final AppDatabase _database;
 
   LocalStudyDailyLogsDatasource({required AppDatabase database})
-      : _database = database;
+    : _database = database;
 
   /// 全ての学習ログを取得
   Future<List<StudyDailyLogsModel>> fetchAllLogs() async {
     final db = await _database.database;
-    final List<Map<String, dynamic>> maps =
-        await db.query(DatabaseConsts.tableStudyDailyLogs);
+    final List<Map<String, dynamic>> maps = await db.query(
+      DatabaseConsts.tableStudyDailyLogs,
+    );
 
     return maps.map((map) => _mapToModel(map)).toList();
   }
@@ -50,7 +53,7 @@ class LocalStudyDailyLogsDatasource {
     final result = await db.rawQuery(
       'SELECT ${DatabaseConsts.columnGoalId}, SUM(${DatabaseConsts.columnTotalSeconds}) as total FROM ${DatabaseConsts.tableStudyDailyLogs} GROUP BY ${DatabaseConsts.columnGoalId}',
     );
-    
+
     final Map<String, int> totals = {};
     for (final row in result) {
       final goalId = row[DatabaseConsts.columnGoalId] as String;
@@ -167,21 +170,22 @@ class LocalStudyDailyLogsDatasource {
       return 0;
     }
 
-    final studyDates = result.map((row) {
-      final dateStr = row['study_day'] as String;
-      return DateTime.parse(dateStr);
-    }).toList();
+    final studyDates =
+        result.map((row) {
+          final dateStr = row['study_day'] as String;
+          return DateTime.parse(dateStr);
+        }).toList();
 
     int streak = 0;
     DateTime checkDate = today;
 
-    final isStudiedToday = studyDates.isNotEmpty &&
-        studyDates.first.isSameDay(today);
+    final isStudiedToday =
+        studyDates.isNotEmpty && studyDates.first.isSameDay(today);
 
     if (!isStudiedToday) {
       final yesterday = today.subtract(const Duration(days: 1));
-      final isStudiedYesterday = studyDates.isNotEmpty &&
-          studyDates.first.isSameDay(yesterday);
+      final isStudiedYesterday =
+          studyDates.isNotEmpty && studyDates.first.isSameDay(yesterday);
 
       if (!isStudiedYesterday) {
         return 0;
@@ -193,7 +197,9 @@ class LocalStudyDailyLogsDatasource {
       if (studyDate.isSameDay(checkDate)) {
         streak++;
         checkDate = checkDate.subtract(const Duration(days: 1));
-      } else if (studyDate.isBefore(checkDate)) {
+        continue;
+      }
+      if (studyDate.isBefore(checkDate)) {
         break;
       }
     }
@@ -201,17 +207,67 @@ class LocalStudyDailyLogsDatasource {
     return streak;
   }
 
+  /// 過去の全学習ログから最長連続日数を計算
+  /// 現在のストリークではなく、履歴全体から最長を算出
+  Future<int> calculateHistoricalLongestStreak() async {
+    final db = await _database.database;
+
+    // 1分以上学習した日を日付順（昇順）で取得
+    final result = await db.rawQuery(
+      '''
+      SELECT DATE(${DatabaseConsts.columnStudyDate}) as study_day,
+             SUM(${DatabaseConsts.columnTotalSeconds}) as total
+      FROM ${DatabaseConsts.tableStudyDailyLogs}
+      GROUP BY DATE(${DatabaseConsts.columnStudyDate})
+      HAVING SUM(${DatabaseConsts.columnTotalSeconds}) >= ?
+      ORDER BY study_day ASC
+      ''',
+      [StreakConsts.minStudySeconds],
+    );
+
+    if (result.isEmpty) {
+      return 0;
+    }
+
+    // 日付リストに変換
+    final studyDates =
+        result.map((row) {
+          final dateStr = row['study_day'] as String;
+          return DateTime.parse(dateStr);
+        }).toList();
+
+    // 最長連続日数を計算
+    int longestStreak = 1;
+    int currentStreak = 1;
+
+    for (var i = 1; i < studyDates.length; i++) {
+      final previousDate = studyDates[i - 1];
+      final currentDate = studyDates[i];
+
+      // 前日との差が1日なら連続
+      final difference = currentDate.difference(previousDate).inDays;
+
+      if (difference == 1) {
+        currentStreak++;
+        longestStreak = max(currentStreak, longestStreak);
+      } else {
+        // 連続が途切れた
+        currentStreak = 1;
+      }
+    }
+
+    return longestStreak;
+  }
+
   /// 最初の学習記録日を取得
   /// 学習記録がない場合はnullを返す
   Future<DateTime?> fetchFirstStudyDate() async {
     final db = await _database.database;
 
-    final result = await db.rawQuery(
-      '''
+    final result = await db.rawQuery('''
       SELECT MIN(DATE(${DatabaseConsts.columnStudyDate})) as first_date
       FROM ${DatabaseConsts.tableStudyDailyLogs}
-      ''',
-    );
+      ''');
 
     if (result.isEmpty || result.first['first_date'] == null) {
       return null;
@@ -257,18 +313,25 @@ class LocalStudyDailyLogsDatasource {
       return StudyDailyLogsModel(
         id: map[DatabaseConsts.columnId] as String,
         goalId: map[DatabaseConsts.columnGoalId] as String,
-        studyDate: DateTime.parse(map[DatabaseConsts.columnStudyDate] as String),
+        studyDate: DateTime.parse(
+          map[DatabaseConsts.columnStudyDate] as String,
+        ),
         totalSeconds: map[DatabaseConsts.columnTotalSeconds] as int,
         userId: map[DatabaseConsts.columnUserId] as String?,
-        createdAt: map[DatabaseConsts.columnCreatedAt] != null
-            ? DateTime.parse(map[DatabaseConsts.columnCreatedAt] as String)
-            : null,
-        updatedAt: map[DatabaseConsts.columnUpdatedAt] != null
-            ? DateTime.parse(map[DatabaseConsts.columnUpdatedAt] as String)
-            : null,
-        syncUpdatedAt: map[DatabaseConsts.columnSyncUpdatedAt] != null
-            ? DateTime.parse(map[DatabaseConsts.columnSyncUpdatedAt] as String)
-            : null,
+        createdAt:
+            map[DatabaseConsts.columnCreatedAt] != null
+                ? DateTime.parse(map[DatabaseConsts.columnCreatedAt] as String)
+                : null,
+        updatedAt:
+            map[DatabaseConsts.columnUpdatedAt] != null
+                ? DateTime.parse(map[DatabaseConsts.columnUpdatedAt] as String)
+                : null,
+        syncUpdatedAt:
+            map[DatabaseConsts.columnSyncUpdatedAt] != null
+                ? DateTime.parse(
+                  map[DatabaseConsts.columnSyncUpdatedAt] as String,
+                )
+                : null,
       );
     } catch (e) {
       throw Exception('データベースからのモデル変換に失敗しました: $e');
@@ -285,7 +348,8 @@ class LocalStudyDailyLogsDatasource {
       DatabaseConsts.columnUserId: model.userId,
       DatabaseConsts.columnCreatedAt: model.createdAt?.toIso8601String(),
       DatabaseConsts.columnUpdatedAt: model.updatedAt?.toIso8601String(),
-      DatabaseConsts.columnSyncUpdatedAt: model.syncUpdatedAt?.toIso8601String(),
+      DatabaseConsts.columnSyncUpdatedAt:
+          model.syncUpdatedAt?.toIso8601String(),
     };
   }
 }
