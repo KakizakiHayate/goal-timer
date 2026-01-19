@@ -241,6 +241,12 @@ class _SettingsScreenState extends State<SettingsScreen>
           value: value,
           onChanged: onChanged,
           activeTrackColor: ColorConsts.primary,
+          thumbColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return ColorConsts.primary;
+            }
+            return null;
+          }),
         ),
       ),
     );
