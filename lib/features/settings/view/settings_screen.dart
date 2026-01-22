@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/utils/animation_consts.dart';
@@ -10,6 +11,7 @@ import '../../../core/utils/spacing_consts.dart';
 import '../../../core/utils/text_consts.dart';
 import '../../../core/widgets/pressable_card.dart';
 import '../../../core/widgets/setting_item.dart';
+import '../../auth/view/login_screen.dart';
 import '../view_model/settings_view_model.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -72,6 +74,11 @@ class _SettingsScreenState extends State<SettingsScreen>
             children: [
               // プロフィールセクション
               _buildProfileSection(),
+
+              const SizedBox(height: SpacingConsts.l),
+
+              // アカウント連携セクション
+              _buildAccountSection(),
 
               const SizedBox(height: SpacingConsts.l),
 
@@ -145,6 +152,34 @@ class _SettingsScreenState extends State<SettingsScreen>
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildAccountSection() {
+    // Supabaseの現在のユーザーを取得
+    final currentUser = Supabase.instance.client.auth.currentUser;
+    final isAnonymous = currentUser?.isAnonymous ?? true;
+
+    return _buildSection(
+      title: 'アカウント連携',
+      children: [
+        if (isAnonymous)
+          SettingItem(
+            title: 'アカウントを連携する',
+            subtitle: 'Google / Apple でデータをバックアップ',
+            icon: Icons.link,
+            iconColor: ColorConsts.primary,
+            onTap: _showLoginScreen,
+          )
+        else
+          SettingItem(
+            title: '連携済み',
+            subtitle: currentUser?.email ?? 'アカウント連携済み',
+            icon: Icons.check_circle,
+            iconColor: ColorConsts.success,
+            onTap: null,
+          ),
+      ],
     );
   }
 
@@ -311,6 +346,12 @@ class _SettingsScreenState extends State<SettingsScreen>
         ),
         ...children,
       ],
+    );
+  }
+
+  void _showLoginScreen() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
     );
   }
 

@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/data/local/app_database.dart';
 import 'core/services/firebase_service.dart';
 import 'core/services/notification_service.dart';
 import 'core/utils/app_logger.dart';
 import 'core/utils/color_consts.dart';
-import 'features/home/view/home_screen.dart';
 import 'features/settings/view_model/settings_view_model.dart';
+import 'features/splash/view/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 環境変数を読み込み
+  await dotenv.load(fileName: '.env');
 
   // Firebaseを初期化（Analytics & Crashlytics）
   try {
@@ -19,7 +24,10 @@ void main() async {
     AppLogger.instance.e('Firebase初期化に失敗しました', error, stackTrace);
   }
 
-  // ✅ DIコンテナに登録（シングルトンとして）
+  // Supabaseを初期化
+  await _initializeSupabase();
+
+  // DIコンテナに登録（シングルトンとして）
   Get.put<AppDatabase>(AppDatabase(), permanent: true);
 
   // 設定ViewModelを登録・初期化
@@ -47,6 +55,28 @@ void main() async {
   runApp(const MyApp());
 }
 
+/// Supabaseを初期化
+Future<void> _initializeSupabase() async {
+  try {
+    final supabaseUrl = dotenv.env['SUPABASE_URL'];
+    final supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'];
+
+    if (supabaseUrl == null || supabaseAnonKey == null) {
+      throw Exception('Supabase環境変数が設定されていません');
+    }
+
+    await Supabase.initialize(
+      url: supabaseUrl,
+      anonKey: supabaseAnonKey,
+    );
+
+    AppLogger.instance.i('Supabase初期化完了');
+  } catch (error, stackTrace) {
+    AppLogger.instance.e('Supabase初期化に失敗しました', error, stackTrace);
+    rethrow;
+  }
+}
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -58,7 +88,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: ColorConsts.primary),
         useMaterial3: true,
       ),
-      home: const HomeScreen(),
+      home: const SplashScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
