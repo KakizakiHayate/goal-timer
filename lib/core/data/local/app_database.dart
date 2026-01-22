@@ -1,5 +1,7 @@
-import 'package:sqflite/sqflite.dart';
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
+import 'package:sqflite/sqflite.dart';
+
 import 'database_consts.dart';
 
 class AppDatabase {
@@ -130,5 +132,12 @@ class AppDatabase {
   Future<void> close() async {
     final db = await database;
     await db.close();
+  }
+
+  /// テスト用: データベースインスタンスをリセット
+  /// 本番コードでは使用しないこと
+  @visibleForTesting
+  static void resetForTesting() {
+    _instance._database = null;
   }
 }

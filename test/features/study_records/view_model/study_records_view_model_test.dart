@@ -100,7 +100,9 @@ void main() {
 
         await viewModel.goToPreviousMonth();
 
-        expect(viewModel.state.currentMonth.month, currentMonth.month - 1);
+        // 前月の計算（1月の場合は12月になる）
+        final expectedMonth = currentMonth.month == 1 ? 12 : currentMonth.month - 1;
+        expect(viewModel.state.currentMonth.month, expectedMonth);
         verify(
           () => mockStudyLogsDatasource.fetchStudyDatesInRange(
             startDate: any(named: 'startDate'),

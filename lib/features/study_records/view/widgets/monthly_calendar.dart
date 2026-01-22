@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:goal_timer/core/utils/color_consts.dart';
-import 'package:goal_timer/core/utils/spacing_consts.dart';
-import 'package:goal_timer/core/utils/text_consts.dart';
+import '../../../../core/utils/color_consts.dart';
+import '../../../../core/utils/spacing_consts.dart';
+import '../../../../core/utils/text_consts.dart';
 
 /// 月間カレンダーウィジェット（月曜始まり）
 class MonthlyCalendar extends StatelessWidget {

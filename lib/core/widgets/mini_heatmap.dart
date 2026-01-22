@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:goal_timer/core/utils/color_consts.dart';
-import 'package:goal_timer/core/utils/streak_consts.dart';
-import 'package:goal_timer/core/utils/time_utils.dart';
+import '../utils/color_consts.dart';
+import '../utils/streak_consts.dart';
+import '../utils/time_utils.dart';
 
 /// ミニヒートマップウィジェット
 /// 直近7日間の学習状況を7つのドットで表示する

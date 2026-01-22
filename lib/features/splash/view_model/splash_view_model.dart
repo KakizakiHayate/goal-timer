@@ -74,12 +74,10 @@ class SplashViewModel extends GetxController {
       update();
 
       // ネットワーク確認
+      // connectivity_plus 7.x: List<ConnectivityResult>を返す
       final connectivityResult = await _connectivity.checkConnectivity();
-      // connectivity_plus 5.x: ConnectivityResult（単一）
-      // connectivity_plus 6.x+: List<ConnectivityResult>
-      final isOfflineResult = connectivityResult is List
-          ? (connectivityResult as List).contains(ConnectivityResult.none)
-          : connectivityResult == ConnectivityResult.none;
+      final isOfflineResult = connectivityResult.contains(ConnectivityResult.none) ||
+          connectivityResult.isEmpty;
       if (isOfflineResult) {
         _status.value = SplashStatus.offline;
         update();
@@ -156,12 +154,13 @@ class SplashViewModel extends GetxController {
   /// データ移行を実行（必要な場合）
   Future<void> _migrateDataIfNeeded() async {
     try {
-      if (_userId == null) {
+      final userId = _userId;
+      if (userId == null) {
         AppLogger.instance.w('ユーザーIDがないため移行をスキップ');
         return;
       }
 
-      final result = await _migrationService.migrate(_userId!);
+      final result = await _migrationService.migrate(userId);
 
       if (result.success) {
         if (result.skipped) {

@@ -88,7 +88,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 ),
               ],
             ),
-            child: Icon(
+            child: const Icon(
               Icons.timer,
               size: 64,
               color: ColorConsts.primary,

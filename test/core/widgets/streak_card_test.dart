@@ -152,7 +152,7 @@ void main() {
       final todayDotFinder = find.byWidgetPredicate((widget) {
         if (widget is Container && widget.decoration is BoxDecoration) {
           final decoration = widget.decoration as BoxDecoration;
-          return decoration.color == const Color(0xFF059669);
+          return decoration.color == ColorConsts.success;
         }
         return false;
       });

@@ -3,13 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../../../core/utils/animation_consts.dart';
 import '../../../core/utils/app_consts.dart';
 import '../../../core/utils/color_consts.dart';
-import '../../../core/utils/text_consts.dart';
 import '../../../core/utils/spacing_consts.dart';
-import '../../../core/utils/animation_consts.dart';
-import '../../../core/widgets/setting_item.dart';
+import '../../../core/utils/text_consts.dart';
 import '../../../core/widgets/pressable_card.dart';
+import '../../../core/widgets/setting_item.dart';
 import '../../auth/view/login_screen.dart';
 import '../view_model/settings_view_model.dart';
 
@@ -121,7 +122,7 @@ class _SettingsScreenState extends State<SettingsScreen>
           Container(
             width: 60,
             height: 60,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               gradient: LinearGradient(
                 colors: [ColorConsts.primary, ColorConsts.primaryLight],
                 begin: Alignment.topLeft,
@@ -274,7 +275,13 @@ class _SettingsScreenState extends State<SettingsScreen>
         trailing: Switch.adaptive(
           value: value,
           onChanged: onChanged,
-          activeColor: ColorConsts.primary,
+          activeTrackColor: ColorConsts.primary,
+          thumbColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return ColorConsts.primary;
+            }
+            return null;
+          }),
         ),
       ),
     );
@@ -461,7 +468,7 @@ class _SettingsScreenState extends State<SettingsScreen>
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text('${AppConsts.appName} について'),
+            title: const Text('${AppConsts.appName} について'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -471,7 +478,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                   style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: SpacingConsts.s),
-                Text('バージョン: ${AppConsts.appVersion}'),
+                const Text('バージョン: ${AppConsts.appVersion}'),
                 const SizedBox(height: SpacingConsts.m),
                 const Text('目標達成をサポートするタイマーアプリです。毎日の小さな積み重ねが、大きな成果につながります。'),
               ],

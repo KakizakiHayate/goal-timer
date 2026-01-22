@@ -13,6 +13,8 @@ void main() {
     // sqflite_ffiを初期化（テスト環境用）
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
+    // シングルトンをリセット
+    AppDatabase.resetForTesting();
   });
 
   setUp(() async {

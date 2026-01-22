@@ -1,6 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:goal_timer/core/utils/app_logger.dart';
-import 'package:goal_timer/core/utils/time_utils.dart';
+import '../../utils/app_logger.dart';
+import '../../utils/time_utils.dart';
 
 /// 設定データのローカルDataSource
 /// SharedPreferencesを使用して設定を永続化

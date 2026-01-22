@@ -1,8 +1,9 @@
-import 'package:goal_timer/core/data/local/app_database.dart';
-import 'package:goal_timer/core/data/local/database_consts.dart';
-import 'package:goal_timer/core/models/goals/goals_model.dart';
-import 'package:goal_timer/core/utils/time_utils.dart';
 import 'package:sqflite/sqflite.dart';
+
+import '../../models/goals/goals_model.dart';
+import '../../utils/time_utils.dart';
+import 'app_database.dart';
+import 'database_consts.dart';
 
 class LocalGoalsDatasource {
   final AppDatabase _database;

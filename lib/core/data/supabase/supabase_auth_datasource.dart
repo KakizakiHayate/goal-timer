@@ -13,19 +13,34 @@ import '../../utils/app_logger.dart';
 /// Supabase認証を管理するDataSource
 class SupabaseAuthDatasource {
   final SupabaseClient _supabase;
-  final GoogleSignIn _googleSignIn;
+  bool _isGoogleSignInInitialized = false;
 
   SupabaseAuthDatasource({
     required SupabaseClient supabase,
-    GoogleSignIn? googleSignIn,
-  })  : _supabase = supabase,
-        _googleSignIn = googleSignIn ??
-            GoogleSignIn(
-              scopes: ['email', 'profile'],
-              serverClientId: Platform.isAndroid
-                  ? dotenv.env['GOOGLE_SIGNIN_ANDROID_CLIENT_ID']
-                  : null,
-            );
+  }) : _supabase = supabase;
+
+  /// GoogleSignInの初期化
+  ///
+  /// serverClientIdにはWeb Client IDを使用します。
+  /// これはSupabaseがGoogle ID Tokenを検証する際に必要です。
+  /// iOS/Android両方で同じWeb Client IDを使用することで、
+  /// ID TokenのaudienceがSupabaseの期待する値と一致します。
+  Future<void> _initializeGoogleSignIn() async {
+    if (_isGoogleSignInInitialized) return;
+
+    // Web Client IDを使用（Supabase連携に必要）
+    // Google Cloud ConsoleのOAuth 2.0クライアントIDから取得
+    final webClientId = dotenv.env['GOOGLE_WEB_CLIENT_ID'];
+
+    if (webClientId == null || webClientId.isEmpty) {
+      AppLogger.instance.w('GOOGLE_WEB_CLIENT_IDが設定されていません');
+    }
+
+    await GoogleSignIn.instance.initialize(
+      serverClientId: webClientId,
+    );
+    _isGoogleSignInInitialized = true;
+  }
 
   /// 現在のユーザーを取得
   User? get currentUser => _supabase.auth.currentUser;
@@ -43,11 +58,12 @@ class SupabaseAuthDatasource {
 
       final response = await _supabase.auth.signInAnonymously();
 
-      if (response.user == null) {
+      final user = response.user;
+      if (user == null) {
         throw Exception('匿名認証に失敗しました: ユーザー情報が取得できません');
       }
 
-      AppLogger.instance.i('匿名認証成功: ユーザーID=${response.user!.id}');
+      AppLogger.instance.i('匿名認証成功: ユーザーID=${user.id}');
       return response;
     } catch (error, stackTrace) {
       AppLogger.instance.e('匿名認証に失敗しました', error, stackTrace);
@@ -68,33 +84,44 @@ class SupabaseAuthDatasource {
         throw Exception('インターネット接続を確認してください');
       }
 
+      // GoogleSignInを初期化
+      await _initializeGoogleSignIn();
+
       // 既存のセッションをクリア
-      await _googleSignIn.signOut();
+      await GoogleSignIn.instance.signOut();
 
-      final googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) {
-        AppLogger.instance.w('Googleログインがキャンセルされました');
-        return false;
-      }
+      // 認証を実行（google_sign_in 7.x API）
+      // authenticate()はidTokenとaccessTokenの両方を含む認証情報を返します
+      final googleUser = await GoogleSignIn.instance.authenticate();
 
-      final googleAuth = await googleUser.authentication;
-      final accessToken = googleAuth.accessToken;
-      final idToken = googleAuth.idToken;
+      // 認証情報からidTokenを取得
+      // google_sign_in 7.xではaccessTokenはauthorizeScopes()からのみ取得可能
+      // authorizeScopes()を呼ぶと二重認証画面が表示されるため、
+      // SupabaseにはidTokenのみを渡します（accessTokenはオプション）
+      final authentication = googleUser.authentication;
+      final idToken = authentication.idToken;
 
-      if (accessToken == null || idToken == null) {
-        throw Exception('Googleトークンの取得に失敗しました');
+      if (idToken == null) {
+        throw Exception('GoogleIDトークンの取得に失敗しました');
       }
 
       // signInWithIdTokenを使用してアカウントを連携
       // 現在の匿名セッションが新しいGoogleアカウントに自動的にリンクされます
+      // accessTokenはオプションのため省略
       await _supabase.auth.signInWithIdToken(
         provider: OAuthProvider.google,
         idToken: idToken,
-        accessToken: accessToken,
       );
 
       AppLogger.instance.i('Googleアカウント連携成功');
       return true;
+    } on GoogleSignInException catch (e) {
+      if (e.code == GoogleSignInExceptionCode.canceled) {
+        AppLogger.instance.w('Googleログインがキャンセルされました');
+        return false;
+      }
+      AppLogger.instance.e('Googleアカウント連携に失敗しました', e);
+      rethrow;
     } catch (error, stackTrace) {
       AppLogger.instance.e('Googleアカウント連携に失敗しました', error, stackTrace);
       rethrow;
@@ -148,7 +175,9 @@ class SupabaseAuthDatasource {
 
       // Googleセッションもクリア
       try {
-        await _googleSignIn.signOut();
+        if (_isGoogleSignInInitialized) {
+          await GoogleSignIn.instance.signOut();
+        }
       } catch (e) {
         AppLogger.instance.w('Googleサインアウト失敗: $e');
       }

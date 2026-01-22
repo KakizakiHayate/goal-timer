@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+
 import '../../../../core/models/goals/goals_model.dart';
 import '../../../../core/utils/color_consts.dart';
-import '../../../../core/utils/text_consts.dart';
 import '../../../../core/utils/spacing_consts.dart';
-import '../../../../core/utils/ui_consts.dart';
 import '../../../../core/utils/string_consts.dart';
+import '../../../../core/utils/text_consts.dart';
 import '../../../../core/utils/time_utils.dart';
+import '../../../../core/utils/ui_consts.dart';
 import '../../view_model/home_view_model.dart';
 
 class AddGoalModal extends StatefulWidget {
@@ -167,20 +168,28 @@ class _AddGoalModalState extends State<AddGoalModal> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: ColorConsts.backgroundPrimary,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+    final screenHeight = MediaQuery.of(context).size.height;
+    // キーボードを除いた領域の高さ（最大95%）
+    final maxHeight = (screenHeight - keyboardHeight) * UIConsts.modalHeightFactor;
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: keyboardHeight),
+      child: Container(
+        constraints: BoxConstraints(maxHeight: maxHeight),
+        decoration: const BoxDecoration(
+          color: ColorConsts.backgroundPrimary,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
+          ),
         ),
-      ),
-      child: SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildHeader(),
-            Expanded(
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildHeader(),
+            Flexible(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(SpacingConsts.l),
                 child: Form(
@@ -204,7 +213,8 @@ class _AddGoalModalState extends State<AddGoalModal> {
                 ),
               ),
             ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -213,16 +223,16 @@ class _AddGoalModalState extends State<AddGoalModal> {
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.all(SpacingConsts.l),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: ColorConsts.cardBackground,
-        borderRadius: const BorderRadius.only(
+        borderRadius: BorderRadius.only(
           topLeft: Radius.circular(24),
           topRight: Radius.circular(24),
         ),
         boxShadow: [
           BoxShadow(
             color: ColorConsts.shadowLight,
-            offset: const Offset(0, 2),
+            offset: Offset(0, 2),
             blurRadius: 8,
           ),
         ],

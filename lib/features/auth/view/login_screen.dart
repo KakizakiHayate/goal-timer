@@ -234,7 +234,7 @@ class _LoginScreenState extends State<LoginScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text(
+            child: const Text(
               'キャンセル',
               style: TextStyle(color: ColorConsts.textSecondary),
             ),

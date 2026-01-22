@@ -44,8 +44,20 @@ void main() {
     mockStudyLogsDatasource = MockLocalStudyDailyLogsDatasource();
 
     when(
+      () => mockGoalsDatasource.fetchActiveGoals(),
+    ).thenAnswer((_) async => [testGoal, testGoal2]);
+
+    when(
       () => mockGoalsDatasource.fetchAllGoals(),
     ).thenAnswer((_) async => [testGoal, testGoal2]);
+
+    when(
+      () => mockGoalsDatasource.updateExpiredGoals(),
+    ).thenAnswer((_) async {});
+
+    when(
+      () => mockGoalsDatasource.populateMissingTotalTargetMinutes(),
+    ).thenAnswer((_) async {});
 
     when(
       () => mockStudyLogsDatasource.fetchTotalSecondsForAllGoals(),

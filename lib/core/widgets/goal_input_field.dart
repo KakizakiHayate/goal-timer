@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import '../utils/color_consts.dart';
-import '../utils/text_consts.dart';
-import '../utils/spacing_consts.dart';
+
 import '../utils/animation_consts.dart';
+import '../utils/color_consts.dart';
+import '../utils/spacing_consts.dart';
+import '../utils/text_consts.dart';
 
 /// 目標作成・編集フォーム用の入力フィールド
 class GoalInputField extends StatefulWidget {
