@@ -134,6 +134,17 @@ class AppDatabase {
     await db.close();
   }
 
+  /// すべてのデータを削除
+  /// アカウント削除時に使用
+  Future<void> clearAllData() async {
+    final db = await database;
+
+    // 全テーブルのデータを削除
+    await db.delete(DatabaseConsts.tableStudyDailyLogs);
+    await db.delete(DatabaseConsts.tableGoals);
+    await db.delete(DatabaseConsts.tableUsers);
+  }
+
   /// テスト用: データベースインスタンスをリセット
   /// 本番コードでは使用しないこと
   @visibleForTesting

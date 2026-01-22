@@ -111,6 +111,84 @@ class AuthViewModel extends GetxController {
     update();
   }
 
+  /// Googleアカウントでログイン（既存アカウント）
+  Future<bool> loginWithGoogle() async {
+    try {
+      _status.value = AuthStatus.loading;
+      _errorMessage.value = '';
+      update();
+
+      final result = await _authDatasource.signInWithGoogle();
+
+      if (result) {
+        _status.value = AuthStatus.success;
+        AppLogger.instance.i('Googleログイン成功');
+      } else {
+        _status.value = AuthStatus.initial;
+        AppLogger.instance.w('Googleログインがキャンセルされました');
+      }
+
+      update();
+      return result;
+    } catch (error, stackTrace) {
+      AppLogger.instance.e('Googleログインに失敗しました', error, stackTrace);
+      _status.value = AuthStatus.error;
+      _errorMessage.value = 'ログインに失敗しました。アカウントが存在しない可能性があります。';
+      update();
+      return false;
+    }
+  }
+
+  /// Appleアカウントでログイン（既存アカウント）
+  Future<bool> loginWithApple() async {
+    try {
+      _status.value = AuthStatus.loading;
+      _errorMessage.value = '';
+      update();
+
+      final result = await _authDatasource.signInWithApple();
+
+      if (result) {
+        _status.value = AuthStatus.success;
+        AppLogger.instance.i('Appleログイン成功');
+      } else {
+        _status.value = AuthStatus.initial;
+        AppLogger.instance.w('Appleログインがキャンセルされました');
+      }
+
+      update();
+      return result;
+    } catch (error, stackTrace) {
+      AppLogger.instance.e('Appleログインに失敗しました', error, stackTrace);
+      _status.value = AuthStatus.error;
+      _errorMessage.value = 'ログインに失敗しました。アカウントが存在しない可能性があります。';
+      update();
+      return false;
+    }
+  }
+
+  /// アカウント削除
+  Future<bool> deleteAccount() async {
+    try {
+      _status.value = AuthStatus.loading;
+      _errorMessage.value = '';
+      update();
+
+      await _authDatasource.deleteAccount();
+
+      _status.value = AuthStatus.success;
+      AppLogger.instance.i('アカウント削除成功');
+      update();
+      return true;
+    } catch (error, stackTrace) {
+      AppLogger.instance.e('アカウント削除に失敗しました', error, stackTrace);
+      _status.value = AuthStatus.error;
+      _errorMessage.value = 'アカウント削除に失敗しました';
+      update();
+      return false;
+    }
+  }
+
   /// サインアウト
   Future<void> signOut() async {
     try {

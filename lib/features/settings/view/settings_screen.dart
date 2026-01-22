@@ -4,14 +4,18 @@ import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/data/local/app_database.dart';
+import '../../../core/data/supabase/supabase_auth_datasource.dart';
 import '../../../core/utils/animation_consts.dart';
 import '../../../core/utils/app_consts.dart';
+import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/color_consts.dart';
 import '../../../core/utils/spacing_consts.dart';
 import '../../../core/utils/text_consts.dart';
 import '../../../core/widgets/pressable_card.dart';
 import '../../../core/widgets/setting_item.dart';
 import '../../auth/view/login_screen.dart';
+import '../../welcome/view/welcome_screen.dart';
 import '../view_model/settings_view_model.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -101,6 +105,11 @@ class _SettingsScreenState extends State<SettingsScreen>
               _buildSupportSection(),
 
               const SizedBox(height: SpacingConsts.l),
+
+              // アカウント管理（ログアウト・削除）
+              _buildAccountManagementSection(),
+
+              const SizedBox(height: SpacingConsts.xxl),
             ],
           ),
         ),
@@ -324,6 +333,35 @@ class _SettingsScreenState extends State<SettingsScreen>
     );
   }
 
+  Widget _buildAccountManagementSection() {
+    final currentUser = Supabase.instance.client.auth.currentUser;
+    final isAnonymous = currentUser?.isAnonymous ?? true;
+
+    return _buildSection(
+      title: 'アカウント管理',
+      children: [
+        // ログアウトボタン（連携済みユーザーのみ表示）
+        if (!isAnonymous)
+          SettingItem(
+            title: 'ログアウト',
+            subtitle: 'アカウントからログアウトします',
+            icon: Icons.logout,
+            iconColor: ColorConsts.warning,
+            onTap: _showLogoutConfirmDialog,
+          ),
+
+        // アカウント削除ボタン（全ユーザーに表示）
+        SettingItem(
+          title: 'アカウントを削除',
+          subtitle: 'すべてのデータが削除されます',
+          icon: Icons.delete_forever,
+          iconColor: ColorConsts.error,
+          onTap: _showDeleteAccountConfirmDialog,
+        ),
+      ],
+    );
+  }
+
   Widget _buildSection({
     required String title,
     required List<Widget> children,
@@ -351,8 +389,196 @@ class _SettingsScreenState extends State<SettingsScreen>
 
   void _showLoginScreen() {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      MaterialPageRoute(builder: (_) => const LoginScreen(mode: LoginMode.link)),
     );
+  }
+
+  /// ログアウト確認ダイアログを表示
+  Future<void> _showLogoutConfirmDialog() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('ログアウト'),
+        content: const Text('ログアウトしますか？'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text(
+              'キャンセル',
+              style: TextStyle(color: ColorConsts.textSecondary),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ColorConsts.warning,
+            ),
+            child: const Text(
+              'ログアウト',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      await _performLogout();
+    }
+  }
+
+  /// ログアウトを実行
+  Future<void> _performLogout() async {
+    try {
+      final authDatasource = SupabaseAuthDatasource(
+        supabase: Supabase.instance.client,
+      );
+      await authDatasource.signOut();
+
+      AppLogger.instance.i('ログアウト完了');
+
+      // ウェルカム画面へ遷移
+      if (mounted) {
+        Get.offAll(() => const WelcomeScreen());
+      }
+    } catch (error, stackTrace) {
+      AppLogger.instance.e('ログアウトに失敗しました', error, stackTrace);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('ログアウトに失敗しました'),
+            backgroundColor: ColorConsts.error,
+          ),
+        );
+      }
+    }
+  }
+
+  /// アカウント削除確認ダイアログ（1段目）
+  Future<void> _showDeleteAccountConfirmDialog() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('アカウントを削除'),
+        content: const Text(
+          'この操作は取り消せません。\n\n'
+          'すべてのデータ（目標、学習記録など）が\n完全に削除されます。',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text(
+              'キャンセル',
+              style: TextStyle(color: ColorConsts.textSecondary),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ColorConsts.error,
+            ),
+            child: const Text(
+              '削除する',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      await _showFinalDeleteConfirmDialog();
+    }
+  }
+
+  /// アカウント削除確認ダイアログ（2段目・最終確認）
+  Future<void> _showFinalDeleteConfirmDialog() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text(
+          '本当に削除しますか？',
+          style: TextStyle(color: ColorConsts.error),
+        ),
+        content: const Text(
+          'この操作を実行すると、あなたのアカウントと\n'
+          'すべてのデータが完全に削除されます。',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text(
+              'やめる',
+              style: TextStyle(color: ColorConsts.textSecondary),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ColorConsts.error,
+            ),
+            child: const Text(
+              '削除',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      await _performDeleteAccount();
+    }
+  }
+
+  /// アカウント削除を実行
+  Future<void> _performDeleteAccount() async {
+    try {
+      // ローディング表示
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+
+      final authDatasource = SupabaseAuthDatasource(
+        supabase: Supabase.instance.client,
+      );
+
+      // Edge Function経由でアカウント削除
+      await authDatasource.deleteAccount();
+
+      // ローカルデータを削除
+      final appDatabase = Get.find<AppDatabase>();
+      await appDatabase.clearAllData();
+
+      AppLogger.instance.i('アカウント削除完了');
+
+      // ダイアログを閉じる
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+
+      // ウェルカム画面へ遷移
+      if (mounted) {
+        Get.offAll(() => const WelcomeScreen());
+      }
+    } catch (error, stackTrace) {
+      AppLogger.instance.e('アカウント削除に失敗しました', error, stackTrace);
+
+      // ダイアログを閉じる
+      if (mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('アカウント削除に失敗しました'),
+            backgroundColor: ColorConsts.error,
+          ),
+        );
+      }
+    }
   }
 
   void _showTimerSettings() {

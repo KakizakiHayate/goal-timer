@@ -128,6 +128,96 @@ class SupabaseAuthDatasource {
     }
   }
 
+  /// Googleアカウントでログイン（既存アカウントにサインイン）
+  ///
+  /// signInWithIdTokenを使用して、既存のGoogleアカウントでサインインします
+  Future<bool> signInWithGoogle() async {
+    try {
+      AppLogger.instance.i('Googleアカウントでログインを開始します');
+
+      // ネットワーク状態チェック
+      final hasNetwork = await _checkNetworkConnection();
+      if (!hasNetwork) {
+        throw Exception('インターネット接続を確認してください');
+      }
+
+      // GoogleSignInを初期化
+      await _initializeGoogleSignIn();
+
+      // 既存のセッションをクリア
+      await GoogleSignIn.instance.signOut();
+
+      // 認証を実行
+      final googleUser = await GoogleSignIn.instance.authenticate();
+
+      // 認証情報からidTokenを取得
+      final authentication = googleUser.authentication;
+      final idToken = authentication.idToken;
+
+      if (idToken == null) {
+        throw Exception('GoogleIDトークンの取得に失敗しました');
+      }
+
+      // signInWithIdTokenを使用してログイン
+      await _supabase.auth.signInWithIdToken(
+        provider: OAuthProvider.google,
+        idToken: idToken,
+      );
+
+      AppLogger.instance.i('Googleアカウントでログイン成功');
+      return true;
+    } on GoogleSignInException catch (e) {
+      if (e.code == GoogleSignInExceptionCode.canceled) {
+        AppLogger.instance.w('Googleログインがキャンセルされました');
+        return false;
+      }
+      AppLogger.instance.e('Googleログインに失敗しました', e);
+      rethrow;
+    } catch (error, stackTrace) {
+      AppLogger.instance.e('Googleログインに失敗しました', error, stackTrace);
+      rethrow;
+    }
+  }
+
+  /// Appleアカウントでログイン（既存アカウントにサインイン）
+  ///
+  /// signInWithIdTokenを使用して、既存のAppleアカウントでサインインします
+  Future<bool> signInWithApple() async {
+    try {
+      AppLogger.instance.i('Appleアカウントでログインを開始します');
+
+      // Apple Sign In用のランダムな文字列を生成
+      final rawNonce = _generateNonce();
+      final nonce = sha256.convert(utf8.encode(rawNonce)).toString();
+
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+        nonce: nonce,
+      );
+
+      final idToken = credential.identityToken;
+      if (idToken == null) {
+        throw Exception('AppleIDトークンの取得に失敗しました');
+      }
+
+      // signInWithIdTokenを使用してログイン
+      await _supabase.auth.signInWithIdToken(
+        provider: OAuthProvider.apple,
+        idToken: idToken,
+        nonce: rawNonce,
+      );
+
+      AppLogger.instance.i('Appleアカウントでログイン成功');
+      return true;
+    } catch (error, stackTrace) {
+      AppLogger.instance.e('Appleログインに失敗しました', error, stackTrace);
+      rethrow;
+    }
+  }
+
   /// Appleアカウントでアイデンティティを連携
   ///
   /// signInWithIdTokenを使用して、匿名ユーザーをAppleアカウントにリンクします
@@ -164,6 +254,38 @@ class SupabaseAuthDatasource {
       return true;
     } catch (error, stackTrace) {
       AppLogger.instance.e('Appleアカウント連携に失敗しました', error, stackTrace);
+      rethrow;
+    }
+  }
+
+  /// アカウントを削除
+  ///
+  /// Edge Function経由でユーザーと関連データを削除します
+  Future<void> deleteAccount() async {
+    try {
+      AppLogger.instance.i('アカウント削除を開始します');
+
+      // Edge Functionを呼び出してアカウントを削除
+      final response = await _supabase.functions.invoke('delete-account');
+
+      if (response.status != 200) {
+        final data = response.data as Map<String, dynamic>?;
+        final error = data?['error'] as String? ?? 'Unknown error';
+        throw Exception('アカウント削除に失敗しました: $error');
+      }
+
+      // Googleセッションもクリア
+      try {
+        if (_isGoogleSignInInitialized) {
+          await GoogleSignIn.instance.signOut();
+        }
+      } catch (e) {
+        AppLogger.instance.w('Googleサインアウト失敗: $e');
+      }
+
+      AppLogger.instance.i('アカウント削除完了');
+    } catch (error, stackTrace) {
+      AppLogger.instance.e('アカウント削除に失敗しました', error, stackTrace);
       rethrow;
     }
   }
