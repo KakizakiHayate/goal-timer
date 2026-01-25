@@ -13,18 +13,22 @@ void main() {
     // sqflite_ffiを初期化（テスト環境用）
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
-    // シングルトンをリセット
-    AppDatabase.resetForTesting();
   });
 
   setUp(() async {
-    // テスト用のデータベースインスタンスを作成
-    database = AppDatabase();
+    // テスト用に一意のデータベースを作成（並列実行時の競合を回避）
+    final uniqueDbName = 'test_users_${DateTime.now().microsecondsSinceEpoch}.db';
+    database = AppDatabase.forTesting(uniqueDbName);
     datasource = LocalUsersDatasource(database: database);
 
     // テストごとにusersテーブルをクリア
     final db = await database.database;
     await db.delete(DatabaseConsts.tableUsers);
+  });
+
+  tearDown(() async {
+    // テスト終了時にデータベースを閉じる
+    await database.close();
   });
 
   group('LocalUsersDatasource Tests', () {

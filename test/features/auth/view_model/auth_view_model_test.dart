@@ -187,7 +187,7 @@ void main() {
 
       test('サインアウト失敗時はerror状態になる', () async {
         when(() => mockAuthDatasource.signOut())
-            .thenThrow(Exception('サインアウトエラー'));
+            .thenAnswer((_) async => throw Exception('サインアウトエラー'));
 
         await viewModel.signOut();
 

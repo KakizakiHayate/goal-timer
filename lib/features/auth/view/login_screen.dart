@@ -6,12 +6,27 @@ import 'package:get/get.dart';
 import '../../../core/utils/color_consts.dart';
 import '../../../core/utils/spacing_consts.dart';
 import '../../../core/utils/text_consts.dart';
+import '../../home/view/home_screen.dart';
 import '../view_model/auth_view_model.dart';
 
+/// ログイン画面のモード
+enum LoginMode {
+  /// ログイン（既存アカウントにサインイン）
+  login,
+
+  /// アカウント連携（新規登録）
+  link,
+}
+
 /// ログイン画面（アカウント連携用）
-/// 設定画面からの遷移と、将来のチュートリアルでも使用する共通コンポーネント
+/// 設定画面からの遷移と、ウェルカム画面からも使用する共通コンポーネント
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  final LoginMode mode;
+
+  const LoginScreen({
+    required this.mode,
+    super.key,
+  });
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -30,13 +45,26 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  /// モードに応じたタイトル
+  String get _title => widget.mode == LoginMode.login ? 'ログイン' : 'アカウント連携';
+
+  /// モードに応じた説明文
+  String get _description => widget.mode == LoginMode.login
+      ? '以前のデータを引き継いで\n再開できます'
+      : 'アカウントを連携すると、データを\n安全にバックアップできます';
+
+  /// モードに応じた注意書き
+  String get _notice => widget.mode == LoginMode.login
+      ? 'アカウントをお持ちでない場合は「すぐに始める」をご利用ください'
+      : '連携後もゲストとしてのデータは保持されます';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: ColorConsts.backgroundPrimary,
       appBar: AppBar(
         title: Text(
-          'アカウント連携',
+          _title,
           style: TextConsts.h3.copyWith(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -61,7 +89,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   // 説明テキスト
                   Text(
-                    'アカウントを連携すると、データを\n安全にバックアップできます',
+                    _description,
                     style: TextConsts.body.copyWith(
                       color: ColorConsts.textSecondary,
                       height: 1.5,
@@ -75,9 +103,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   _buildLoginButton(
                     onPressed: viewModel.isLoading
                         ? null
-                        : () => _onGoogleLoginPressed(viewModel),
+                        : () => _onGooglePressed(viewModel),
                     icon: _buildGoogleIcon(),
-                    label: 'Google でログイン',
+                    label: 'Google で${widget.mode == LoginMode.login ? 'ログイン' : '連携'}',
                     backgroundColor: Colors.white,
                     textColor: ColorConsts.textPrimary,
                   ),
@@ -89,9 +117,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     _buildLoginButton(
                       onPressed: viewModel.isLoading
                           ? null
-                          : () => _onAppleLoginPressed(viewModel),
+                          : () => _onApplePressed(viewModel),
                       icon: const Icon(Icons.apple, color: Colors.white, size: 24),
-                      label: 'Apple でログイン',
+                      label: 'Apple で${widget.mode == LoginMode.login ? 'ログイン' : '連携'}',
                       backgroundColor: Colors.black,
                       textColor: Colors.white,
                     ),
@@ -125,7 +153,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   // 注意書き
                   Text(
-                    '連携後もゲストとしてのデータは保持されます',
+                    _notice,
                     style: TextConsts.caption.copyWith(
                       color: ColorConsts.textSecondary,
                     ),
@@ -203,26 +231,46 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Future<void> _onGoogleLoginPressed(AuthViewModel viewModel) async {
-    // 確認ダイアログを表示
-    final confirmed = await _showConfirmDialog('Google');
-    if (!confirmed) return;
+  Future<void> _onGooglePressed(AuthViewModel viewModel) async {
+    if (widget.mode == LoginMode.login) {
+      // ログインモード
+      final success = await viewModel.loginWithGoogle();
+      if (success && mounted) {
+        _navigateToHome();
+      }
+    } else {
+      // 連携モード
+      final confirmed = await _showConfirmDialog('Google');
+      if (!confirmed) return;
 
-    final success = await viewModel.linkWithGoogle();
-    if (success && mounted) {
-      _showSuccessDialog();
+      final success = await viewModel.linkWithGoogle();
+      if (success && mounted) {
+        _showSuccessDialog();
+      }
     }
   }
 
-  Future<void> _onAppleLoginPressed(AuthViewModel viewModel) async {
-    // 確認ダイアログを表示
-    final confirmed = await _showConfirmDialog('Apple');
-    if (!confirmed) return;
+  Future<void> _onApplePressed(AuthViewModel viewModel) async {
+    if (widget.mode == LoginMode.login) {
+      // ログインモード
+      final success = await viewModel.loginWithApple();
+      if (success && mounted) {
+        _navigateToHome();
+      }
+    } else {
+      // 連携モード
+      final confirmed = await _showConfirmDialog('Apple');
+      if (!confirmed) return;
 
-    final success = await viewModel.linkWithApple();
-    if (success && mounted) {
-      _showSuccessDialog();
+      final success = await viewModel.linkWithApple();
+      if (success && mounted) {
+        _showSuccessDialog();
+      }
     }
+  }
+
+  void _navigateToHome() {
+    Get.offAll(() => const HomeScreen());
   }
 
   Future<bool> _showConfirmDialog(String provider) async {

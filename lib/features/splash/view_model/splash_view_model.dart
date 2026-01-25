@@ -28,8 +28,11 @@ enum SplashStatus {
   /// データ移行中
   migrating,
 
-  /// 完了
-  completed,
+  /// 完了（ホーム画面へ遷移）
+  completedToHome,
+
+  /// 完了（ウェルカム画面へ遷移）
+  completedToWelcome,
 
   /// エラー
   error,
@@ -76,8 +79,9 @@ class SplashViewModel extends GetxController {
       // ネットワーク確認
       // connectivity_plus 7.x: List<ConnectivityResult>を返す
       final connectivityResult = await _connectivity.checkConnectivity();
-      final isOfflineResult = connectivityResult.contains(ConnectivityResult.none) ||
-          connectivityResult.isEmpty;
+      final isOfflineResult =
+          connectivityResult.contains(ConnectivityResult.none) ||
+              connectivityResult.isEmpty;
       if (isOfflineResult) {
         _status.value = SplashStatus.offline;
         update();
@@ -87,19 +91,25 @@ class SplashViewModel extends GetxController {
       // DataSourceを初期化
       _initializeDataSources();
 
-      // 匿名認証
+      // 既存セッションを確認
       _status.value = SplashStatus.authenticating;
       update();
-      await _signInAnonymously();
 
-      // データ移行
-      _status.value = SplashStatus.migrating;
-      update();
-      await _migrateDataIfNeeded();
+      final hasSession = await _checkExistingSession();
 
-      // 完了
-      _status.value = SplashStatus.completed;
-      update();
+      if (hasSession) {
+        // 既存セッションがある場合はデータ移行を実行してホーム画面へ
+        _status.value = SplashStatus.migrating;
+        update();
+        await _migrateDataIfNeeded();
+
+        _status.value = SplashStatus.completedToHome;
+        update();
+      } else {
+        // セッションがない場合はウェルカム画面へ
+        _status.value = SplashStatus.completedToWelcome;
+        update();
+      }
     } catch (error, stackTrace) {
       AppLogger.instance.e('Splash初期化エラー', error, stackTrace);
       _status.value = SplashStatus.error;
@@ -125,28 +135,24 @@ class SplashViewModel extends GetxController {
     );
   }
 
-  /// 匿名認証を実行
-  Future<void> _signInAnonymously() async {
+  /// 既存セッションを確認
+  ///
+  /// セッションがある場合はtrueを返し、_userIdを設定
+  /// セッションがない場合はfalseを返す
+  Future<bool> _checkExistingSession() async {
     try {
       // 既存セッションがあるか確認
       final currentUser = _authDatasource.currentUser;
       if (currentUser != null) {
         AppLogger.instance.i('既存セッションを使用: ${currentUser.id}');
         _userId = currentUser.id;
-        return;
+        return true;
       }
 
-      // 匿名認証を実行
-      final response = await _authDatasource.signInAnonymously();
-      _userId = response.user?.id;
-
-      if (_userId == null) {
-        throw Exception('匿名認証に失敗しました: ユーザーIDが取得できません');
-      }
-
-      AppLogger.instance.i('匿名認証成功: $_userId');
+      AppLogger.instance.i('セッションなし: ウェルカム画面へ遷移');
+      return false;
     } catch (error, stackTrace) {
-      AppLogger.instance.e('匿名認証に失敗しました', error, stackTrace);
+      AppLogger.instance.e('セッション確認に失敗しました', error, stackTrace);
       rethrow;
     }
   }

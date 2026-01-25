@@ -18,18 +18,22 @@ void main() {
     // sqflite_ffiを初期化（テスト環境用）
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
-    // シングルトンをリセット
-    AppDatabase.resetForTesting();
   });
 
   setUp(() async {
-    // テスト用のデータベースインスタンスを作成
-    database = AppDatabase();
+    // テスト用に一意のデータベースを作成（並列実行時の競合を回避）
+    final uniqueDbName = 'test_goals_expiration_${DateTime.now().microsecondsSinceEpoch}.db';
+    database = AppDatabase.forTesting(uniqueDbName);
     datasource = LocalGoalsDatasource(database: database);
 
     // テストごとにgoalsテーブルをクリア
     final db = await database.database;
     await db.delete('goals');
+  });
+
+  tearDown(() async {
+    // テスト終了時にデータベースを閉じる
+    await database.close();
   });
 
   group('GoalsModel 期限切れ関連', () {

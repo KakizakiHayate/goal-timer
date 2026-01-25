@@ -5,6 +5,7 @@ import '../../../core/utils/color_consts.dart';
 import '../../../core/utils/spacing_consts.dart';
 import '../../../core/utils/text_consts.dart';
 import '../../home/view/home_screen.dart';
+import '../../welcome/view/welcome_screen.dart';
 import '../view_model/splash_view_model.dart';
 
 /// Splash画面
@@ -42,9 +43,16 @@ class _SplashScreenState extends State<SplashScreen> {
       body: GetBuilder<SplashViewModel>(
         builder: (viewModel) {
           // 完了したらホーム画面へ遷移
-          if (viewModel.status == SplashStatus.completed) {
+          if (viewModel.status == SplashStatus.completedToHome) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               _navigateToHome();
+            });
+          }
+
+          // 完了したらウェルカム画面へ遷移
+          if (viewModel.status == SplashStatus.completedToWelcome) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _navigateToWelcome();
             });
           }
 
@@ -140,7 +148,8 @@ class _SplashScreenState extends State<SplashScreen> {
         return '認証しています...';
       case SplashStatus.migrating:
         return 'データを準備しています...';
-      case SplashStatus.completed:
+      case SplashStatus.completedToHome:
+      case SplashStatus.completedToWelcome:
         return '完了';
       case SplashStatus.offline:
         return 'オフライン';
@@ -152,6 +161,12 @@ class _SplashScreenState extends State<SplashScreen> {
   void _navigateToHome() {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (_) => const HomeScreen()),
+    );
+  }
+
+  void _navigateToWelcome() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const WelcomeScreen()),
     );
   }
 
