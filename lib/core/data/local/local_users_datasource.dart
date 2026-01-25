@@ -173,21 +173,36 @@ class LocalUsersDatasource {
     }
   }
 
-  /// 表示名を更新
-  /// ユーザーが存在しない場合は何もしない
+  /// 表示名を更新（upsert）
+  /// ユーザーが存在しない場合は新規作成する
   Future<void> updateDisplayName(String displayName) async {
     try {
       final db = await _database.database;
 
-      final count = await db.update(DatabaseConsts.tableUsers, {
-        DatabaseConsts.columnDisplayName: displayName,
-        DatabaseConsts.columnUpdatedAt: DateTime.now().toIso8601String(),
-      });
+      // 既存ユーザーを確認
+      final existingUsers = await db.query(
+        DatabaseConsts.tableUsers,
+        limit: 1,
+      );
 
-      if (count > 0) {
-        AppLogger.instance.i('表示名を更新しました: $displayName');
+      final now = DateTime.now().toIso8601String();
+
+      if (existingUsers.isEmpty) {
+        // ユーザーが存在しない場合は新規作成
+        await db.insert(DatabaseConsts.tableUsers, {
+          DatabaseConsts.columnId: 'local_user',
+          DatabaseConsts.columnDisplayName: displayName,
+          DatabaseConsts.columnCreatedAt: now,
+          DatabaseConsts.columnUpdatedAt: now,
+        });
+        AppLogger.instance.i('新規ユーザーを作成し、表示名を設定しました: $displayName');
       } else {
-        AppLogger.instance.w('ユーザーが存在しないため、表示名を更新できません');
+        // 既存ユーザーを更新
+        await db.update(DatabaseConsts.tableUsers, {
+          DatabaseConsts.columnDisplayName: displayName,
+          DatabaseConsts.columnUpdatedAt: now,
+        });
+        AppLogger.instance.i('表示名を更新しました: $displayName');
       }
     } catch (e, stackTrace) {
       AppLogger.instance.e('表示名の更新に失敗しました', e, stackTrace);
