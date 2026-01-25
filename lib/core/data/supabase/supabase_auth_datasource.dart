@@ -9,6 +9,7 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../utils/app_logger.dart';
+import 'auth_result.dart';
 
 /// Supabase認証を管理するDataSource
 class SupabaseAuthDatasource {
@@ -74,12 +75,13 @@ class SupabaseAuthDatasource {
   /// Googleアカウントでアイデンティティを連携
   ///
   /// signInWithIdTokenを使用して、匿名ユーザーをGoogleアカウントにリンクします
-  Future<bool> linkWithGoogle() async {
+  /// 戻り値のAuthResultにはdisplayNameが含まれます
+  Future<AuthResult> linkWithGoogle() async {
     try {
       AppLogger.instance.i('Googleアカウント連携を開始します');
 
       // ネットワーク状態チェック
-      final hasNetwork = await _checkNetworkConnection();
+      final hasNetwork = await checkNetworkConnection();
       if (!hasNetwork) {
         throw Exception('インターネット接続を確認してください');
       }
@@ -113,12 +115,15 @@ class SupabaseAuthDatasource {
         idToken: idToken,
       );
 
-      AppLogger.instance.i('Googleアカウント連携成功');
-      return true;
+      // displayNameを取得
+      final displayName = googleUser.displayName;
+      AppLogger.instance.i('Googleアカウント連携成功: displayName=$displayName');
+
+      return AuthResult.success(displayName: displayName);
     } on GoogleSignInException catch (e) {
       if (e.code == GoogleSignInExceptionCode.canceled) {
         AppLogger.instance.w('Googleログインがキャンセルされました');
-        return false;
+        return AuthResult.cancelled();
       }
       AppLogger.instance.e('Googleアカウント連携に失敗しました', e);
       rethrow;
@@ -131,12 +136,13 @@ class SupabaseAuthDatasource {
   /// Googleアカウントでログイン（既存アカウントにサインイン）
   ///
   /// signInWithIdTokenを使用して、既存のGoogleアカウントでサインインします
-  Future<bool> signInWithGoogle() async {
+  /// 戻り値のAuthResultにはdisplayNameが含まれます
+  Future<AuthResult> signInWithGoogle() async {
     try {
       AppLogger.instance.i('Googleアカウントでログインを開始します');
 
       // ネットワーク状態チェック
-      final hasNetwork = await _checkNetworkConnection();
+      final hasNetwork = await checkNetworkConnection();
       if (!hasNetwork) {
         throw Exception('インターネット接続を確認してください');
       }
@@ -164,12 +170,15 @@ class SupabaseAuthDatasource {
         idToken: idToken,
       );
 
-      AppLogger.instance.i('Googleアカウントでログイン成功');
-      return true;
+      // displayNameを取得
+      final displayName = googleUser.displayName;
+      AppLogger.instance.i('Googleアカウントでログイン成功: displayName=$displayName');
+
+      return AuthResult.success(displayName: displayName);
     } on GoogleSignInException catch (e) {
       if (e.code == GoogleSignInExceptionCode.canceled) {
         AppLogger.instance.w('Googleログインがキャンセルされました');
-        return false;
+        return AuthResult.cancelled();
       }
       AppLogger.instance.e('Googleログインに失敗しました', e);
       rethrow;
@@ -182,7 +191,9 @@ class SupabaseAuthDatasource {
   /// Appleアカウントでログイン（既存アカウントにサインイン）
   ///
   /// signInWithIdTokenを使用して、既存のAppleアカウントでサインインします
-  Future<bool> signInWithApple() async {
+  /// 戻り値のAuthResultにはdisplayNameが含まれます
+  /// 注意: Appleは初回ログイン時のみ名前を提供します。2回目以降はnullになります。
+  Future<AuthResult> signInWithApple() async {
     try {
       AppLogger.instance.i('Appleアカウントでログインを開始します');
 
@@ -210,8 +221,14 @@ class SupabaseAuthDatasource {
         nonce: rawNonce,
       );
 
-      AppLogger.instance.i('Appleアカウントでログイン成功');
-      return true;
+      // displayNameを取得（Appleは初回のみ名前を提供）
+      final displayName = _buildAppleDisplayName(
+        givenName: credential.givenName,
+        familyName: credential.familyName,
+      );
+      AppLogger.instance.i('Appleアカウントでログイン成功: displayName=$displayName');
+
+      return AuthResult.success(displayName: displayName);
     } catch (error, stackTrace) {
       AppLogger.instance.e('Appleログインに失敗しました', error, stackTrace);
       rethrow;
@@ -221,7 +238,9 @@ class SupabaseAuthDatasource {
   /// Appleアカウントでアイデンティティを連携
   ///
   /// signInWithIdTokenを使用して、匿名ユーザーをAppleアカウントにリンクします
-  Future<bool> linkWithApple() async {
+  /// 戻り値のAuthResultにはdisplayNameが含まれます
+  /// 注意: Appleは初回ログイン時のみ名前を提供します。2回目以降はnullになります。
+  Future<AuthResult> linkWithApple() async {
     try {
       AppLogger.instance.i('Appleアカウント連携を開始します');
 
@@ -250,8 +269,14 @@ class SupabaseAuthDatasource {
         nonce: rawNonce,
       );
 
-      AppLogger.instance.i('Appleアカウント連携成功');
-      return true;
+      // displayNameを取得（Appleは初回のみ名前を提供）
+      final displayName = _buildAppleDisplayName(
+        givenName: credential.givenName,
+        familyName: credential.familyName,
+      );
+      AppLogger.instance.i('Appleアカウント連携成功: displayName=$displayName');
+
+      return AuthResult.success(displayName: displayName);
     } catch (error, stackTrace) {
       AppLogger.instance.e('Appleアカウント連携に失敗しました', error, stackTrace);
       rethrow;
@@ -338,7 +363,7 @@ class SupabaseAuthDatasource {
   }
 
   /// ネットワーク接続状態をチェック
-  Future<bool> _checkNetworkConnection() async {
+  Future<bool> checkNetworkConnection() async {
     try {
       final result = await InternetAddress.lookup('google.com');
       return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
@@ -346,5 +371,67 @@ class SupabaseAuthDatasource {
       AppLogger.instance.w('ネットワーク接続チェック失敗: $e');
       return false;
     }
+  }
+
+  /// Apple Sign-Inから取得した名前を結合
+  /// givenNameとfamilyNameがどちらもnullの場合はnullを返す
+  String? _buildAppleDisplayName({
+    required String? givenName,
+    required String? familyName,
+  }) {
+    if (givenName == null && familyName == null) {
+      return null;
+    }
+
+    final parts = <String>[];
+    if (familyName != null && familyName.isNotEmpty) {
+      parts.add(familyName);
+    }
+    if (givenName != null && givenName.isNotEmpty) {
+      parts.add(givenName);
+    }
+
+    return parts.isEmpty ? null : parts.join(' ');
+  }
+
+  /// Supabase Auth user_metadataのdisplayNameを更新
+  Future<void> updateDisplayName(String displayName) async {
+    try {
+      AppLogger.instance.i('displayNameを更新します: $displayName');
+
+      await _supabase.auth.updateUser(
+        UserAttributes(
+          data: {'display_name': displayName},
+        ),
+      );
+
+      AppLogger.instance.i('displayNameの更新が完了しました');
+    } catch (error, stackTrace) {
+      AppLogger.instance.e('displayNameの更新に失敗しました', error, stackTrace);
+      rethrow;
+    }
+  }
+
+  /// 現在のユーザーのdisplayNameを取得（user_metadataから）
+  String? getDisplayNameFromMetadata() {
+    final user = currentUser;
+    if (user == null) return null;
+
+    final metadata = user.userMetadata;
+    if (metadata == null) return null;
+
+    // カスタムのdisplay_nameを優先
+    final customDisplayName = metadata['display_name'] as String?;
+    if (customDisplayName != null && customDisplayName.isNotEmpty) {
+      return customDisplayName;
+    }
+
+    // Google Sign-Inの場合はnameが設定される
+    final googleName = metadata['name'] as String?;
+    if (googleName != null && googleName.isNotEmpty) {
+      return googleName;
+    }
+
+    return null;
   }
 }

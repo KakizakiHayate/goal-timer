@@ -244,7 +244,7 @@ class _HomeTabContent extends StatelessWidget {
                     SpacingConsts.s,
                   ),
                   child: Text(
-                    '${_getGreeting()}、ゲストユーザー さん',
+                    '${_getGreeting()}、${homeState.displayName} さん',
                     style: TextConsts.h3.copyWith(
                       color: ColorConsts.textPrimary,
                       fontWeight: FontWeight.bold,

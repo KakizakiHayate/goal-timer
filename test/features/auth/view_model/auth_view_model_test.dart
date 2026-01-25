@@ -2,6 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:mocktail/mocktail.dart';
 
+import 'package:goal_timer/core/data/local/local_users_datasource.dart';
+import 'package:goal_timer/core/data/supabase/auth_result.dart';
 import 'package:goal_timer/core/data/supabase/supabase_auth_datasource.dart';
 import 'package:goal_timer/features/auth/view_model/auth_view_model.dart';
 
@@ -9,18 +11,28 @@ import 'package:goal_timer/features/auth/view_model/auth_view_model.dart';
 class MockSupabaseAuthDatasource extends Mock
     implements SupabaseAuthDatasource {}
 
+class MockLocalUsersDatasource extends Mock implements LocalUsersDatasource {}
+
 void main() {
   late MockSupabaseAuthDatasource mockAuthDatasource;
+  late MockLocalUsersDatasource mockUsersDatasource;
   late AuthViewModel viewModel;
 
   setUp(() {
     mockAuthDatasource = MockSupabaseAuthDatasource();
+    mockUsersDatasource = MockLocalUsersDatasource();
     Get.testMode = true;
 
     // デフォルトのスタブ
     when(() => mockAuthDatasource.isAnonymous).thenReturn(true);
+    when(
+      () => mockUsersDatasource.updateDisplayName(any()),
+    ).thenAnswer((_) async {});
 
-    viewModel = AuthViewModel(authDatasource: mockAuthDatasource);
+    viewModel = AuthViewModel(
+      authDatasource: mockAuthDatasource,
+      usersDatasource: mockUsersDatasource,
+    );
   });
 
   tearDown(() {
@@ -56,8 +68,10 @@ void main() {
       test('連携済みユーザーの場合はfalseを返す', () {
         when(() => mockAuthDatasource.isAnonymous).thenReturn(false);
 
-        final linkedViewModel =
-            AuthViewModel(authDatasource: mockAuthDatasource);
+        final linkedViewModel = AuthViewModel(
+          authDatasource: mockAuthDatasource,
+          usersDatasource: mockUsersDatasource,
+        );
 
         expect(linkedViewModel.isAnonymous, isFalse);
       });
@@ -73,8 +87,10 @@ void main() {
       test('連携済みユーザーの場合はfalseを返す', () {
         when(() => mockAuthDatasource.isAnonymous).thenReturn(false);
 
-        final linkedViewModel =
-            AuthViewModel(authDatasource: mockAuthDatasource);
+        final linkedViewModel = AuthViewModel(
+          authDatasource: mockAuthDatasource,
+          usersDatasource: mockUsersDatasource,
+        );
 
         expect(linkedViewModel.showLinkButton, isFalse);
       });
@@ -83,7 +99,7 @@ void main() {
     group('linkWithGoogle', () {
       test('連携成功時はsuccess状態になる', () async {
         when(() => mockAuthDatasource.linkWithGoogle())
-            .thenAnswer((_) async => true);
+            .thenAnswer((_) async => AuthResult.success());
 
         final result = await viewModel.linkWithGoogle();
 
@@ -93,7 +109,7 @@ void main() {
 
       test('連携キャンセル時はinitial状態のままである', () async {
         when(() => mockAuthDatasource.linkWithGoogle())
-            .thenAnswer((_) async => false);
+            .thenAnswer((_) async => AuthResult.cancelled());
 
         final result = await viewModel.linkWithGoogle();
 
@@ -116,7 +132,7 @@ void main() {
         when(() => mockAuthDatasource.linkWithGoogle()).thenAnswer((_) async {
           // 遅延をシミュレート
           await Future.delayed(const Duration(milliseconds: 100));
-          return true;
+          return AuthResult.success();
         });
 
         // 非同期で実行開始
@@ -131,7 +147,7 @@ void main() {
     group('linkWithApple', () {
       test('連携成功時はsuccess状態になる', () async {
         when(() => mockAuthDatasource.linkWithApple())
-            .thenAnswer((_) async => true);
+            .thenAnswer((_) async => AuthResult.success());
 
         final result = await viewModel.linkWithApple();
 
@@ -141,7 +157,7 @@ void main() {
 
       test('連携キャンセル時はinitial状態のままである', () async {
         when(() => mockAuthDatasource.linkWithApple())
-            .thenAnswer((_) async => false);
+            .thenAnswer((_) async => AuthResult.cancelled());
 
         final result = await viewModel.linkWithApple();
 
