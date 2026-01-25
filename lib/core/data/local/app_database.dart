@@ -9,6 +9,11 @@ class AppDatabase {
   factory AppDatabase() => _instance;
   AppDatabase._internal();
 
+  /// テスト用: 一意のDB名を指定してインスタンスを作成
+  @visibleForTesting
+  AppDatabase.forTesting(this._testDbName);
+
+  String? _testDbName;
   Database? _database;
 
   Future<Database> get database async {
@@ -17,7 +22,8 @@ class AppDatabase {
 
   Future<Database> _initDatabase() async {
     final databasesPath = await getDatabasesPath();
-    final path = join(databasesPath, DatabaseConsts.databaseName);
+    final dbName = _testDbName ?? DatabaseConsts.databaseName;
+    final path = join(databasesPath, dbName);
 
     return openDatabase(
       path,

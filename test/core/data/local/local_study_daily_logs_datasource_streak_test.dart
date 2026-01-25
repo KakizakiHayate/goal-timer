@@ -13,16 +13,21 @@ void main() {
   setUpAll(() {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
-    // シングルトンをリセット
-    AppDatabase.resetForTesting();
   });
 
   setUp(() async {
-    database = AppDatabase();
+    // テスト用に一意のデータベースを作成（並列実行時の競合を回避）
+    final uniqueDbName = 'test_study_logs_streak_${DateTime.now().microsecondsSinceEpoch}.db';
+    database = AppDatabase.forTesting(uniqueDbName);
     datasource = LocalStudyDailyLogsDatasource(database: database);
 
     final db = await database.database;
     await db.delete('study_daily_logs');
+  });
+
+  tearDown(() async {
+    // テスト終了時にデータベースを閉じる
+    await database.close();
   });
 
   DateTime today() {
