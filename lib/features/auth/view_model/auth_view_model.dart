@@ -212,6 +212,9 @@ class AuthViewModel extends GetxController {
 
       await _authDatasource.deleteAccount();
 
+      // ローカルDBのユーザーデータをリセット
+      await _usersDatasource.resetDisplayName();
+
       _status.value = AuthStatus.success;
       AppLogger.instance.i('アカウント削除成功');
       update();
@@ -232,6 +235,9 @@ class AuthViewModel extends GetxController {
       update();
 
       await _authDatasource.signOut();
+
+      // ローカルDBのユーザーデータをリセット
+      await _usersDatasource.resetDisplayName();
 
       _status.value = AuthStatus.initial;
       AppLogger.instance.i('サインアウト完了');

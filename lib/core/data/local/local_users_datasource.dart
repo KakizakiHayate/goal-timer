@@ -194,4 +194,24 @@ class LocalUsersDatasource {
       rethrow;
     }
   }
+
+  /// 表示名をデフォルト値にリセット
+  /// サインアウトやアカウント削除時に呼び出す
+  Future<void> resetDisplayName() async {
+    try {
+      final db = await _database.database;
+
+      final count = await db.update(DatabaseConsts.tableUsers, {
+        DatabaseConsts.columnDisplayName: null,
+        DatabaseConsts.columnUpdatedAt: DateTime.now().toIso8601String(),
+      });
+
+      if (count > 0) {
+        AppLogger.instance.i('表示名をリセットしました');
+      }
+    } catch (e, stackTrace) {
+      AppLogger.instance.e('表示名のリセットに失敗しました', e, stackTrace);
+      // リセット失敗はクリティカルではないのでrethrowしない
+    }
+  }
 }

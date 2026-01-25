@@ -28,6 +28,9 @@ void main() {
     when(
       () => mockUsersDatasource.updateDisplayName(any()),
     ).thenAnswer((_) async {});
+    when(
+      () => mockUsersDatasource.resetDisplayName(),
+    ).thenAnswer((_) async {});
 
     viewModel = AuthViewModel(
       authDatasource: mockAuthDatasource,
