@@ -70,27 +70,15 @@ class FirebaseService {
     required String userId,
     required int goalCount,
     required int studyLogCount,
-  }) async {
-    try {
-      await _analytics?.logEvent(
-        name: _eventMigrationCompleted,
-        parameters: {
+  }) =>
+      _logEvent(
+        _eventMigrationCompleted,
+        {
           'user_id': userId,
           'goal_count': goalCount,
           'study_log_count': studyLogCount,
         },
       );
-      AppLogger.instance.i(
-        'FirebaseService: マイグレーション完了イベントを送信しました',
-      );
-    } catch (error, stackTrace) {
-      AppLogger.instance.e(
-        'FirebaseService: マイグレーション完了イベント送信に失敗しました',
-        error,
-        stackTrace,
-      );
-    }
-  }
 
   /// マイグレーション失敗イベントを送信
   ///
@@ -99,26 +87,14 @@ class FirebaseService {
   Future<void> logMigrationFailed({
     required String userId,
     required String errorMessage,
-  }) async {
-    try {
-      await _analytics?.logEvent(
-        name: _eventMigrationFailed,
-        parameters: {
+  }) =>
+      _logEvent(
+        _eventMigrationFailed,
+        {
           'user_id': userId,
           'error_message': errorMessage,
         },
       );
-      AppLogger.instance.i(
-        'FirebaseService: マイグレーション失敗イベントを送信しました',
-      );
-    } catch (error, stackTrace) {
-      AppLogger.instance.e(
-        'FirebaseService: マイグレーション失敗イベント送信に失敗しました',
-        error,
-        stackTrace,
-      );
-    }
-  }
 
   /// マイグレーションスキップイベントを送信
   ///
@@ -127,21 +103,26 @@ class FirebaseService {
   Future<void> logMigrationSkipped({
     required String userId,
     required String reason,
-  }) async {
-    try {
-      await _analytics?.logEvent(
-        name: _eventMigrationSkipped,
-        parameters: {
+  }) =>
+      _logEvent(
+        _eventMigrationSkipped,
+        {
           'user_id': userId,
           'reason': reason,
         },
       );
-      AppLogger.instance.i(
-        'FirebaseService: マイグレーションスキップイベントを送信しました',
-      );
+
+  /// イベント送信の共通処理
+  Future<void> _logEvent(
+    String name,
+    Map<String, Object>? parameters,
+  ) async {
+    try {
+      await _analytics?.logEvent(name: name, parameters: parameters);
+      AppLogger.instance.i('FirebaseService: イベント「$name」を送信しました');
     } catch (error, stackTrace) {
       AppLogger.instance.e(
-        'FirebaseService: マイグレーションスキップイベント送信に失敗しました',
+        'FirebaseService: イベント「$name」の送信に失敗しました',
         error,
         stackTrace,
       );
