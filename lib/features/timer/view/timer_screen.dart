@@ -165,10 +165,12 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
   Future<void> _handleBackButton(TimerState timerState) async {
     if (timerState.needsBackConfirmation) {
       final shouldPop = await _showBackConfirmDialog();
-      if (shouldPop == true && mounted) {
-        Navigator.pop(context);
+      if (shouldPop != true) {
+        return;
       }
-    } else {
+    }
+
+    if (mounted) {
       Navigator.pop(context);
     }
   }
@@ -205,7 +207,7 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
             style: ElevatedButton.styleFrom(
               backgroundColor: ColorConsts.error,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(SpacingConsts.radiusMd),
               ),
             ),
             child: Text(
