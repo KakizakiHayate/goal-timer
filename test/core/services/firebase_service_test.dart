@@ -59,18 +59,6 @@ void main() {
           completes,
         );
       });
-
-      test('logMigrationSkippedがエラーなく呼び出せること', () async {
-        final service = FirebaseService();
-
-        await expectLater(
-          service.logMigrationSkipped(
-            userId: 'test-user',
-            reason: 'already_migrated',
-          ),
-          completes,
-        );
-      });
     });
   });
 }

@@ -21,10 +21,6 @@ class MigrationService {
   /// SharedPreferencesのキー: 移行済みフラグ
   static const String _keyIsMigrated = 'is_migrated_to_supabase';
 
-  /// スキップ理由の定数
-  static const String _skipReasonAlreadyMigrated = 'already_migrated';
-  static const String _skipReasonNoLocalData = 'no_local_data';
-
   MigrationService({
     required LocalGoalsDatasource localGoalsDatasource,
     required LocalStudyDailyLogsDatasource localStudyLogsDatasource,
@@ -116,13 +112,9 @@ class MigrationService {
     AppLogger.instance.i('データ移行を開始します: userId=$userId');
 
     try {
-      // 移行済みの場合はスキップ
+      // 移行済みの場合はスキップ（GAイベントは送信しない）
       if (await isMigrated()) {
         AppLogger.instance.i('既に移行済みのためスキップします');
-        await _firebaseService.logMigrationSkipped(
-          userId: userId,
-          reason: _skipReasonAlreadyMigrated,
-        );
         return const MigrationResult(
           success: true,
           skipped: true,
@@ -130,14 +122,10 @@ class MigrationService {
         );
       }
 
-      // ローカルデータがない場合はスキップ
+      // ローカルデータがない場合はスキップ（GAイベントは送信しない）
       if (!await hasLocalData()) {
         AppLogger.instance.i('ローカルデータがないためスキップします');
         await _setMigrated();
-        await _firebaseService.logMigrationSkipped(
-          userId: userId,
-          reason: _skipReasonNoLocalData,
-        );
         return const MigrationResult(
           success: true,
           skipped: true,

@@ -75,10 +75,6 @@ void main() {
           userId: any(named: 'userId'),
           errorMessage: any(named: 'errorMessage'),
         )).thenAnswer((_) async {});
-    when(() => mockFirebaseService.logMigrationSkipped(
-          userId: any(named: 'userId'),
-          reason: any(named: 'reason'),
-        )).thenAnswer((_) async {});
 
     migrationService = MigrationService(
       localGoalsDatasource: mockLocalGoals,
@@ -181,11 +177,12 @@ void main() {
         expect(result.skipped, isTrue);
         expect(result.message, '既に移行済みです');
 
-        // スキップイベントが送信されることを確認
-        verify(() => mockFirebaseService.logMigrationSkipped(
-              userId: 'user-123',
-              reason: 'already_migrated',
-            )).called(1);
+        // スキップ時はGAイベントを送信しない
+        verifyNever(() => mockFirebaseService.logMigrationCompleted(
+              userId: any(named: 'userId'),
+              goalCount: any(named: 'goalCount'),
+              studyLogCount: any(named: 'studyLogCount'),
+            ));
       });
 
       test('ローカルデータがない場合はスキップする', () async {
@@ -201,11 +198,12 @@ void main() {
         expect(result.skipped, isTrue);
         expect(result.message, 'ローカルデータがありません');
 
-        // スキップイベントが送信されることを確認
-        verify(() => mockFirebaseService.logMigrationSkipped(
-              userId: 'user-123',
-              reason: 'no_local_data',
-            )).called(1);
+        // スキップ時はGAイベントを送信しない
+        verifyNever(() => mockFirebaseService.logMigrationCompleted(
+              userId: any(named: 'userId'),
+              goalCount: any(named: 'goalCount'),
+              studyLogCount: any(named: 'studyLogCount'),
+            ));
       });
 
       test('目標と学習ログを正常に移行する', () async {

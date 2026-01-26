@@ -23,7 +23,6 @@ class FirebaseService {
   // イベント名の定数
   static const String _eventMigrationCompleted = 'migration_completed';
   static const String _eventMigrationFailed = 'migration_failed';
-  static const String _eventMigrationSkipped = 'migration_skipped';
 
   /// Firebaseサービスを初期化する
   Future<void> init() async {
@@ -93,22 +92,6 @@ class FirebaseService {
         {
           'user_id': userId,
           'error_message': errorMessage,
-        },
-      );
-
-  /// マイグレーションスキップイベントを送信
-  ///
-  /// [userId] SupabaseユーザーID
-  /// [reason] スキップ理由
-  Future<void> logMigrationSkipped({
-    required String userId,
-    required String reason,
-  }) =>
-      _logEvent(
-        _eventMigrationSkipped,
-        {
-          'user_id': userId,
-          'reason': reason,
         },
       );
 
