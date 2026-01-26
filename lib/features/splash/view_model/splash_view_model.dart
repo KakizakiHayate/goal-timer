@@ -99,43 +99,22 @@ class SplashViewModel extends GetxController {
 
       if (hasSession) {
         // 既存セッションがある場合はデータ移行を実行してホーム画面へ
-        _status.value = SplashStatus.migrating;
-        update();
-        await _migrateDataIfNeeded();
-
-        _status.value = SplashStatus.completedToHome;
-        update();
-      } else {
-        // セッションがない場合、レガシーユーザーかどうかを確認
-        final hasLocalData = await _migrationService.hasLocalData();
-
-        if (hasLocalData) {
-          // レガシーユーザー: 自動でSupabase匿名ログイン → データ移行 → ホーム画面
-          AppLogger.instance.i('レガシーユーザーを検出: 自動匿名ログインを実行');
-
-          final response = await _authDatasource.signInAnonymously();
-          final userId = response.user?.id;
-
-          if (userId == null) {
-            throw Exception('匿名認証に失敗しました: ユーザーIDが取得できません');
-          }
-
-          _userId = userId;
-          AppLogger.instance.i('レガシーユーザーの匿名認証成功: $userId');
-
-          // データ移行を実行
-          _status.value = SplashStatus.migrating;
-          update();
-          await _migrateDataIfNeeded();
-
-          _status.value = SplashStatus.completedToHome;
-          update();
-        } else {
-          // 新規ユーザー: ウェルカム画面へ
-          _status.value = SplashStatus.completedToWelcome;
-          update();
-        }
+        await _migrateAndNavigateToHome();
+        return;
       }
+
+      // セッションがない場合、レガシーユーザーかどうかを確認
+      final hasLocalData = await _migrationService.hasLocalData();
+
+      if (hasLocalData) {
+        // レガシーユーザー: 自動でSupabase匿名ログイン → データ移行 → ホーム画面
+        await _handleLegacyUser();
+        return;
+      }
+
+      // 新規ユーザー: ウェルカム画面へ
+      _status.value = SplashStatus.completedToWelcome;
+      update();
     } catch (error, stackTrace) {
       AppLogger.instance.e('Splash初期化エラー', error, stackTrace);
       _status.value = SplashStatus.error;
@@ -181,6 +160,34 @@ class SplashViewModel extends GetxController {
       AppLogger.instance.e('セッション確認に失敗しました', error, stackTrace);
       rethrow;
     }
+  }
+
+  /// データ移行を実行してホーム画面へ遷移
+  Future<void> _migrateAndNavigateToHome() async {
+    _status.value = SplashStatus.migrating;
+    update();
+    await _migrateDataIfNeeded();
+
+    _status.value = SplashStatus.completedToHome;
+    update();
+  }
+
+  /// レガシーユーザーの処理（自動匿名ログイン → データ移行 → ホーム画面）
+  Future<void> _handleLegacyUser() async {
+    AppLogger.instance.i('レガシーユーザーを検出: 自動匿名ログインを実行');
+
+    final response = await _authDatasource.signInAnonymously();
+    final userId = response.user?.id;
+
+    if (userId == null) {
+      throw Exception('匿名認証に失敗しました: ユーザーIDが取得できません');
+    }
+
+    _userId = userId;
+    AppLogger.instance.i('レガシーユーザーの匿名認証成功: $userId');
+
+    // データ移行を実行してホーム画面へ
+    await _migrateAndNavigateToHome();
   }
 
   /// データ移行を実行（必要な場合）

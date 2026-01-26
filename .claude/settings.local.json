@@ -101,7 +101,11 @@
       "Bash(dart run custom_lint:*)",
       "Bash(pod repo update)",
       "Bash(pod update:*)",
-      "mcp__supabase__get_project"
+      "mcp__supabase__get_project",
+      "Bash(gh pr merge:*)",
+      "Bash(git fetch:*)",
+      "Bash(dart run build_runner:*)",
+      "Bash(gh pr edit:*)"
     ],
     "deny": []
   },
