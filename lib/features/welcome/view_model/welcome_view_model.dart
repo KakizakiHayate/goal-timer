@@ -81,25 +81,8 @@ class WelcomeViewModel extends GetxController {
   }
 
   /// データ移行を実行（必要な場合）
+  /// 移行失敗時も例外をthrowせず、ローカルデータで継続使用可能にする
   Future<void> _migrateDataIfNeeded(String userId) async {
-    try {
-      final result = await _migrationService.migrate(userId);
-
-      if (result.success) {
-        if (result.skipped) {
-          AppLogger.instance.i('データ移行: ${result.message}');
-        } else {
-          AppLogger.instance.i(
-            'データ移行成功: 目標${result.goalCount}件、ログ${result.studyLogCount}件',
-          );
-        }
-      } else {
-        AppLogger.instance.e('データ移行失敗: ${result.message}');
-        throw Exception(result.message);
-      }
-    } catch (error, stackTrace) {
-      AppLogger.instance.e('データ移行に失敗しました', error, stackTrace);
-      rethrow;
-    }
+    await _migrationService.migrateAndLogResult(userId);
   }
 }

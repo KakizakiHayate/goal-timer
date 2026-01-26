@@ -75,16 +75,20 @@ class SupabaseGoalsDatasource {
   }
 
   /// 複数の目標を一括で挿入
+  /// null値はDBのDEFAULT値を使用するため除外する
   Future<void> insertGoals(List<GoalsModel> goals) async {
     if (goals.isEmpty) return;
 
     try {
       final now = DateTime.now();
       final goalsToInsert = goals.map((goal) {
-        return goal.copyWith(
+        final json = goal.copyWith(
           updatedAt: now,
           syncUpdatedAt: now,
         ).toJson();
+        // null値を除外してDBのDEFAULT値を使用させる
+        json.removeWhere((key, value) => value == null);
+        return json;
       }).toList();
 
       await _supabase.from(_tableName).upsert(goalsToInsert);
