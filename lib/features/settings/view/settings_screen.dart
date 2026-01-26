@@ -206,49 +206,51 @@ class _SettingsScreenState extends State<SettingsScreen>
 
     final result = await showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text(UserConsts.changeNameDialogTitle),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: controller,
-              maxLength: UserConsts.maxDisplayNameLength,
-              autofocus: true,
-              decoration: InputDecoration(
-                hintText: UserConsts.changeNameDialogHint,
-                counterText:
-                    '${controller.text.length}/${UserConsts.maxDisplayNameLength}',
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text(UserConsts.changeNameDialogTitle),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: controller,
+                maxLength: UserConsts.maxDisplayNameLength,
+                autofocus: true,
+                decoration: InputDecoration(
+                  hintText: UserConsts.changeNameDialogHint,
+                  counterText:
+                      '${controller.text.length}/${UserConsts.maxDisplayNameLength}',
+                ),
+                onChanged: (value) {
+                  // counterTextを更新するため、StatefulBuilderのsetStateを使用
+                  setDialogState(() {});
+                },
               ),
-              onChanged: (value) {
-                // counterTextを更新するため、setStateを使用
-                (context as Element).markNeedsBuild();
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text(UserConsts.cancelButtonLabel),
+            ),
+            TextButton(
+              onPressed: () {
+                final newName = controller.text.trim();
+                if (newName.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(UserConsts.emptyNameError),
+                      backgroundColor: ColorConsts.error,
+                    ),
+                  );
+                  return;
+                }
+                Navigator.of(context).pop(newName);
               },
+              child: const Text(UserConsts.saveButtonLabel),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text(UserConsts.cancelButtonLabel),
-          ),
-          TextButton(
-            onPressed: () {
-              final newName = controller.text.trim();
-              if (newName.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(UserConsts.emptyNameError),
-                    backgroundColor: ColorConsts.error,
-                  ),
-                );
-                return;
-              }
-              Navigator.of(context).pop(newName);
-            },
-            child: const Text(UserConsts.saveButtonLabel),
-          ),
-        ],
       ),
     );
 

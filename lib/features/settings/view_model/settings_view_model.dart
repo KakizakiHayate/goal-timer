@@ -128,9 +128,9 @@ class SettingsViewModel extends GetxController {
         return false;
       }
 
-      // ローカルDBとSupabase public.usersテーブルの両方を更新
-      await _usersDatasource.updateDisplayName(newName);
+      // Supabaseを先に更新し、成功したらローカルDBを更新（データ整合性のため）
       await _supabaseUsersDatasource.updateDisplayName(userId, newName);
+      await _usersDatasource.updateDisplayName(newName);
 
       displayName.value = newName;
       AppLogger.instance.i('displayNameを更新しました: $newName');
