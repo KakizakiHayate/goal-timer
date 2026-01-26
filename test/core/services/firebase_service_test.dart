@@ -29,5 +29,36 @@ void main() {
     // 1. アプリ起動時にログ「FirebaseService: Firebase初期化が完了しました」が出力される
     // 2. デバッグビルドでは「Crashlyticsはデバッグモードのため無効化」が出力される
     // 3. Firebase Console > Analytics > DebugView でイベントが確認できる
+
+    group('マイグレーションイベント', () {
+      // Note: analyticsが初期化されていない状態でもエラーなく動作することを確認
+      // 実際のイベント送信は統合テストで確認
+
+      test('logMigrationCompletedがエラーなく呼び出せること', () async {
+        final service = FirebaseService();
+
+        // analyticsがnullの状態でも例外が発生しないこと
+        await expectLater(
+          service.logMigrationCompleted(
+            userId: 'test-user',
+            goalCount: 5,
+            studyLogCount: 10,
+          ),
+          completes,
+        );
+      });
+
+      test('logMigrationFailedがエラーなく呼び出せること', () async {
+        final service = FirebaseService();
+
+        await expectLater(
+          service.logMigrationFailed(
+            userId: 'test-user',
+            errorMessage: 'Test error',
+          ),
+          completes,
+        );
+      });
+    });
   });
 }
