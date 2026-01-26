@@ -22,6 +22,12 @@ class FakeSettingsViewModel extends GetxController
   final RxBool streakReminderEnabled = true.obs;
 
   @override
+  final RxString displayName = 'テストユーザー'.obs;
+
+  @override
+  final RxBool isUpdatingDisplayName = false.obs;
+
+  @override
   Future<void> init() async {}
 
   @override
@@ -34,6 +40,18 @@ class FakeSettingsViewModel extends GetxController
 
   @override
   String get formattedDefaultTime => '25:00';
+
+  @override
+  Future<bool> checkNetworkConnection() async => true;
+
+  @override
+  Future<bool> updateDisplayName(String newName) async {
+    displayName.value = newName;
+    return true;
+  }
+
+  @override
+  Future<void> refreshDisplayName() async {}
 }
 
 /// テスト用MockNotificationService

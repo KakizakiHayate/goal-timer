@@ -83,4 +83,49 @@ class SupabaseUsersDatasource {
       rethrow;
     }
   }
+
+  /// displayNameを取得
+  ///
+  /// usersテーブルからdisplay_nameを取得します。
+  /// ユーザーが存在しない場合やdisplay_nameが未設定の場合はnullを返します。
+  Future<String?> getDisplayName(String userId) async {
+    try {
+      final response = await _supabase
+          .from(_tableName)
+          .select('display_name')
+          .eq('id', userId)
+          .maybeSingle();
+
+      if (response == null) {
+        AppLogger.instance.i('ユーザーが存在しません: $userId');
+        return null;
+      }
+
+      final displayName = response['display_name'] as String?;
+      AppLogger.instance.i('displayNameを取得しました: $displayName');
+      return displayName;
+    } catch (error, stackTrace) {
+      AppLogger.instance.e('displayName取得に失敗しました', error, stackTrace);
+      rethrow;
+    }
+  }
+
+  /// displayNameを更新
+  ///
+  /// usersテーブルのdisplay_nameを更新します。
+  Future<void> updateDisplayName(String userId, String displayName) async {
+    try {
+      final now = DateTime.now();
+      await _supabase.from(_tableName).update({
+        'display_name': displayName,
+        'updated_at': now.toIso8601String(),
+        'sync_updated_at': now.toIso8601String(),
+      }).eq('id', userId);
+
+      AppLogger.instance.i('displayNameを更新しました: $userId -> $displayName');
+    } catch (error, stackTrace) {
+      AppLogger.instance.e('displayName更新に失敗しました', error, stackTrace);
+      rethrow;
+    }
+  }
 }

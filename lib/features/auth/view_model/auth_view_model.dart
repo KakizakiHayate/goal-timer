@@ -1,7 +1,10 @@
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../core/data/local/app_database.dart';
+import '../../../core/data/local/local_users_datasource.dart';
 import '../../../core/data/supabase/supabase_auth_datasource.dart';
+import '../../../core/data/supabase/supabase_users_datasource.dart';
 import '../../../core/utils/app_logger.dart';
 
 /// 認証の状態
@@ -22,10 +25,20 @@ enum AuthStatus {
 /// 認証ViewModel
 class AuthViewModel extends GetxController {
   late final SupabaseAuthDatasource _authDatasource;
+  late final LocalUsersDatasource _usersDatasource;
+  late final SupabaseUsersDatasource _supabaseUsersDatasource;
 
-  AuthViewModel({SupabaseAuthDatasource? authDatasource}) {
+  AuthViewModel({
+    SupabaseAuthDatasource? authDatasource,
+    LocalUsersDatasource? usersDatasource,
+    SupabaseUsersDatasource? supabaseUsersDatasource,
+  }) {
     _authDatasource = authDatasource ??
         SupabaseAuthDatasource(supabase: Supabase.instance.client);
+    _usersDatasource =
+        usersDatasource ?? LocalUsersDatasource(database: AppDatabase());
+    _supabaseUsersDatasource = supabaseUsersDatasource ??
+        SupabaseUsersDatasource(supabase: Supabase.instance.client);
   }
 
   /// 現在の状態
@@ -57,16 +70,23 @@ class AuthViewModel extends GetxController {
 
       final result = await _authDatasource.linkWithGoogle();
 
-      if (result) {
+      if (result.success) {
+        // displayNameをローカルDBとSupabaseに保存
+        await _saveDisplayName(result.displayName, saveToSupabase: true);
+
         _status.value = AuthStatus.success;
         AppLogger.instance.i('Googleアカウント連携成功');
-      } else {
+        update();
+        return true;
+      } else if (result.cancelled) {
         _status.value = AuthStatus.initial;
         AppLogger.instance.w('Googleアカウント連携がキャンセルされました');
+        update();
+        return false;
       }
 
       update();
-      return result;
+      return false;
     } catch (error, stackTrace) {
       AppLogger.instance.e('Googleアカウント連携に失敗しました', error, stackTrace);
       _status.value = AuthStatus.error;
@@ -85,16 +105,23 @@ class AuthViewModel extends GetxController {
 
       final result = await _authDatasource.linkWithApple();
 
-      if (result) {
+      if (result.success) {
+        // displayNameをローカルDBとSupabaseに保存
+        await _saveDisplayName(result.displayName, saveToSupabase: true);
+
         _status.value = AuthStatus.success;
         AppLogger.instance.i('Appleアカウント連携成功');
-      } else {
+        update();
+        return true;
+      } else if (result.cancelled) {
         _status.value = AuthStatus.initial;
         AppLogger.instance.w('Appleアカウント連携がキャンセルされました');
+        update();
+        return false;
       }
 
       update();
-      return result;
+      return false;
     } catch (error, stackTrace) {
       AppLogger.instance.e('Appleアカウント連携に失敗しました', error, stackTrace);
       _status.value = AuthStatus.error;
@@ -120,16 +147,30 @@ class AuthViewModel extends GetxController {
 
       final result = await _authDatasource.signInWithGoogle();
 
-      if (result) {
+      if (result.success) {
+        // public.usersテーブルに保存されたカスタムdisplayNameを優先
+        // なければGoogleから取得したdisplayNameを使用
+        final userId = _authDatasource.currentUser?.id;
+        String? customDisplayName;
+        if (userId != null) {
+          customDisplayName =
+              await _supabaseUsersDatasource.getDisplayName(userId);
+        }
+        await _saveDisplayName(customDisplayName ?? result.displayName);
+
         _status.value = AuthStatus.success;
         AppLogger.instance.i('Googleログイン成功');
-      } else {
+        update();
+        return true;
+      } else if (result.cancelled) {
         _status.value = AuthStatus.initial;
         AppLogger.instance.w('Googleログインがキャンセルされました');
+        update();
+        return false;
       }
 
       update();
-      return result;
+      return false;
     } catch (error, stackTrace) {
       AppLogger.instance.e('Googleログインに失敗しました', error, stackTrace);
       _status.value = AuthStatus.error;
@@ -148,16 +189,30 @@ class AuthViewModel extends GetxController {
 
       final result = await _authDatasource.signInWithApple();
 
-      if (result) {
+      if (result.success) {
+        // public.usersテーブルに保存されたカスタムdisplayNameを優先
+        // なければAppleから取得したdisplayNameを使用
+        final userId = _authDatasource.currentUser?.id;
+        String? customDisplayName;
+        if (userId != null) {
+          customDisplayName =
+              await _supabaseUsersDatasource.getDisplayName(userId);
+        }
+        await _saveDisplayName(customDisplayName ?? result.displayName);
+
         _status.value = AuthStatus.success;
         AppLogger.instance.i('Appleログイン成功');
-      } else {
+        update();
+        return true;
+      } else if (result.cancelled) {
         _status.value = AuthStatus.initial;
         AppLogger.instance.w('Appleログインがキャンセルされました');
+        update();
+        return false;
       }
 
       update();
-      return result;
+      return false;
     } catch (error, stackTrace) {
       AppLogger.instance.e('Appleログインに失敗しました', error, stackTrace);
       _status.value = AuthStatus.error;
@@ -175,6 +230,9 @@ class AuthViewModel extends GetxController {
       update();
 
       await _authDatasource.deleteAccount();
+
+      // ローカルDBのユーザーデータをリセット
+      await _usersDatasource.resetDisplayName();
 
       _status.value = AuthStatus.success;
       AppLogger.instance.i('アカウント削除成功');
@@ -197,6 +255,9 @@ class AuthViewModel extends GetxController {
 
       await _authDatasource.signOut();
 
+      // ローカルDBのユーザーデータをリセット
+      await _usersDatasource.resetDisplayName();
+
       _status.value = AuthStatus.initial;
       AppLogger.instance.i('サインアウト完了');
       update();
@@ -205,6 +266,37 @@ class AuthViewModel extends GetxController {
       _status.value = AuthStatus.error;
       _errorMessage.value = 'サインアウトに失敗しました';
       update();
+    }
+  }
+
+  /// displayNameをローカルDBとSupabaseに保存
+  ///
+  /// [saveToSupabase]がtrueの場合、public.usersテーブルにも保存します（連携時に使用）
+  Future<void> _saveDisplayName(
+    String? displayName, {
+    bool saveToSupabase = false,
+  }) async {
+    if (displayName == null || displayName.isEmpty) {
+      AppLogger.instance.i('displayNameが取得できなかったため保存をスキップ');
+      return;
+    }
+
+    try {
+      // ローカルDBに保存
+      await _usersDatasource.updateDisplayName(displayName);
+      AppLogger.instance.i('displayNameをローカルDBに保存しました: $displayName');
+
+      // Supabaseにも保存（連携時のみ）
+      if (saveToSupabase) {
+        final userId = _authDatasource.currentUser?.id;
+        if (userId != null) {
+          await _supabaseUsersDatasource.updateDisplayName(userId, displayName);
+          AppLogger.instance.i('displayNameをSupabaseに保存しました: $displayName');
+        }
+      }
+    } catch (error, stackTrace) {
+      // displayName保存の失敗はログイン処理全体を失敗させない
+      AppLogger.instance.e('displayNameの保存に失敗しました', error, stackTrace);
     }
   }
 }

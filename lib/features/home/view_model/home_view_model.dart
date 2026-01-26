@@ -4,10 +4,12 @@ import 'package:uuid/uuid.dart';
 import '../../../core/data/local/app_database.dart';
 import '../../../core/data/local/local_goals_datasource.dart';
 import '../../../core/data/local/local_study_daily_logs_datasource.dart';
+import '../../../core/data/local/local_users_datasource.dart';
 import '../../../core/models/goals/goals_model.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/streak_consts.dart';
 import '../../../core/utils/time_utils.dart';
+import '../../../core/utils/user_consts.dart';
 
 /// 目標削除操作の結果
 enum DeleteGoalResult { success, failure }
@@ -19,6 +21,7 @@ class HomeState {
   final bool isLoading;
   final int currentStreak;
   final List<DateTime> recentStudyDates;
+  final String displayName;
 
   HomeState({
     this.goals = const [],
@@ -26,6 +29,7 @@ class HomeState {
     this.isLoading = false,
     this.currentStreak = 0,
     this.recentStudyDates = const [],
+    this.displayName = UserConsts.defaultGuestName,
   });
 
   HomeState copyWith({
@@ -34,6 +38,7 @@ class HomeState {
     bool? isLoading,
     int? currentStreak,
     List<DateTime>? recentStudyDates,
+    String? displayName,
   }) {
     return HomeState(
       goals: goals ?? this.goals,
@@ -42,6 +47,7 @@ class HomeState {
       isLoading: isLoading ?? this.isLoading,
       currentStreak: currentStreak ?? this.currentStreak,
       recentStudyDates: recentStudyDates ?? this.recentStudyDates,
+      displayName: displayName ?? this.displayName,
     );
   }
 
@@ -67,6 +73,7 @@ class HomeState {
 class HomeViewModel extends GetxController {
   late final LocalGoalsDatasource _goalsDatasource;
   late final LocalStudyDailyLogsDatasource _studyLogsDatasource;
+  late final LocalUsersDatasource _usersDatasource;
 
   // 状態（Rxを使わない）
   HomeState _state = HomeState();
@@ -75,6 +82,7 @@ class HomeViewModel extends GetxController {
   HomeViewModel({
     LocalGoalsDatasource? goalsDatasource,
     LocalStudyDailyLogsDatasource? studyLogsDatasource,
+    LocalUsersDatasource? usersDatasource,
   }) {
     final database = AppDatabase();
     _goalsDatasource =
@@ -82,6 +90,8 @@ class HomeViewModel extends GetxController {
     _studyLogsDatasource =
         studyLogsDatasource ??
         LocalStudyDailyLogsDatasource(database: database);
+    _usersDatasource =
+        usersDatasource ?? LocalUsersDatasource(database: database);
   }
 
   @override
@@ -102,35 +112,43 @@ class HomeViewModel extends GetxController {
       // 既存目標のtotalTargetMinutesを補完（Issue #111実装前に作成された目標対応）
       await _goalsDatasource.populateMissingTotalTargetMinutes();
 
-      // 目標、学習時間、ストリークデータを並列で取得（Dart 3 Recordsで型安全に）
+      // 目標、学習時間、ストリークデータ、displayNameを並列で取得
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
       final startDate = today.subtract(
         const Duration(days: StreakConsts.recentDaysCount - 1),
       );
 
-      final (goals, studiedSeconds, recentStudyDates, currentStreak) =
-          await (
-            _goalsDatasource.fetchActiveGoals(),
-            _studyLogsDatasource.fetchTotalSecondsForAllGoals(),
-            _studyLogsDatasource.fetchStudyDatesInRange(
-              startDate: startDate,
-              endDate: today,
-            ),
-            _studyLogsDatasource.calculateCurrentStreak(),
-          ).wait;
+      final (
+        goals,
+        studiedSeconds,
+        recentStudyDates,
+        currentStreak,
+        displayName,
+      ) = await (
+        _goalsDatasource.fetchActiveGoals(),
+        _studyLogsDatasource.fetchTotalSecondsForAllGoals(),
+        _studyLogsDatasource.fetchStudyDatesInRange(
+          startDate: startDate,
+          endDate: today,
+        ),
+        _studyLogsDatasource.calculateCurrentStreak(),
+        _usersDatasource.getDisplayName(),
+      ).wait;
 
       AppLogger.instance.i('目標を${goals.length}件読み込みました');
       AppLogger.instance.i('学習時間データを${studiedSeconds.length}件読み込みました');
       AppLogger.instance.i(
         'ストリーク: $currentStreak日, 直近学習日: ${recentStudyDates.length}日',
       );
+      AppLogger.instance.i('displayName: $displayName');
 
       _state = state.copyWith(
         goals: goals,
         studiedSecondsByGoalId: studiedSeconds,
         currentStreak: currentStreak,
         recentStudyDates: recentStudyDates,
+        displayName: displayName,
         isLoading: false,
       );
       update();
@@ -274,6 +292,19 @@ class HomeViewModel extends GetxController {
   // 目標リストを再読み込み
   void reloadGoals() {
     loadGoals();
+  }
+
+  /// displayNameを再読み込み
+  /// 設定画面から戻ったときに呼び出す
+  Future<void> refreshDisplayName() async {
+    try {
+      final displayName = await _usersDatasource.getDisplayName();
+      _state = state.copyWith(displayName: displayName);
+      update();
+      AppLogger.instance.i('displayNameを再読み込みしました: $displayName');
+    } catch (error, stackTrace) {
+      AppLogger.instance.e('displayNameの再読み込みに失敗しました', error, stackTrace);
+    }
   }
 
   // フィルタリングされた目標リストを取得

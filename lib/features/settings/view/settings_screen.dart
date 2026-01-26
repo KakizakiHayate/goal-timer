@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/data/local/app_database.dart';
+import '../../../core/data/local/local_users_datasource.dart';
 import '../../../core/data/supabase/supabase_auth_datasource.dart';
 import '../../../core/utils/animation_consts.dart';
 import '../../../core/utils/app_consts.dart';
@@ -12,6 +13,7 @@ import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/color_consts.dart';
 import '../../../core/utils/spacing_consts.dart';
 import '../../../core/utils/text_consts.dart';
+import '../../../core/utils/user_consts.dart';
 import '../../../core/widgets/pressable_card.dart';
 import '../../../core/widgets/setting_item.dart';
 import '../../auth/view/login_screen.dart';
@@ -118,50 +120,160 @@ class _SettingsScreenState extends State<SettingsScreen>
   }
 
   Widget _buildProfileSection() {
-    return PressableCard(
-      margin: EdgeInsets.zero,
-      padding: const EdgeInsets.all(SpacingConsts.l),
-      backgroundColor: ColorConsts.cardBackground,
-      borderRadius: 20.0,
-      elevation: 2.0,
-      onTap: null,
-      child: Row(
-        children: [
-          // アバター
-          Container(
-            width: 60,
-            height: 60,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [ColorConsts.primary, ColorConsts.primaryLight],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.person, color: Colors.white, size: 32),
-          ),
-
-          const SizedBox(width: SpacingConsts.l),
-
-          // ユーザー情報
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'ゲストユーザー',
-                  style: TextConsts.h4.copyWith(
-                    color: ColorConsts.textPrimary,
-                    fontWeight: FontWeight.bold,
-                  ),
+    return Obx(
+      () => PressableCard(
+        margin: EdgeInsets.zero,
+        padding: const EdgeInsets.all(SpacingConsts.l),
+        backgroundColor: ColorConsts.cardBackground,
+        borderRadius: 20.0,
+        elevation: 2.0,
+        onTap: _showChangeNameDialog,
+        child: Row(
+          children: [
+            // アバター
+            Container(
+              width: 60,
+              height: 60,
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [ColorConsts.primary, ColorConsts.primaryLight],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-              ],
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.person, color: Colors.white, size: 32),
             ),
-          ),
-        ],
+
+            const SizedBox(width: SpacingConsts.l),
+
+            // ユーザー情報
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _settingsViewModel.displayName.value,
+                    style: TextConsts.h4.copyWith(
+                      color: ColorConsts.textPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: SpacingConsts.xs),
+                  Text(
+                    'タップして名前を変更',
+                    style: TextConsts.caption.copyWith(
+                      color: ColorConsts.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // 編集アイコン
+            const Icon(
+              Icons.edit_outlined,
+              color: ColorConsts.textSecondary,
+              size: 20,
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  /// 名前変更ダイアログを表示
+  Future<void> _showChangeNameDialog() async {
+    // オンラインチェック
+    final hasNetwork = await _settingsViewModel.checkNetworkConnection();
+    if (!hasNetwork) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(UserConsts.offlineError),
+            backgroundColor: ColorConsts.error,
+          ),
+        );
+      }
+      return;
+    }
+
+    final controller = TextEditingController(
+      text: _settingsViewModel.displayName.value,
+    );
+
+    if (!mounted) return;
+
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text(UserConsts.changeNameDialogTitle),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: controller,
+                maxLength: UserConsts.maxDisplayNameLength,
+                autofocus: true,
+                decoration: InputDecoration(
+                  hintText: UserConsts.changeNameDialogHint,
+                  counterText:
+                      '${controller.text.length}/${UserConsts.maxDisplayNameLength}',
+                ),
+                onChanged: (value) {
+                  // counterTextを更新するため、StatefulBuilderのsetStateを使用
+                  setDialogState(() {});
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text(UserConsts.cancelButtonLabel),
+            ),
+            TextButton(
+              onPressed: () {
+                final newName = controller.text.trim();
+                if (newName.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(UserConsts.emptyNameError),
+                      backgroundColor: ColorConsts.error,
+                    ),
+                  );
+                  return;
+                }
+                Navigator.of(context).pop(newName);
+              },
+              child: const Text(UserConsts.saveButtonLabel),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (result == null || result.isEmpty) return;
+
+    final success = await _settingsViewModel.updateDisplayName(result);
+    if (!mounted) return;
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('名前を変更しました'),
+          backgroundColor: ColorConsts.success,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('名前の変更に失敗しました'),
+          backgroundColor: ColorConsts.error,
+        ),
+      );
+    }
   }
 
   Widget _buildAccountSection() {
@@ -387,10 +499,13 @@ class _SettingsScreenState extends State<SettingsScreen>
     );
   }
 
-  void _showLoginScreen() {
-    Navigator.of(context).push(
+  Future<void> _showLoginScreen() async {
+    await Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => const LoginScreen(mode: LoginMode.link)),
     );
+
+    // ログイン画面から戻ったときにdisplayNameを再読み込み
+    await _settingsViewModel.refreshDisplayName();
   }
 
   /// ログアウト確認ダイアログを表示
@@ -434,6 +549,12 @@ class _SettingsScreenState extends State<SettingsScreen>
         supabase: Supabase.instance.client,
       );
       await authDatasource.signOut();
+
+      // ローカルDBのdisplayNameをリセット
+      final usersDatasource = LocalUsersDatasource(
+        database: Get.find<AppDatabase>(),
+      );
+      await usersDatasource.resetDisplayName();
 
       AppLogger.instance.i('ログアウト完了');
 

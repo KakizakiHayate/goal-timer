@@ -7,6 +7,7 @@ import '../../../core/utils/color_consts.dart';
 import '../../../core/utils/spacing_consts.dart';
 import '../../../core/utils/text_consts.dart';
 import '../../home/view/home_screen.dart';
+import '../../settings/view_model/settings_view_model.dart';
 import '../view_model/auth_view_model.dart';
 
 /// ログイン画面のモード
@@ -270,6 +271,9 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _navigateToHome() {
+    // SettingsViewModelのdisplayNameを更新（シングルトンなので再初期化されないため）
+    Get.find<SettingsViewModel>().refreshDisplayName();
+
     Get.offAll(() => const HomeScreen());
   }
 

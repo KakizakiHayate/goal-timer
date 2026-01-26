@@ -1,5 +1,6 @@
 import '../../utils/app_logger.dart';
 import '../../utils/streak_reminder_consts.dart';
+import '../../utils/user_consts.dart';
 import 'app_database.dart';
 import 'database_consts.dart';
 
@@ -142,6 +143,90 @@ class LocalUsersDatasource {
     } catch (e, stackTrace) {
       AppLogger.instance.e('ストリークリマインダー設定の更新に失敗しました', e, stackTrace);
       rethrow;
+    }
+  }
+
+  /// 表示名を取得
+  /// ユーザーが存在しない場合またはdisplayNameがnullの場合はデフォルト値を返す
+  Future<String> getDisplayName() async {
+    try {
+      final db = await _database.database;
+      final result = await db.query(
+        DatabaseConsts.tableUsers,
+        columns: [DatabaseConsts.columnDisplayName],
+        limit: 1,
+      );
+
+      if (result.isEmpty) {
+        return UserConsts.defaultGuestName;
+      }
+
+      final displayName =
+          result.first[DatabaseConsts.columnDisplayName] as String?;
+      if (displayName == null || displayName.isEmpty) {
+        return UserConsts.defaultGuestName;
+      }
+      return displayName;
+    } catch (e, stackTrace) {
+      AppLogger.instance.e('表示名の取得に失敗しました', e, stackTrace);
+      return UserConsts.defaultGuestName;
+    }
+  }
+
+  /// 表示名を更新（upsert）
+  /// ユーザーが存在しない場合は新規作成する
+  Future<void> updateDisplayName(String displayName) async {
+    try {
+      final db = await _database.database;
+
+      // 既存ユーザーを確認
+      final existingUsers = await db.query(
+        DatabaseConsts.tableUsers,
+        limit: 1,
+      );
+
+      final now = DateTime.now().toIso8601String();
+
+      if (existingUsers.isEmpty) {
+        // ユーザーが存在しない場合は新規作成
+        await db.insert(DatabaseConsts.tableUsers, {
+          DatabaseConsts.columnId: 'local_user',
+          DatabaseConsts.columnDisplayName: displayName,
+          DatabaseConsts.columnCreatedAt: now,
+          DatabaseConsts.columnUpdatedAt: now,
+        });
+        AppLogger.instance.i('新規ユーザーを作成し、表示名を設定しました: $displayName');
+      } else {
+        // 既存ユーザーを更新
+        await db.update(DatabaseConsts.tableUsers, {
+          DatabaseConsts.columnDisplayName: displayName,
+          DatabaseConsts.columnUpdatedAt: now,
+        });
+        AppLogger.instance.i('表示名を更新しました: $displayName');
+      }
+    } catch (e, stackTrace) {
+      AppLogger.instance.e('表示名の更新に失敗しました', e, stackTrace);
+      rethrow;
+    }
+  }
+
+  /// 表示名をデフォルト値にリセット
+  /// サインアウトやアカウント削除時に呼び出す
+  Future<void> resetDisplayName() async {
+    try {
+      final db = await _database.database;
+
+      final count = await db.update(DatabaseConsts.tableUsers, {
+        DatabaseConsts.columnDisplayName: null,
+        DatabaseConsts.columnUpdatedAt: DateTime.now().toIso8601String(),
+      });
+
+      if (count > 0) {
+        AppLogger.instance.i('表示名をリセットしました');
+      }
+    } catch (e, stackTrace) {
+      AppLogger.instance.e('表示名のリセットに失敗しました', e, stackTrace);
+      // リセット失敗はクリティカルではないのでrethrowしない
     }
   }
 }
