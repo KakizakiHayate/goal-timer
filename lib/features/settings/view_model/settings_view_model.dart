@@ -5,6 +5,7 @@ import '../../../core/data/local/app_database.dart';
 import '../../../core/data/local/local_settings_datasource.dart';
 import '../../../core/data/local/local_users_datasource.dart';
 import '../../../core/data/supabase/supabase_auth_datasource.dart';
+import '../../../core/data/supabase/supabase_users_datasource.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/streak_reminder_consts.dart';
@@ -18,6 +19,7 @@ class SettingsViewModel extends GetxController {
   late final LocalUsersDatasource _usersDatasource;
   late final NotificationService _notificationService;
   late final SupabaseAuthDatasource _authDatasource;
+  late final SupabaseUsersDatasource _supabaseUsersDatasource;
 
   final RxInt defaultTimerSeconds =
       LocalSettingsDataSource.defaultTimerSeconds.obs;
@@ -30,6 +32,7 @@ class SettingsViewModel extends GetxController {
     LocalUsersDatasource? usersDatasource,
     NotificationService? notificationService,
     SupabaseAuthDatasource? authDatasource,
+    SupabaseUsersDatasource? supabaseUsersDatasource,
   }) {
     _datasource = LocalSettingsDataSource();
     _usersDatasource =
@@ -38,6 +41,8 @@ class SettingsViewModel extends GetxController {
     _notificationService = notificationService ?? NotificationService();
     _authDatasource = authDatasource ??
         SupabaseAuthDatasource(supabase: Supabase.instance.client);
+    _supabaseUsersDatasource = supabaseUsersDatasource ??
+        SupabaseUsersDatasource(supabase: Supabase.instance.client);
   }
 
   /// 初期化: SharedPreferencesとDBから設定を読み込む
@@ -83,6 +88,13 @@ class SettingsViewModel extends GetxController {
     return _authDatasource.checkNetworkConnection();
   }
 
+  /// displayNameを再読み込み
+  /// ログイン後や画面表示時に呼び出す
+  Future<void> refreshDisplayName() async {
+    final name = await _usersDatasource.getDisplayName();
+    displayName.value = name;
+  }
+
   /// displayNameを更新
   /// オンライン必須のため、オフライン時はエラーを返す
   Future<bool> updateDisplayName(String newName) async {
@@ -108,9 +120,17 @@ class SettingsViewModel extends GetxController {
 
       isUpdatingDisplayName.value = true;
 
-      // ローカルDBとSupabaseの両方を更新
+      // ユーザーIDを取得
+      final userId = _authDatasource.currentUser?.id;
+      if (userId == null) {
+        AppLogger.instance.w('ユーザーIDが取得できないため更新をスキップ');
+        isUpdatingDisplayName.value = false;
+        return false;
+      }
+
+      // ローカルDBとSupabase public.usersテーブルの両方を更新
       await _usersDatasource.updateDisplayName(newName);
-      await _authDatasource.updateDisplayName(newName);
+      await _supabaseUsersDatasource.updateDisplayName(userId, newName);
 
       displayName.value = newName;
       AppLogger.instance.i('displayNameを更新しました: $newName');

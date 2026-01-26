@@ -5,6 +5,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:goal_timer/core/data/local/local_users_datasource.dart';
 import 'package:goal_timer/core/data/supabase/auth_result.dart';
 import 'package:goal_timer/core/data/supabase/supabase_auth_datasource.dart';
+import 'package:goal_timer/core/data/supabase/supabase_users_datasource.dart';
 import 'package:goal_timer/features/auth/view_model/auth_view_model.dart';
 
 // モッククラス
@@ -13,28 +14,41 @@ class MockSupabaseAuthDatasource extends Mock
 
 class MockLocalUsersDatasource extends Mock implements LocalUsersDatasource {}
 
+class MockSupabaseUsersDatasource extends Mock
+    implements SupabaseUsersDatasource {}
+
 void main() {
   late MockSupabaseAuthDatasource mockAuthDatasource;
   late MockLocalUsersDatasource mockUsersDatasource;
+  late MockSupabaseUsersDatasource mockSupabaseUsersDatasource;
   late AuthViewModel viewModel;
 
   setUp(() {
     mockAuthDatasource = MockSupabaseAuthDatasource();
     mockUsersDatasource = MockLocalUsersDatasource();
+    mockSupabaseUsersDatasource = MockSupabaseUsersDatasource();
     Get.testMode = true;
 
     // デフォルトのスタブ
     when(() => mockAuthDatasource.isAnonymous).thenReturn(true);
+    when(() => mockAuthDatasource.currentUser).thenReturn(null);
     when(
       () => mockUsersDatasource.updateDisplayName(any()),
     ).thenAnswer((_) async {});
     when(
       () => mockUsersDatasource.resetDisplayName(),
     ).thenAnswer((_) async {});
+    when(
+      () => mockSupabaseUsersDatasource.updateDisplayName(any(), any()),
+    ).thenAnswer((_) async {});
+    when(
+      () => mockSupabaseUsersDatasource.getDisplayName(any()),
+    ).thenAnswer((_) async => null);
 
     viewModel = AuthViewModel(
       authDatasource: mockAuthDatasource,
       usersDatasource: mockUsersDatasource,
+      supabaseUsersDatasource: mockSupabaseUsersDatasource,
     );
   });
 
@@ -74,6 +88,7 @@ void main() {
         final linkedViewModel = AuthViewModel(
           authDatasource: mockAuthDatasource,
           usersDatasource: mockUsersDatasource,
+          supabaseUsersDatasource: mockSupabaseUsersDatasource,
         );
 
         expect(linkedViewModel.isAnonymous, isFalse);
@@ -93,6 +108,7 @@ void main() {
         final linkedViewModel = AuthViewModel(
           authDatasource: mockAuthDatasource,
           usersDatasource: mockUsersDatasource,
+          supabaseUsersDatasource: mockSupabaseUsersDatasource,
         );
 
         expect(linkedViewModel.showLinkButton, isFalse);

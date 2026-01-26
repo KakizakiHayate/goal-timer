@@ -294,6 +294,19 @@ class HomeViewModel extends GetxController {
     loadGoals();
   }
 
+  /// displayNameを再読み込み
+  /// 設定画面から戻ったときに呼び出す
+  Future<void> refreshDisplayName() async {
+    try {
+      final displayName = await _usersDatasource.getDisplayName();
+      _state = state.copyWith(displayName: displayName);
+      update();
+      AppLogger.instance.i('displayNameを再読み込みしました: $displayName');
+    } catch (error, stackTrace) {
+      AppLogger.instance.e('displayNameの再読み込みに失敗しました', error, stackTrace);
+    }
+  }
+
   // フィルタリングされた目標リストを取得
   List<GoalsModel> get filteredGoals => state.goals;
 

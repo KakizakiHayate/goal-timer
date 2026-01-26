@@ -49,6 +49,9 @@ class FakeSettingsViewModel extends GetxController
     displayName.value = newName;
     return true;
   }
+
+  @override
+  Future<void> refreshDisplayName() async {}
 }
 
 /// テスト用MockNotificationService

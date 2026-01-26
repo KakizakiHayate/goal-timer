@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/data/local/app_database.dart';
+import '../../../core/data/local/local_users_datasource.dart';
 import '../../../core/data/supabase/supabase_auth_datasource.dart';
 import '../../../core/utils/animation_consts.dart';
 import '../../../core/utils/app_consts.dart';
@@ -496,10 +497,13 @@ class _SettingsScreenState extends State<SettingsScreen>
     );
   }
 
-  void _showLoginScreen() {
-    Navigator.of(context).push(
+  Future<void> _showLoginScreen() async {
+    await Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => const LoginScreen(mode: LoginMode.link)),
     );
+
+    // ログイン画面から戻ったときにdisplayNameを再読み込み
+    await _settingsViewModel.refreshDisplayName();
   }
 
   /// ログアウト確認ダイアログを表示
@@ -543,6 +547,12 @@ class _SettingsScreenState extends State<SettingsScreen>
         supabase: Supabase.instance.client,
       );
       await authDatasource.signOut();
+
+      // ローカルDBのdisplayNameをリセット
+      final usersDatasource = LocalUsersDatasource(
+        database: Get.find<AppDatabase>(),
+      );
+      await usersDatasource.resetDisplayName();
 
       AppLogger.instance.i('ログアウト完了');
 

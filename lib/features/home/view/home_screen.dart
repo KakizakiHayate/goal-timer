@@ -140,6 +140,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             onTap: (index) {
               _tabController.animateTo(index);
               setState(() {});
+
+              // ホームタブに戻ったときにdisplayNameを再読み込み
+              if (index == 0) {
+                Get.find<HomeViewModel>().refreshDisplayName();
+              }
             },
             type: BottomNavigationBarType.fixed,
             backgroundColor: Colors.transparent,
