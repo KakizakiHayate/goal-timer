@@ -97,6 +97,26 @@ class TimerState {
   /// タイマーが動作中または一時停止中の場合は切り替え不可
   bool get isModeSwitchable =>
       status == TimerStatus.initial || status == TimerStatus.completed;
+
+  /// 戻る時に確認ダイアログが必要かどうか
+  /// 1秒でもカウントしていれば確認が必要
+  /// ただし、完了済み（completed）の場合は不要
+  bool get needsBackConfirmation {
+    // 完了済みの場合は確認不要
+    if (status == TimerStatus.completed) {
+      return false;
+    }
+
+    switch (mode) {
+      case TimerMode.countup:
+        // カウントアップ: 1秒でもカウントしていれば確認が必要
+        return currentSeconds > TimerConstants.countupInitialSeconds;
+      case TimerMode.countdown:
+      case TimerMode.pomodoro:
+        // カウントダウン/ポモドーロ: 1秒でも減っていれば確認が必要
+        return currentSeconds < totalSeconds;
+    }
+  }
 }
 
 // タイマーのViewModel

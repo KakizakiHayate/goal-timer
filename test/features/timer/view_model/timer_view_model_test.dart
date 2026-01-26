@@ -421,4 +421,146 @@ void main() {
       viewModel.onClose();
     });
   });
+
+  group('TimerState needsBackConfirmation Tests', () {
+    group('カウントアップモード', () {
+      test('カウントが0の場合はfalseを返すこと', () {
+        // Arrange
+        final state = TimerState(
+          mode: TimerMode.countup,
+          currentSeconds: 0,
+          totalSeconds: 0,
+          status: TimerStatus.initial,
+        );
+
+        // Assert
+        expect(state.needsBackConfirmation, isFalse);
+      });
+
+      test('1秒でもカウントしていればtrueを返すこと', () {
+        // Arrange
+        final state = TimerState(
+          mode: TimerMode.countup,
+          currentSeconds: 1,
+          totalSeconds: 0,
+          status: TimerStatus.running,
+        );
+
+        // Assert
+        expect(state.needsBackConfirmation, isTrue);
+      });
+
+      test('一時停止中でもカウントがあればtrueを返すこと', () {
+        // Arrange
+        final state = TimerState(
+          mode: TimerMode.countup,
+          currentSeconds: 60,
+          totalSeconds: 0,
+          status: TimerStatus.paused,
+        );
+
+        // Assert
+        expect(state.needsBackConfirmation, isTrue);
+      });
+    });
+
+    group('カウントダウンモード', () {
+      test('カウントが減っていない場合はfalseを返すこと', () {
+        // Arrange
+        final state = TimerState(
+          mode: TimerMode.countdown,
+          currentSeconds: 1500,
+          totalSeconds: 1500,
+          status: TimerStatus.initial,
+        );
+
+        // Assert
+        expect(state.needsBackConfirmation, isFalse);
+      });
+
+      test('1秒でも減っていればtrueを返すこと', () {
+        // Arrange
+        final state = TimerState(
+          mode: TimerMode.countdown,
+          currentSeconds: 1499,
+          totalSeconds: 1500,
+          status: TimerStatus.running,
+        );
+
+        // Assert
+        expect(state.needsBackConfirmation, isTrue);
+      });
+
+      test('一時停止中でもカウントが減っていればtrueを返すこと', () {
+        // Arrange
+        final state = TimerState(
+          mode: TimerMode.countdown,
+          currentSeconds: 1200,
+          totalSeconds: 1500,
+          status: TimerStatus.paused,
+        );
+
+        // Assert
+        expect(state.needsBackConfirmation, isTrue);
+      });
+    });
+
+    group('ポモドーロモード', () {
+      test('カウントが減っていない場合はfalseを返すこと', () {
+        // Arrange
+        final state = TimerState(
+          mode: TimerMode.pomodoro,
+          currentSeconds: 1500,
+          totalSeconds: 1500,
+          status: TimerStatus.initial,
+          pomodoroRound: 1,
+        );
+
+        // Assert
+        expect(state.needsBackConfirmation, isFalse);
+      });
+
+      test('1秒でも減っていればtrueを返すこと', () {
+        // Arrange
+        final state = TimerState(
+          mode: TimerMode.pomodoro,
+          currentSeconds: 1499,
+          totalSeconds: 1500,
+          status: TimerStatus.running,
+          pomodoroRound: 1,
+        );
+
+        // Assert
+        expect(state.needsBackConfirmation, isTrue);
+      });
+    });
+
+    group('完了状態', () {
+      test('completed状態では常にfalseを返すこと（カウントアップ）', () {
+        // Arrange
+        final state = TimerState(
+          mode: TimerMode.countup,
+          currentSeconds: 100,
+          totalSeconds: 0,
+          status: TimerStatus.completed,
+        );
+
+        // Assert
+        expect(state.needsBackConfirmation, isFalse);
+      });
+
+      test('completed状態では常にfalseを返すこと（カウントダウン）', () {
+        // Arrange
+        final state = TimerState(
+          mode: TimerMode.countdown,
+          currentSeconds: 0,
+          totalSeconds: 1500,
+          status: TimerStatus.completed,
+        );
+
+        // Assert
+        expect(state.needsBackConfirmation, isFalse);
+      });
+    });
+  });
 }
