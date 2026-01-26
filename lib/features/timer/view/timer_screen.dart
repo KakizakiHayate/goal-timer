@@ -160,6 +160,67 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
     );
   }
 
+  /// 戻るボタン押下時の処理
+  /// 確認が必要な場合はダイアログを表示
+  Future<void> _handleBackButton(TimerState timerState) async {
+    if (timerState.needsBackConfirmation) {
+      final shouldPop = await _showBackConfirmDialog();
+      if (shouldPop == true && mounted) {
+        Navigator.pop(context);
+      }
+    } else {
+      Navigator.pop(context);
+    }
+  }
+
+  /// 戻る確認ダイアログを表示
+  /// 戻る場合はtrue、キャンセルの場合はfalseを返す
+  Future<bool?> _showBackConfirmDialog() {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: Text(
+          '学習を中断しますか？',
+          style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          '記録されていない学習時間は失われます。',
+          style: TextConsts.body.copyWith(color: ColorConsts.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              'キャンセル',
+              style: TextConsts.body.copyWith(
+                color: ColorConsts.textSecondary,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ColorConsts.error,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              '中断する',
+              style: TextConsts.body.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Obx(() {
@@ -171,7 +232,13 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
         _checkAndShowCompletionDialog();
       }
 
-      return Scaffold(
+      return PopScope(
+        canPop: !timerState.needsBackConfirmation,
+        onPopInvokedWithResult: (didPop, result) async {
+          if (didPop) return;
+          await _handleBackButton(timerState);
+        },
+        child: Scaffold(
         body: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -193,7 +260,7 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                           Icons.arrow_back_ios,
                           color: Colors.white,
                         ),
-                        onPressed: () => Navigator.pop(context),
+                        onPressed: () => _handleBackButton(timerState),
                       ),
                       Expanded(
                         child: Text(
@@ -239,6 +306,7 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
             ),
           ),
         ),
+      ),
       );
     });
   }
