@@ -71,6 +71,35 @@ class MigrationService {
     }
   }
 
+  /// データ移行を実行し、結果をログ出力する
+  ///
+  /// [userId] SupabaseユーザーID
+  /// 移行失敗時も例外をthrowせず、ローカルデータで継続使用可能
+  /// ViewModelから呼び出す共通メソッド
+  Future<void> migrateAndLogResult(String userId) async {
+    try {
+      final result = await migrate(userId);
+
+      if (result.migrationFailed) {
+        // 移行失敗時もログのみ、例外はthrowしない
+        AppLogger.instance.w(
+          'データ移行に失敗しましたが、ローカルデータで継続します: ${result.message}',
+        );
+      } else if (result.skipped) {
+        AppLogger.instance.i('データ移行: ${result.message}');
+      } else {
+        AppLogger.instance.i(
+          'データ移行成功: 目標${result.goalCount}件、ログ${result.studyLogCount}件',
+        );
+      }
+      // 例外をthrowしない。常にホーム画面へ遷移
+    } catch (error, stackTrace) {
+      // 予期せぬエラーの場合もログのみ
+      AppLogger.instance.e('データ移行で予期せぬエラー', error, stackTrace);
+      // rethrowしない → ホーム画面へ遷移を継続
+    }
+  }
+
   /// ローカルデータをSupabaseに移行
   ///
   /// [userId] SupabaseユーザーID
