@@ -69,18 +69,18 @@ void main() {
   });
 
   group('MigrationService', () {
-    group('hasMigrated', () {
+    group('isMigrated', () {
       test('移行前はfalseを返す', () async {
         SharedPreferences.setMockInitialValues({});
-        final result = await migrationService.hasMigrated();
+        final result = await migrationService.isMigrated();
         expect(result, isFalse);
       });
 
       test('移行後はtrueを返す', () async {
         SharedPreferences.setMockInitialValues({
-          'has_migrated_to_supabase': true,
+          'is_migrated_to_supabase': true,
         });
-        final result = await migrationService.hasMigrated();
+        final result = await migrationService.isMigrated();
         expect(result, isTrue);
       });
     });
@@ -151,7 +151,7 @@ void main() {
     group('migrate', () {
       test('既に移行済みの場合はスキップする', () async {
         SharedPreferences.setMockInitialValues({
-          'has_migrated_to_supabase': true,
+          'is_migrated_to_supabase': true,
         });
 
         final result = await migrationService.migrate('user-123');
@@ -217,20 +217,45 @@ void main() {
 
         // 移行後は移行済みと判定される
         final prefs = await SharedPreferences.getInstance();
-        expect(prefs.getBool('has_migrated_to_supabase'), isTrue);
+        expect(prefs.getBool('is_migrated_to_supabase'), isTrue);
+      });
+
+      test('移行失敗時はsuccess: true, migrationFailed: trueを返す', () async {
+        SharedPreferences.setMockInitialValues({});
+
+        // hasLocalDataのためのモック設定
+        when(() => mockLocalGoals.fetchAllGoalsIncludingDeleted())
+            .thenAnswer((_) async => [testGoal]);
+        when(() => mockLocalStudyLogs.fetchAllLogs())
+            .thenAnswer((_) async => [testLog]);
+
+        // Supabaseへの挿入でエラーを発生させる
+        when(() => mockSupabaseGoals.insertGoals(any()))
+            .thenThrow(Exception('Supabase error'));
+
+        final result = await migrationService.migrate('user-123');
+
+        // 移行は失敗しているが、success: trueを返す
+        expect(result.success, isTrue);
+        expect(result.migrationFailed, isTrue);
+        expect(result.error, isNotNull);
+
+        // 移行フラグは設定されない（再試行可能）
+        final prefs = await SharedPreferences.getInstance();
+        expect(prefs.getBool('is_migrated_to_supabase'), isNull);
       });
     });
 
     group('resetMigration', () {
       test('移行フラグをリセットする', () async {
         SharedPreferences.setMockInitialValues({
-          'has_migrated_to_supabase': true,
+          'is_migrated_to_supabase': true,
         });
 
         await migrationService.resetMigration();
 
         final prefs = await SharedPreferences.getInstance();
-        expect(prefs.getBool('has_migrated_to_supabase'), isNull);
+        expect(prefs.getBool('is_migrated_to_supabase'), isNull);
       });
     });
   });

@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/local/local_goals_datasource.dart';
@@ -14,7 +17,7 @@ class MigrationService {
   final SupabaseStudyLogsDatasource _supabaseStudyLogsDatasource;
 
   /// SharedPreferencesのキー: 移行済みフラグ
-  static const String _keyHasMigrated = 'has_migrated_to_supabase';
+  static const String _keyIsMigrated = 'is_migrated_to_supabase';
 
   MigrationService({
     required LocalGoalsDatasource localGoalsDatasource,
@@ -27,15 +30,15 @@ class MigrationService {
         _supabaseStudyLogsDatasource = supabaseStudyLogsDatasource;
 
   /// 移行済みかどうかを確認
-  Future<bool> hasMigrated() async {
+  Future<bool> isMigrated() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_keyHasMigrated) ?? false;
+    return prefs.getBool(_keyIsMigrated) ?? false;
   }
 
   /// 移行済みフラグを設定
   Future<void> _setMigrated() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_keyHasMigrated, true);
+    await prefs.setBool(_keyIsMigrated, true);
     AppLogger.instance.i('移行済みフラグを設定しました');
   }
 
@@ -71,12 +74,13 @@ class MigrationService {
   /// ローカルデータをSupabaseに移行
   ///
   /// [userId] SupabaseユーザーID
+  /// 移行失敗時もsuccess: trueを返し、ユーザーはローカルデータで継続使用可能
   Future<MigrationResult> migrate(String userId) async {
     AppLogger.instance.i('データ移行を開始します: userId=$userId');
 
     try {
       // 移行済みの場合はスキップ
-      if (await hasMigrated()) {
+      if (await isMigrated()) {
         AppLogger.instance.i('既に移行済みのためスキップします');
         return const MigrationResult(
           success: true,
@@ -117,12 +121,57 @@ class MigrationService {
       );
     } catch (error, stackTrace) {
       AppLogger.instance.e('データ移行に失敗しました', error, stackTrace);
+
+      // Crashlyticsにエラーとデータを送信（運営が手動移行できるように）
+      await _sendErrorToCrashlytics(
+        error: error,
+        stackTrace: stackTrace,
+        userId: userId,
+      );
+
+      // 失敗しても success: true を返し、ユーザーはアプリを継続使用可能
+      // is_migrated_to_supabase フラグは設定しない（再試行可能にする）
       return MigrationResult(
-        success: false,
+        success: true,
         skipped: false,
-        message: 'データ移行に失敗しました: $error',
+        message: 'データ移行に失敗しましたが、ローカルデータで継続できます',
+        migrationFailed: true,
         error: error,
       );
+    }
+  }
+
+  /// Crashlyticsにエラーとマイグレーションデータを送信
+  Future<void> _sendErrorToCrashlytics({
+    required Object error,
+    required StackTrace stackTrace,
+    required String userId,
+  }) async {
+    try {
+      // ローカルデータを取得
+      final goals = await _localGoalsDatasource.fetchAllGoalsIncludingDeleted();
+      final studyLogs = await _localStudyLogsDatasource.fetchAllLogs();
+
+      // JSONに変換
+      final goalsJson = goals.map((g) => g.toJson()).toList();
+      final logsJson = studyLogs.map((l) => l.toJson()).toList();
+
+      await FirebaseCrashlytics.instance.recordError(
+        error,
+        stackTrace,
+        reason: 'Data migration failed',
+        information: [
+          'userId: $userId',
+          'goalCount: ${goals.length}',
+          'studyLogCount: ${studyLogs.length}',
+          'goals: ${jsonEncode(goalsJson)}',
+          'studyLogs: ${jsonEncode(logsJson)}',
+        ],
+      );
+
+      AppLogger.instance.i('Crashlyticsにエラーとデータを送信しました');
+    } catch (e, st) {
+      AppLogger.instance.e('Crashlytics送信に失敗しました', e, st);
     }
   }
 
@@ -166,7 +215,7 @@ class MigrationService {
   /// 移行をリセット（デバッグ用）
   Future<void> resetMigration() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_keyHasMigrated);
+    await prefs.remove(_keyIsMigrated);
     AppLogger.instance.i('移行フラグをリセットしました');
   }
 }
@@ -193,6 +242,9 @@ class MigrationResult {
   final int studyLogCount;
   final Object? error;
 
+  /// 移行が失敗したかどうか（success: trueでもmigrationFailed: trueの場合がある）
+  final bool migrationFailed;
+
   const MigrationResult({
     required this.success,
     required this.skipped,
@@ -200,5 +252,6 @@ class MigrationResult {
     this.goalCount = 0,
     this.studyLogCount = 0,
     this.error,
+    this.migrationFailed = false,
   });
 }

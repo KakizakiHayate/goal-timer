@@ -158,6 +158,7 @@ class SplashViewModel extends GetxController {
   }
 
   /// データ移行を実行（必要な場合）
+  /// 移行失敗時も例外をthrowせず、ローカルデータで継続使用可能にする
   Future<void> _migrateDataIfNeeded() async {
     try {
       final userId = _userId;
@@ -168,21 +169,23 @@ class SplashViewModel extends GetxController {
 
       final result = await _migrationService.migrate(userId);
 
-      if (result.success) {
-        if (result.skipped) {
-          AppLogger.instance.i('データ移行: ${result.message}');
-        } else {
-          AppLogger.instance.i(
-            'データ移行成功: 目標${result.goalCount}件、ログ${result.studyLogCount}件',
-          );
-        }
+      if (result.migrationFailed) {
+        // 移行失敗時もログのみ、例外はthrowしない
+        AppLogger.instance.w(
+          'データ移行に失敗しましたが、ローカルデータで継続します: ${result.message}',
+        );
+      } else if (result.skipped) {
+        AppLogger.instance.i('データ移行: ${result.message}');
       } else {
-        AppLogger.instance.e('データ移行失敗: ${result.message}');
-        throw Exception(result.message);
+        AppLogger.instance.i(
+          'データ移行成功: 目標${result.goalCount}件、ログ${result.studyLogCount}件',
+        );
       }
+      // 例外をthrowしない。常にホーム画面へ遷移
     } catch (error, stackTrace) {
-      AppLogger.instance.e('データ移行に失敗しました', error, stackTrace);
-      rethrow;
+      // 予期せぬエラーの場合もログのみ
+      AppLogger.instance.e('データ移行で予期せぬエラー', error, stackTrace);
+      // rethrowしない → ホーム画面へ遷移を継続
     }
   }
 
