@@ -8,6 +8,7 @@ import '../data/local/local_study_daily_logs_datasource.dart';
 import '../data/supabase/supabase_goals_datasource.dart';
 import '../data/supabase/supabase_study_logs_datasource.dart';
 import '../utils/app_logger.dart';
+import 'firebase_service.dart';
 
 /// ローカルデータをSupabaseに移行するサービス
 class MigrationService {
@@ -15,6 +16,7 @@ class MigrationService {
   final LocalStudyDailyLogsDatasource _localStudyLogsDatasource;
   final SupabaseGoalsDatasource _supabaseGoalsDatasource;
   final SupabaseStudyLogsDatasource _supabaseStudyLogsDatasource;
+  final FirebaseService _firebaseService;
 
   /// SharedPreferencesのキー: 移行済みフラグ
   static const String _keyIsMigrated = 'is_migrated_to_supabase';
@@ -24,10 +26,12 @@ class MigrationService {
     required LocalStudyDailyLogsDatasource localStudyLogsDatasource,
     required SupabaseGoalsDatasource supabaseGoalsDatasource,
     required SupabaseStudyLogsDatasource supabaseStudyLogsDatasource,
+    FirebaseService? firebaseService,
   })  : _localGoalsDatasource = localGoalsDatasource,
         _localStudyLogsDatasource = localStudyLogsDatasource,
         _supabaseGoalsDatasource = supabaseGoalsDatasource,
-        _supabaseStudyLogsDatasource = supabaseStudyLogsDatasource;
+        _supabaseStudyLogsDatasource = supabaseStudyLogsDatasource,
+        _firebaseService = firebaseService ?? FirebaseService();
 
   /// 移行済みかどうかを確認
   Future<bool> isMigrated() async {
@@ -111,6 +115,10 @@ class MigrationService {
       // 移行済みの場合はスキップ
       if (await isMigrated()) {
         AppLogger.instance.i('既に移行済みのためスキップします');
+        await _firebaseService.logMigrationSkipped(
+          userId: userId,
+          reason: 'already_migrated',
+        );
         return const MigrationResult(
           success: true,
           skipped: true,
@@ -122,6 +130,10 @@ class MigrationService {
       if (!await hasLocalData()) {
         AppLogger.instance.i('ローカルデータがないためスキップします');
         await _setMigrated();
+        await _firebaseService.logMigrationSkipped(
+          userId: userId,
+          reason: 'no_local_data',
+        );
         return const MigrationResult(
           success: true,
           skipped: true,
@@ -140,6 +152,13 @@ class MigrationService {
       // 移行済みフラグを設定
       await _setMigrated();
 
+      // マイグレーション完了イベントを送信
+      await _firebaseService.logMigrationCompleted(
+        userId: userId,
+        goalCount: goalCount,
+        studyLogCount: logCount,
+      );
+
       AppLogger.instance.i('データ移行が完了しました');
       return MigrationResult(
         success: true,
@@ -156,6 +175,12 @@ class MigrationService {
         error: error,
         stackTrace: stackTrace,
         userId: userId,
+      );
+
+      // マイグレーション失敗イベントを送信
+      await _firebaseService.logMigrationFailed(
+        userId: userId,
+        errorMessage: error.toString(),
       );
 
       // 失敗しても success: true を返し、ユーザーはアプリを継続使用可能

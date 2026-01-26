@@ -8,6 +8,7 @@ import 'package:goal_timer/core/data/supabase/supabase_goals_datasource.dart';
 import 'package:goal_timer/core/data/supabase/supabase_study_logs_datasource.dart';
 import 'package:goal_timer/core/models/goals/goals_model.dart';
 import 'package:goal_timer/core/models/study_daily_logs/study_daily_logs_model.dart';
+import 'package:goal_timer/core/services/firebase_service.dart';
 import 'package:goal_timer/core/services/migration_service.dart';
 
 // モッククラス
@@ -22,11 +23,14 @@ class MockSupabaseGoalsDatasource extends Mock
 class MockSupabaseStudyLogsDatasource extends Mock
     implements SupabaseStudyLogsDatasource {}
 
+class MockFirebaseService extends Mock implements FirebaseService {}
+
 void main() {
   late MockLocalGoalsDatasource mockLocalGoals;
   late MockLocalStudyLogsDatasource mockLocalStudyLogs;
   late MockSupabaseGoalsDatasource mockSupabaseGoals;
   late MockSupabaseStudyLogsDatasource mockSupabaseStudyLogs;
+  late MockFirebaseService mockFirebaseService;
   late MigrationService migrationService;
 
   // テスト用のモデル
@@ -59,12 +63,29 @@ void main() {
     mockLocalStudyLogs = MockLocalStudyLogsDatasource();
     mockSupabaseGoals = MockSupabaseGoalsDatasource();
     mockSupabaseStudyLogs = MockSupabaseStudyLogsDatasource();
+    mockFirebaseService = MockFirebaseService();
+
+    // FirebaseServiceのモック設定
+    when(() => mockFirebaseService.logMigrationCompleted(
+          userId: any(named: 'userId'),
+          goalCount: any(named: 'goalCount'),
+          studyLogCount: any(named: 'studyLogCount'),
+        )).thenAnswer((_) async {});
+    when(() => mockFirebaseService.logMigrationFailed(
+          userId: any(named: 'userId'),
+          errorMessage: any(named: 'errorMessage'),
+        )).thenAnswer((_) async {});
+    when(() => mockFirebaseService.logMigrationSkipped(
+          userId: any(named: 'userId'),
+          reason: any(named: 'reason'),
+        )).thenAnswer((_) async {});
 
     migrationService = MigrationService(
       localGoalsDatasource: mockLocalGoals,
       localStudyLogsDatasource: mockLocalStudyLogs,
       supabaseGoalsDatasource: mockSupabaseGoals,
       supabaseStudyLogsDatasource: mockSupabaseStudyLogs,
+      firebaseService: mockFirebaseService,
     );
   });
 
@@ -159,6 +180,12 @@ void main() {
         expect(result.success, isTrue);
         expect(result.skipped, isTrue);
         expect(result.message, '既に移行済みです');
+
+        // スキップイベントが送信されることを確認
+        verify(() => mockFirebaseService.logMigrationSkipped(
+              userId: 'user-123',
+              reason: 'already_migrated',
+            )).called(1);
       });
 
       test('ローカルデータがない場合はスキップする', () async {
@@ -173,6 +200,12 @@ void main() {
         expect(result.success, isTrue);
         expect(result.skipped, isTrue);
         expect(result.message, 'ローカルデータがありません');
+
+        // スキップイベントが送信されることを確認
+        verify(() => mockFirebaseService.logMigrationSkipped(
+              userId: 'user-123',
+              reason: 'no_local_data',
+            )).called(1);
       });
 
       test('目標と学習ログを正常に移行する', () async {
@@ -200,6 +233,13 @@ void main() {
         // Supabaseへの挿入が呼ばれたことを確認
         verify(() => mockSupabaseGoals.insertGoals(any())).called(1);
         verify(() => mockSupabaseStudyLogs.insertLogs(any())).called(1);
+
+        // 完了イベントが送信されることを確認
+        verify(() => mockFirebaseService.logMigrationCompleted(
+              userId: 'user-123',
+              goalCount: 1,
+              studyLogCount: 1,
+            )).called(1);
       });
 
       test('移行後は移行済みフラグが設定される', () async {
@@ -243,6 +283,12 @@ void main() {
         // 移行フラグは設定されない（再試行可能）
         final prefs = await SharedPreferences.getInstance();
         expect(prefs.getBool('is_migrated_to_supabase'), isNull);
+
+        // 失敗イベントが送信されることを確認
+        verify(() => mockFirebaseService.logMigrationFailed(
+              userId: 'user-123',
+              errorMessage: any(named: 'errorMessage'),
+            )).called(1);
       });
     });
 
