@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../models/study_daily_logs/study_daily_logs_model.dart';
@@ -228,18 +230,9 @@ class StudyLogsRepository {
     int currentStreak = 1;
 
     for (var i = 1; i < dates.length; i++) {
-      final prev = dates[i - 1];
-      final current = dates[i];
-      final diff = current.difference(prev).inDays;
-
-      if (diff == 1) {
-        currentStreak++;
-        if (currentStreak > longestStreak) {
-          longestStreak = currentStreak;
-        }
-      } else {
-        currentStreak = 1;
-      }
+      final diff = dates[i].difference(dates[i - 1]).inDays;
+      currentStreak = (diff == 1) ? currentStreak + 1 : 1;
+      longestStreak = max(longestStreak, currentStreak);
     }
 
     return longestStreak;

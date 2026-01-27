@@ -52,8 +52,9 @@ class UsersRepository {
       return _supabaseDs.upsertUser(user);
     }
 
-    if (user.displayName != null && user.displayName!.isNotEmpty) {
-      await _localDs.updateDisplayName(user.displayName!);
+    final displayName = user.displayName;
+    if (displayName != null && displayName.isNotEmpty) {
+      await _localDs.updateDisplayName(displayName);
     }
 
     return user;

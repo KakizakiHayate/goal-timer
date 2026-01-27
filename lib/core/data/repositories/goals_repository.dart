@@ -83,54 +83,60 @@ class GoalsRepository {
   }
 
   Future<void> updateExpiredGoals(String userId) async {
-    if (await _migrationService.isMigrated()) {
-      final goals = await _supabaseDs.fetchAllGoals(userId);
-      final now = DateTime.now();
-      final today = DateTime(now.year, now.month, now.day);
-
-      for (final goal in goals) {
-        final deadlineDate = DateTime(
-          goal.deadline.year,
-          goal.deadline.month,
-          goal.deadline.day,
-        );
-        final isExpired = deadlineDate.isBefore(today);
-        final shouldUpdate =
-            goal.deletedAt == null &&
-            goal.expiredAt == null &&
-            goal.completedAt == null &&
-            isExpired;
-
-        if (!shouldUpdate) continue;
-
-        await _supabaseDs.upsertGoal(goal.copyWith(expiredAt: now));
-      }
-    } else {
+    if (!await _migrationService.isMigrated()) {
       await _localDs.updateExpiredGoals();
+      return;
+    }
+
+    final goals = await _supabaseDs.fetchAllGoals(userId);
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    for (final goal in goals) {
+      if (!_shouldMarkAsExpired(goal, today)) continue;
+      await _supabaseDs.upsertGoal(goal.copyWith(expiredAt: now));
     }
   }
 
+  bool _shouldMarkAsExpired(GoalsModel goal, DateTime today) {
+    final deadlineDate = DateTime(
+      goal.deadline.year,
+      goal.deadline.month,
+      goal.deadline.day,
+    );
+    final isExpired = deadlineDate.isBefore(today);
+    return goal.deletedAt == null &&
+        goal.expiredAt == null &&
+        goal.completedAt == null &&
+        isExpired;
+  }
+
   Future<void> populateMissingTotalTargetMinutes(String userId) async {
-    if (await _migrationService.isMigrated()) {
-      final goals = await _supabaseDs.fetchAllGoals(userId);
-
-      for (final goal in goals) {
-        if (goal.deletedAt != null || goal.totalTargetMinutes != null) {
-          continue;
-        }
-
-        final remainingDays = TimeUtils.calculateRemainingDays(goal.deadline);
-        final totalTargetMinutes = TimeUtils.calculateTotalTargetMinutes(
-          targetMinutes: goal.targetMinutes,
-          remainingDays: remainingDays,
-        );
-
-        await _supabaseDs.upsertGoal(
-          goal.copyWith(totalTargetMinutes: totalTargetMinutes),
-        );
-      }
-    } else {
+    if (!await _migrationService.isMigrated()) {
       await _localDs.populateMissingTotalTargetMinutes();
+      return;
     }
+
+    final goals = await _supabaseDs.fetchAllGoals(userId);
+
+    for (final goal in goals) {
+      if (_shouldSkipTotalTargetMinutesUpdate(goal)) continue;
+      await _updateGoalWithTotalTargetMinutes(goal);
+    }
+  }
+
+  bool _shouldSkipTotalTargetMinutesUpdate(GoalsModel goal) {
+    return goal.deletedAt != null || goal.totalTargetMinutes != null;
+  }
+
+  Future<void> _updateGoalWithTotalTargetMinutes(GoalsModel goal) async {
+    final remainingDays = TimeUtils.calculateRemainingDays(goal.deadline);
+    final totalTargetMinutes = TimeUtils.calculateTotalTargetMinutes(
+      targetMinutes: goal.targetMinutes,
+      remainingDays: remainingDays,
+    );
+    await _supabaseDs.upsertGoal(
+      goal.copyWith(totalTargetMinutes: totalTargetMinutes),
+    );
   }
 }
