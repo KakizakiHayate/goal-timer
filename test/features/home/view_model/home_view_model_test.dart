@@ -1,19 +1,26 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
+import 'package:goal_timer/core/data/repositories/goals_repository.dart';
+import 'package:goal_timer/core/data/repositories/study_logs_repository.dart';
+import 'package:goal_timer/core/data/repositories/users_repository.dart';
 import 'package:goal_timer/core/models/goals/goals_model.dart';
-import 'package:goal_timer/core/data/local/local_goals_datasource.dart';
-import 'package:goal_timer/core/data/local/local_study_daily_logs_datasource.dart';
+import 'package:goal_timer/core/services/auth_service.dart';
 import 'package:goal_timer/features/home/view_model/home_view_model.dart';
+import 'package:mocktail/mocktail.dart';
 
-class MockLocalGoalsDatasource extends Mock implements LocalGoalsDatasource {}
+class MockGoalsRepository extends Mock implements GoalsRepository {}
 
-class MockLocalStudyDailyLogsDatasource extends Mock
-    implements LocalStudyDailyLogsDatasource {}
+class MockStudyLogsRepository extends Mock implements StudyLogsRepository {}
+
+class MockUsersRepository extends Mock implements UsersRepository {}
+
+class MockAuthService extends Mock implements AuthService {}
 
 void main() {
   late HomeViewModel viewModel;
-  late MockLocalGoalsDatasource mockGoalsDatasource;
-  late MockLocalStudyDailyLogsDatasource mockStudyLogsDatasource;
+  late MockGoalsRepository mockGoalsRepository;
+  late MockStudyLogsRepository mockStudyLogsRepository;
+  late MockUsersRepository mockUsersRepository;
+  late MockAuthService mockAuthService;
 
   final testGoal = GoalsModel(
     id: 'test-goal-id',
@@ -40,43 +47,55 @@ void main() {
   );
 
   setUp(() {
-    mockGoalsDatasource = MockLocalGoalsDatasource();
-    mockStudyLogsDatasource = MockLocalStudyDailyLogsDatasource();
+    mockGoalsRepository = MockGoalsRepository();
+    mockStudyLogsRepository = MockStudyLogsRepository();
+    mockUsersRepository = MockUsersRepository();
+    mockAuthService = MockAuthService();
+
+    // AuthService mock
+    when(() => mockAuthService.currentUserId).thenReturn('test-user-id');
 
     when(
-      () => mockGoalsDatasource.fetchActiveGoals(),
+      () => mockGoalsRepository.fetchActiveGoals(any()),
     ).thenAnswer((_) async => [testGoal, testGoal2]);
 
     when(
-      () => mockGoalsDatasource.fetchAllGoals(),
+      () => mockGoalsRepository.fetchAllGoals(any()),
     ).thenAnswer((_) async => [testGoal, testGoal2]);
 
     when(
-      () => mockGoalsDatasource.updateExpiredGoals(),
+      () => mockGoalsRepository.updateExpiredGoals(any()),
     ).thenAnswer((_) async {});
 
     when(
-      () => mockGoalsDatasource.populateMissingTotalTargetMinutes(),
+      () => mockGoalsRepository.populateMissingTotalTargetMinutes(any()),
     ).thenAnswer((_) async {});
 
     when(
-      () => mockStudyLogsDatasource.fetchTotalSecondsForAllGoals(),
+      () => mockStudyLogsRepository.fetchTotalSecondsForAllGoals(any()),
     ).thenAnswer((_) async => <String, int>{});
 
     when(
-      () => mockStudyLogsDatasource.fetchStudyDatesInRange(
+      () => mockStudyLogsRepository.fetchStudyDatesInRange(
         startDate: any(named: 'startDate'),
         endDate: any(named: 'endDate'),
+        userId: any(named: 'userId'),
       ),
     ).thenAnswer((_) async => <DateTime>[]);
 
     when(
-      () => mockStudyLogsDatasource.calculateCurrentStreak(),
+      () => mockStudyLogsRepository.calculateCurrentStreak(any()),
     ).thenAnswer((_) async => 0);
 
+    when(
+      () => mockUsersRepository.getDisplayName(any()),
+    ).thenAnswer((_) async => 'テストユーザー');
+
     viewModel = HomeViewModel(
-      goalsDatasource: mockGoalsDatasource,
-      studyLogsDatasource: mockStudyLogsDatasource,
+      goalsRepository: mockGoalsRepository,
+      studyLogsRepository: mockStudyLogsRepository,
+      usersRepository: mockUsersRepository,
+      authService: mockAuthService,
     );
   });
 
@@ -84,7 +103,7 @@ void main() {
     group('onDeleteGoalConfirmed', () {
       test('should delete goal only (preserving study logs)', () async {
         when(
-          () => mockGoalsDatasource.deleteGoal(testGoal.id),
+          () => mockGoalsRepository.deleteGoal(testGoal.id),
         ).thenAnswer((_) async {});
 
         await viewModel.loadGoals();
@@ -93,12 +112,12 @@ void main() {
         final result = await viewModel.onDeleteGoalConfirmed(testGoal);
 
         expect(result, DeleteGoalResult.success);
-        verify(() => mockGoalsDatasource.deleteGoal(testGoal.id)).called(1);
+        verify(() => mockGoalsRepository.deleteGoal(testGoal.id)).called(1);
       });
 
       test('should remove goal from state after deletion', () async {
         when(
-          () => mockGoalsDatasource.deleteGoal(testGoal.id),
+          () => mockGoalsRepository.deleteGoal(testGoal.id),
         ).thenAnswer((_) async {});
 
         await viewModel.loadGoals();
@@ -115,7 +134,7 @@ void main() {
 
       test('should return failure when deletion fails', () async {
         when(
-          () => mockGoalsDatasource.deleteGoal(testGoal.id),
+          () => mockGoalsRepository.deleteGoal(testGoal.id),
         ).thenThrow(Exception('Database error'));
 
         await viewModel.loadGoals();
@@ -127,7 +146,7 @@ void main() {
 
       test('should not modify state when deletion fails', () async {
         when(
-          () => mockGoalsDatasource.deleteGoal(testGoal.id),
+          () => mockGoalsRepository.deleteGoal(testGoal.id),
         ).thenThrow(Exception('Database error'));
 
         await viewModel.loadGoals();

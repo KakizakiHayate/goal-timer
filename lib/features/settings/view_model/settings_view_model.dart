@@ -1,11 +1,10 @@
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../core/data/local/app_database.dart';
 import '../../../core/data/local/local_settings_datasource.dart';
-import '../../../core/data/local/local_users_datasource.dart';
+import '../../../core/data/repositories/users_repository.dart';
 import '../../../core/data/supabase/supabase_auth_datasource.dart';
-import '../../../core/data/supabase/supabase_users_datasource.dart';
+import '../../../core/services/auth_service.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/streak_reminder_consts.dart';
@@ -13,13 +12,13 @@ import '../../../core/utils/time_utils.dart';
 import '../../../core/utils/user_consts.dart';
 
 /// 設定画面のViewModel
-/// MVVM準拠: DataSource経由でデータアクセス
+/// MVVM準拠: Repository経由でデータアクセス
 class SettingsViewModel extends GetxController {
-  late final LocalSettingsDataSource _datasource;
-  late final LocalUsersDatasource _usersDatasource;
+  late final LocalSettingsDataSource _settingsDataSource;
+  late final UsersRepository _usersRepository;
   late final NotificationService _notificationService;
   late final SupabaseAuthDatasource _authDatasource;
-  late final SupabaseUsersDatasource _supabaseUsersDatasource;
+  late final AuthService _authService;
 
   final RxInt defaultTimerSeconds =
       LocalSettingsDataSource.defaultTimerSeconds.obs;
@@ -28,32 +27,36 @@ class SettingsViewModel extends GetxController {
   final RxString displayName = UserConsts.defaultGuestName.obs;
   final RxBool isUpdatingDisplayName = false.obs;
 
+  /// 現在のユーザーID（未ログイン時は空文字列）
+  String get _userId => _authService.currentUserId ?? '';
+
   SettingsViewModel({
-    LocalUsersDatasource? usersDatasource,
+    UsersRepository? usersRepository,
     NotificationService? notificationService,
     SupabaseAuthDatasource? authDatasource,
-    SupabaseUsersDatasource? supabaseUsersDatasource,
+    AuthService? authService,
   }) {
-    _datasource = LocalSettingsDataSource();
-    _usersDatasource =
-        usersDatasource ??
-        LocalUsersDatasource(database: Get.find<AppDatabase>());
+    _settingsDataSource = LocalSettingsDataSource();
+    _usersRepository = usersRepository ?? UsersRepository();
     _notificationService = notificationService ?? NotificationService();
     _authDatasource = authDatasource ??
         SupabaseAuthDatasource(supabase: Supabase.instance.client);
-    _supabaseUsersDatasource = supabaseUsersDatasource ??
-        SupabaseUsersDatasource(supabase: Supabase.instance.client);
+    _authService = authService ?? AuthService();
   }
 
   /// 初期化: SharedPreferencesとDBから設定を読み込む
   Future<void> init() async {
-    final seconds = await _datasource.fetchDefaultTimerSeconds();
+    final userId = _userId;
+
+    final seconds = await _settingsDataSource.fetchDefaultTimerSeconds();
     defaultTimerSeconds.value = seconds;
 
-    final reminderEnabled = await _usersDatasource.getStreakReminderEnabled();
+    final reminderEnabled = await _usersRepository.getStreakReminderEnabled(
+      userId,
+    );
     streakReminderEnabled.value = reminderEnabled;
 
-    final name = await _usersDatasource.getDisplayName();
+    final name = await _usersRepository.getDisplayName(userId);
     displayName.value = name;
   }
 
@@ -64,7 +67,7 @@ class SettingsViewModel extends GetxController {
       LocalSettingsDataSource.maxTimerSeconds,
     );
     defaultTimerSeconds.value = seconds;
-    await _datasource.saveDefaultTimerSeconds(seconds);
+    await _settingsDataSource.saveDefaultTimerSeconds(seconds);
   }
 
   /// フォーマット済みのデフォルト時間を取得
@@ -74,8 +77,9 @@ class SettingsViewModel extends GetxController {
 
   /// ストリークリマインダー設定を更新
   Future<void> updateStreakReminderEnabled(bool enabled) async {
+    final userId = _userId;
     streakReminderEnabled.value = enabled;
-    await _usersDatasource.updateStreakReminderEnabled(enabled);
+    await _usersRepository.updateStreakReminderEnabled(enabled, userId);
 
     if (!enabled) {
       // リマインダーをOFFにした場合は全ての通知をキャンセル
@@ -91,7 +95,7 @@ class SettingsViewModel extends GetxController {
   /// displayNameを再読み込み
   /// ログイン後や画面表示時に呼び出す
   Future<void> refreshDisplayName() async {
-    final name = await _usersDatasource.getDisplayName();
+    final name = await _usersRepository.getDisplayName(_userId);
     displayName.value = name;
   }
 
@@ -121,16 +125,15 @@ class SettingsViewModel extends GetxController {
       isUpdatingDisplayName.value = true;
 
       // ユーザーIDを取得
-      final userId = _authDatasource.currentUser?.id;
+      final userId = _authService.currentUserId;
       if (userId == null) {
         AppLogger.instance.w('ユーザーIDが取得できないため更新をスキップ');
         isUpdatingDisplayName.value = false;
         return false;
       }
 
-      // Supabaseを先に更新し、成功したらローカルDBを更新（データ整合性のため）
-      await _supabaseUsersDatasource.updateDisplayName(userId, newName);
-      await _usersDatasource.updateDisplayName(newName);
+      // Repository経由で更新（Repository内でLocal/Supabaseを振り分け）
+      await _usersRepository.updateDisplayName(newName, userId);
 
       displayName.value = newName;
       AppLogger.instance.i('displayNameを更新しました: $newName');

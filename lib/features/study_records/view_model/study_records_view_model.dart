@@ -1,8 +1,8 @@
 import 'package:get/get.dart';
-import '../../../core/data/local/app_database.dart';
-import '../../../core/data/local/local_goals_datasource.dart';
-import '../../../core/data/local/local_study_daily_logs_datasource.dart';
-import '../../../core/data/local/local_users_datasource.dart';
+import '../../../core/data/repositories/goals_repository.dart';
+import '../../../core/data/repositories/study_logs_repository.dart';
+import '../../../core/data/repositories/users_repository.dart';
+import '../../../core/services/auth_service.dart';
 import '../../../core/utils/app_logger.dart';
 
 /// 日別学習記録データ
@@ -77,28 +77,30 @@ class StudyRecordsState {
 
 /// 学習記録画面のViewModel
 class StudyRecordsViewModel extends GetxController {
-  final LocalStudyDailyLogsDatasource _studyLogsDatasource;
-  final LocalGoalsDatasource _goalsDatasource;
-  final LocalUsersDatasource _usersDatasource;
+  final StudyLogsRepository _studyLogsRepository;
+  final GoalsRepository _goalsRepository;
+  final UsersRepository _usersRepository;
+  final AuthService _authService;
 
   StudyRecordsState _state = StudyRecordsState(
     currentMonth: DateTime(DateTime.now().year, DateTime.now().month),
   );
   StudyRecordsState get state => _state;
 
+  /// 現在のユーザーID（未ログイン時は空文字列）
+  String get _userId => _authService.currentUserId ?? '';
+
   /// コンストラクタ（DIパターン適用）
-  /// テスト時にはDataSourceを注入可能
+  /// テスト時にはRepositoryを注入可能
   StudyRecordsViewModel({
-    LocalStudyDailyLogsDatasource? studyLogsDatasource,
-    LocalGoalsDatasource? goalsDatasource,
-    LocalUsersDatasource? usersDatasource,
-  }) : _studyLogsDatasource =
-           studyLogsDatasource ??
-           LocalStudyDailyLogsDatasource(database: AppDatabase()),
-       _goalsDatasource =
-           goalsDatasource ?? LocalGoalsDatasource(database: AppDatabase()),
-       _usersDatasource =
-           usersDatasource ?? LocalUsersDatasource(database: AppDatabase());
+    StudyLogsRepository? studyLogsRepository,
+    GoalsRepository? goalsRepository,
+    UsersRepository? usersRepository,
+    AuthService? authService,
+  }) : _studyLogsRepository = studyLogsRepository ?? StudyLogsRepository(),
+       _goalsRepository = goalsRepository ?? GoalsRepository(),
+       _usersRepository = usersRepository ?? UsersRepository(),
+       _authService = authService ?? AuthService();
 
   @override
   void onInit() {
@@ -112,11 +114,13 @@ class StudyRecordsViewModel extends GetxController {
     update();
 
     try {
+      final userId = _userId;
+
       // 並列で取得（Dart 3 レコード構文で型安全に）
       final (firstStudyDate, currentStreak, longestStreak) =
           await (
-            _studyLogsDatasource.fetchFirstStudyDate(),
-            _studyLogsDatasource.calculateCurrentStreak(),
+            _studyLogsRepository.fetchFirstStudyDate(userId),
+            _studyLogsRepository.calculateCurrentStreak(userId),
             _getOrCalculateLongestStreak(),
           ).wait;
 
@@ -140,17 +144,22 @@ class StudyRecordsViewModel extends GetxController {
   /// データがない場合は履歴から計算して保存し、その値を返す
   Future<int> _getOrCalculateLongestStreak() async {
     try {
+      final userId = _userId;
+
       // 最長ストリークを取得
-      final longestStreak = await _usersDatasource.getLongestStreak();
+      final longestStreak = await _usersRepository.getLongestStreak(userId);
 
       // 最長ストリークが0の場合、履歴から計算して設定
       if (longestStreak == 0) {
         final historicalLongestStreak =
-            await _studyLogsDatasource.calculateHistoricalLongestStreak();
+            await _studyLogsRepository.calculateHistoricalLongestStreak(userId);
 
         if (historicalLongestStreak > 0) {
           // 履歴から計算した最長ストリークを保存
-          await _usersDatasource.updateLongestStreak(historicalLongestStreak);
+          await _usersRepository.updateLongestStreak(
+            historicalLongestStreak,
+            userId,
+          );
           AppLogger.instance.i(
             '最長ストリークを履歴から計算・保存しました: $historicalLongestStreak日',
           );
@@ -179,9 +188,10 @@ class StudyRecordsViewModel extends GetxController {
         0,
       );
 
-      final studyDates = await _studyLogsDatasource.fetchStudyDatesInRange(
+      final studyDates = await _studyLogsRepository.fetchStudyDatesInRange(
         startDate: startDate,
         endDate: endDate,
+        userId: _userId,
       );
 
       _state = _state.copyWith(studyDates: studyDates);
@@ -229,12 +239,19 @@ class StudyRecordsViewModel extends GetxController {
   /// 指定日の学習記録を取得
   Future<List<DailyRecord>> fetchDailyRecords(DateTime date) async {
     try {
-      final records = await _studyLogsDatasource.fetchDailyRecordsByDate(date);
+      final userId = _userId;
+
+      final records = await _studyLogsRepository.fetchDailyRecordsByDate(
+        date,
+        userId,
+      );
 
       if (records.isEmpty) return [];
 
       // 目標情報を取得（削除済み含む）
-      final goals = await _goalsDatasource.fetchAllGoalsIncludingDeleted();
+      final goals = await _goalsRepository.fetchAllGoalsIncludingDeleted(
+        userId,
+      );
       final goalMap = {for (final goal in goals) goal.id: goal};
 
       final dailyRecords = <DailyRecord>[];
