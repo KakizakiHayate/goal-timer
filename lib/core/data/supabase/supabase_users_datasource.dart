@@ -128,4 +128,95 @@ class SupabaseUsersDatasource {
       rethrow;
     }
   }
+
+  /// longestStreakを取得
+  ///
+  /// usersテーブルからlongest_streakを取得します。
+  /// ユーザーが存在しない場合やlongest_streakが未設定の場合は0を返します。
+  Future<int> getLongestStreak(String userId) async {
+    try {
+      final response = await _supabase
+          .from(_tableName)
+          .select('longest_streak')
+          .eq('id', userId)
+          .maybeSingle();
+
+      if (response == null) {
+        AppLogger.instance.i('ユーザーが存在しません: $userId');
+        return 0;
+      }
+
+      final longestStreak = response['longest_streak'] as int? ?? 0;
+      AppLogger.instance.i('longestStreakを取得しました: $longestStreak');
+      return longestStreak;
+    } catch (error, stackTrace) {
+      AppLogger.instance.e('longestStreak取得に失敗しました', error, stackTrace);
+      rethrow;
+    }
+  }
+
+  /// longestStreakを更新
+  ///
+  /// usersテーブルのlongest_streakを更新します。
+  Future<void> updateLongestStreak(String userId, int longestStreak) async {
+    try {
+      final now = DateTime.now();
+      await _supabase.from(_tableName).update({
+        'longest_streak': longestStreak,
+        'updated_at': now.toIso8601String(),
+        'sync_updated_at': now.toIso8601String(),
+      }).eq('id', userId);
+
+      AppLogger.instance.i('longestStreakを更新しました: $userId -> $longestStreak');
+    } catch (error, stackTrace) {
+      AppLogger.instance.e('longestStreak更新に失敗しました', error, stackTrace);
+      rethrow;
+    }
+  }
+
+  /// streakReminderEnabledを取得
+  ///
+  /// usersテーブルからstreak_reminder_enabledを取得します。
+  /// ユーザーが存在しない場合やstreak_reminder_enabledが未設定の場合はtrueを返します。
+  Future<bool> getStreakReminderEnabled(String userId) async {
+    try {
+      final response = await _supabase
+          .from(_tableName)
+          .select('streak_reminder_enabled')
+          .eq('id', userId)
+          .maybeSingle();
+
+      if (response == null) {
+        AppLogger.instance.i('ユーザーが存在しません: $userId');
+        return true; // デフォルト値
+      }
+
+      final enabled = response['streak_reminder_enabled'] as bool? ?? true;
+      AppLogger.instance.i('streakReminderEnabledを取得しました: $enabled');
+      return enabled;
+    } catch (error, stackTrace) {
+      AppLogger.instance.e('streakReminderEnabled取得に失敗しました', error, stackTrace);
+      rethrow;
+    }
+  }
+
+  /// streakReminderEnabledを更新
+  ///
+  /// usersテーブルのstreak_reminder_enabledを更新します。
+  Future<void> updateStreakReminderEnabled(String userId, bool enabled) async {
+    try {
+      final now = DateTime.now();
+      await _supabase.from(_tableName).update({
+        'streak_reminder_enabled': enabled,
+        'updated_at': now.toIso8601String(),
+        'sync_updated_at': now.toIso8601String(),
+      }).eq('id', userId);
+
+      AppLogger.instance.i(
+          'streakReminderEnabledを更新しました: $userId -> ${enabled ? "有効" : "無効"}');
+    } catch (error, stackTrace) {
+      AppLogger.instance.e('streakReminderEnabled更新に失敗しました', error, stackTrace);
+      rethrow;
+    }
+  }
 }
