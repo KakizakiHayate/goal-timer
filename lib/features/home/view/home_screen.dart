@@ -10,6 +10,7 @@ import '../../../core/utils/spacing_consts.dart';
 import '../../../core/utils/string_consts.dart';
 import '../../../core/utils/text_consts.dart';
 import '../../../core/utils/time_utils.dart';
+import '../../../core/widgets/error_dialog.dart';
 import '../../../core/widgets/goal_card.dart';
 import '../../../core/widgets/pressable_card.dart';
 import '../../../core/widgets/streak_card.dart';
@@ -226,11 +227,42 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 class _HomeTabContent extends StatelessWidget {
   const _HomeTabContent();
 
+  /// HomeErrorTypeをErrorDialogTypeに変換
+  ErrorDialogType _mapErrorType(HomeErrorType? errorType) {
+    switch (errorType) {
+      case HomeErrorType.save:
+        return ErrorDialogType.save;
+      case HomeErrorType.update:
+        return ErrorDialogType.save;
+      case HomeErrorType.delete:
+        return ErrorDialogType.delete;
+      case null:
+        return ErrorDialogType.generic;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return GetBuilder<HomeViewModel>(
       builder: (homeViewModel) {
         final homeState = homeViewModel.state;
+
+        // エラーがある場合はダイアログを表示
+        if (homeState.hasError) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!context.mounted) return;
+
+            final errorType = _mapErrorType(homeState.errorType);
+            ErrorDialog.show(
+              context,
+              type: errorType,
+              message: homeState.errorMessage,
+            ).then((_) {
+              // ダイアログを閉じたらエラーをクリア
+              homeViewModel.clearError();
+            });
+          });
+        }
 
         if (homeState.isLoading) {
           return const Center(child: CircularProgressIndicator());

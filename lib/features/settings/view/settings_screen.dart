@@ -14,6 +14,7 @@ import '../../../core/utils/color_consts.dart';
 import '../../../core/utils/spacing_consts.dart';
 import '../../../core/utils/text_consts.dart';
 import '../../../core/utils/user_consts.dart';
+import '../../../core/widgets/error_dialog.dart';
 import '../../../core/widgets/pressable_card.dart';
 import '../../../core/widgets/setting_item.dart';
 import '../../auth/view/login_screen.dart';
@@ -58,22 +59,39 @@ class _SettingsScreenState extends State<SettingsScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: ColorConsts.backgroundPrimary,
-      appBar: AppBar(
-        title: Text(
-          '設定',
-          style: TextConsts.h3.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
+    return Obx(() {
+      // エラーがある場合はダイアログを表示
+      if (_settingsViewModel.hasError) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+
+          ErrorDialog.show(
+            context,
+            type: ErrorDialogType.save,
+            message: _settingsViewModel.errorMessage.value,
+          ).then((_) {
+            // ダイアログを閉じたらエラーをクリア
+            _settingsViewModel.clearError();
+          });
+        });
+      }
+
+      return Scaffold(
+        backgroundColor: ColorConsts.backgroundPrimary,
+        appBar: AppBar(
+          title: Text(
+            '設定',
+            style: TextConsts.h3.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
+          backgroundColor: ColorConsts.primary,
+          elevation: 0,
         ),
-        backgroundColor: ColorConsts.primary,
-        elevation: 0,
-      ),
-      body: FadeTransition(
-        opacity: _fadeAnimation,
-        child: SingleChildScrollView(
+        body: FadeTransition(
+          opacity: _fadeAnimation,
+          child: SingleChildScrollView(
           padding: const EdgeInsets.all(SpacingConsts.l),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,6 +135,7 @@ class _SettingsScreenState extends State<SettingsScreen>
         ),
       ),
     );
+    });
   }
 
   Widget _buildProfileSection() {

@@ -6,6 +6,7 @@ import '../../../core/data/repositories/study_logs_repository.dart';
 import '../../../core/data/repositories/users_repository.dart';
 import '../../../core/models/goals/goals_model.dart';
 import '../../../core/services/auth_service.dart';
+import '../../../core/services/crashlytics_service.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/streak_consts.dart';
 import '../../../core/utils/time_utils.dart';
@@ -13,6 +14,9 @@ import '../../../core/utils/user_consts.dart';
 
 /// 目標削除操作の結果
 enum DeleteGoalResult { success, failure }
+
+/// エラーの種類
+enum HomeErrorType { save, update, delete }
 
 // Home画面の状態
 class HomeState {
@@ -22,6 +26,8 @@ class HomeState {
   final int currentStreak;
   final List<DateTime> recentStudyDates;
   final String displayName;
+  final String? errorMessage;
+  final HomeErrorType? errorType;
 
   HomeState({
     this.goals = const [],
@@ -30,6 +36,8 @@ class HomeState {
     this.currentStreak = 0,
     this.recentStudyDates = const [],
     this.displayName = UserConsts.defaultGuestName,
+    this.errorMessage,
+    this.errorType,
   });
 
   HomeState copyWith({
@@ -39,6 +47,9 @@ class HomeState {
     int? currentStreak,
     List<DateTime>? recentStudyDates,
     String? displayName,
+    String? errorMessage,
+    HomeErrorType? errorType,
+    bool clearError = false,
   }) {
     return HomeState(
       goals: goals ?? this.goals,
@@ -48,8 +59,13 @@ class HomeState {
       currentStreak: currentStreak ?? this.currentStreak,
       recentStudyDates: recentStudyDates ?? this.recentStudyDates,
       displayName: displayName ?? this.displayName,
+      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      errorType: clearError ? null : (errorType ?? this.errorType),
     );
   }
+
+  /// エラーがあるかどうか
+  bool get hasError => errorMessage != null;
 
   /// 目標の進捗率を計算（0.0〜1.0）
   /// totalTargetMinutesを使用して進捗率を計算
@@ -75,6 +91,7 @@ class HomeViewModel extends GetxController {
   late final StudyLogsRepository _studyLogsRepository;
   late final UsersRepository _usersRepository;
   late final AuthService _authService;
+  late final CrashlyticsService _crashlyticsService;
 
   // 状態（Rxを使わない）
   HomeState _state = HomeState();
@@ -85,15 +102,23 @@ class HomeViewModel extends GetxController {
     StudyLogsRepository? studyLogsRepository,
     UsersRepository? usersRepository,
     AuthService? authService,
+    CrashlyticsService? crashlyticsService,
   }) {
     _goalsRepository = goalsRepository ?? GoalsRepository();
     _studyLogsRepository = studyLogsRepository ?? StudyLogsRepository();
     _usersRepository = usersRepository ?? UsersRepository();
     _authService = authService ?? AuthService();
+    _crashlyticsService = crashlyticsService ?? CrashlyticsService();
   }
 
   /// 現在のユーザーID（未ログイン時は空文字列）
   String get _userId => _authService.currentUserId ?? '';
+
+  /// エラー状態をクリアする
+  void clearError() {
+    _state = state.copyWith(clearError: true);
+    update();
+  }
 
   @override
   void onInit() {
@@ -171,30 +196,30 @@ class HomeViewModel extends GetxController {
     required String avoidMessage,
     required DateTime deadline,
   }) async {
+    final now = DateTime.now();
+    final userId = _userId;
+
+    // 残り日数と総目標時間を計算
+    final remainingDays = TimeUtils.calculateRemainingDays(deadline);
+    final totalTargetMinutes = TimeUtils.calculateTotalTargetMinutes(
+      targetMinutes: targetMinutes,
+      remainingDays: remainingDays,
+    );
+
+    final goal = GoalsModel(
+      id: const Uuid().v4(),
+      userId: userId.isEmpty ? null : userId,
+      title: title,
+      description: description.isEmpty ? null : description,
+      targetMinutes: targetMinutes,
+      totalTargetMinutes: totalTargetMinutes,
+      avoidMessage: avoidMessage,
+      deadline: deadline,
+      createdAt: now,
+      updatedAt: now,
+    );
+
     try {
-      final now = DateTime.now();
-      final userId = _userId;
-
-      // 残り日数と総目標時間を計算
-      final remainingDays = TimeUtils.calculateRemainingDays(deadline);
-      final totalTargetMinutes = TimeUtils.calculateTotalTargetMinutes(
-        targetMinutes: targetMinutes,
-        remainingDays: remainingDays,
-      );
-
-      final goal = GoalsModel(
-        id: const Uuid().v4(),
-        userId: userId.isEmpty ? null : userId,
-        title: title,
-        description: description.isEmpty ? null : description,
-        targetMinutes: targetMinutes,
-        totalTargetMinutes: totalTargetMinutes,
-        avoidMessage: avoidMessage,
-        deadline: deadline,
-        createdAt: now,
-        updatedAt: now,
-      );
-
       await _goalsRepository.upsertGoal(goal);
       AppLogger.instance.i('目標を保存しました: ${goal.id}');
 
@@ -209,6 +234,17 @@ class HomeViewModel extends GetxController {
       }());
     } catch (error, stackTrace) {
       AppLogger.instance.e('目標の保存に失敗しました', error, stackTrace);
+
+      // Crashlyticsにデータ送信
+      await _crashlyticsService.sendFailedGoalData(goal, error, stackTrace);
+
+      // エラー状態を設定
+      _state = state.copyWith(
+        errorMessage: '保存に失敗しました。ネットワーク接続を確認してください。',
+        errorType: HomeErrorType.save,
+      );
+      update();
+
       rethrow;
     }
   }
@@ -222,26 +258,26 @@ class HomeViewModel extends GetxController {
     required String avoidMessage,
     required DateTime deadline,
   }) async {
+    final now = DateTime.now();
+
+    // 残り日数と総目標時間を再計算
+    final remainingDays = TimeUtils.calculateRemainingDays(deadline);
+    final totalTargetMinutes = TimeUtils.calculateTotalTargetMinutes(
+      targetMinutes: targetMinutes,
+      remainingDays: remainingDays,
+    );
+
+    final updatedGoal = original.copyWith(
+      title: title,
+      description: description.isEmpty ? null : description,
+      targetMinutes: targetMinutes,
+      totalTargetMinutes: totalTargetMinutes,
+      avoidMessage: avoidMessage,
+      deadline: deadline,
+      updatedAt: now,
+    );
+
     try {
-      final now = DateTime.now();
-
-      // 残り日数と総目標時間を再計算
-      final remainingDays = TimeUtils.calculateRemainingDays(deadline);
-      final totalTargetMinutes = TimeUtils.calculateTotalTargetMinutes(
-        targetMinutes: targetMinutes,
-        remainingDays: remainingDays,
-      );
-
-      final updatedGoal = original.copyWith(
-        title: title,
-        description: description.isEmpty ? null : description,
-        targetMinutes: targetMinutes,
-        totalTargetMinutes: totalTargetMinutes,
-        avoidMessage: avoidMessage,
-        deadline: deadline,
-        updatedAt: now,
-      );
-
       await _goalsRepository.updateGoal(updatedGoal);
       AppLogger.instance.i('目標を更新しました: ${updatedGoal.id}');
 
@@ -254,6 +290,17 @@ class HomeViewModel extends GetxController {
       update();
     } catch (error, stackTrace) {
       AppLogger.instance.e('目標の更新に失敗しました', error, stackTrace);
+
+      // Crashlyticsにデータ送信
+      await _crashlyticsService.sendFailedGoalData(updatedGoal, error, stackTrace);
+
+      // エラー状態を設定
+      _state = state.copyWith(
+        errorMessage: '更新に失敗しました。ネットワーク接続を確認してください。',
+        errorType: HomeErrorType.update,
+      );
+      update();
+
       rethrow;
     }
   }
@@ -265,7 +312,7 @@ class HomeViewModel extends GetxController {
       await _deleteGoalInternal(goal);
       return DeleteGoalResult.success;
     } catch (_) {
-      // エラーは_deleteGoalInternal内でログ記録済み
+      // エラーは_deleteGoalInternal内でログ記録・エラー状態設定済み
       return DeleteGoalResult.failure;
     }
   }
@@ -290,6 +337,17 @@ class HomeViewModel extends GetxController {
       }());
     } catch (error, stackTrace) {
       AppLogger.instance.e('目標の削除に失敗しました', error, stackTrace);
+
+      // Crashlyticsに送信
+      await _crashlyticsService.sendFailedGoalDelete(goal.id, error, stackTrace);
+
+      // エラー状態を設定
+      _state = state.copyWith(
+        errorMessage: '削除に失敗しました。ネットワーク接続を確認してください。',
+        errorType: HomeErrorType.delete,
+      );
+      update();
+
       rethrow;
     }
   }

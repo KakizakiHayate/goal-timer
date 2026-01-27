@@ -5,7 +5,9 @@ import 'package:goal_timer/core/data/local/local_settings_datasource.dart';
 import 'package:goal_timer/core/data/repositories/study_logs_repository.dart';
 import 'package:goal_timer/core/data/repositories/users_repository.dart';
 import 'package:goal_timer/core/models/goals/goals_model.dart';
+import 'package:goal_timer/core/models/study_daily_logs/study_daily_logs_model.dart';
 import 'package:goal_timer/core/services/auth_service.dart';
+import 'package:goal_timer/core/services/crashlytics_service.dart';
 import 'package:goal_timer/core/services/notification_service.dart';
 import 'package:goal_timer/features/settings/view_model/settings_view_model.dart';
 import 'package:goal_timer/features/timer/view_model/timer_view_model.dart';
@@ -37,6 +39,17 @@ class FakeSettingsViewModel extends GetxController
   final RxBool isUpdatingDisplayName = false.obs;
 
   @override
+  final RxnString errorMessage = RxnString();
+
+  @override
+  bool get hasError => errorMessage.value != null;
+
+  @override
+  void clearError() {
+    errorMessage.value = null;
+  }
+
+  @override
   Future<void> init() async {}
 
   @override
@@ -66,6 +79,15 @@ class FakeSettingsViewModel extends GetxController
 /// テスト用MockNotificationService
 class MockNotificationService extends Mock implements NotificationService {}
 
+/// テスト用MockCrashlyticsService
+class MockCrashlyticsService extends Mock implements CrashlyticsService {}
+
+/// FakeStudyDailyLogsModel
+class FakeStudyDailyLogsModel extends Fake implements StudyDailyLogsModel {}
+
+/// FakeStackTrace
+class FakeStackTrace extends Fake implements StackTrace {}
+
 void main() {
   late MockAppDatabase mockDatabase;
   late FakeSettingsViewModel fakeSettingsViewModel;
@@ -73,11 +95,15 @@ void main() {
   late MockStudyLogsRepository mockStudyLogsRepository;
   late MockUsersRepository mockUsersRepository;
   late MockAuthService mockAuthService;
+  late MockCrashlyticsService mockCrashlyticsService;
   late GoalsModel testGoal;
 
   setUpAll(() {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
+    registerFallbackValue(FakeStudyDailyLogsModel());
+    registerFallbackValue(FakeStackTrace());
+    registerFallbackValue(Exception('fallback error'));
   });
 
   setUp(() {
@@ -87,6 +113,7 @@ void main() {
     mockStudyLogsRepository = MockStudyLogsRepository();
     mockUsersRepository = MockUsersRepository();
     mockAuthService = MockAuthService();
+    mockCrashlyticsService = MockCrashlyticsService();
     testGoal = GoalsModel(
       id: 'test-goal-id',
       userId: 'test-user-id',
@@ -127,6 +154,11 @@ void main() {
 
     // MockAuthServiceのスタブ設定
     when(() => mockAuthService.currentUserId).thenReturn('test-user-id');
+
+    // MockCrashlyticsServiceのスタブ設定
+    when(
+      () => mockCrashlyticsService.sendFailedStudyLogData(any(), any(), any()),
+    ).thenAnswer((_) async {});
   });
 
   /// テスト用のTimerViewModelを作成するヘルパー関数
@@ -137,6 +169,7 @@ void main() {
       studyLogsRepository: mockStudyLogsRepository,
       usersRepository: mockUsersRepository,
       authService: mockAuthService,
+      crashlyticsService: mockCrashlyticsService,
     );
   }
 
