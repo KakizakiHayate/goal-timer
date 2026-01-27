@@ -1,5 +1,8 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../models/users/users_model.dart';
+import '../../services/migration_service.dart';
+import '../../utils/user_consts.dart';
 import '../local/app_database.dart';
 import '../local/local_goals_datasource.dart';
 import '../local/local_study_daily_logs_datasource.dart';
@@ -7,9 +10,6 @@ import '../local/local_users_datasource.dart';
 import '../supabase/supabase_goals_datasource.dart';
 import '../supabase/supabase_study_logs_datasource.dart';
 import '../supabase/supabase_users_datasource.dart';
-import '../../models/users/users_model.dart';
-import '../../services/migration_service.dart';
-import '../../utils/user_consts.dart';
 
 class UsersRepository {
   late final LocalUsersDatasource _localDs;

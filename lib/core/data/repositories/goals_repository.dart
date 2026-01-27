@@ -1,13 +1,13 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../models/goals/goals_model.dart';
+import '../../services/migration_service.dart';
+import '../../utils/time_utils.dart';
 import '../local/app_database.dart';
 import '../local/local_goals_datasource.dart';
 import '../local/local_study_daily_logs_datasource.dart';
 import '../supabase/supabase_goals_datasource.dart';
 import '../supabase/supabase_study_logs_datasource.dart';
-import '../../models/goals/goals_model.dart';
-import '../../services/migration_service.dart';
-import '../../utils/time_utils.dart';
 
 class GoalsRepository {
   late final LocalGoalsDatasource _localDs;
