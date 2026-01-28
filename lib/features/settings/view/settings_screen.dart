@@ -59,6 +59,9 @@ class _SettingsScreenState extends State<SettingsScreen>
   @override
   Widget build(BuildContext context) {
     return Obx(() {
+      // 監視対象のobservable変数にアクセス（子メソッド内の変数も追跡される）
+      _settingsViewModel.displayName.value;
+
       return Scaffold(
         backgroundColor: ColorConsts.backgroundPrimary,
         appBar: AppBar(
