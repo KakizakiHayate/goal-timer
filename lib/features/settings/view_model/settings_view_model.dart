@@ -5,7 +5,6 @@ import '../../../core/data/local/local_settings_datasource.dart';
 import '../../../core/data/repositories/users_repository.dart';
 import '../../../core/data/supabase/supabase_auth_datasource.dart';
 import '../../../core/services/auth_service.dart';
-import '../../../core/services/crashlytics_service.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/streak_reminder_consts.dart';
@@ -20,7 +19,6 @@ class SettingsViewModel extends GetxController {
   late final NotificationService _notificationService;
   late final SupabaseAuthDatasource _authDatasource;
   late final AuthService _authService;
-  late final CrashlyticsService _crashlyticsService;
 
   final RxInt defaultTimerSeconds =
       LocalSettingsDataSource.defaultTimerSeconds.obs;
@@ -28,15 +26,6 @@ class SettingsViewModel extends GetxController {
       StreakReminderConsts.defaultReminderEnabled.obs;
   final RxString displayName = UserConsts.defaultGuestName.obs;
   final RxBool isUpdatingDisplayName = false.obs;
-  final RxnString errorMessage = RxnString();
-
-  /// エラーがあるかどうか
-  bool get hasError => errorMessage.value != null;
-
-  /// エラー状態をクリアする
-  void clearError() {
-    errorMessage.value = null;
-  }
 
   /// 現在のユーザーID（未ログイン時は空文字列）
   String get _userId => _authService.currentUserId ?? '';
@@ -46,7 +35,6 @@ class SettingsViewModel extends GetxController {
     NotificationService? notificationService,
     SupabaseAuthDatasource? authDatasource,
     AuthService? authService,
-    CrashlyticsService? crashlyticsService,
   }) {
     _settingsDataSource = LocalSettingsDataSource();
     _usersRepository = usersRepository ?? UsersRepository();
@@ -54,7 +42,6 @@ class SettingsViewModel extends GetxController {
     _authDatasource = authDatasource ??
         SupabaseAuthDatasource(supabase: Supabase.instance.client);
     _authService = authService ?? AuthService();
-    _crashlyticsService = crashlyticsService ?? CrashlyticsService();
   }
 
   /// 初期化: SharedPreferencesとDBから設定を読み込む
@@ -155,18 +142,6 @@ class SettingsViewModel extends GetxController {
       return true;
     } catch (error, stackTrace) {
       AppLogger.instance.e('displayNameの更新に失敗しました', error, stackTrace);
-
-      // Crashlyticsにデータ送信
-      await _crashlyticsService.sendFailedDisplayNameUpdate(
-        _userId,
-        newName,
-        error,
-        stackTrace,
-      );
-
-      // エラー状態を設定
-      errorMessage.value = '名前の更新に失敗しました。ネットワーク接続を確認してください。';
-
       isUpdatingDisplayName.value = false;
       return false;
     }

@@ -252,7 +252,8 @@ void main() {
       test('マイグレーション済みの場合はSupabaseから取得する', () async {
         when(() => mockMigrationService.isMigrated())
             .thenAnswer((_) async => true);
-        when(() => mockSupabaseDs.fetchAllGoals(testUserId)).thenAnswer(
+        when(() => mockSupabaseDs.fetchAllGoalsIncludingDeleted(testUserId))
+            .thenAnswer(
           (_) async => [testGoal, testGoalWithDeleted],
         );
 
@@ -260,6 +261,8 @@ void main() {
             await repository.fetchAllGoalsIncludingDeleted(testUserId);
 
         expect(result.length, 2);
+        verify(() => mockSupabaseDs.fetchAllGoalsIncludingDeleted(testUserId))
+            .called(1);
       });
 
       test('マイグレーション未済の場合はローカルDBから取得する', () async {

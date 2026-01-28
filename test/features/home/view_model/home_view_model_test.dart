@@ -4,7 +4,6 @@ import 'package:goal_timer/core/data/repositories/study_logs_repository.dart';
 import 'package:goal_timer/core/data/repositories/users_repository.dart';
 import 'package:goal_timer/core/models/goals/goals_model.dart';
 import 'package:goal_timer/core/services/auth_service.dart';
-import 'package:goal_timer/core/services/crashlytics_service.dart';
 import 'package:goal_timer/features/home/view_model/home_view_model.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -16,24 +15,12 @@ class MockUsersRepository extends Mock implements UsersRepository {}
 
 class MockAuthService extends Mock implements AuthService {}
 
-class MockCrashlyticsService extends Mock implements CrashlyticsService {}
-
-class FakeGoalsModel extends Fake implements GoalsModel {}
-
-class FakeStackTrace extends Fake implements StackTrace {}
-
 void main() {
-  setUpAll(() {
-    registerFallbackValue(FakeGoalsModel());
-    registerFallbackValue(FakeStackTrace());
-    registerFallbackValue(Exception('fallback error'));
-  });
   late HomeViewModel viewModel;
   late MockGoalsRepository mockGoalsRepository;
   late MockStudyLogsRepository mockStudyLogsRepository;
   late MockUsersRepository mockUsersRepository;
   late MockAuthService mockAuthService;
-  late MockCrashlyticsService mockCrashlyticsService;
 
   final testGoal = GoalsModel(
     id: 'test-goal-id',
@@ -64,18 +51,9 @@ void main() {
     mockStudyLogsRepository = MockStudyLogsRepository();
     mockUsersRepository = MockUsersRepository();
     mockAuthService = MockAuthService();
-    mockCrashlyticsService = MockCrashlyticsService();
 
     // AuthService mock
     when(() => mockAuthService.currentUserId).thenReturn('test-user-id');
-
-    // CrashlyticsService mock
-    when(
-      () => mockCrashlyticsService.sendFailedGoalData(any(), any(), any()),
-    ).thenAnswer((_) async {});
-    when(
-      () => mockCrashlyticsService.sendFailedGoalDelete(any(), any(), any()),
-    ).thenAnswer((_) async {});
 
     when(
       () => mockGoalsRepository.fetchActiveGoals(any()),
@@ -118,7 +96,6 @@ void main() {
       studyLogsRepository: mockStudyLogsRepository,
       usersRepository: mockUsersRepository,
       authService: mockAuthService,
-      crashlyticsService: mockCrashlyticsService,
     );
   });
 

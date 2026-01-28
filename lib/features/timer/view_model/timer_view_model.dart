@@ -8,7 +8,6 @@ import '../../../core/data/repositories/users_repository.dart';
 import '../../../core/models/goals/goals_model.dart';
 import '../../../core/models/study_daily_logs/study_daily_logs_model.dart';
 import '../../../core/services/auth_service.dart';
-import '../../../core/services/crashlytics_service.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/services/rating_service.dart';
 import '../../../core/utils/app_logger.dart';
@@ -45,7 +44,6 @@ class TimerState {
   final TimerMode mode;
   final bool isPomodoroBreak;
   final bool needsCompletionConfirm;
-  final String? errorMessage;
 
   // デフォルト値の定数
   static const int _defaultSeconds =
@@ -59,7 +57,6 @@ class TimerState {
     this.isPomodoroBreak = false,
     this.pomodoroRound = TimerConstants.initialPomodoroRound,
     this.needsCompletionConfirm = false,
-    this.errorMessage,
   }) : totalSeconds = totalSeconds ?? _defaultSeconds,
        currentSeconds = currentSeconds ?? _defaultSeconds;
 
@@ -71,8 +68,6 @@ class TimerState {
     bool? isPomodoroBreak,
     int? pomodoroRound,
     bool? needsCompletionConfirm,
-    String? errorMessage,
-    bool clearError = false,
   }) {
     return TimerState(
       totalSeconds: totalSeconds ?? this.totalSeconds,
@@ -83,12 +78,8 @@ class TimerState {
       pomodoroRound: pomodoroRound ?? this.pomodoroRound,
       needsCompletionConfirm:
           needsCompletionConfirm ?? this.needsCompletionConfirm,
-      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
   }
-
-  /// エラーがあるかどうか
-  bool get hasError => errorMessage != null;
 
   String formatTime() {
     return TimeUtils.formatDurationFromSeconds(currentSeconds);
@@ -133,7 +124,6 @@ class TimerViewModel extends GetxController {
   final StudyLogsRepository _studyLogsRepository;
   final UsersRepository _usersRepository;
   final AuthService _authService;
-  final CrashlyticsService _crashlyticsService;
   final GoalsModel goal;
 
   // PRコメント対応: インスタンス変数として一度だけ取得
@@ -163,11 +153,6 @@ class TimerViewModel extends GetxController {
   /// 現在のユーザーID（未ログイン時は空文字列）
   String get _userId => _authService.currentUserId ?? '';
 
-  /// エラー状態をクリアする
-  void clearError() {
-    _state.value = state.copyWith(clearError: true);
-  }
-
   /// コンストラクタ（DIパターン適用）
   /// テスト時にはRepositoryを注入可能
   TimerViewModel({
@@ -177,13 +162,11 @@ class TimerViewModel extends GetxController {
     AuthService? authService,
     SettingsViewModel? settingsViewModel,
     NotificationService? notificationService,
-    CrashlyticsService? crashlyticsService,
   }) : _settingsViewModel = settingsViewModel ?? Get.find<SettingsViewModel>(),
        _notificationService = notificationService ?? NotificationService(),
        _studyLogsRepository = studyLogsRepository ?? StudyLogsRepository(),
        _usersRepository = usersRepository ?? UsersRepository(),
-       _authService = authService ?? AuthService(),
-       _crashlyticsService = crashlyticsService ?? CrashlyticsService() {
+       _authService = authService ?? AuthService() {
     final defaultSeconds = _settingsViewModel.defaultTimerSeconds.value;
 
     _state.value = TimerState(
@@ -462,17 +445,18 @@ class TimerViewModel extends GetxController {
   }
 
   Future<void> saveStudyDailyLogData() async {
-    // 深夜0時またぎ対応: 学習セッションの開始日を使用
-    // 例: 23:50開始→0:10終了の場合、開始日（前日）にカウント
-    final studyDate = _studySessionStartDay ?? DateTime.now();
-    final log = StudyDailyLogsModel(
-      id: const Uuid().v4(),
-      goalId: goal.id,
-      studyDate: DateTime(studyDate.year, studyDate.month, studyDate.day),
-      totalSeconds: _elapsedSeconds,
-    );
-
     try {
+      // 深夜0時またぎ対応: 学習セッションの開始日を使用
+      // 例: 23:50開始→0:10終了の場合、開始日（前日）にカウント
+      final studyDate = _studySessionStartDay ?? DateTime.now();
+      final log = StudyDailyLogsModel(
+        id: const Uuid().v4(),
+        goalId: goal.id,
+        studyDate: DateTime(studyDate.year, studyDate.month, studyDate.day),
+        totalSeconds: _elapsedSeconds,
+        userId: _userId,
+      );
+
       // Repository経由で保存
       await _studyLogsRepository.upsertLog(log);
 
@@ -492,15 +476,6 @@ class TimerViewModel extends GetxController {
       await RatingService().onStudyCompleted();
     } catch (error, stackTrace) {
       AppLogger.instance.e('学習記録の保存に失敗しました', error, stackTrace);
-
-      // Crashlyticsにデータ送信
-      await _crashlyticsService.sendFailedStudyLogData(log, error, stackTrace);
-
-      // エラー状態を設定
-      _state.value = state.copyWith(
-        errorMessage: '学習記録の保存に失敗しました。ネットワーク接続を確認してください。',
-      );
-
       rethrow;
     }
   }

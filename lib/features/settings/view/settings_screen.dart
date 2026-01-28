@@ -14,7 +14,6 @@ import '../../../core/utils/color_consts.dart';
 import '../../../core/utils/spacing_consts.dart';
 import '../../../core/utils/text_consts.dart';
 import '../../../core/utils/user_consts.dart';
-import '../../../core/widgets/error_dialog.dart';
 import '../../../core/widgets/pressable_card.dart';
 import '../../../core/widgets/setting_item.dart';
 import '../../auth/view/login_screen.dart';
@@ -60,22 +59,6 @@ class _SettingsScreenState extends State<SettingsScreen>
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      // エラーがある場合はダイアログを表示
-      if (_settingsViewModel.hasError) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!mounted) return;
-
-          ErrorDialog.show(
-            context,
-            type: ErrorDialogType.save,
-            message: _settingsViewModel.errorMessage.value,
-          ).then((_) {
-            // ダイアログを閉じたらエラーをクリア
-            _settingsViewModel.clearError();
-          });
-        });
-      }
-
       return Scaffold(
         backgroundColor: ColorConsts.backgroundPrimary,
         appBar: AppBar(

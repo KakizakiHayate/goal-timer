@@ -8,7 +8,6 @@ import '../../../core/utils/spacing_consts.dart';
 import '../../../core/utils/text_consts.dart';
 import '../../../core/utils/time_utils.dart';
 import '../../../core/widgets/circular_progress_indicator.dart' as custom;
-import '../../../core/widgets/error_dialog.dart';
 import '../view_model/timer_view_model.dart';
 
 /// タイマー画面
@@ -229,22 +228,6 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
     return Obx(() {
       final timerViewModel = Get.find<TimerViewModel>();
       final timerState = timerViewModel.state;
-
-      // エラーがある場合はダイアログを表示
-      if (timerState.hasError) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!mounted) return;
-
-          ErrorDialog.show(
-            context,
-            type: ErrorDialogType.save,
-            message: timerState.errorMessage,
-          ).then((_) {
-            // ダイアログを閉じたらエラーをクリア
-            timerViewModel.clearError();
-          });
-        });
-      }
 
       // フォアグラウンドでタイマーが完了した場合、確認ダイアログを表示
       if (timerState.needsCompletionConfirm && !_isCompletionDialogShowing) {

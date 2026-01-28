@@ -51,17 +51,20 @@ class SupabaseStudyLogsDatasource {
   }
 
   /// 学習ログを作成または更新
+  /// null値はDBのDEFAULT値を使用するため除外する
   Future<StudyDailyLogsModel> upsertLog(StudyDailyLogsModel log) async {
     try {
       final now = DateTime.now();
-      final logToUpsert = log.copyWith(
+      final json = log.copyWith(
         updatedAt: now,
         syncUpdatedAt: now,
-      );
+      ).toJson();
+      // null値を除外してDBのDEFAULT値を使用させる
+      json.removeWhere((key, value) => value == null);
 
       final response = await _supabase
           .from(_tableName)
-          .upsert(logToUpsert.toJson())
+          .upsert(json)
           .select()
           .single();
 
