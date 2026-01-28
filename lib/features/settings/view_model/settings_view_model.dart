@@ -27,8 +27,11 @@ class SettingsViewModel extends GetxController {
   final RxString displayName = UserConsts.defaultGuestName.obs;
   final RxBool isUpdatingDisplayName = false.obs;
 
-  /// 現在のユーザーID（未ログイン時は空文字列）
-  String get _userId => _authService.currentUserId ?? '';
+  /// 現在のユーザーID
+  ///
+  /// マイグレーション済み（Supabase使用時）は必ず値が存在する。
+  /// マイグレーション未済（ローカルDB使用時）はnullの場合がある。
+  String? get _userId => _authService.currentUserId;
 
   SettingsViewModel({
     UsersRepository? usersRepository,
@@ -46,7 +49,7 @@ class SettingsViewModel extends GetxController {
 
   /// 初期化: SharedPreferencesとDBから設定を読み込む
   Future<void> init() async {
-    final userId = _userId;
+    final userId = _userId ?? '';
 
     final seconds = await _settingsDataSource.fetchDefaultTimerSeconds();
     defaultTimerSeconds.value = seconds;
@@ -77,7 +80,7 @@ class SettingsViewModel extends GetxController {
 
   /// ストリークリマインダー設定を更新
   Future<void> updateStreakReminderEnabled(bool enabled) async {
-    final userId = _userId;
+    final userId = _userId ?? '';
     streakReminderEnabled.value = enabled;
     await _usersRepository.updateStreakReminderEnabled(enabled, userId);
 
@@ -95,7 +98,7 @@ class SettingsViewModel extends GetxController {
   /// displayNameを再読み込み
   /// ログイン後や画面表示時に呼び出す
   Future<void> refreshDisplayName() async {
-    final name = await _usersRepository.getDisplayName(_userId);
+    final name = await _usersRepository.getDisplayName(_userId ?? '');
     displayName.value = name;
   }
 

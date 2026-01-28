@@ -50,12 +50,16 @@ class SupabaseGoalsDatasource {
   }
 
   /// 特定の目標を取得
-  Future<GoalsModel?> fetchGoalById(String goalId) async {
+  ///
+  /// [goalId] 目標ID
+  /// [userId] ユーザーID（IDOR防止のため、自身の目標のみ取得可能）
+  Future<GoalsModel?> fetchGoalById(String goalId, String userId) async {
     try {
       final response = await _supabase
           .from(_tableName)
           .select()
           .eq('id', goalId)
+          .eq('user_id', userId)
           .maybeSingle();
 
       if (response == null) {

@@ -88,10 +88,10 @@ class GoalsRepository {
   /// 特定の目標を取得
   ///
   /// [goalId] 目標ID
-  /// [userId] ユーザーID（Supabase使用時に必要、ローカルでは未使用）
+  /// [userId] ユーザーID（Supabase使用時はIDOR防止のため必須、ローカルでは未使用）
   Future<GoalsModel?> fetchGoalById(String goalId, String userId) async {
     if (await _migrationService.isMigrated()) {
-      return _supabaseDs.fetchGoalById(goalId);
+      return _supabaseDs.fetchGoalById(goalId, userId);
     } else {
       return _localDs.fetchGoalById(goalId);
     }
