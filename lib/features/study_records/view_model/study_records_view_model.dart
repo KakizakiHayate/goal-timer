@@ -87,8 +87,11 @@ class StudyRecordsViewModel extends GetxController {
   );
   StudyRecordsState get state => _state;
 
-  /// 現在のユーザーID（未ログイン時は空文字列）
-  String get _userId => _authService.currentUserId ?? '';
+  /// Repositoryに渡す用のユーザーID（nullの場合は空文字）
+  ///
+  /// マイグレーション済み（Supabase使用時）は必ず値が存在する。
+  /// マイグレーション未済（ローカルDB使用時）はnullの場合があるため空文字を返す。
+  String get _userIdForRepository => _authService.currentUserId ?? '';
 
   /// コンストラクタ（DIパターン適用）
   /// テスト時にはRepositoryを注入可能
@@ -114,7 +117,7 @@ class StudyRecordsViewModel extends GetxController {
     update();
 
     try {
-      final userId = _userId;
+      final userId = _userIdForRepository;
 
       // 並列で取得（Dart 3 レコード構文で型安全に）
       final (firstStudyDate, currentStreak, longestStreak) =
@@ -144,7 +147,7 @@ class StudyRecordsViewModel extends GetxController {
   /// データがない場合は履歴から計算して保存し、その値を返す
   Future<int> _getOrCalculateLongestStreak() async {
     try {
-      final userId = _userId;
+      final userId = _userIdForRepository;
 
       // 最長ストリークを取得
       final longestStreak = await _usersRepository.getLongestStreak(userId);
@@ -191,7 +194,7 @@ class StudyRecordsViewModel extends GetxController {
       final studyDates = await _studyLogsRepository.fetchStudyDatesInRange(
         startDate: startDate,
         endDate: endDate,
-        userId: _userId,
+        userId: _userIdForRepository,
       );
 
       _state = _state.copyWith(studyDates: studyDates);
@@ -239,7 +242,7 @@ class StudyRecordsViewModel extends GetxController {
   /// 指定日の学習記録を取得
   Future<List<DailyRecord>> fetchDailyRecords(DateTime date) async {
     try {
-      final userId = _userId;
+      final userId = _userIdForRepository;
 
       final records = await _studyLogsRepository.fetchDailyRecordsByDate(
         date,

@@ -128,13 +128,14 @@ void main() {
       test('マイグレーション済みの場合はSupabaseから取得する', () async {
         when(() => mockMigrationService.isMigrated())
             .thenAnswer((_) async => true);
-        when(() => mockSupabaseDs.fetchGoalById('goal-1'))
+        when(() => mockSupabaseDs.fetchGoalById('goal-1', testUserId))
             .thenAnswer((_) async => testGoal);
 
         final result = await repository.fetchGoalById('goal-1', testUserId);
 
         expect(result, testGoal);
-        verify(() => mockSupabaseDs.fetchGoalById('goal-1')).called(1);
+        verify(() => mockSupabaseDs.fetchGoalById('goal-1', testUserId))
+            .called(1);
       });
 
       test('マイグレーション未済の場合はローカルDBから取得する', () async {
