@@ -58,22 +58,23 @@ class _SettingsScreenState extends State<SettingsScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: ColorConsts.backgroundPrimary,
-      appBar: AppBar(
-        title: Text(
-          '設定',
-          style: TextConsts.h3.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
+    return Obx(() {
+      return Scaffold(
+        backgroundColor: ColorConsts.backgroundPrimary,
+        appBar: AppBar(
+          title: Text(
+            '設定',
+            style: TextConsts.h3.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
+          backgroundColor: ColorConsts.primary,
+          elevation: 0,
         ),
-        backgroundColor: ColorConsts.primary,
-        elevation: 0,
-      ),
-      body: FadeTransition(
-        opacity: _fadeAnimation,
-        child: SingleChildScrollView(
+        body: FadeTransition(
+          opacity: _fadeAnimation,
+          child: SingleChildScrollView(
           padding: const EdgeInsets.all(SpacingConsts.l),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,6 +118,7 @@ class _SettingsScreenState extends State<SettingsScreen>
         ),
       ),
     );
+    });
   }
 
   Widget _buildProfileSection() {
