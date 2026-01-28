@@ -66,7 +66,13 @@ class WelcomeViewModel extends GetxController {
       AppLogger.instance.i('匿名認証成功: $userId');
 
       // データ移行を実行
+      AppLogger.instance.d('[WelcomeVM] _migrateDataIfNeeded 開始');
       await _migrateDataIfNeeded(userId);
+      AppLogger.instance.d('[WelcomeVM] _migrateDataIfNeeded 完了');
+
+      // 移行フラグの確認（デバッグ用）
+      final isMigratedNow = await _migrationService.isMigrated();
+      AppLogger.instance.d('[WelcomeVM] 遷移前 isMigrated=$isMigratedNow');
 
       // ホーム画面へ遷移
       Get.offAll(() => const HomeScreen());

@@ -36,14 +36,19 @@ class MigrationService {
   /// 移行済みかどうかを確認
   Future<bool> isMigrated() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_keyIsMigrated) ?? false;
+    final result = prefs.getBool(_keyIsMigrated) ?? false;
+    AppLogger.instance.d('[Migration] isMigrated() = $result');
+    return result;
   }
 
   /// 移行済みフラグを設定
   Future<void> _setMigrated() async {
+    AppLogger.instance.d('[Migration] _setMigrated() 開始');
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_keyIsMigrated, true);
-    AppLogger.instance.i('移行済みフラグを設定しました');
+    // 書き込み確認
+    final verified = prefs.getBool(_keyIsMigrated) ?? false;
+    AppLogger.instance.i('[Migration] 移行済みフラグを設定しました (verified=$verified)');
   }
 
   /// ローカルデータがあるかどうかを確認
@@ -109,12 +114,14 @@ class MigrationService {
   /// [userId] SupabaseユーザーID
   /// 移行失敗時もsuccess: trueを返し、ユーザーはローカルデータで継続使用可能
   Future<MigrationResult> migrate(String userId) async {
-    AppLogger.instance.i('データ移行を開始します: userId=$userId');
+    AppLogger.instance.i('[Migration] migrate() 開始: userId=$userId');
 
     try {
       // 移行済みの場合はスキップ（GAイベントは送信しない）
-      if (await isMigrated()) {
-        AppLogger.instance.i('既に移行済みのためスキップします');
+      final alreadyMigrated = await isMigrated();
+      AppLogger.instance.d('[Migration] alreadyMigrated=$alreadyMigrated');
+      if (alreadyMigrated) {
+        AppLogger.instance.i('[Migration] 既に移行済みのためスキップします');
         return const MigrationResult(
           success: true,
           skipped: true,
@@ -123,9 +130,12 @@ class MigrationService {
       }
 
       // ローカルデータがない場合はスキップ（GAイベントは送信しない）
-      if (!await hasLocalData()) {
-        AppLogger.instance.i('ローカルデータがないためスキップします');
+      final hasData = await hasLocalData();
+      AppLogger.instance.d('[Migration] hasLocalData=$hasData');
+      if (!hasData) {
+        AppLogger.instance.i('[Migration] ローカルデータがないため_setMigrated()を呼び出します');
         await _setMigrated();
+        AppLogger.instance.i('[Migration] _setMigrated()完了、MigrationResult返却');
         return const MigrationResult(
           success: true,
           skipped: true,

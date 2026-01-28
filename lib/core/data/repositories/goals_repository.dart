@@ -101,11 +101,13 @@ class GoalsRepository {
   ///
   /// [goal] 保存する目標モデル
   Future<GoalsModel> upsertGoal(GoalsModel goal) async {
-    if (await _migrationService.isMigrated()) {
-      AppLogger.instance.i('Supabaseに目標を保存します: ${goal.id}');
+    final isMigrated = await _migrationService.isMigrated();
+    AppLogger.instance.d('[GoalsRepository] upsertGoal: isMigrated=$isMigrated');
+    if (isMigrated) {
+      AppLogger.instance.i('[GoalsRepository] Supabaseに目標を保存します: ${goal.id}');
       return _supabaseDs.upsertGoal(goal);
     } else {
-      AppLogger.instance.i('ローカルDBに目標を保存します: ${goal.id}');
+      AppLogger.instance.i('[GoalsRepository] ローカルDBに目標を保存します: ${goal.id}');
       await _localDs.saveGoal(goal);
       return goal;
     }
