@@ -156,6 +156,9 @@ class TimerViewModel extends GetxController {
   /// マイグレーション未済（ローカルDB使用時）はnullの場合がある。
   String? get _userId => _authService.currentUserId;
 
+  /// Repositoryに渡す用のユーザーID（nullの場合は空文字）
+  String get _userIdForRepository => _authService.currentUserId ?? '';
+
   /// コンストラクタ（DIパターン適用）
   /// テスト時にはRepositoryを注入可能
   TimerViewModel({
@@ -486,7 +489,7 @@ class TimerViewModel extends GetxController {
   /// 現在のストリークが最長を超えていれば更新する
   Future<void> _updateLongestStreakIfNeeded() async {
     try {
-      final userId = _userId ?? '';
+      final userId = _userIdForRepository;
 
       // 現在のストリークを計算
       final currentStreak = await _studyLogsRepository.calculateCurrentStreak(
@@ -514,7 +517,7 @@ class TimerViewModel extends GetxController {
   /// 明日のストリークリマインダーをスケジュールする
   Future<void> _scheduleTomorrowStreakReminders(int currentStreak) async {
     try {
-      final userId = _userId ?? '';
+      final userId = _userIdForRepository;
 
       // リマインダー設定が有効かどうかを確認
       final reminderEnabled = await _usersRepository.getStreakReminderEnabled(
@@ -543,7 +546,7 @@ class TimerViewModel extends GetxController {
   /// デバッグ用: 保存されているログを全件取得して表示
   Future<void> debugPrintAllLogs() async {
     try {
-      final logs = await _studyLogsRepository.fetchAllLogs(_userId ?? '');
+      final logs = await _studyLogsRepository.fetchAllLogs(_userIdForRepository);
       AppLogger.instance.i('=== 保存されているログ一覧 (${logs.length}件) ===');
 
       if (logs.isEmpty) {

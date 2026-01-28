@@ -98,6 +98,9 @@ class HomeViewModel extends GetxController {
   /// マイグレーション未済（ローカルDB使用時）はnullの場合がある。
   String? get _userId => _authService.currentUserId;
 
+  /// Repositoryに渡す用のユーザーID（nullの場合は空文字）
+  String get _userIdForRepository => _authService.currentUserId ?? '';
+
   @override
   void onInit() {
     super.onInit();
@@ -110,9 +113,7 @@ class HomeViewModel extends GetxController {
       _state = state.copyWith(isLoading: true);
       update();
 
-      // userIdはローカルDB使用時はnullの場合があるが、
-      // Repository内でマイグレーション状態に応じて適切に処理される
-      final userId = _userId ?? '';
+      final userId = _userIdForRepository;
 
       // 期限切れの目標を更新
       await _goalsRepository.updateExpiredGoals(userId);
@@ -308,7 +309,7 @@ class HomeViewModel extends GetxController {
   /// 設定画面から戻ったときに呼び出す
   Future<void> refreshDisplayName() async {
     try {
-      final displayName = await _usersRepository.getDisplayName(_userId ?? '');
+      final displayName = await _usersRepository.getDisplayName(_userIdForRepository);
       _state = state.copyWith(displayName: displayName);
       update();
       AppLogger.instance.i('displayNameを再読み込みしました: $displayName');
@@ -323,7 +324,7 @@ class HomeViewModel extends GetxController {
   /// デバッグ用: 保存されている目標を全件取得して表示
   Future<void> debugPrintAllGoals() async {
     try {
-      final goals = await _goalsRepository.fetchAllGoals(_userId ?? '');
+      final goals = await _goalsRepository.fetchAllGoals(_userIdForRepository);
       AppLogger.instance.i('=== 保存されている目標一覧 (${goals.length}件) ===');
 
       if (goals.isEmpty) {
