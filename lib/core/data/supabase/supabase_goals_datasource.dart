@@ -31,6 +31,24 @@ class SupabaseGoalsDatasource {
     }
   }
 
+  /// ユーザーの全ての目標を取得（削除済みを含む）
+  Future<List<GoalsModel>> fetchAllGoalsIncludingDeleted(String userId) async {
+    try {
+      final response = await _supabase
+          .from(_tableName)
+          .select()
+          .eq('user_id', userId)
+          .order('created_at', ascending: false);
+
+      return (response as List)
+          .map((json) => GoalsModel.fromJson(json as Map<String, dynamic>))
+          .toList();
+    } catch (error, stackTrace) {
+      AppLogger.instance.e('目標取得（削除済み含む）に失敗しました', error, stackTrace);
+      rethrow;
+    }
+  }
+
   /// 特定の目標を取得
   Future<GoalsModel?> fetchGoalById(String goalId) async {
     try {

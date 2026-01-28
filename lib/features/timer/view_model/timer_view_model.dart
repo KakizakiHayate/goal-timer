@@ -3,11 +3,11 @@ import 'dart:async';
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../../core/data/local/app_database.dart';
-import '../../../core/data/local/local_study_daily_logs_datasource.dart';
-import '../../../core/data/local/local_users_datasource.dart';
+import '../../../core/data/repositories/study_logs_repository.dart';
+import '../../../core/data/repositories/users_repository.dart';
 import '../../../core/models/goals/goals_model.dart';
 import '../../../core/models/study_daily_logs/study_daily_logs_model.dart';
+import '../../../core/services/auth_service.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/services/rating_service.dart';
 import '../../../core/utils/app_logger.dart';
@@ -121,8 +121,9 @@ class TimerState {
 
 // タイマーのViewModel
 class TimerViewModel extends GetxController {
-  final LocalStudyDailyLogsDatasource _datasource;
-  final LocalUsersDatasource _usersDatasource;
+  final StudyLogsRepository _studyLogsRepository;
+  final UsersRepository _usersRepository;
+  final AuthService _authService;
   final GoalsModel goal;
 
   // PRコメント対応: インスタンス変数として一度だけ取得
@@ -149,22 +150,23 @@ class TimerViewModel extends GetxController {
   // 経過時間を取得するgetter
   int get elapsedSeconds => _elapsedSeconds;
 
+  /// 現在のユーザーID（未ログイン時は空文字列）
+  String get _userId => _authService.currentUserId ?? '';
+
   /// コンストラクタ（DIパターン適用）
-  /// テスト時にはDataSourceを注入可能
+  /// テスト時にはRepositoryを注入可能
   TimerViewModel({
     required this.goal,
-    LocalStudyDailyLogsDatasource? datasource,
-    LocalUsersDatasource? usersDatasource,
+    StudyLogsRepository? studyLogsRepository,
+    UsersRepository? usersRepository,
+    AuthService? authService,
     SettingsViewModel? settingsViewModel,
     NotificationService? notificationService,
   }) : _settingsViewModel = settingsViewModel ?? Get.find<SettingsViewModel>(),
        _notificationService = notificationService ?? NotificationService(),
-       _datasource =
-           datasource ??
-           LocalStudyDailyLogsDatasource(database: Get.find<AppDatabase>()),
-       _usersDatasource =
-           usersDatasource ??
-           LocalUsersDatasource(database: Get.find<AppDatabase>()) {
+       _studyLogsRepository = studyLogsRepository ?? StudyLogsRepository(),
+       _usersRepository = usersRepository ?? UsersRepository(),
+       _authService = authService ?? AuthService() {
     final defaultSeconds = _settingsViewModel.defaultTimerSeconds.value;
 
     _state.value = TimerState(
@@ -452,10 +454,11 @@ class TimerViewModel extends GetxController {
         goalId: goal.id,
         studyDate: DateTime(studyDate.year, studyDate.month, studyDate.day),
         totalSeconds: _elapsedSeconds,
+        userId: _userId,
       );
 
-      // DataSource経由で保存
-      await _datasource.saveLog(log);
+      // Repository経由で保存
+      await _studyLogsRepository.upsertLog(log);
 
       // 保存完了後、学習セッションの開始日をクリア
       _studySessionStartDay = null;
@@ -480,12 +483,17 @@ class TimerViewModel extends GetxController {
   /// 現在のストリークが最長を超えていれば更新する
   Future<void> _updateLongestStreakIfNeeded() async {
     try {
+      final userId = _userId;
+
       // 現在のストリークを計算
-      final currentStreak = await _datasource.calculateCurrentStreak();
+      final currentStreak = await _studyLogsRepository.calculateCurrentStreak(
+        userId,
+      );
 
       // 最長ストリークと比較して必要なら更新
-      final updated = await _usersDatasource.updateLongestStreakIfNeeded(
+      final updated = await _usersRepository.updateLongestStreakIfNeeded(
         currentStreak,
+        userId,
       );
 
       if (updated) {
@@ -503,8 +511,12 @@ class TimerViewModel extends GetxController {
   /// 明日のストリークリマインダーをスケジュールする
   Future<void> _scheduleTomorrowStreakReminders(int currentStreak) async {
     try {
+      final userId = _userId;
+
       // リマインダー設定が有効かどうかを確認
-      final reminderEnabled = await _usersDatasource.getStreakReminderEnabled();
+      final reminderEnabled = await _usersRepository.getStreakReminderEnabled(
+        userId,
+      );
       if (!reminderEnabled) {
         AppLogger.instance.i('ストリークリマインダーはOFFのためスケジュールをスキップ');
         return;
@@ -525,10 +537,10 @@ class TimerViewModel extends GetxController {
     }
   }
 
-  /// 🔍 デバッグ用: 保存されているログを全件取得して表示
+  /// デバッグ用: 保存されているログを全件取得して表示
   Future<void> debugPrintAllLogs() async {
     try {
-      final logs = await _datasource.fetchAllLogs();
+      final logs = await _studyLogsRepository.fetchAllLogs(_userId);
       AppLogger.instance.i('=== 保存されているログ一覧 (${logs.length}件) ===');
 
       if (logs.isEmpty) {

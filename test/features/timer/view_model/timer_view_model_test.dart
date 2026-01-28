@@ -2,7 +2,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:goal_timer/core/data/local/app_database.dart';
 import 'package:goal_timer/core/data/local/local_settings_datasource.dart';
+import 'package:goal_timer/core/data/repositories/study_logs_repository.dart';
+import 'package:goal_timer/core/data/repositories/users_repository.dart';
 import 'package:goal_timer/core/models/goals/goals_model.dart';
+import 'package:goal_timer/core/services/auth_service.dart';
 import 'package:goal_timer/core/services/notification_service.dart';
 import 'package:goal_timer/features/settings/view_model/settings_view_model.dart';
 import 'package:goal_timer/features/timer/view_model/timer_view_model.dart';
@@ -10,6 +13,12 @@ import 'package:mocktail/mocktail.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class MockAppDatabase extends Mock implements AppDatabase {}
+
+class MockStudyLogsRepository extends Mock implements StudyLogsRepository {}
+
+class MockUsersRepository extends Mock implements UsersRepository {}
+
+class MockAuthService extends Mock implements AuthService {}
 
 /// GetxControllerを継承したFakeクラス（Mockではなく）
 class FakeSettingsViewModel extends GetxController
@@ -61,6 +70,9 @@ void main() {
   late MockAppDatabase mockDatabase;
   late FakeSettingsViewModel fakeSettingsViewModel;
   late MockNotificationService mockNotificationService;
+  late MockStudyLogsRepository mockStudyLogsRepository;
+  late MockUsersRepository mockUsersRepository;
+  late MockAuthService mockAuthService;
   late GoalsModel testGoal;
 
   setUpAll(() {
@@ -72,6 +84,9 @@ void main() {
     mockDatabase = MockAppDatabase();
     fakeSettingsViewModel = FakeSettingsViewModel();
     mockNotificationService = MockNotificationService();
+    mockStudyLogsRepository = MockStudyLogsRepository();
+    mockUsersRepository = MockUsersRepository();
+    mockAuthService = MockAuthService();
     testGoal = GoalsModel(
       id: 'test-goal-id',
       userId: 'test-user-id',
@@ -109,6 +124,9 @@ void main() {
         goalTitle: any(named: 'goalTitle'),
       ),
     ).thenAnswer((_) async {});
+
+    // MockAuthServiceのスタブ設定
+    when(() => mockAuthService.currentUserId).thenReturn('test-user-id');
   });
 
   /// テスト用のTimerViewModelを作成するヘルパー関数
@@ -116,6 +134,9 @@ void main() {
     return TimerViewModel(
       goal: testGoal,
       notificationService: mockNotificationService,
+      studyLogsRepository: mockStudyLogsRepository,
+      usersRepository: mockUsersRepository,
+      authService: mockAuthService,
     );
   }
 

@@ -1,11 +1,11 @@
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../../core/data/local/app_database.dart';
-import '../../../core/data/local/local_goals_datasource.dart';
-import '../../../core/data/local/local_study_daily_logs_datasource.dart';
-import '../../../core/data/local/local_users_datasource.dart';
+import '../../../core/data/repositories/goals_repository.dart';
+import '../../../core/data/repositories/study_logs_repository.dart';
+import '../../../core/data/repositories/users_repository.dart';
 import '../../../core/models/goals/goals_model.dart';
+import '../../../core/services/auth_service.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/streak_consts.dart';
 import '../../../core/utils/time_utils.dart';
@@ -71,28 +71,29 @@ class HomeState {
 
 // Home画面のViewModel
 class HomeViewModel extends GetxController {
-  late final LocalGoalsDatasource _goalsDatasource;
-  late final LocalStudyDailyLogsDatasource _studyLogsDatasource;
-  late final LocalUsersDatasource _usersDatasource;
+  late final GoalsRepository _goalsRepository;
+  late final StudyLogsRepository _studyLogsRepository;
+  late final UsersRepository _usersRepository;
+  late final AuthService _authService;
 
   // 状態（Rxを使わない）
   HomeState _state = HomeState();
   HomeState get state => _state;
 
   HomeViewModel({
-    LocalGoalsDatasource? goalsDatasource,
-    LocalStudyDailyLogsDatasource? studyLogsDatasource,
-    LocalUsersDatasource? usersDatasource,
+    GoalsRepository? goalsRepository,
+    StudyLogsRepository? studyLogsRepository,
+    UsersRepository? usersRepository,
+    AuthService? authService,
   }) {
-    final database = AppDatabase();
-    _goalsDatasource =
-        goalsDatasource ?? LocalGoalsDatasource(database: database);
-    _studyLogsDatasource =
-        studyLogsDatasource ??
-        LocalStudyDailyLogsDatasource(database: database);
-    _usersDatasource =
-        usersDatasource ?? LocalUsersDatasource(database: database);
+    _goalsRepository = goalsRepository ?? GoalsRepository();
+    _studyLogsRepository = studyLogsRepository ?? StudyLogsRepository();
+    _usersRepository = usersRepository ?? UsersRepository();
+    _authService = authService ?? AuthService();
   }
+
+  /// 現在のユーザーID（未ログイン時は空文字列）
+  String get _userId => _authService.currentUserId ?? '';
 
   @override
   void onInit() {
@@ -100,17 +101,19 @@ class HomeViewModel extends GetxController {
     loadGoals();
   }
 
-  // ローカルデータベースから目標と学習ログをロード
+  // データベースから目標と学習ログをロード
   Future<void> loadGoals() async {
     try {
       _state = state.copyWith(isLoading: true);
       update();
 
+      final userId = _userId;
+
       // 期限切れの目標を更新
-      await _goalsDatasource.updateExpiredGoals();
+      await _goalsRepository.updateExpiredGoals(userId);
 
       // 既存目標のtotalTargetMinutesを補完（Issue #111実装前に作成された目標対応）
-      await _goalsDatasource.populateMissingTotalTargetMinutes();
+      await _goalsRepository.populateMissingTotalTargetMinutes(userId);
 
       // 目標、学習時間、ストリークデータ、displayNameを並列で取得
       final now = DateTime.now();
@@ -126,14 +129,15 @@ class HomeViewModel extends GetxController {
         currentStreak,
         displayName,
       ) = await (
-        _goalsDatasource.fetchActiveGoals(),
-        _studyLogsDatasource.fetchTotalSecondsForAllGoals(),
-        _studyLogsDatasource.fetchStudyDatesInRange(
+        _goalsRepository.fetchActiveGoals(userId),
+        _studyLogsRepository.fetchTotalSecondsForAllGoals(userId),
+        _studyLogsRepository.fetchStudyDatesInRange(
           startDate: startDate,
           endDate: today,
+          userId: userId,
         ),
-        _studyLogsDatasource.calculateCurrentStreak(),
-        _usersDatasource.getDisplayName(),
+        _studyLogsRepository.calculateCurrentStreak(userId),
+        _usersRepository.getDisplayName(userId),
       ).wait;
 
       AppLogger.instance.i('目標を${goals.length}件読み込みました');
@@ -169,6 +173,7 @@ class HomeViewModel extends GetxController {
   }) async {
     try {
       final now = DateTime.now();
+      final userId = _userId;
 
       // 残り日数と総目標時間を計算
       final remainingDays = TimeUtils.calculateRemainingDays(deadline);
@@ -179,7 +184,7 @@ class HomeViewModel extends GetxController {
 
       final goal = GoalsModel(
         id: const Uuid().v4(),
-        userId: null,
+        userId: userId.isEmpty ? null : userId,
         title: title,
         description: description.isEmpty ? null : description,
         targetMinutes: targetMinutes,
@@ -190,7 +195,7 @@ class HomeViewModel extends GetxController {
         updatedAt: now,
       );
 
-      await _goalsDatasource.saveGoal(goal);
+      await _goalsRepository.upsertGoal(goal);
       AppLogger.instance.i('目標を保存しました: ${goal.id}');
 
       // 状態を直接更新（パフォーマンス改善: DBからの再読み込みを回避）
@@ -237,7 +242,7 @@ class HomeViewModel extends GetxController {
         updatedAt: now,
       );
 
-      await _goalsDatasource.updateGoal(updatedGoal);
+      await _goalsRepository.updateGoal(updatedGoal);
       AppLogger.instance.i('目標を更新しました: ${updatedGoal.id}');
 
       // 状態を直接更新（パフォーマンス改善: DBからの再読み込みを回避）
@@ -270,7 +275,7 @@ class HomeViewModel extends GetxController {
   Future<void> _deleteGoalInternal(GoalsModel goal) async {
     try {
       // 目標のみ削除（学習ログは保持してストリーク計算に使用）
-      await _goalsDatasource.deleteGoal(goal.id);
+      await _goalsRepository.deleteGoal(goal.id);
       AppLogger.instance.i('目標を削除しました（学習ログは保持）: ${goal.id}');
 
       // 状態を直接更新（パフォーマンス改善: DBからの再読み込みを回避）
@@ -298,7 +303,7 @@ class HomeViewModel extends GetxController {
   /// 設定画面から戻ったときに呼び出す
   Future<void> refreshDisplayName() async {
     try {
-      final displayName = await _usersDatasource.getDisplayName();
+      final displayName = await _usersRepository.getDisplayName(_userId);
       _state = state.copyWith(displayName: displayName);
       update();
       AppLogger.instance.i('displayNameを再読み込みしました: $displayName');
@@ -313,7 +318,7 @@ class HomeViewModel extends GetxController {
   /// デバッグ用: 保存されている目標を全件取得して表示
   Future<void> debugPrintAllGoals() async {
     try {
-      final goals = await _goalsDatasource.fetchAllGoals();
+      final goals = await _goalsRepository.fetchAllGoals(_userId);
       AppLogger.instance.i('=== 保存されている目標一覧 (${goals.length}件) ===');
 
       if (goals.isEmpty) {
