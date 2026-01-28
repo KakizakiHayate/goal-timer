@@ -128,4 +128,21 @@ class SupabaseUsersDatasource {
       rethrow;
     }
   }
+
+  /// longest_streakを更新
+  Future<void> updateLongestStreak(String userId, int streak) async {
+    try {
+      final now = DateTime.now();
+      await _supabase.from(_tableName).update({
+        'longest_streak': streak,
+        'updated_at': now.toIso8601String(),
+        'sync_updated_at': now.toIso8601String(),
+      }).eq('id', userId);
+
+      AppLogger.instance.i('longest_streakを更新しました: $userId -> $streak');
+    } catch (error, stackTrace) {
+      AppLogger.instance.e('longest_streak更新に失敗しました', error, stackTrace);
+      rethrow;
+    }
+  }
 }
