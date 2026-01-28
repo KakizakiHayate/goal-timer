@@ -218,14 +218,14 @@ class GoalsRepository {
 
   /// 削除済みを含む全ての目標を取得
   ///
-  /// マイグレーション時などに使用
+  /// 学習記録画面で過去の記録に紐づく削除済み目標も表示するために使用
   /// [userId] ユーザーID（Supabase使用時に必要）
   Future<List<GoalsModel>> fetchAllGoalsIncludingDeleted(String userId) async {
     if (await _migrationService.isMigrated()) {
-      // Supabaseでは削除済みも含めて取得するAPIがないため、
-      // fetchAllGoalsを使用（Supabase側で論理削除をフィルタリングしている場合は要調整）
-      return _supabaseDs.fetchAllGoals(userId);
+      AppLogger.instance.i('Supabaseから削除済みを含む目標を取得します');
+      return _supabaseDs.fetchAllGoalsIncludingDeleted(userId);
     } else {
+      AppLogger.instance.i('ローカルDBから削除済みを含む目標を取得します');
       return _localDs.fetchAllGoalsIncludingDeleted();
     }
   }

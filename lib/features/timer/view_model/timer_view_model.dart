@@ -454,6 +454,7 @@ class TimerViewModel extends GetxController {
         goalId: goal.id,
         studyDate: DateTime(studyDate.year, studyDate.month, studyDate.day),
         totalSeconds: _elapsedSeconds,
+        userId: _userId,
       );
 
       // Repository経由で保存
