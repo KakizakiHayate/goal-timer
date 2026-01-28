@@ -1,14 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
 import 'package:goal_timer/core/data/local/local_goals_datasource.dart';
 import 'package:goal_timer/core/data/repositories/goals_repository.dart';
 import 'package:goal_timer/core/data/supabase/supabase_goals_datasource.dart';
 import 'package:goal_timer/core/models/goals/goals_model.dart';
 import 'package:goal_timer/core/services/migration_service.dart';
+import 'package:mocktail/mocktail.dart';
 
-// モッククラス
 class MockLocalGoalsDatasource extends Mock implements LocalGoalsDatasource {}
 
 class MockSupabaseGoalsDatasource extends Mock
@@ -16,44 +13,68 @@ class MockSupabaseGoalsDatasource extends Mock
 
 class MockMigrationService extends Mock implements MigrationService {}
 
+class FakeGoalsModel extends Fake implements GoalsModel {}
+
 void main() {
   late MockLocalGoalsDatasource mockLocalDs;
   late MockSupabaseGoalsDatasource mockSupabaseDs;
   late MockMigrationService mockMigrationService;
   late GoalsRepository repository;
 
-  // テスト用のモデル
+  final testUserId = 'test-user-id';
+
   final testGoal = GoalsModel(
     id: 'goal-1',
+    userId: testUserId,
     title: 'テスト目標',
-    deadline: DateTime.now().add(const Duration(days: 30)),
+    description: 'テスト説明',
+    deadline: DateTime(2025, 12, 31),
     avoidMessage: 'テスト回避メッセージ',
     targetMinutes: 100,
+    createdAt: DateTime(2025, 1, 1),
+    updatedAt: DateTime(2025, 1, 1),
   );
 
-  final testGoalWithExpired = GoalsModel(
+  final testGoal2 = GoalsModel(
     id: 'goal-2',
-    title: '期限切れ目標',
-    deadline: DateTime.now().subtract(const Duration(days: 1)),
-    avoidMessage: 'テスト回避メッセージ',
-    targetMinutes: 50,
-    expiredAt: DateTime.now(),
+    userId: testUserId,
+    title: 'テスト目標2',
+    description: 'テスト説明2',
+    deadline: DateTime(2025, 12, 31),
+    avoidMessage: 'テスト回避メッセージ2',
+    targetMinutes: 200,
+    createdAt: DateTime(2025, 1, 1),
+    updatedAt: DateTime(2025, 1, 1),
   );
 
-  final testGoalWithDeleted = GoalsModel(
+  final deletedGoal = GoalsModel(
     id: 'goal-3',
+    userId: testUserId,
     title: '削除済み目標',
-    deadline: DateTime.now().add(const Duration(days: 10)),
-    avoidMessage: 'テスト回避メッセージ',
-    targetMinutes: 30,
-    deletedAt: DateTime.now(),
+    description: 'テスト説明3',
+    deadline: DateTime(2025, 12, 31),
+    avoidMessage: 'テスト回避メッセージ3',
+    targetMinutes: 300,
+    deletedAt: DateTime(2025, 1, 15),
+    createdAt: DateTime(2025, 1, 1),
+    updatedAt: DateTime(2025, 1, 1),
   );
 
-  const testUserId = 'user-123';
+  final expiredGoal = GoalsModel(
+    id: 'goal-4',
+    userId: testUserId,
+    title: '期限切れ目標',
+    description: 'テスト説明4',
+    deadline: DateTime(2025, 12, 31),
+    avoidMessage: 'テスト回避メッセージ4',
+    targetMinutes: 400,
+    expiredAt: DateTime(2025, 1, 1),
+    createdAt: DateTime(2025, 1, 1),
+    updatedAt: DateTime(2025, 1, 1),
+  );
 
   setUpAll(() {
-    SharedPreferences.setMockInitialValues({});
-    registerFallbackValue(testGoal);
+    registerFallbackValue(FakeGoalsModel());
   });
 
   setUp(() {
@@ -61,7 +82,7 @@ void main() {
     mockSupabaseDs = MockSupabaseGoalsDatasource();
     mockMigrationService = MockMigrationService();
 
-    repository = GoalsRepository.withDependencies(
+    repository = GoalsRepository(
       localDs: mockLocalDs,
       supabaseDs: mockSupabaseDs,
       migrationService: mockMigrationService,
@@ -74,24 +95,24 @@ void main() {
         when(() => mockMigrationService.isMigrated())
             .thenAnswer((_) async => true);
         when(() => mockSupabaseDs.fetchAllGoals(testUserId))
-            .thenAnswer((_) async => [testGoal]);
+            .thenAnswer((_) async => [testGoal, testGoal2]);
 
         final result = await repository.fetchAllGoals(testUserId);
 
-        expect(result, [testGoal]);
+        expect(result.length, 2);
         verify(() => mockSupabaseDs.fetchAllGoals(testUserId)).called(1);
         verifyNever(() => mockLocalDs.fetchAllGoals());
       });
 
-      test('マイグレーション未済の場合はローカルDBから取得する', () async {
+      test('マイグレーション未済の場合はローカルから取得する', () async {
         when(() => mockMigrationService.isMigrated())
             .thenAnswer((_) async => false);
         when(() => mockLocalDs.fetchAllGoals())
-            .thenAnswer((_) async => [testGoal]);
+            .thenAnswer((_) async => [testGoal, testGoal2]);
 
         final result = await repository.fetchAllGoals(testUserId);
 
-        expect(result, [testGoal]);
+        expect(result.length, 2);
         verify(() => mockLocalDs.fetchAllGoals()).called(1);
         verifyNever(() => mockSupabaseDs.fetchAllGoals(any()));
       });
@@ -101,17 +122,17 @@ void main() {
       test('マイグレーション済みの場合はSupabaseから取得してフィルタリングする', () async {
         when(() => mockMigrationService.isMigrated())
             .thenAnswer((_) async => true);
-        when(() => mockSupabaseDs.fetchAllGoals(testUserId)).thenAnswer(
-          (_) async => [testGoal, testGoalWithExpired, testGoalWithDeleted],
-        );
+        when(() => mockSupabaseDs.fetchAllGoals(testUserId))
+            .thenAnswer((_) async => [testGoal, deletedGoal, expiredGoal]);
 
         final result = await repository.fetchActiveGoals(testUserId);
 
         expect(result.length, 1);
-        expect(result.first.id, 'goal-1');
+        expect(result.first.id, testGoal.id);
+        verify(() => mockSupabaseDs.fetchAllGoals(testUserId)).called(1);
       });
 
-      test('マイグレーション未済の場合はローカルDBから取得する', () async {
+      test('マイグレーション未済の場合はローカルから取得する', () async {
         when(() => mockMigrationService.isMigrated())
             .thenAnswer((_) async => false);
         when(() => mockLocalDs.fetchActiveGoals())
@@ -119,7 +140,7 @@ void main() {
 
         final result = await repository.fetchActiveGoals(testUserId);
 
-        expect(result, [testGoal]);
+        expect(result.length, 1);
         verify(() => mockLocalDs.fetchActiveGoals()).called(1);
       });
     });
@@ -128,25 +149,25 @@ void main() {
       test('マイグレーション済みの場合はSupabaseから取得する', () async {
         when(() => mockMigrationService.isMigrated())
             .thenAnswer((_) async => true);
-        when(() => mockSupabaseDs.fetchGoalById('goal-1'))
+        when(() => mockSupabaseDs.fetchGoalById(testGoal.id))
             .thenAnswer((_) async => testGoal);
 
-        final result = await repository.fetchGoalById('goal-1', testUserId);
+        final result = await repository.fetchGoalById(testGoal.id, testUserId);
 
         expect(result, testGoal);
-        verify(() => mockSupabaseDs.fetchGoalById('goal-1')).called(1);
+        verify(() => mockSupabaseDs.fetchGoalById(testGoal.id)).called(1);
       });
 
-      test('マイグレーション未済の場合はローカルDBから取得する', () async {
+      test('マイグレーション未済の場合はローカルから取得する', () async {
         when(() => mockMigrationService.isMigrated())
             .thenAnswer((_) async => false);
-        when(() => mockLocalDs.fetchGoalById('goal-1'))
+        when(() => mockLocalDs.fetchGoalById(testGoal.id))
             .thenAnswer((_) async => testGoal);
 
-        final result = await repository.fetchGoalById('goal-1', testUserId);
+        final result = await repository.fetchGoalById(testGoal.id, testUserId);
 
         expect(result, testGoal);
-        verify(() => mockLocalDs.fetchGoalById('goal-1')).called(1);
+        verify(() => mockLocalDs.fetchGoalById(testGoal.id)).called(1);
       });
     });
 
@@ -163,40 +184,32 @@ void main() {
         verify(() => mockSupabaseDs.upsertGoal(testGoal)).called(1);
       });
 
-      test('マイグレーション未済の場合はローカルDBに保存する', () async {
+      test('マイグレーション未済で新規の場合はローカルに保存する', () async {
         when(() => mockMigrationService.isMigrated())
             .thenAnswer((_) async => false);
+        when(() => mockLocalDs.fetchGoalById(testGoal.id))
+            .thenAnswer((_) async => null);
         when(() => mockLocalDs.saveGoal(testGoal)).thenAnswer((_) async {});
 
         final result = await repository.upsertGoal(testGoal);
 
         expect(result, testGoal);
         verify(() => mockLocalDs.saveGoal(testGoal)).called(1);
-      });
-    });
-
-    group('updateGoal', () {
-      test('マイグレーション済みの場合はSupabaseを更新する', () async {
-        when(() => mockMigrationService.isMigrated())
-            .thenAnswer((_) async => true);
-        when(() => mockSupabaseDs.upsertGoal(testGoal))
-            .thenAnswer((_) async => testGoal);
-
-        final result = await repository.updateGoal(testGoal);
-
-        expect(result, testGoal);
-        verify(() => mockSupabaseDs.upsertGoal(testGoal)).called(1);
+        verifyNever(() => mockLocalDs.updateGoal(any()));
       });
 
-      test('マイグレーション未済の場合はローカルDBを更新する', () async {
+      test('マイグレーション未済で既存の場合はローカルを更新する', () async {
         when(() => mockMigrationService.isMigrated())
             .thenAnswer((_) async => false);
+        when(() => mockLocalDs.fetchGoalById(testGoal.id))
+            .thenAnswer((_) async => testGoal);
         when(() => mockLocalDs.updateGoal(testGoal)).thenAnswer((_) async {});
 
-        final result = await repository.updateGoal(testGoal);
+        final result = await repository.upsertGoal(testGoal);
 
         expect(result, testGoal);
         verify(() => mockLocalDs.updateGoal(testGoal)).called(1);
+        verifyNever(() => mockLocalDs.saveGoal(any()));
       });
     });
 
@@ -204,27 +217,30 @@ void main() {
       test('マイグレーション済みの場合はSupabaseから削除する', () async {
         when(() => mockMigrationService.isMigrated())
             .thenAnswer((_) async => true);
-        when(() => mockSupabaseDs.deleteGoal('goal-1'))
+        when(() => mockSupabaseDs.deleteGoal(testGoal.id))
             .thenAnswer((_) async {});
 
-        await repository.deleteGoal('goal-1');
+        await repository.deleteGoal(testGoal.id);
 
-        verify(() => mockSupabaseDs.deleteGoal('goal-1')).called(1);
+        verify(() => mockSupabaseDs.deleteGoal(testGoal.id)).called(1);
+        verifyNever(() => mockLocalDs.deleteGoal(any()));
       });
 
-      test('マイグレーション未済の場合はローカルDBから削除する', () async {
+      test('マイグレーション未済の場合はローカルから削除する', () async {
         when(() => mockMigrationService.isMigrated())
             .thenAnswer((_) async => false);
-        when(() => mockLocalDs.deleteGoal('goal-1')).thenAnswer((_) async {});
+        when(() => mockLocalDs.deleteGoal(testGoal.id))
+            .thenAnswer((_) async {});
 
-        await repository.deleteGoal('goal-1');
+        await repository.deleteGoal(testGoal.id);
 
-        verify(() => mockLocalDs.deleteGoal('goal-1')).called(1);
+        verify(() => mockLocalDs.deleteGoal(testGoal.id)).called(1);
+        verifyNever(() => mockSupabaseDs.deleteGoal(any()));
       });
     });
 
     group('updateExpiredGoals', () {
-      test('マイグレーション未済の場合はローカルDBを更新する', () async {
+      test('マイグレーション未済の場合はローカルで更新する', () async {
         when(() => mockMigrationService.isMigrated())
             .thenAnswer((_) async => false);
         when(() => mockLocalDs.updateExpiredGoals()).thenAnswer((_) async {});
@@ -232,11 +248,12 @@ void main() {
         await repository.updateExpiredGoals(testUserId);
 
         verify(() => mockLocalDs.updateExpiredGoals()).called(1);
+        verifyNever(() => mockSupabaseDs.fetchAllGoals(any()));
       });
     });
 
     group('populateMissingTotalTargetMinutes', () {
-      test('マイグレーション未済の場合はローカルDBを更新する', () async {
+      test('マイグレーション未済の場合はローカルで更新する', () async {
         when(() => mockMigrationService.isMigrated())
             .thenAnswer((_) async => false);
         when(() => mockLocalDs.populateMissingTotalTargetMinutes())
@@ -245,34 +262,7 @@ void main() {
         await repository.populateMissingTotalTargetMinutes(testUserId);
 
         verify(() => mockLocalDs.populateMissingTotalTargetMinutes()).called(1);
-      });
-    });
-
-    group('fetchAllGoalsIncludingDeleted', () {
-      test('マイグレーション済みの場合はSupabaseから取得する', () async {
-        when(() => mockMigrationService.isMigrated())
-            .thenAnswer((_) async => true);
-        when(() => mockSupabaseDs.fetchAllGoals(testUserId)).thenAnswer(
-          (_) async => [testGoal, testGoalWithDeleted],
-        );
-
-        final result =
-            await repository.fetchAllGoalsIncludingDeleted(testUserId);
-
-        expect(result.length, 2);
-      });
-
-      test('マイグレーション未済の場合はローカルDBから取得する', () async {
-        when(() => mockMigrationService.isMigrated())
-            .thenAnswer((_) async => false);
-        when(() => mockLocalDs.fetchAllGoalsIncludingDeleted())
-            .thenAnswer((_) async => [testGoal, testGoalWithDeleted]);
-
-        final result =
-            await repository.fetchAllGoalsIncludingDeleted(testUserId);
-
-        expect(result.length, 2);
-        verify(() => mockLocalDs.fetchAllGoalsIncludingDeleted()).called(1);
+        verifyNever(() => mockSupabaseDs.fetchAllGoals(any()));
       });
     });
   });

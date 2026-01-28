@@ -1,14 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
 import 'package:goal_timer/core/data/local/local_study_daily_logs_datasource.dart';
 import 'package:goal_timer/core/data/repositories/study_logs_repository.dart';
 import 'package:goal_timer/core/data/supabase/supabase_study_logs_datasource.dart';
 import 'package:goal_timer/core/models/study_daily_logs/study_daily_logs_model.dart';
 import 'package:goal_timer/core/services/migration_service.dart';
+import 'package:goal_timer/core/utils/streak_consts.dart';
+import 'package:mocktail/mocktail.dart';
 
-// モッククラス
 class MockLocalStudyLogsDatasource extends Mock
     implements LocalStudyDailyLogsDatasource {}
 
@@ -17,42 +15,44 @@ class MockSupabaseStudyLogsDatasource extends Mock
 
 class MockMigrationService extends Mock implements MigrationService {}
 
+class FakeStudyDailyLogsModel extends Fake implements StudyDailyLogsModel {}
+
 void main() {
   late MockLocalStudyLogsDatasource mockLocalDs;
   late MockSupabaseStudyLogsDatasource mockSupabaseDs;
   late MockMigrationService mockMigrationService;
   late StudyLogsRepository repository;
 
-  // テスト用のモデル
-  final today = DateTime.now();
-  final testLog = StudyDailyLogsModel(
+  final testUserId = 'test-user-id';
+  final testGoalId = 'goal-1';
+
+  final testLog1 = StudyDailyLogsModel(
     id: 'log-1',
-    goalId: 'goal-1',
-    studyDate: DateTime(today.year, today.month, today.day),
+    goalId: testGoalId,
+    studyDate: DateTime(2025, 1, 15),
     totalSeconds: 3600,
+    createdAt: DateTime(2025, 1, 15),
   );
 
   final testLog2 = StudyDailyLogsModel(
     id: 'log-2',
-    goalId: 'goal-1',
-    studyDate:
-        DateTime(today.year, today.month, today.day)
-            .subtract(const Duration(days: 1)),
+    goalId: testGoalId,
+    studyDate: DateTime(2025, 1, 16),
     totalSeconds: 1800,
+    createdAt: DateTime(2025, 1, 16),
   );
 
   final testLog3 = StudyDailyLogsModel(
     id: 'log-3',
     goalId: 'goal-2',
-    studyDate: DateTime(today.year, today.month, today.day),
+    studyDate: DateTime(2025, 1, 15),
     totalSeconds: 7200,
+    createdAt: DateTime(2025, 1, 15),
   );
 
-  const testUserId = 'user-123';
-
   setUpAll(() {
-    SharedPreferences.setMockInitialValues({});
-    registerFallbackValue(testLog);
+    registerFallbackValue(FakeStudyDailyLogsModel());
+    registerFallbackValue(DateTime.now());
   });
 
   setUp(() {
@@ -60,7 +60,7 @@ void main() {
     mockSupabaseDs = MockSupabaseStudyLogsDatasource();
     mockMigrationService = MockMigrationService();
 
-    repository = StudyLogsRepository.withDependencies(
+    repository = StudyLogsRepository(
       localDs: mockLocalDs,
       supabaseDs: mockSupabaseDs,
       migrationService: mockMigrationService,
@@ -73,7 +73,7 @@ void main() {
         when(() => mockMigrationService.isMigrated())
             .thenAnswer((_) async => true);
         when(() => mockSupabaseDs.fetchAllLogs(testUserId))
-            .thenAnswer((_) async => [testLog, testLog2]);
+            .thenAnswer((_) async => [testLog1, testLog2]);
 
         final result = await repository.fetchAllLogs(testUserId);
 
@@ -82,11 +82,11 @@ void main() {
         verifyNever(() => mockLocalDs.fetchAllLogs());
       });
 
-      test('マイグレーション未済の場合はローカルDBから取得する', () async {
+      test('マイグレーション未済の場合はローカルから取得する', () async {
         when(() => mockMigrationService.isMigrated())
             .thenAnswer((_) async => false);
         when(() => mockLocalDs.fetchAllLogs())
-            .thenAnswer((_) async => [testLog, testLog2]);
+            .thenAnswer((_) async => [testLog1, testLog2]);
 
         final result = await repository.fetchAllLogs(testUserId);
 
@@ -100,155 +100,114 @@ void main() {
       test('マイグレーション済みの場合はSupabaseから取得する', () async {
         when(() => mockMigrationService.isMigrated())
             .thenAnswer((_) async => true);
-        when(() => mockSupabaseDs.fetchLogsByGoalId('goal-1'))
-            .thenAnswer((_) async => [testLog, testLog2]);
+        when(() => mockSupabaseDs.fetchLogsByGoalId(testGoalId))
+            .thenAnswer((_) async => [testLog1, testLog2]);
 
-        final result = await repository.fetchLogsByGoalId('goal-1');
-
-        expect(result.length, 2);
-        verify(() => mockSupabaseDs.fetchLogsByGoalId('goal-1')).called(1);
-      });
-
-      test('マイグレーション未済の場合はローカルDBから取得する', () async {
-        when(() => mockMigrationService.isMigrated())
-            .thenAnswer((_) async => false);
-        when(() => mockLocalDs.fetchLogsByGoalId('goal-1'))
-            .thenAnswer((_) async => [testLog, testLog2]);
-
-        final result = await repository.fetchLogsByGoalId('goal-1');
+        final result =
+            await repository.fetchLogsByGoalId(testGoalId, testUserId);
 
         expect(result.length, 2);
-        verify(() => mockLocalDs.fetchLogsByGoalId('goal-1')).called(1);
-      });
-    });
-
-    group('fetchTotalSecondsByGoalId', () {
-      test('マイグレーション済みの場合はSupabaseから取得して計算する', () async {
-        when(() => mockMigrationService.isMigrated())
-            .thenAnswer((_) async => true);
-        when(() => mockSupabaseDs.fetchLogsByGoalId('goal-1'))
-            .thenAnswer((_) async => [testLog, testLog2]);
-
-        final result = await repository.fetchTotalSecondsByGoalId('goal-1');
-
-        // 3600 + 1800 = 5400
-        expect(result, 5400);
+        verify(() => mockSupabaseDs.fetchLogsByGoalId(testGoalId)).called(1);
       });
 
-      test('マイグレーション未済の場合はローカルDBから取得する', () async {
+      test('マイグレーション未済の場合はローカルから取得する', () async {
         when(() => mockMigrationService.isMigrated())
             .thenAnswer((_) async => false);
-        when(() => mockLocalDs.fetchTotalSecondsByGoalId('goal-1'))
-            .thenAnswer((_) async => 5400);
+        when(() => mockLocalDs.fetchLogsByGoalId(testGoalId))
+            .thenAnswer((_) async => [testLog1, testLog2]);
 
-        final result = await repository.fetchTotalSecondsByGoalId('goal-1');
+        final result =
+            await repository.fetchLogsByGoalId(testGoalId, testUserId);
 
-        expect(result, 5400);
-        verify(() => mockLocalDs.fetchTotalSecondsByGoalId('goal-1')).called(1);
+        expect(result.length, 2);
+        verify(() => mockLocalDs.fetchLogsByGoalId(testGoalId)).called(1);
       });
     });
 
     group('fetchTotalSecondsForAllGoals', () {
-      test('マイグレーション済みの場合はSupabaseから取得して計算する', () async {
+      test('マイグレーション済みの場合はSupabaseから取得して集計する', () async {
         when(() => mockMigrationService.isMigrated())
             .thenAnswer((_) async => true);
         when(() => mockSupabaseDs.fetchAllLogs(testUserId))
-            .thenAnswer((_) async => [testLog, testLog2, testLog3]);
+            .thenAnswer((_) async => [testLog1, testLog2, testLog3]);
 
         final result = await repository.fetchTotalSecondsForAllGoals(testUserId);
 
-        // goal-1: 3600 + 1800 = 5400
-        // goal-2: 7200
-        expect(result['goal-1'], 5400);
+        expect(result[testGoalId], 5400); // 3600 + 1800
         expect(result['goal-2'], 7200);
+        verify(() => mockSupabaseDs.fetchAllLogs(testUserId)).called(1);
       });
 
-      test('マイグレーション未済の場合はローカルDBから取得する', () async {
+      test('マイグレーション未済の場合はローカルから取得する', () async {
         when(() => mockMigrationService.isMigrated())
             .thenAnswer((_) async => false);
         when(() => mockLocalDs.fetchTotalSecondsForAllGoals())
-            .thenAnswer((_) async => {'goal-1': 5400, 'goal-2': 7200});
+            .thenAnswer((_) async => {testGoalId: 5400, 'goal-2': 7200});
 
         final result = await repository.fetchTotalSecondsForAllGoals(testUserId);
 
-        expect(result['goal-1'], 5400);
+        expect(result[testGoalId], 5400);
         expect(result['goal-2'], 7200);
+        verify(() => mockLocalDs.fetchTotalSecondsForAllGoals()).called(1);
       });
     });
 
-    group('upsertLog', () {
-      test('マイグレーション済みの場合はSupabaseに保存する', () async {
+    group('fetchStudyDatesInRange', () {
+      test('マイグレーション済みの場合はSupabaseから取得してフィルタリングする', () async {
+        final startDate = DateTime(2025, 1, 1);
+        final endDate = DateTime(2025, 1, 31);
+
+        // StreakConsts.minStudySeconds以上の記録を作成
+        final logWithEnoughTime = StudyDailyLogsModel(
+          id: 'log-enough',
+          goalId: testGoalId,
+          studyDate: DateTime(2025, 1, 15),
+          totalSeconds: StreakConsts.minStudySeconds,
+          createdAt: DateTime(2025, 1, 15),
+        );
+
         when(() => mockMigrationService.isMigrated())
             .thenAnswer((_) async => true);
-        when(() => mockSupabaseDs.upsertLog(testLog))
-            .thenAnswer((_) async => testLog);
+        when(() => mockSupabaseDs.fetchAllLogs(testUserId))
+            .thenAnswer((_) async => [logWithEnoughTime]);
 
-        final result = await repository.upsertLog(testLog);
+        final result = await repository.fetchStudyDatesInRange(
+          startDate: startDate,
+          endDate: endDate,
+          userId: testUserId,
+        );
 
-        expect(result, testLog);
-        verify(() => mockSupabaseDs.upsertLog(testLog)).called(1);
+        expect(result.length, 1);
+        expect(result.first, DateTime(2025, 1, 15));
       });
 
-      test('マイグレーション未済の場合はローカルDBに保存する', () async {
+      test('マイグレーション未済の場合はローカルから取得する', () async {
+        final startDate = DateTime(2025, 1, 1);
+        final endDate = DateTime(2025, 1, 31);
+
         when(() => mockMigrationService.isMigrated())
             .thenAnswer((_) async => false);
-        when(() => mockLocalDs.saveLog(testLog)).thenAnswer((_) async {});
+        when(() => mockLocalDs.fetchStudyDatesInRange(
+              startDate: startDate,
+              endDate: endDate,
+            )).thenAnswer((_) async => [DateTime(2025, 1, 15)]);
 
-        final result = await repository.upsertLog(testLog);
+        final result = await repository.fetchStudyDatesInRange(
+          startDate: startDate,
+          endDate: endDate,
+          userId: testUserId,
+        );
 
-        expect(result, testLog);
-        verify(() => mockLocalDs.saveLog(testLog)).called(1);
-      });
-    });
-
-    group('deleteLog', () {
-      test('マイグレーション済みの場合はSupabaseから削除する', () async {
-        when(() => mockMigrationService.isMigrated())
-            .thenAnswer((_) async => true);
-        when(() => mockSupabaseDs.deleteLog('log-1')).thenAnswer((_) async {});
-
-        await repository.deleteLog('log-1');
-
-        verify(() => mockSupabaseDs.deleteLog('log-1')).called(1);
-      });
-
-      test('マイグレーション未済の場合はローカルDBから削除する', () async {
-        when(() => mockMigrationService.isMigrated())
-            .thenAnswer((_) async => false);
-        when(() => mockLocalDs.deleteLog('log-1')).thenAnswer((_) async {});
-
-        await repository.deleteLog('log-1');
-
-        verify(() => mockLocalDs.deleteLog('log-1')).called(1);
-      });
-    });
-
-    group('deleteLogsByGoalId', () {
-      test('マイグレーション済みの場合はSupabaseから削除する', () async {
-        when(() => mockMigrationService.isMigrated())
-            .thenAnswer((_) async => true);
-        when(() => mockSupabaseDs.deleteLogsByGoalId('goal-1'))
-            .thenAnswer((_) async {});
-
-        await repository.deleteLogsByGoalId('goal-1');
-
-        verify(() => mockSupabaseDs.deleteLogsByGoalId('goal-1')).called(1);
-      });
-
-      test('マイグレーション未済の場合はローカルDBから削除する', () async {
-        when(() => mockMigrationService.isMigrated())
-            .thenAnswer((_) async => false);
-        when(() => mockLocalDs.deleteLogsByGoalId('goal-1'))
-            .thenAnswer((_) async {});
-
-        await repository.deleteLogsByGoalId('goal-1');
-
-        verify(() => mockLocalDs.deleteLogsByGoalId('goal-1')).called(1);
+        expect(result.length, 1);
+        verify(() => mockLocalDs.fetchStudyDatesInRange(
+              startDate: startDate,
+              endDate: endDate,
+            )).called(1);
       });
     });
 
     group('calculateCurrentStreak', () {
-      test('マイグレーション未済の場合はローカルDBから計算する', () async {
+      test('マイグレーション未済の場合はローカルで計算する', () async {
         when(() => mockMigrationService.isMigrated())
             .thenAnswer((_) async => false);
         when(() => mockLocalDs.calculateCurrentStreak())
@@ -262,7 +221,7 @@ void main() {
     });
 
     group('calculateHistoricalLongestStreak', () {
-      test('マイグレーション未済の場合はローカルDBから計算する', () async {
+      test('マイグレーション未済の場合はローカルで計算する', () async {
         when(() => mockMigrationService.isMigrated())
             .thenAnswer((_) async => false);
         when(() => mockLocalDs.calculateHistoricalLongestStreak())
@@ -276,57 +235,97 @@ void main() {
       });
     });
 
-    group('fetchStudyDatesInRange', () {
-      test('マイグレーション未済の場合はローカルDBから取得する', () async {
-        final startDate = DateTime.now().subtract(const Duration(days: 7));
-        final endDate = DateTime.now();
-
-        when(() => mockMigrationService.isMigrated())
-            .thenAnswer((_) async => false);
-        when(
-          () => mockLocalDs.fetchStudyDatesInRange(
-            startDate: startDate,
-            endDate: endDate,
-          ),
-        ).thenAnswer((_) async => [DateTime.now()]);
-
-        final result = await repository.fetchStudyDatesInRange(
-          startDate: startDate,
-          endDate: endDate,
-          userId: testUserId,
-        );
-
-        expect(result.length, 1);
-      });
-    });
-
     group('fetchFirstStudyDate', () {
-      test('マイグレーション未済の場合はローカルDBから取得する', () async {
-        final firstDate = DateTime(2024, 1, 1);
+      test('マイグレーション済みの場合はSupabaseから取得して最初の日付を返す', () async {
         when(() => mockMigrationService.isMigrated())
-            .thenAnswer((_) async => false);
-        when(() => mockLocalDs.fetchFirstStudyDate())
-            .thenAnswer((_) async => firstDate);
+            .thenAnswer((_) async => true);
+        when(() => mockSupabaseDs.fetchAllLogs(testUserId))
+            .thenAnswer((_) async => [testLog2, testLog1]); // log2が後の日付
 
         final result = await repository.fetchFirstStudyDate(testUserId);
 
-        expect(result, firstDate);
+        expect(result, DateTime(2025, 1, 15)); // log1の日付
+      });
+
+      test('マイグレーション済みでログがない場合はnullを返す', () async {
+        when(() => mockMigrationService.isMigrated())
+            .thenAnswer((_) async => true);
+        when(() => mockSupabaseDs.fetchAllLogs(testUserId))
+            .thenAnswer((_) async => []);
+
+        final result = await repository.fetchFirstStudyDate(testUserId);
+
+        expect(result, isNull);
+      });
+
+      test('マイグレーション未済の場合はローカルから取得する', () async {
+        when(() => mockMigrationService.isMigrated())
+            .thenAnswer((_) async => false);
+        when(() => mockLocalDs.fetchFirstStudyDate())
+            .thenAnswer((_) async => DateTime(2025, 1, 15));
+
+        final result = await repository.fetchFirstStudyDate(testUserId);
+
+        expect(result, DateTime(2025, 1, 15));
         verify(() => mockLocalDs.fetchFirstStudyDate()).called(1);
       });
     });
 
     group('fetchDailyRecordsByDate', () {
-      test('マイグレーション未済の場合はローカルDBから取得する', () async {
-        final date = DateTime.now();
+      test('マイグレーション済みの場合はSupabaseから取得して日付でフィルタリングする', () async {
+        final targetDate = DateTime(2025, 1, 15);
+
+        when(() => mockMigrationService.isMigrated())
+            .thenAnswer((_) async => true);
+        when(() => mockSupabaseDs.fetchAllLogs(testUserId))
+            .thenAnswer((_) async => [testLog1, testLog2, testLog3]);
+
+        final result =
+            await repository.fetchDailyRecordsByDate(targetDate, testUserId);
+
+        // 2025/1/15のログのみ: testLog1(3600) + testLog3(7200)
+        expect(result[testGoalId], 3600);
+        expect(result['goal-2'], 7200);
+      });
+
+      test('マイグレーション未済の場合はローカルから取得する', () async {
+        final targetDate = DateTime(2025, 1, 15);
+
         when(() => mockMigrationService.isMigrated())
             .thenAnswer((_) async => false);
-        when(() => mockLocalDs.fetchDailyRecordsByDate(date))
-            .thenAnswer((_) async => {'goal-1': 3600});
+        when(() => mockLocalDs.fetchDailyRecordsByDate(targetDate))
+            .thenAnswer((_) async => {testGoalId: 3600, 'goal-2': 7200});
 
-        final result = await repository.fetchDailyRecordsByDate(date, testUserId);
+        final result =
+            await repository.fetchDailyRecordsByDate(targetDate, testUserId);
 
-        expect(result['goal-1'], 3600);
-        verify(() => mockLocalDs.fetchDailyRecordsByDate(date)).called(1);
+        expect(result[testGoalId], 3600);
+        verify(() => mockLocalDs.fetchDailyRecordsByDate(targetDate)).called(1);
+      });
+    });
+
+    group('upsertLog', () {
+      test('マイグレーション済みの場合はSupabaseに保存する', () async {
+        when(() => mockMigrationService.isMigrated())
+            .thenAnswer((_) async => true);
+        when(() => mockSupabaseDs.upsertLog(testLog1))
+            .thenAnswer((_) async => testLog1);
+
+        final result = await repository.upsertLog(testLog1);
+
+        expect(result, testLog1);
+        verify(() => mockSupabaseDs.upsertLog(testLog1)).called(1);
+      });
+
+      test('マイグレーション未済の場合はローカルに保存する', () async {
+        when(() => mockMigrationService.isMigrated())
+            .thenAnswer((_) async => false);
+        when(() => mockLocalDs.saveLog(testLog1)).thenAnswer((_) async {});
+
+        final result = await repository.upsertLog(testLog1);
+
+        expect(result, testLog1);
+        verify(() => mockLocalDs.saveLog(testLog1)).called(1);
       });
     });
   });

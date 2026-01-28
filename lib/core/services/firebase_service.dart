@@ -20,6 +20,10 @@ class FirebaseService {
 
   bool _isInitialized = false;
 
+  // イベント名の定数
+  static const String _eventMigrationCompleted = 'migration_completed';
+  static const String _eventMigrationFailed = 'migration_failed';
+
   /// Firebaseサービスを初期化する
   Future<void> init() async {
     if (_isInitialized) return;
@@ -53,6 +57,58 @@ class FirebaseService {
     } catch (error, stackTrace) {
       AppLogger.instance.e('FirebaseService: 初期化に失敗しました', error, stackTrace);
       rethrow;
+    }
+  }
+
+  /// マイグレーション完了イベントを送信
+  ///
+  /// [userId] SupabaseユーザーID
+  /// [goalCount] 移行した目標の件数
+  /// [studyLogCount] 移行した学習ログの件数
+  Future<void> logMigrationCompleted({
+    required String userId,
+    required int goalCount,
+    required int studyLogCount,
+  }) =>
+      _logEvent(
+        _eventMigrationCompleted,
+        {
+          'user_id': userId,
+          'goal_count': goalCount,
+          'study_log_count': studyLogCount,
+        },
+      );
+
+  /// マイグレーション失敗イベントを送信
+  ///
+  /// [userId] SupabaseユーザーID
+  /// [errorMessage] エラーメッセージ
+  Future<void> logMigrationFailed({
+    required String userId,
+    required String errorMessage,
+  }) =>
+      _logEvent(
+        _eventMigrationFailed,
+        {
+          'user_id': userId,
+          'error_message': errorMessage,
+        },
+      );
+
+  /// イベント送信の共通処理
+  Future<void> _logEvent(
+    String name,
+    Map<String, Object>? parameters,
+  ) async {
+    try {
+      await _analytics?.logEvent(name: name, parameters: parameters);
+      AppLogger.instance.i('FirebaseService: イベント「$name」を送信しました');
+    } catch (error, stackTrace) {
+      AppLogger.instance.e(
+        'FirebaseService: イベント「$name」の送信に失敗しました',
+        error,
+        stackTrace,
+      );
     }
   }
 }
