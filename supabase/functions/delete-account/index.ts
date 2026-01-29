@@ -70,7 +70,17 @@ Deno.serve(async (req) => {
       console.error('Error deleting goals:', goalsError)
     }
 
-    // 3. ユーザーを削除
+    // 3. public.users を削除
+    const { error: usersError } = await supabaseAdmin
+      .from('users')
+      .delete()
+      .eq('id', user.id)
+
+    if (usersError) {
+      console.error('Error deleting public.users:', usersError)
+    }
+
+    // 4. auth.users を削除
     const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(user.id)
 
     if (deleteError) {

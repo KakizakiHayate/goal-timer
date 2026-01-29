@@ -234,40 +234,128 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _onGooglePressed(AuthViewModel viewModel) async {
     if (widget.mode == LoginMode.login) {
-      // ログインモード
-      final success = await viewModel.loginWithGoogle();
-      if (success && mounted) {
-        _navigateToHome();
-      }
+      await _handleGoogleLogin(viewModel);
     } else {
-      // 連携モード
-      final confirmed = await _showConfirmDialog('Google');
-      if (!confirmed) return;
+      await _handleGoogleLink(viewModel);
+    }
+  }
 
-      final success = await viewModel.linkWithGoogle();
-      if (success && mounted) {
-        _showSuccessDialog();
-      }
+  Future<void> _handleGoogleLogin(AuthViewModel viewModel) async {
+    final success = await viewModel.loginWithGoogle();
+    if (!mounted) return;
+
+    if (success) {
+      _navigateToHome();
+      return;
+    }
+    if (viewModel.errorType != AuthErrorType.none) {
+      _showErrorDialog(viewModel.errorType);
+    }
+  }
+
+  Future<void> _handleGoogleLink(AuthViewModel viewModel) async {
+    final confirmed = await _showConfirmDialog('Google');
+    if (!confirmed) return;
+
+    final success = await viewModel.linkWithGoogle();
+    if (!mounted) return;
+
+    if (success) {
+      _showSuccessDialog();
+      return;
+    }
+    if (viewModel.errorType != AuthErrorType.none) {
+      _showErrorDialog(viewModel.errorType);
     }
   }
 
   Future<void> _onApplePressed(AuthViewModel viewModel) async {
     if (widget.mode == LoginMode.login) {
-      // ログインモード
-      final success = await viewModel.loginWithApple();
-      if (success && mounted) {
-        _navigateToHome();
-      }
+      await _handleAppleLogin(viewModel);
     } else {
-      // 連携モード
-      final confirmed = await _showConfirmDialog('Apple');
-      if (!confirmed) return;
-
-      final success = await viewModel.linkWithApple();
-      if (success && mounted) {
-        _showSuccessDialog();
-      }
+      await _handleAppleLink(viewModel);
     }
+  }
+
+  Future<void> _handleAppleLogin(AuthViewModel viewModel) async {
+    final success = await viewModel.loginWithApple();
+    if (!mounted) return;
+
+    if (success) {
+      _navigateToHome();
+      return;
+    }
+    if (viewModel.errorType != AuthErrorType.none) {
+      _showErrorDialog(viewModel.errorType);
+    }
+  }
+
+  Future<void> _handleAppleLink(AuthViewModel viewModel) async {
+    final confirmed = await _showConfirmDialog('Apple');
+    if (!confirmed) return;
+
+    final success = await viewModel.linkWithApple();
+    if (!mounted) return;
+
+    if (success) {
+      _showSuccessDialog();
+      return;
+    }
+    if (viewModel.errorType != AuthErrorType.none) {
+      _showErrorDialog(viewModel.errorType);
+    }
+  }
+
+  /// エラー種別に応じたダイアログを表示
+  void _showErrorDialog(AuthErrorType errorType) {
+    String title;
+    String message;
+
+    switch (errorType) {
+      case AuthErrorType.accountNotFound:
+        title = 'ログインできませんでした';
+        message =
+            'このアカウントは登録されていません。\n新規登録は「すぐに始める」からアカウント連携を行ってください。';
+      case AuthErrorType.accountAlreadyExists:
+        title = '連携できませんでした';
+        message =
+            'このアカウントは既に登録されています。\n連携するには、一度ログインしてアカウントを削除してください。';
+      case AuthErrorType.emailNotFound:
+        title = widget.mode == LoginMode.login
+            ? 'ログインできませんでした'
+            : '連携できませんでした';
+        message =
+            'メールアドレスを取得できませんでした。\n設定からApple IDの連携を解除して再度お試しください。';
+      case AuthErrorType.other:
+      case AuthErrorType.none:
+        title = widget.mode == LoginMode.login
+            ? 'ログインできませんでした'
+            : '連携できませんでした';
+        message = 'エラーが発生しました。\nしばらくしてから再度お試しください。';
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Get.find<AuthViewModel>().clearError();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ColorConsts.primary,
+            ),
+            child: const Text(
+              'OK',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _navigateToHome() {
