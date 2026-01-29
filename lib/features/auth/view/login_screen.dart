@@ -234,55 +234,75 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _onGooglePressed(AuthViewModel viewModel) async {
     if (widget.mode == LoginMode.login) {
-      // ログインモード
-      final success = await viewModel.loginWithGoogle();
-      if (mounted) {
-        if (success) {
-          _navigateToHome();
-        } else if (viewModel.errorType != AuthErrorType.none) {
-          _showErrorDialog(viewModel.errorType);
-        }
-      }
+      await _handleGoogleLogin(viewModel);
     } else {
-      // 連携モード
-      final confirmed = await _showConfirmDialog('Google');
-      if (!confirmed) return;
+      await _handleGoogleLink(viewModel);
+    }
+  }
 
-      final success = await viewModel.linkWithGoogle();
-      if (mounted) {
-        if (success) {
-          _showSuccessDialog();
-        } else if (viewModel.errorType != AuthErrorType.none) {
-          _showErrorDialog(viewModel.errorType);
-        }
-      }
+  Future<void> _handleGoogleLogin(AuthViewModel viewModel) async {
+    final success = await viewModel.loginWithGoogle();
+    if (!mounted) return;
+
+    if (success) {
+      _navigateToHome();
+      return;
+    }
+    if (viewModel.errorType != AuthErrorType.none) {
+      _showErrorDialog(viewModel.errorType);
+    }
+  }
+
+  Future<void> _handleGoogleLink(AuthViewModel viewModel) async {
+    final confirmed = await _showConfirmDialog('Google');
+    if (!confirmed) return;
+
+    final success = await viewModel.linkWithGoogle();
+    if (!mounted) return;
+
+    if (success) {
+      _showSuccessDialog();
+      return;
+    }
+    if (viewModel.errorType != AuthErrorType.none) {
+      _showErrorDialog(viewModel.errorType);
     }
   }
 
   Future<void> _onApplePressed(AuthViewModel viewModel) async {
     if (widget.mode == LoginMode.login) {
-      // ログインモード
-      final success = await viewModel.loginWithApple();
-      if (mounted) {
-        if (success) {
-          _navigateToHome();
-        } else if (viewModel.errorType != AuthErrorType.none) {
-          _showErrorDialog(viewModel.errorType);
-        }
-      }
+      await _handleAppleLogin(viewModel);
     } else {
-      // 連携モード
-      final confirmed = await _showConfirmDialog('Apple');
-      if (!confirmed) return;
+      await _handleAppleLink(viewModel);
+    }
+  }
 
-      final success = await viewModel.linkWithApple();
-      if (mounted) {
-        if (success) {
-          _showSuccessDialog();
-        } else if (viewModel.errorType != AuthErrorType.none) {
-          _showErrorDialog(viewModel.errorType);
-        }
-      }
+  Future<void> _handleAppleLogin(AuthViewModel viewModel) async {
+    final success = await viewModel.loginWithApple();
+    if (!mounted) return;
+
+    if (success) {
+      _navigateToHome();
+      return;
+    }
+    if (viewModel.errorType != AuthErrorType.none) {
+      _showErrorDialog(viewModel.errorType);
+    }
+  }
+
+  Future<void> _handleAppleLink(AuthViewModel viewModel) async {
+    final confirmed = await _showConfirmDialog('Apple');
+    if (!confirmed) return;
+
+    final success = await viewModel.linkWithApple();
+    if (!mounted) return;
+
+    if (success) {
+      _showSuccessDialog();
+      return;
+    }
+    if (viewModel.errorType != AuthErrorType.none) {
+      _showErrorDialog(viewModel.errorType);
     }
   }
 

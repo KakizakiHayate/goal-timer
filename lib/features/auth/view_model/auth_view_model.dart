@@ -124,7 +124,9 @@ class AuthViewModel extends GetxController {
       }
 
       // Step 2: emailチェック
-      if (result.email == null || result.email!.isEmpty) {
+      final email = result.email;
+      final idToken = result.idToken;
+      if (email == null || email.isEmpty) {
         await _authDatasource.clearGoogleSession();
         _status.value = AuthStatus.error;
         _errorType.value = AuthErrorType.emailNotFound;
@@ -134,9 +136,19 @@ class AuthViewModel extends GetxController {
         return false;
       }
 
+      if (idToken == null) {
+        await _authDatasource.clearGoogleSession();
+        _status.value = AuthStatus.error;
+        _errorType.value = AuthErrorType.other;
+        _errorMessage.value = '認証情報を取得できませんでした';
+        AppLogger.instance.e('idTokenがnullのため連携を中断');
+        update();
+        return false;
+      }
+
       // Step 3: アカウント存在チェック
       final exists = await _supabaseUsersDatasource.checkAccountExists(
-        email: result.email!,
+        email: email,
         provider: AuthProvider.google,
       );
 
@@ -151,14 +163,14 @@ class AuthViewModel extends GetxController {
       }
 
       // Step 4: signInWithIdToken()を呼び出して連携
-      await _authDatasource.completeSignInWithGoogle(result.idToken!);
+      await _authDatasource.completeSignInWithGoogle(idToken);
 
       // Step 5: public.usersにemail/providerを保存
       final userId = _authDatasource.currentUser?.id;
       if (userId != null) {
         await _supabaseUsersDatasource.upsertEmailAndProvider(
           userId: userId,
-          email: result.email!,
+          email: email,
           provider: AuthProvider.google,
         );
       }
@@ -215,7 +227,10 @@ class AuthViewModel extends GetxController {
       }
 
       // Step 2: emailチェック
-      if (result.email == null || result.email!.isEmpty) {
+      final email = result.email;
+      final idToken = result.idToken;
+      final rawNonce = result.rawNonce;
+      if (email == null || email.isEmpty) {
         _status.value = AuthStatus.error;
         _errorType.value = AuthErrorType.emailNotFound;
         _errorMessage.value = 'メールアドレスを取得できませんでした';
@@ -224,9 +239,18 @@ class AuthViewModel extends GetxController {
         return false;
       }
 
+      if (idToken == null || rawNonce == null) {
+        _status.value = AuthStatus.error;
+        _errorType.value = AuthErrorType.other;
+        _errorMessage.value = '認証情報を取得できませんでした';
+        AppLogger.instance.e('idToken/rawNonceがnullのため連携を中断');
+        update();
+        return false;
+      }
+
       // Step 3: アカウント存在チェック
       final exists = await _supabaseUsersDatasource.checkAccountExists(
-        email: result.email!,
+        email: email,
         provider: AuthProvider.apple,
       );
 
@@ -241,8 +265,8 @@ class AuthViewModel extends GetxController {
 
       // Step 4: signInWithIdToken()を呼び出して連携
       await _authDatasource.completeSignInWithApple(
-        idToken: result.idToken!,
-        rawNonce: result.rawNonce!,
+        idToken: idToken,
+        rawNonce: rawNonce,
       );
 
       // Step 5: public.usersにemail/providerを保存
@@ -250,7 +274,7 @@ class AuthViewModel extends GetxController {
       if (userId != null) {
         await _supabaseUsersDatasource.upsertEmailAndProvider(
           userId: userId,
-          email: result.email!,
+          email: email,
           provider: AuthProvider.apple,
         );
       }
@@ -313,7 +337,9 @@ class AuthViewModel extends GetxController {
       }
 
       // Step 2: emailチェック
-      if (result.email == null || result.email!.isEmpty) {
+      final email = result.email;
+      final idToken = result.idToken;
+      if (email == null || email.isEmpty) {
         await _authDatasource.clearGoogleSession();
         _status.value = AuthStatus.error;
         _errorType.value = AuthErrorType.emailNotFound;
@@ -323,9 +349,19 @@ class AuthViewModel extends GetxController {
         return false;
       }
 
+      if (idToken == null) {
+        await _authDatasource.clearGoogleSession();
+        _status.value = AuthStatus.error;
+        _errorType.value = AuthErrorType.other;
+        _errorMessage.value = '認証情報を取得できませんでした';
+        AppLogger.instance.e('idTokenがnullのためログインを中断');
+        update();
+        return false;
+      }
+
       // Step 3: アカウント存在チェック
       final exists = await _supabaseUsersDatasource.checkAccountExists(
-        email: result.email!,
+        email: email,
         provider: AuthProvider.google,
       );
 
@@ -340,7 +376,7 @@ class AuthViewModel extends GetxController {
       }
 
       // Step 4: signInWithIdToken()を呼び出してログイン
-      await _authDatasource.completeSignInWithGoogle(result.idToken!);
+      await _authDatasource.completeSignInWithGoogle(idToken);
 
       // public.usersテーブルに保存されたカスタムdisplayNameを優先
       final userId = _authDatasource.currentUser?.id;
@@ -399,7 +435,10 @@ class AuthViewModel extends GetxController {
       }
 
       // Step 2: emailチェック
-      if (result.email == null || result.email!.isEmpty) {
+      final email = result.email;
+      final idToken = result.idToken;
+      final rawNonce = result.rawNonce;
+      if (email == null || email.isEmpty) {
         _status.value = AuthStatus.error;
         _errorType.value = AuthErrorType.emailNotFound;
         _errorMessage.value = 'メールアドレスを取得できませんでした';
@@ -408,9 +447,18 @@ class AuthViewModel extends GetxController {
         return false;
       }
 
+      if (idToken == null || rawNonce == null) {
+        _status.value = AuthStatus.error;
+        _errorType.value = AuthErrorType.other;
+        _errorMessage.value = '認証情報を取得できませんでした';
+        AppLogger.instance.e('idToken/rawNonceがnullのためログインを中断');
+        update();
+        return false;
+      }
+
       // Step 3: アカウント存在チェック
       final exists = await _supabaseUsersDatasource.checkAccountExists(
-        email: result.email!,
+        email: email,
         provider: AuthProvider.apple,
       );
 
@@ -425,8 +473,8 @@ class AuthViewModel extends GetxController {
 
       // Step 4: signInWithIdToken()を呼び出してログイン
       await _authDatasource.completeSignInWithApple(
-        idToken: result.idToken!,
-        rawNonce: result.rawNonce!,
+        idToken: idToken,
+        rawNonce: rawNonce,
       );
 
       // public.usersテーブルに保存されたカスタムdisplayNameを優先

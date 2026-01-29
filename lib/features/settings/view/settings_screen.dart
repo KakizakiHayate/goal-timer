@@ -561,6 +561,9 @@ class _SettingsScreenState extends State<SettingsScreen>
       );
       await usersDatasource.resetDisplayName();
 
+      // SettingsViewModelのdisplayNameをリセット（permanentなのでメモリ上の値も更新）
+      _settingsViewModel.displayName.value = UserConsts.defaultGuestName;
+
       AppLogger.instance.i('ログアウト完了');
 
       // ウェルカム画面へ遷移
@@ -679,6 +682,9 @@ class _SettingsScreenState extends State<SettingsScreen>
       // ローカルデータを削除
       final appDatabase = Get.find<AppDatabase>();
       await appDatabase.clearAllData();
+
+      // SettingsViewModelのdisplayNameをリセット（permanentなのでメモリ上の値も更新）
+      _settingsViewModel.displayName.value = UserConsts.defaultGuestName;
 
       AppLogger.instance.i('アカウント削除完了');
 
