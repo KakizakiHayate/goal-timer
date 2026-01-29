@@ -33,6 +33,7 @@ dependencies:
   in_app_review: ^2.0.9
   intl: any
   json_annotation: ^4.9.0
+  jwt_decoder: ^2.0.1
   local_auth: ^3.0.0
   logger: ^2.6.2
   path: '1.9.1'

@@ -219,4 +219,62 @@ class SupabaseUsersDatasource {
       rethrow;
     }
   }
+
+  /// アカウントが存在するか確認
+  ///
+  /// usersテーブルでemail + providerの組み合わせが存在するか確認します。
+  /// Google/Appleは別アカウント扱いのため、両方の条件でチェックします。
+  /// RLSをバイパスするため、SECURITY DEFINER関数を使用しています。
+  Future<bool> checkAccountExists({
+    required String email,
+    required String provider,
+  }) async {
+    try {
+      // RLSをバイパスするため、SECURITY DEFINER関数を呼び出す
+      final response = await _supabase.rpc(
+        'check_account_exists',
+        params: {
+          'p_email': email,
+          'p_provider': provider,
+        },
+      );
+
+      final exists = response as bool;
+      AppLogger.instance.i(
+        'アカウント存在チェック: email=$email, provider=$provider, exists=$exists',
+      );
+      return exists;
+    } catch (error, stackTrace) {
+      AppLogger.instance.e('アカウント存在チェックに失敗しました', error, stackTrace);
+      rethrow;
+    }
+  }
+
+  /// emailとproviderをupsert
+  ///
+  /// 連携成功時にemailとproviderを保存します。
+  /// レコードが存在すれば更新、存在しなければ作成します。
+  Future<void> upsertEmailAndProvider({
+    required String userId,
+    required String email,
+    required String provider,
+  }) async {
+    try {
+      final now = DateTime.now();
+      await _supabase.from(_tableName).upsert({
+        'id': userId,
+        'email': email,
+        'provider': provider,
+        'updated_at': now.toIso8601String(),
+        'sync_updated_at': now.toIso8601String(),
+      });
+
+      AppLogger.instance.i(
+        'emailとproviderをupsertしました: userId=$userId, email=$email, provider=$provider',
+      );
+    } catch (error, stackTrace) {
+      AppLogger.instance.e('emailとproviderのupsertに失敗しました', error, stackTrace);
+      rethrow;
+    }
+  }
 }
