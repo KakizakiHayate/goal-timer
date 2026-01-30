@@ -7,8 +7,15 @@ class AppConsts {
   static const String privacyPolicyUrl =
       'https://docs.google.com/document/d/1xagtbSDKcWep7K_FUii8l2LTCZL_BUXbCRm4hxxNCww/edit?usp=sharing';
 
-  /// お問い合わせフォームURL
-  static const String contactFormUrl = 'https://forms.gle/95jjrtez2Nc8CG9m9';
+  /// フィードバックフォームURL（日本語）
+  /// TODO: 実際のGoogleフォームURLに差し替えてください
+  static const String feedbackFormUrlJa =
+      'https://forms.gle/PLACEHOLDER_JA';
+
+  /// フィードバックフォームURL（英語）
+  /// TODO: 実際のGoogleフォームURLに差し替えてください
+  static const String feedbackFormUrlEn =
+      'https://forms.gle/PLACEHOLDER_EN';
 
   // === アプリ情報 ===
   /// アプリ名
@@ -16,4 +23,11 @@ class AppConsts {
 
   /// アプリバージョン
   static const String appVersion = '1.0.0';
+
+  // === フィードバック設定 ===
+  /// フィードバックポップアップの表示間隔（カウントダウン完了回数）
+  static const int feedbackPopupInterval = 3;
+
+  /// フィードバックポップアップの非表示期間（日数）
+  static const int feedbackPopupCooldownDays = 7;
 }

@@ -433,11 +433,13 @@ class _SettingsScreenState extends State<SettingsScreen>
       title: 'サポート',
       children: [
         SettingItem(
-          title: 'お問い合わせ',
-          subtitle: 'ご意見・ご要望をお聞かせください',
-          icon: Icons.email_outlined,
+          title: _isJapanese ? '不具合報告・ご要望' : 'Feedback & Support',
+          subtitle: _isJapanese
+              ? 'アプリの改善にご協力ください'
+              : 'Help us improve the app',
+          icon: Icons.feedback_outlined,
           iconColor: ColorConsts.success,
-          onTap: _showContact,
+          onTap: _showFeedbackForm,
         ),
         SettingItem(
           title: 'アプリについて',
@@ -449,6 +451,10 @@ class _SettingsScreenState extends State<SettingsScreen>
       ],
     );
   }
+
+  /// 端末言語が日本語かどうか
+  bool get _isJapanese =>
+      Localizations.localeOf(context).languageCode == 'ja';
 
   Widget _buildAccountManagementSection() {
     final currentUser = Supabase.instance.client.auth.currentUser;
@@ -816,9 +822,29 @@ class _SettingsScreenState extends State<SettingsScreen>
     _openUrl(AppConsts.privacyPolicyUrl);
   }
 
-  void _showContact() {
-    // PRコメント対応: URLを定数化
-    _openUrl(AppConsts.contactFormUrl);
+  /// フィードバックフォームを内部ブラウザで開く
+  Future<void> _showFeedbackForm() async {
+    final url = _isJapanese
+        ? AppConsts.feedbackFormUrlJa
+        : AppConsts.feedbackFormUrlEn;
+    await _openUrlInApp(url);
+  }
+
+  /// 内部ブラウザ（アプリ内WebView）でURLを開く
+  Future<void> _openUrlInApp(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.inAppWebView);
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('URLを開けませんでした'),
+            backgroundColor: ColorConsts.error,
+          ),
+        );
+      }
+    }
   }
 
   void _showAbout() {
