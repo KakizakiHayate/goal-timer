@@ -434,11 +434,18 @@ class _SettingsScreenState extends State<SettingsScreen>
       title: 'サポート',
       children: [
         SettingItem(
-          title: '不具合報告・ご要望',
-          subtitle: 'アプリの改善にご協力ください',
-          icon: Icons.feedback_outlined,
-          iconColor: ColorConsts.success,
-          onTap: _showFeedbackForm,
+          title: '不具合報告',
+          subtitle: 'バグや問題を報告する',
+          icon: Icons.bug_report_outlined,
+          iconColor: ColorConsts.error,
+          onTap: _showBugReportForm,
+        ),
+        SettingItem(
+          title: '機能追加のご要望',
+          subtitle: '新機能のアイデアをお聞かせください',
+          icon: Icons.lightbulb_outline,
+          iconColor: ColorConsts.warning,
+          onTap: _showFeatureRequestForm,
         ),
         SettingItem(
           title: 'アプリについて',
@@ -818,11 +825,19 @@ class _SettingsScreenState extends State<SettingsScreen>
     _openUrl(AppConsts.privacyPolicyUrl);
   }
 
-  /// フィードバックフォームを内部ブラウザで開く
-  Future<void> _showFeedbackForm() async {
+  /// 不具合報告フォームを内部ブラウザで開く
+  Future<void> _showBugReportForm() async {
     await UrlLauncherUtils.openInAppWebView(
       context,
-      AppConsts.feedbackFormUrlJa,
+      AppConsts.bugReportFormUrl,
+    );
+  }
+
+  /// 機能追加要望フォームを内部ブラウザで開く
+  Future<void> _showFeatureRequestForm() async {
+    await UrlLauncherUtils.openInAppWebView(
+      context,
+      AppConsts.featureRequestFormUrl,
     );
   }
 

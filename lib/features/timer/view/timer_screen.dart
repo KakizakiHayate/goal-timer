@@ -192,7 +192,7 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
   Future<void> _openFeedbackForm() async {
     await UrlLauncherUtils.openInAppWebView(
       context,
-      AppConsts.feedbackFormUrlJa,
+      AppConsts.featureRequestFormUrl,
       showErrorSnackBar: false,
     );
   }
