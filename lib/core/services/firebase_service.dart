@@ -100,6 +100,13 @@ class FirebaseService {
     String name,
     Map<String, Object>? parameters,
   ) async {
+    // デバッグモードでは送信をスキップ
+    if (kDebugMode) {
+      AppLogger.instance
+          .d('FirebaseService: デバッグモードのためイベント「$name」の送信をスキップ');
+      return;
+    }
+
     try {
       await _analytics?.logEvent(name: name, parameters: parameters);
       AppLogger.instance.i('FirebaseService: イベント「$name」を送信しました');
