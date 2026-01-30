@@ -434,10 +434,8 @@ class _SettingsScreenState extends State<SettingsScreen>
       title: 'サポート',
       children: [
         SettingItem(
-          title: _isJapanese ? '不具合報告・ご要望' : 'Feedback & Support',
-          subtitle: _isJapanese
-              ? 'アプリの改善にご協力ください'
-              : 'Help us improve the app',
+          title: '不具合報告・ご要望',
+          subtitle: 'アプリの改善にご協力ください',
           icon: Icons.feedback_outlined,
           iconColor: ColorConsts.success,
           onTap: _showFeedbackForm,
@@ -453,9 +451,6 @@ class _SettingsScreenState extends State<SettingsScreen>
     );
   }
 
-  /// 端末言語が日本語かどうか
-  bool get _isJapanese =>
-      Localizations.localeOf(context).languageCode == 'ja';
 
   Widget _buildAccountManagementSection() {
     final currentUser = Supabase.instance.client.auth.currentUser;
@@ -825,10 +820,10 @@ class _SettingsScreenState extends State<SettingsScreen>
 
   /// フィードバックフォームを内部ブラウザで開く
   Future<void> _showFeedbackForm() async {
-    final url = _isJapanese
-        ? AppConsts.feedbackFormUrlJa
-        : AppConsts.feedbackFormUrlEn;
-    await UrlLauncherUtils.openInAppWebView(context, url);
+    await UrlLauncherUtils.openInAppWebView(
+      context,
+      AppConsts.feedbackFormUrlJa,
+    );
   }
 
   void _showAbout() {

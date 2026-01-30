@@ -7,15 +7,10 @@ class AppConsts {
   static const String privacyPolicyUrl =
       'https://docs.google.com/document/d/1xagtbSDKcWep7K_FUii8l2LTCZL_BUXbCRm4hxxNCww/edit?usp=sharing';
 
-  /// フィードバックフォームURL（日本語）
+  /// フィードバックフォームURL
   /// TODO: 実際のGoogleフォームURLに差し替えてください
   static const String feedbackFormUrlJa =
       'https://forms.gle/PLACEHOLDER_JA';
-
-  /// フィードバックフォームURL（英語）
-  /// TODO: 実際のGoogleフォームURLに差し替えてください
-  static const String feedbackFormUrlEn =
-      'https://forms.gle/PLACEHOLDER_EN';
 
   // === アプリ情報 ===
   /// アプリ名

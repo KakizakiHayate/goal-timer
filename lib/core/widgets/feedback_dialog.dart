@@ -17,12 +17,7 @@ enum FeedbackDialogResult {
 ///
 /// カウントダウン完了時に表示し、ユーザーからフィードバックを収集する
 class FeedbackDialog extends StatelessWidget {
-  final bool isJapanese;
-
-  const FeedbackDialog({
-    required this.isJapanese,
-    super.key,
-  });
+  const FeedbackDialog({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -44,9 +39,7 @@ class FeedbackDialog extends StatelessWidget {
           children: [
             // タイトル
             Text(
-              isJapanese
-                  ? '目標達成おめでとうございます!'
-                  : 'Congratulations on achieving your goal!',
+              '目標達成おめでとうございます!',
               style: TextConsts.h4.copyWith(
                 fontWeight: FontWeight.w600,
                 color: ColorConsts.textPrimary,
@@ -57,9 +50,7 @@ class FeedbackDialog extends StatelessWidget {
 
             // 本文
             Text(
-              isJapanese
-                  ? 'より使いやすいアプリにするために、1分だけお声を聞かせていただけませんか？開発者が全て目を通します。'
-                  : 'Could you spare a minute to help us improve? The developer reads every response.',
+              'より使いやすいアプリにするために、1分だけお声を聞かせていただけませんか？開発者が全て目を通します。',
               style: TextConsts.body.copyWith(
                 color: ColorConsts.textSecondary,
                 height: 1.4,
@@ -90,7 +81,7 @@ class FeedbackDialog extends StatelessWidget {
                       elevation: 0,
                     ),
                     child: Text(
-                      isJapanese ? '回答する' : 'Answer',
+                      '回答する',
                       style: TextConsts.body.copyWith(
                         fontWeight: FontWeight.w600,
                         color: Colors.white,
@@ -116,7 +107,7 @@ class FeedbackDialog extends StatelessWidget {
                       ),
                     ),
                     child: Text(
-                      isJapanese ? '今はしない' : 'Not now',
+                      '今はしない',
                       style: TextConsts.body.copyWith(
                         color: ColorConsts.textSecondary,
                       ),
@@ -134,16 +125,14 @@ class FeedbackDialog extends StatelessWidget {
   /// フィードバックダイアログを表示する
   ///
   /// [context] BuildContext
-  /// [isJapanese] 日本語表示かどうか
   /// Returns: [FeedbackDialogResult] or null if dismissed
   static Future<FeedbackDialogResult?> show({
     required BuildContext context,
-    required bool isJapanese,
   }) {
     return showDialog<FeedbackDialogResult>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => FeedbackDialog(isJapanese: isJapanese),
+      builder: (context) => const FeedbackDialog(),
     );
   }
 }

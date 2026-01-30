@@ -173,18 +173,14 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
   Future<void> _showFeedbackPopupIfNeeded(TimerViewModel timerViewModel) async {
     if (!mounted) return;
 
-    final isJapanese = Localizations.localeOf(context).languageCode == 'ja';
-    final result = await FeedbackDialog.show(
-      context: context,
-      isJapanese: isJapanese,
-    );
+    final result = await FeedbackDialog.show(context: context);
 
     // フラグをクリア
     timerViewModel.clearFeedbackPopupFlag();
 
     if (result == FeedbackDialogResult.answer) {
       // 「回答する」を選択: フォームを開く
-      await _openFeedbackForm(isJapanese);
+      await _openFeedbackForm();
       await timerViewModel.recordFeedbackDismissed();
     } else if (result == FeedbackDialogResult.dismiss) {
       // 「今はしない」を選択: 非表示日時を記録
@@ -193,13 +189,10 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
   }
 
   /// フィードバックフォームを内部ブラウザで開く
-  Future<void> _openFeedbackForm(bool isJapanese) async {
-    final url = isJapanese
-        ? AppConsts.feedbackFormUrlJa
-        : AppConsts.feedbackFormUrlEn;
+  Future<void> _openFeedbackForm() async {
     await UrlLauncherUtils.openInAppWebView(
       context,
-      url,
+      AppConsts.feedbackFormUrlJa,
       showErrorSnackBar: false,
     );
   }
