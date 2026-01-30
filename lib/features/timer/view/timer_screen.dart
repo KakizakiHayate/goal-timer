@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/models/goals/goals_model.dart';
 import '../../../core/utils/app_consts.dart';
@@ -9,6 +8,7 @@ import '../../../core/utils/color_consts.dart';
 import '../../../core/utils/spacing_consts.dart';
 import '../../../core/utils/text_consts.dart';
 import '../../../core/utils/time_utils.dart';
+import '../../../core/utils/url_launcher_utils.dart';
 import '../../../core/widgets/circular_progress_indicator.dart' as custom;
 import '../../../core/widgets/feedback_dialog.dart';
 import '../view_model/timer_view_model.dart';
@@ -197,13 +197,11 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
     final url = isJapanese
         ? AppConsts.feedbackFormUrlJa
         : AppConsts.feedbackFormUrlEn;
-    final uri = Uri.parse(url);
-
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.inAppWebView);
-    } else {
-      AppLogger.instance.e('フィードバックフォームを開けませんでした: $url');
-    }
+    await UrlLauncherUtils.openInAppWebView(
+      context,
+      url,
+      showErrorSnackBar: false,
+    );
   }
 
   /// 戻るボタン押下時の処理
@@ -714,10 +712,11 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
               ),
               ElevatedButton(
                 onPressed: () async {
+                  final navigator = Navigator.of(context);
                   await timerViewModel.onTappedTimerFinishButton();
                   if (context.mounted) {
                     // ダイアログを閉じる
-                    Navigator.pop(context);
+                    navigator.pop();
 
                     // フィードバックポップアップの表示チェック（カウントダウンモードのみ）
                     if (timerViewModel.state.shouldShowFeedbackPopup) {
@@ -726,7 +725,7 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
 
                     // タイマー画面を閉じて、学習完了を通知（trueを返す）
                     if (mounted) {
-                      Navigator.pop(this.context, true);
+                      navigator.pop(true);
                     }
                   }
                 },

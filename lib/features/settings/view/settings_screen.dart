@@ -13,6 +13,7 @@ import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/color_consts.dart';
 import '../../../core/utils/spacing_consts.dart';
 import '../../../core/utils/text_consts.dart';
+import '../../../core/utils/url_launcher_utils.dart';
 import '../../../core/utils/user_consts.dart';
 import '../../../core/widgets/pressable_card.dart';
 import '../../../core/widgets/setting_item.dart';
@@ -827,24 +828,7 @@ class _SettingsScreenState extends State<SettingsScreen>
     final url = _isJapanese
         ? AppConsts.feedbackFormUrlJa
         : AppConsts.feedbackFormUrlEn;
-    await _openUrlInApp(url);
-  }
-
-  /// 内部ブラウザ（アプリ内WebView）でURLを開く
-  Future<void> _openUrlInApp(String url) async {
-    final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.inAppWebView);
-    } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('URLを開けませんでした'),
-            backgroundColor: ColorConsts.error,
-          ),
-        );
-      }
-    }
+    await UrlLauncherUtils.openInAppWebView(context, url);
   }
 
   void _showAbout() {

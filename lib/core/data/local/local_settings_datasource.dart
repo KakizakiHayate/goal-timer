@@ -12,6 +12,11 @@ class LocalSettingsDataSource {
   static const String _keyLastFeedbackDismissedAt =
       'last_feedback_dismissed_at';
 
+  // SharedPreferencesインスタンスをキャッシュ（遅延初期化）
+  Future<SharedPreferences>? _prefsCache;
+  Future<SharedPreferences> get _prefs =>
+      _prefsCache ??= SharedPreferences.getInstance();
+
   // タイマー設定の定数
   static const int _defaultTimerMinutes = 25;
   static const int _minTimerMinutes = 1;
@@ -27,7 +32,7 @@ class LocalSettingsDataSource {
   /// デフォルトタイマー時間を取得
   Future<int> fetchDefaultTimerSeconds() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = await _prefs;
       final stored = prefs.getInt(_keyDefaultTimerSeconds);
       if (stored != null &&
           stored >= minTimerSeconds &&
@@ -46,7 +51,7 @@ class LocalSettingsDataSource {
   Future<void> saveDefaultTimerSeconds(int seconds) async {
     try {
       final clampedSeconds = seconds.clamp(minTimerSeconds, maxTimerSeconds);
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = await _prefs;
       await prefs.setInt(_keyDefaultTimerSeconds, clampedSeconds);
       AppLogger.instance.i('デフォルトタイマー時間を保存しました: $clampedSeconds秒');
     } catch (error, stackTrace) {
@@ -60,7 +65,7 @@ class LocalSettingsDataSource {
   /// カウントダウン完了カウントを取得
   Future<int> fetchCountdownCompletionCount() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = await _prefs;
       return prefs.getInt(_keyCountdownCompletionCount) ?? 0;
     } catch (error, stackTrace) {
       AppLogger.instance.e('カウントダウン完了カウントの読み込みに失敗しました', error, stackTrace);
@@ -71,7 +76,7 @@ class LocalSettingsDataSource {
   /// カウントダウン完了カウントをインクリメント
   Future<int> incrementCountdownCompletionCount() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = await _prefs;
       final currentCount = prefs.getInt(_keyCountdownCompletionCount) ?? 0;
       final newCount = currentCount + 1;
       await prefs.setInt(_keyCountdownCompletionCount, newCount);
@@ -86,7 +91,7 @@ class LocalSettingsDataSource {
   /// カウントダウン完了カウントをリセット
   Future<void> resetCountdownCompletionCount() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = await _prefs;
       await prefs.setInt(_keyCountdownCompletionCount, 0);
       AppLogger.instance.i('カウントダウン完了カウントをリセットしました');
     } catch (error, stackTrace) {
@@ -98,7 +103,7 @@ class LocalSettingsDataSource {
   /// 最終フィードバック非表示日時を取得
   Future<DateTime?> fetchLastFeedbackDismissedAt() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = await _prefs;
       final timestamp = prefs.getString(_keyLastFeedbackDismissedAt);
       if (timestamp != null) {
         return DateTime.parse(timestamp);
@@ -113,7 +118,7 @@ class LocalSettingsDataSource {
   /// 最終フィードバック非表示日時を保存
   Future<void> saveLastFeedbackDismissedAt(DateTime dateTime) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = await _prefs;
       await prefs.setString(
         _keyLastFeedbackDismissedAt,
         dateTime.toIso8601String(),
@@ -132,7 +137,7 @@ class LocalSettingsDataSource {
   /// 2. 最終非表示日時から[AppConsts.feedbackPopupCooldownDays]日以上経過
   Future<bool> shouldShowFeedbackPopup() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = await _prefs;
       final count = prefs.getInt(_keyCountdownCompletionCount) ?? 0;
 
       // 条件1: カウントが表示間隔の倍数でなければ表示しない
