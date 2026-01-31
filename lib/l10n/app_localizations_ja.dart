@@ -40,4 +40,71 @@ class AppLocalizationsJa extends AppLocalizations {
   String daysSuffix(int count) {
     return '$count日';
   }
+
+  @override
+  String get progress => '進捗';
+
+  @override
+  String get btnStartTimer => 'タイマー開始';
+
+  @override
+  String get btnEdit => '編集';
+
+  @override
+  String deadlineInfo(int month, int day, int days) {
+    return '$month月$day日まで（あと$days日）';
+  }
+
+  @override
+  String get timerCompleteTitle => 'タイマー完了';
+
+  @override
+  String timerCompleteMessage(String goal) {
+    return '「$goal」の学習時間が終了しました';
+  }
+
+  @override
+  String get timerChannelName => 'タイマー完了';
+
+  @override
+  String get timerChannelDescription => 'タイマーが完了した時の通知';
+
+  @override
+  String get streakReminderChannelName => 'ストリークリマインダー';
+
+  @override
+  String get streakReminderChannelDescription => '連続学習日数を維持するためのリマインダー通知';
+
+  @override
+  String get reminderTitle => '今日も学習しましょう！';
+
+  @override
+  String get warningTitle => 'ストリークが途切れそう！';
+
+  @override
+  String get finalWarningTitle => '最後のチャンス！';
+
+  @override
+  String reminderMessage(int days) {
+    return '現在$days日連続で学習中です。今日も続けましょう！';
+  }
+
+  @override
+  String warningMessage(int days) {
+    return '$days日間の連続学習が途切れてしまいます！あと少しで1日終了です。';
+  }
+
+  @override
+  String finalWarningMessage(int days) {
+    return '$days日連続の記録を守りましょう！今日中に1分以上学習してください。';
+  }
+
+  @override
+  String get reminderNoStreak => '今日から学習を始めましょう！';
+
+  @override
+  String get warningNoStreak => '今日も学習しませんか？まだ間に合います！';
+
+  @override
+  String get finalWarningNoStreak => '今日中に学習して、連続学習を始めましょう！';
 }

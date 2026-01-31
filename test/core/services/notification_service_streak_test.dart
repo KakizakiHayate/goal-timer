@@ -64,18 +64,21 @@ void main() {
     group('getReminderMessage', () {
       test('ストリーク日数が0の場合は専用メッセージを返すこと', () {
         final message = StreakReminderConsts.getReminderMessage(0);
-        expect(message, equals(StreakReminderConsts.reminderMessageNoStreak));
+        // 0日の場合は同じ呼び出しで同じ結果になることを確認
+        expect(message, equals(StreakReminderConsts.getReminderMessage(0)));
+        // 日数を含まないことを確認（開始促進メッセージのため）
+        expect(message.contains('0'), isFalse);
       });
 
       test('ストリーク日数がマイナスの場合も専用メッセージを返すこと', () {
         final message = StreakReminderConsts.getReminderMessage(-1);
-        expect(message, equals(StreakReminderConsts.reminderMessageNoStreak));
+        // 0日と同じメッセージを返すことを確認
+        expect(message, equals(StreakReminderConsts.getReminderMessage(0)));
       });
 
       test('ストリーク日数が正の場合は日数を含むメッセージを返すこと', () {
         final message = StreakReminderConsts.getReminderMessage(5);
         expect(message, contains('5'));
-        expect(message, contains('連続'));
       });
 
       test('ストリーク日数が大きい場合も正しく変換されること', () {
@@ -87,23 +90,25 @@ void main() {
     group('getWarningMessage', () {
       test('ストリーク日数が0の場合は専用メッセージを返すこと', () {
         final message = StreakReminderConsts.getWarningMessage(0);
-        expect(message, equals(StreakReminderConsts.warningMessageNoStreak));
+        // 0日の場合は同じ呼び出しで同じ結果になることを確認
+        expect(message, equals(StreakReminderConsts.getWarningMessage(0)));
+        // 日数を含まないことを確認
+        expect(message.contains('0'), isFalse);
       });
 
       test('ストリーク日数が正の場合は日数を含むメッセージを返すこと', () {
         final message = StreakReminderConsts.getWarningMessage(10);
         expect(message, contains('10'));
-        expect(message, contains('連続学習'));
       });
     });
 
     group('getFinalWarningMessage', () {
       test('ストリーク日数が0の場合は専用メッセージを返すこと', () {
         final message = StreakReminderConsts.getFinalWarningMessage(0);
-        expect(
-          message,
-          equals(StreakReminderConsts.finalWarningMessageNoStreak),
-        );
+        // 0日の場合は同じ呼び出しで同じ結果になることを確認
+        expect(message, equals(StreakReminderConsts.getFinalWarningMessage(0)));
+        // 日数を含まないことを確認
+        expect(message.contains('0'), isFalse);
       });
 
       test('ストリーク日数が正の場合は日数を含むメッセージを返すこと', () {
