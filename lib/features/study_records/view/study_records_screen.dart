@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../../core/utils/color_consts.dart';
 import '../../../core/utils/spacing_consts.dart';
 import '../../../core/utils/text_consts.dart';
+import '../../../l10n/app_localizations.dart';
 import '../view_model/study_records_view_model.dart';
 import 'widgets/daily_record_bottom_sheet.dart';
 import 'widgets/monthly_calendar.dart';
@@ -31,10 +32,12 @@ class _StudyRecordsScreenState extends State<StudyRecordsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Scaffold(
       backgroundColor: ColorConsts.backgroundPrimary,
       appBar: AppBar(
-        title: const Text('学習記録'),
+        title: Text(l10n?.studyRecordsTitle ?? 'Study Records'),
         backgroundColor: ColorConsts.cardBackground,
         foregroundColor: ColorConsts.textPrimary,
         elevation: 0,
@@ -55,7 +58,7 @@ class _StudyRecordsScreenState extends State<StudyRecordsScreen> {
                 const SizedBox(height: SpacingConsts.m),
                 _buildCalendarCard(viewModel, state),
                 const SizedBox(height: SpacingConsts.l),
-                _buildStreakInfo(state),
+                _buildStreakInfo(context, state),
                 const SizedBox(height: SpacingConsts.l),
               ],
             ),
@@ -89,7 +92,7 @@ class _StudyRecordsScreenState extends State<StudyRecordsScreen> {
             ),
           ),
           Text(
-            _formatMonth(state.currentMonth),
+            _formatMonth(context, state.currentMonth),
             style: TextConsts.h3.copyWith(fontWeight: FontWeight.w600),
           ),
           IconButton(
@@ -135,7 +138,9 @@ class _StudyRecordsScreenState extends State<StudyRecordsScreen> {
   }
 
   /// ストリーク情報
-  Widget _buildStreakInfo(StudyRecordsState state) {
+  Widget _buildStreakInfo(BuildContext context, StudyRecordsState state) {
+    final l10n = AppLocalizations.of(context);
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: SpacingConsts.l),
       padding: const EdgeInsets.all(SpacingConsts.m),
@@ -154,16 +159,16 @@ class _StudyRecordsScreenState extends State<StudyRecordsScreen> {
         children: [
           Expanded(
             child: _buildStreakItem(
-              title: '現在のストリーク',
-              value: '${state.currentStreak}日',
+              title: l10n?.currentStreakLabel ?? 'Current Streak',
+              value: l10n?.daysSuffix(state.currentStreak) ?? '${state.currentStreak} days',
               icon: '🔥',
             ),
           ),
           Container(width: 1, height: 48, color: ColorConsts.disabled),
           Expanded(
             child: _buildStreakItem(
-              title: '最長ストリーク',
-              value: '${state.longestStreak}日',
+              title: l10n?.longestStreakLabel ?? 'Longest Streak',
+              value: l10n?.daysSuffix(state.longestStreak) ?? '${state.longestStreak} days',
               icon: '🏆',
             ),
           ),
@@ -201,8 +206,9 @@ class _StudyRecordsScreenState extends State<StudyRecordsScreen> {
   }
 
   /// 月をフォーマット
-  String _formatMonth(DateTime date) {
-    return '${date.year}年${date.month}月';
+  String _formatMonth(BuildContext context, DateTime date) {
+    final l10n = AppLocalizations.of(context);
+    return l10n?.monthFormat(date.year, date.month) ?? '${date.year}/${date.month}';
   }
 
   /// 日別学習記録を表示
