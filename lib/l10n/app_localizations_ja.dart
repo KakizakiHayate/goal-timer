@@ -107,4 +107,58 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get finalWarningNoStreak => '今日中に学習して、連続学習を始めましょう！';
+
+  @override
+  String get navHome => 'ホーム';
+
+  @override
+  String get navTimer => 'タイマー';
+
+  @override
+  String get navSettings => '設定';
+
+  @override
+  String greetingMorning(String name) {
+    return 'おはよう、$name さん';
+  }
+
+  @override
+  String greetingAfternoon(String name) {
+    return 'こんにちは、$name さん';
+  }
+
+  @override
+  String greetingEvening(String name) {
+    return 'こんばんは、$name さん';
+  }
+
+  @override
+  String get sectionMyGoals => 'マイ目標';
+
+  @override
+  String get emptyGoalsTitle => '目標がありません';
+
+  @override
+  String get emptyGoalsMessage => '下の+ボタンから\n新しい目標を追加してください';
+
+  @override
+  String get timerTabTitle => 'タイマー';
+
+  @override
+  String get timerEmptyMessage => 'タイマーを使用するには\n目標を作成してください';
+
+  @override
+  String get timerSelectGoal => 'タイマーを開始する目標を選択してください';
+
+  @override
+  String get deleteGoalTitle => '目標を削除しますか？';
+
+  @override
+  String get deleteGoalMessage => 'この目標と、紐づいた学習ログがすべて削除されます。この操作は元に戻せません。';
+
+  @override
+  String get goalDeletedMessage => '目標を削除しました';
+
+  @override
+  String get goalDeleteFailedMessage => '目標の削除に失敗しました';
 }

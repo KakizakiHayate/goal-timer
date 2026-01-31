@@ -133,4 +133,59 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get finalWarningNoStreak => 'Study today to start your streak!';
+
+  @override
+  String get navHome => 'Home';
+
+  @override
+  String get navTimer => 'Timer';
+
+  @override
+  String get navSettings => 'Settings';
+
+  @override
+  String greetingMorning(String name) {
+    return 'Good morning, $name';
+  }
+
+  @override
+  String greetingAfternoon(String name) {
+    return 'Hello, $name';
+  }
+
+  @override
+  String greetingEvening(String name) {
+    return 'Good evening, $name';
+  }
+
+  @override
+  String get sectionMyGoals => 'My Goals';
+
+  @override
+  String get emptyGoalsTitle => 'No goals yet';
+
+  @override
+  String get emptyGoalsMessage => 'Tap the + button below\nto add a new goal';
+
+  @override
+  String get timerTabTitle => 'Timer';
+
+  @override
+  String get timerEmptyMessage => 'Create a goal\nto use the timer';
+
+  @override
+  String get timerSelectGoal => 'Select a goal to start the timer';
+
+  @override
+  String get deleteGoalTitle => 'Delete this goal?';
+
+  @override
+  String get deleteGoalMessage =>
+      'This goal and all related study logs will be permanently deleted. This action cannot be undone.';
+
+  @override
+  String get goalDeletedMessage => 'Goal deleted';
+
+  @override
+  String get goalDeleteFailedMessage => 'Failed to delete goal';
 }
