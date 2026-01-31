@@ -11,6 +11,7 @@ import '../../../core/models/study_daily_logs/study_daily_logs_model.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/services/rating_service.dart';
+import '../../../core/utils/app_consts.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/streak_consts.dart';
 import '../../../core/utils/time_utils.dart';
@@ -324,17 +325,24 @@ class TimerViewModel extends GetxController {
       needsCompletionConfirm: true,
     );
     AppLogger.instance.i('タイマーが完了しました: $_elapsedSeconds秒');
-
-    // カウントダウンモードの場合、フィードバックポップアップの表示判定を行う
-    if (state.mode == TimerMode.countdown) {
-      _checkAndShowFeedbackPopup();
-    }
+    // フィードバックポップアップの判定はonTappedTimerFinishButtonで行う
+    // （学習記録保存時にカウント）
   }
 
   /// フィードバックポップアップの表示判定を行い、必要に応じてフラグを立てる
+  /// 1分以上の学習でカウント対象
   Future<void> _checkAndShowFeedbackPopup() async {
     try {
-      // カウントダウン完了カウントをインクリメント
+      // 最低学習時間（1分）未満はカウント対象外
+      if (_elapsedSeconds < AppConsts.minStudySecondsForFeedback) {
+        AppLogger.instance.i(
+          'フィードバック: 学習時間が${AppConsts.minStudySecondsForFeedback}秒未満のためカウント対象外 '
+          '($_elapsedSeconds秒)',
+        );
+        return;
+      }
+
+      // 学習完了カウントをインクリメント
       await _settingsDataSource.incrementCountdownCompletionCount();
 
       // 表示条件を満たしているかチェック
@@ -499,6 +507,9 @@ class TimerViewModel extends GetxController {
 
       // 🔍 デバッグ: 保存後に全ログを表示
       await debugPrintAllLogs();
+
+      // フィードバックポップアップの表示判定（リセット前に実行）
+      await _checkAndShowFeedbackPopup();
 
       // タイマーをリセット
       resetTimer();
