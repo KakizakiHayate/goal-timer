@@ -1,0 +1,21 @@
+{
+  "@@locale": "ja",
+
+  "appName": "Goal Timer",
+
+  "commonBtnCancel": "キャンセル",
+
+  "commonBtnOk": "OK",
+
+  "commonBtnSave": "保存",
+
+  "commonBtnDelete": "削除",
+
+  "defaultGuestName": "ゲスト",
+
+  "timeFormatHoursMinutes": "{hours}時間{minutes}分",
+
+  "timeFormatMinutes": "{minutes}分",
+
+  "daysSuffix": "{count}日"
+}

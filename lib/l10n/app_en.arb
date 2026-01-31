@@ -1,0 +1,66 @@
+{
+  "@@locale": "en",
+
+  "appName": "Goal Timer",
+  "@appName": {
+    "description": "The name of the application"
+  },
+
+  "commonBtnCancel": "Cancel",
+  "@commonBtnCancel": {
+    "description": "Common cancel button text"
+  },
+
+  "commonBtnOk": "OK",
+  "@commonBtnOk": {
+    "description": "Common OK button text"
+  },
+
+  "commonBtnSave": "Save",
+  "@commonBtnSave": {
+    "description": "Common save button text"
+  },
+
+  "commonBtnDelete": "Delete",
+  "@commonBtnDelete": {
+    "description": "Common delete button text"
+  },
+
+  "defaultGuestName": "Guest",
+  "@defaultGuestName": {
+    "description": "Default name for guest users"
+  },
+
+  "timeFormatHoursMinutes": "{hours}h {minutes}m",
+  "@timeFormatHoursMinutes": {
+    "description": "Time format with hours and minutes",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+
+  "timeFormatMinutes": "{minutes}m",
+  "@timeFormatMinutes": {
+    "description": "Time format with minutes only",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+
+  "daysSuffix": "{count, plural, one{1 day} other{{count} days}}",
+  "@daysSuffix": {
+    "description": "Days suffix with plural support",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
+}
