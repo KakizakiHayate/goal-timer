@@ -188,4 +188,58 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goalDeleteFailedMessage => 'Failed to delete goal';
+
+  @override
+  String get timerScreenTitle => 'Timer';
+
+  @override
+  String get modeCountdown => 'Countdown';
+
+  @override
+  String get modeCountup => 'Count Up';
+
+  @override
+  String get statusFocusing => 'Focusing...';
+
+  @override
+  String get statusPaused => 'Paused';
+
+  @override
+  String get statusReady => 'Press Start';
+
+  @override
+  String get dialogTimerCompleteTitle => 'Timer Complete';
+
+  @override
+  String dialogTimerCompleteMessage(String time) {
+    return 'Would you like to record $time as study time?';
+  }
+
+  @override
+  String get btnRecord => 'Record';
+
+  @override
+  String get btnDontRecord => 'Don\'t Record';
+
+  @override
+  String get dialogStudyCompleteTitle => 'Study Complete';
+
+  @override
+  String get dialogBackConfirmTitle => 'Stop studying?';
+
+  @override
+  String get dialogBackConfirmMessage => 'Unrecorded study time will be lost.';
+
+  @override
+  String get btnQuit => 'Quit';
+
+  @override
+  String get dialogModeSwitchTitle => 'Switch Mode';
+
+  @override
+  String get dialogModeSwitchMessage =>
+      'Please save or reset the timer before switching modes.';
+
+  @override
+  String get btnComplete => 'Complete';
 }

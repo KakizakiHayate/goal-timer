@@ -361,6 +361,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to delete goal'**
   String get goalDeleteFailedMessage;
+
+  /// Timer screen app bar title
+  ///
+  /// In en, this message translates to:
+  /// **'Timer'**
+  String get timerScreenTitle;
+
+  /// Countdown timer mode
+  ///
+  /// In en, this message translates to:
+  /// **'Countdown'**
+  String get modeCountdown;
+
+  /// Count up timer mode
+  ///
+  /// In en, this message translates to:
+  /// **'Count Up'**
+  String get modeCountup;
+
+  /// Timer status when running
+  ///
+  /// In en, this message translates to:
+  /// **'Focusing...'**
+  String get statusFocusing;
+
+  /// Timer status when paused
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get statusPaused;
+
+  /// Timer status when ready to start
+  ///
+  /// In en, this message translates to:
+  /// **'Press Start'**
+  String get statusReady;
+
+  /// Timer complete dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Timer Complete'**
+  String get dialogTimerCompleteTitle;
+
+  /// Timer complete dialog message
+  ///
+  /// In en, this message translates to:
+  /// **'Would you like to record {time} as study time?'**
+  String dialogTimerCompleteMessage(String time);
+
+  /// Record button text
+  ///
+  /// In en, this message translates to:
+  /// **'Record'**
+  String get btnRecord;
+
+  /// Don't record button text
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t Record'**
+  String get btnDontRecord;
+
+  /// Study complete dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Study Complete'**
+  String get dialogStudyCompleteTitle;
+
+  /// Back confirmation dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Stop studying?'**
+  String get dialogBackConfirmTitle;
+
+  /// Back confirmation dialog message
+  ///
+  /// In en, this message translates to:
+  /// **'Unrecorded study time will be lost.'**
+  String get dialogBackConfirmMessage;
+
+  /// Quit button text
+  ///
+  /// In en, this message translates to:
+  /// **'Quit'**
+  String get btnQuit;
+
+  /// Mode switch dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Switch Mode'**
+  String get dialogModeSwitchTitle;
+
+  /// Mode switch blocked dialog message
+  ///
+  /// In en, this message translates to:
+  /// **'Please save or reset the timer before switching modes.'**
+  String get dialogModeSwitchMessage;
+
+  /// Complete button text
+  ///
+  /// In en, this message translates to:
+  /// **'Complete'**
+  String get btnComplete;
 }
 
 class _AppLocalizationsDelegate
