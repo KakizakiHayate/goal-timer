@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/models/goals/goals_model.dart';
+import '../../../core/utils/app_consts.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/color_consts.dart';
 import '../../../core/utils/spacing_consts.dart';
 import '../../../core/utils/text_consts.dart';
 import '../../../core/utils/time_utils.dart';
+import '../../../core/utils/url_launcher_utils.dart';
 import '../../../core/widgets/circular_progress_indicator.dart' as custom;
+import '../../../core/widgets/feedback_dialog.dart';
 import '../view_model/timer_view_model.dart';
 
 /// タイマー画面
@@ -132,6 +135,12 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                     await timerViewModel.onTappedTimerFinishButton();
                     _isCompletionDialogShowing = false;
                     navigator.pop();
+
+                    // フィードバックポップアップの表示チェック
+                    if (timerViewModel.state.shouldShowFeedbackPopup) {
+                      await _showFeedbackPopupIfNeeded(timerViewModel);
+                    }
+
                     navigator.pop(true);
                   } catch (e, s) {
                     AppLogger.instance.e('学習記録の保存に失敗しました', e, s);
@@ -157,6 +166,34 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
               ),
             ],
           ),
+    );
+  }
+
+  /// フィードバックポップアップを表示し、結果に応じて処理を行う
+  Future<void> _showFeedbackPopupIfNeeded(TimerViewModel timerViewModel) async {
+    if (!mounted) return;
+
+    final result = await FeedbackDialog.show(context: context);
+
+    // フラグをクリア
+    timerViewModel.clearFeedbackPopupFlag();
+
+    if (result == FeedbackDialogResult.answer) {
+      // 「回答する」を選択: フォームを開く
+      await _openFeedbackForm();
+      await timerViewModel.recordFeedbackDismissed();
+    } else if (result == FeedbackDialogResult.dismiss) {
+      // 「今はしない」を選択: 非表示日時を記録
+      await timerViewModel.recordFeedbackDismissed();
+    }
+  }
+
+  /// フィードバックフォームを内部ブラウザで開く
+  Future<void> _openFeedbackForm() async {
+    await UrlLauncherUtils.openInAppWebView(
+      context,
+      AppConsts.featureRequestFormUrl,
+      showErrorSnackBar: false,
     );
   }
 
@@ -668,12 +705,21 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
               ),
               ElevatedButton(
                 onPressed: () async {
+                  final navigator = Navigator.of(context);
                   await timerViewModel.onTappedTimerFinishButton();
                   if (context.mounted) {
                     // ダイアログを閉じる
-                    Navigator.pop(context);
+                    navigator.pop();
+
+                    // フィードバックポップアップの表示チェック（カウントダウンモードのみ）
+                    if (timerViewModel.state.shouldShowFeedbackPopup) {
+                      await _showFeedbackPopupIfNeeded(timerViewModel);
+                    }
+
                     // タイマー画面を閉じて、学習完了を通知（trueを返す）
-                    Navigator.pop(context, true);
+                    if (mounted) {
+                      navigator.pop(true);
+                    }
                   }
                 },
                 style: ElevatedButton.styleFrom(

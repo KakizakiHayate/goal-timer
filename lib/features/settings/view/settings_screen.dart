@@ -13,6 +13,7 @@ import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/color_consts.dart';
 import '../../../core/utils/spacing_consts.dart';
 import '../../../core/utils/text_consts.dart';
+import '../../../core/utils/url_launcher_utils.dart';
 import '../../../core/utils/user_consts.dart';
 import '../../../core/widgets/pressable_card.dart';
 import '../../../core/widgets/setting_item.dart';
@@ -433,11 +434,18 @@ class _SettingsScreenState extends State<SettingsScreen>
       title: 'サポート',
       children: [
         SettingItem(
-          title: 'お問い合わせ',
-          subtitle: 'ご意見・ご要望をお聞かせください',
-          icon: Icons.email_outlined,
-          iconColor: ColorConsts.success,
-          onTap: _showContact,
+          title: '不具合報告',
+          subtitle: 'バグや問題を報告する',
+          icon: Icons.bug_report_outlined,
+          iconColor: ColorConsts.error,
+          onTap: _showBugReportForm,
+        ),
+        SettingItem(
+          title: '機能追加のご要望',
+          subtitle: '新機能のアイデアをお聞かせください',
+          icon: Icons.lightbulb_outline,
+          iconColor: ColorConsts.warning,
+          onTap: _showFeatureRequestForm,
         ),
         SettingItem(
           title: 'アプリについて',
@@ -449,6 +457,7 @@ class _SettingsScreenState extends State<SettingsScreen>
       ],
     );
   }
+
 
   Widget _buildAccountManagementSection() {
     final currentUser = Supabase.instance.client.auth.currentUser;
@@ -816,9 +825,20 @@ class _SettingsScreenState extends State<SettingsScreen>
     _openUrl(AppConsts.privacyPolicyUrl);
   }
 
-  void _showContact() {
-    // PRコメント対応: URLを定数化
-    _openUrl(AppConsts.contactFormUrl);
+  /// 不具合報告フォームを内部ブラウザで開く
+  Future<void> _showBugReportForm() async {
+    await UrlLauncherUtils.openInAppWebView(
+      context,
+      AppConsts.bugReportFormUrl,
+    );
+  }
+
+  /// 機能追加要望フォームを内部ブラウザで開く
+  Future<void> _showFeatureRequestForm() async {
+    await UrlLauncherUtils.openInAppWebView(
+      context,
+      AppConsts.featureRequestFormUrl,
+    );
   }
 
   void _showAbout() {

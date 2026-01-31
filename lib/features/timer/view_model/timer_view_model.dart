@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../core/data/local/local_settings_datasource.dart';
 import '../../../core/data/repositories/study_logs_repository.dart';
 import '../../../core/data/repositories/users_repository.dart';
 import '../../../core/models/goals/goals_model.dart';
@@ -10,6 +11,7 @@ import '../../../core/models/study_daily_logs/study_daily_logs_model.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/services/rating_service.dart';
+import '../../../core/utils/app_consts.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/streak_consts.dart';
 import '../../../core/utils/time_utils.dart';
@@ -44,6 +46,7 @@ class TimerState {
   final TimerMode mode;
   final bool isPomodoroBreak;
   final bool needsCompletionConfirm;
+  final bool shouldShowFeedbackPopup;
 
   // デフォルト値の定数
   static const int _defaultSeconds =
@@ -57,6 +60,7 @@ class TimerState {
     this.isPomodoroBreak = false,
     this.pomodoroRound = TimerConstants.initialPomodoroRound,
     this.needsCompletionConfirm = false,
+    this.shouldShowFeedbackPopup = false,
   }) : totalSeconds = totalSeconds ?? _defaultSeconds,
        currentSeconds = currentSeconds ?? _defaultSeconds;
 
@@ -68,6 +72,7 @@ class TimerState {
     bool? isPomodoroBreak,
     int? pomodoroRound,
     bool? needsCompletionConfirm,
+    bool? shouldShowFeedbackPopup,
   }) {
     return TimerState(
       totalSeconds: totalSeconds ?? this.totalSeconds,
@@ -78,6 +83,8 @@ class TimerState {
       pomodoroRound: pomodoroRound ?? this.pomodoroRound,
       needsCompletionConfirm:
           needsCompletionConfirm ?? this.needsCompletionConfirm,
+      shouldShowFeedbackPopup:
+          shouldShowFeedbackPopup ?? this.shouldShowFeedbackPopup,
     );
   }
 
@@ -132,6 +139,9 @@ class TimerViewModel extends GetxController {
   // 通知サービス
   final NotificationService _notificationService;
 
+  // 設定DataSource（フィードバック状態管理用）
+  final LocalSettingsDataSource _settingsDataSource;
+
   Timer? _timer;
   int _elapsedSeconds = TimerConstants.initialElapsedSeconds;
 
@@ -168,11 +178,13 @@ class TimerViewModel extends GetxController {
     AuthService? authService,
     SettingsViewModel? settingsViewModel,
     NotificationService? notificationService,
+    LocalSettingsDataSource? settingsDataSource,
   }) : _settingsViewModel = settingsViewModel ?? Get.find<SettingsViewModel>(),
        _notificationService = notificationService ?? NotificationService(),
        _studyLogsRepository = studyLogsRepository ?? StudyLogsRepository(),
        _usersRepository = usersRepository ?? UsersRepository(),
-       _authService = authService ?? AuthService() {
+       _authService = authService ?? AuthService(),
+       _settingsDataSource = settingsDataSource ?? LocalSettingsDataSource() {
     final defaultSeconds = _settingsViewModel.defaultTimerSeconds.value;
 
     _state.value = TimerState(
@@ -313,6 +325,60 @@ class TimerViewModel extends GetxController {
       needsCompletionConfirm: true,
     );
     AppLogger.instance.i('タイマーが完了しました: $_elapsedSeconds秒');
+    // フィードバックポップアップの判定はonTappedTimerFinishButtonで行う
+    // （学習記録保存時にカウント）
+  }
+
+  /// フィードバックポップアップの表示判定を行い、必要に応じてフラグを立てる
+  /// 1分以上の学習でカウント対象
+  Future<void> _checkAndShowFeedbackPopup() async {
+    try {
+      // 最低学習時間（1分）未満はカウント対象外
+      if (_elapsedSeconds < AppConsts.minStudySecondsForFeedback) {
+        AppLogger.instance.i(
+          'フィードバック: 学習時間が${AppConsts.minStudySecondsForFeedback}秒未満のためカウント対象外 '
+          '($_elapsedSeconds秒)',
+        );
+        return;
+      }
+
+      // 学習完了カウントをインクリメント
+      await _settingsDataSource.incrementCountdownCompletionCount();
+
+      // 表示条件を満たしているかチェック
+      final shouldShow = await _settingsDataSource.shouldShowFeedbackPopup();
+
+      if (shouldShow) {
+        _state.value = state.copyWith(shouldShowFeedbackPopup: true);
+      }
+    } catch (error, stackTrace) {
+      AppLogger.instance.e(
+        'フィードバックポップアップの表示判定に失敗しました',
+        error,
+        stackTrace,
+      );
+    }
+  }
+
+  /// フィードバックポップアップの表示フラグをクリアする
+  void clearFeedbackPopupFlag() {
+    _state.value = state.copyWith(shouldShowFeedbackPopup: false);
+  }
+
+  /// フィードバックポップアップを非表示にした日時を記録する
+  /// （「回答する」または「今はしない」を選択した場合に呼び出す）
+  Future<void> recordFeedbackDismissed() async {
+    try {
+      await _settingsDataSource.saveLastFeedbackDismissedAt(DateTime.now());
+      // カウントをリセット（次の3回目から再表示するため）
+      await _settingsDataSource.resetCountdownCompletionCount();
+    } catch (error, stackTrace) {
+      AppLogger.instance.e(
+        'フィードバック非表示日時の記録に失敗しました',
+        error,
+        stackTrace,
+      );
+    }
   }
 
   /// 完了通知をスケジュールする
@@ -441,6 +507,9 @@ class TimerViewModel extends GetxController {
 
       // 🔍 デバッグ: 保存後に全ログを表示
       await debugPrintAllLogs();
+
+      // フィードバックポップアップの表示判定（リセット前に実行）
+      await _checkAndShowFeedbackPopup();
 
       // タイマーをリセット
       resetTimer();
