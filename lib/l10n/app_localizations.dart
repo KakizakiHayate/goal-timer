@@ -637,6 +637,288 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{days} days left → Total target: {time}'**
   String remainingDaysInfo(int days, String time);
+
+  /// Settings screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settingsTitle;
+
+  /// Hint text for profile section
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to change name'**
+  String get tapToChangeName;
+
+  /// Name change dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Change Name'**
+  String get changeNameDialogTitle;
+
+  /// Name change dialog hint
+  ///
+  /// In en, this message translates to:
+  /// **'Enter name'**
+  String get changeNameDialogHint;
+
+  /// Error message for empty name
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a name'**
+  String get emptyNameError;
+
+  /// Error message for offline state
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot change while offline'**
+  String get offlineError;
+
+  /// Success message for name change
+  ///
+  /// In en, this message translates to:
+  /// **'Name changed successfully'**
+  String get nameChangedSuccess;
+
+  /// Error message for name change failure
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to change name'**
+  String get nameChangeFailed;
+
+  /// Account link section title
+  ///
+  /// In en, this message translates to:
+  /// **'Account Link'**
+  String get sectionAccountLink;
+
+  /// Link account button title
+  ///
+  /// In en, this message translates to:
+  /// **'Link Account'**
+  String get linkAccount;
+
+  /// Link account button subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Backup data with Google / Apple'**
+  String get linkAccountSubtitle;
+
+  /// Account linked status
+  ///
+  /// In en, this message translates to:
+  /// **'Linked'**
+  String get accountLinked;
+
+  /// Default account linked subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Account linked'**
+  String get accountLinkedDefault;
+
+  /// App settings section title
+  ///
+  /// In en, this message translates to:
+  /// **'App Settings'**
+  String get sectionAppSettings;
+
+  /// Default timer duration setting title
+  ///
+  /// In en, this message translates to:
+  /// **'Default Timer Duration'**
+  String get defaultTimerDuration;
+
+  /// Default timer duration setting subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Default time for new goals: {time}'**
+  String defaultTimerDurationSubtitle(String time);
+
+  /// Notifications section title
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get sectionNotifications;
+
+  /// Streak reminder setting title
+  ///
+  /// In en, this message translates to:
+  /// **'Streak Reminder'**
+  String get streakReminder;
+
+  /// Streak reminder enabled subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Receive reminders to maintain your study streak'**
+  String get streakReminderOnSubtitle;
+
+  /// Streak reminder disabled subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder notifications are OFF'**
+  String get streakReminderOffSubtitle;
+
+  /// Data and privacy section title
+  ///
+  /// In en, this message translates to:
+  /// **'Data & Privacy'**
+  String get sectionDataPrivacy;
+
+  /// Privacy policy setting title
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get privacyPolicy;
+
+  /// Privacy policy setting subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'About data handling'**
+  String get privacyPolicySubtitle;
+
+  /// Support section title
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get sectionSupport;
+
+  /// Bug report setting title
+  ///
+  /// In en, this message translates to:
+  /// **'Bug Report'**
+  String get bugReport;
+
+  /// Bug report setting subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Report bugs and issues'**
+  String get bugReportSubtitle;
+
+  /// Feature request setting title
+  ///
+  /// In en, this message translates to:
+  /// **'Feature Request'**
+  String get featureRequest;
+
+  /// Feature request setting subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Share your ideas for new features'**
+  String get featureRequestSubtitle;
+
+  /// About app setting title
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get aboutApp;
+
+  /// Version label
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version}'**
+  String versionLabel(String version);
+
+  /// Account management section title
+  ///
+  /// In en, this message translates to:
+  /// **'Account Management'**
+  String get sectionAccountManagement;
+
+  /// Logout button title
+  ///
+  /// In en, this message translates to:
+  /// **'Logout'**
+  String get logout;
+
+  /// Logout button subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out from your account'**
+  String get logoutSubtitle;
+
+  /// Logout confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to logout?'**
+  String get logoutConfirmMessage;
+
+  /// Logout failure message
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to logout'**
+  String get logoutFailed;
+
+  /// Delete account button title
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account'**
+  String get deleteAccount;
+
+  /// Delete account button subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'All data will be deleted'**
+  String get deleteAccountSubtitle;
+
+  /// Delete account confirmation dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account'**
+  String get deleteAccountConfirmTitle;
+
+  /// Delete account confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'This action cannot be undone.\n\nAll your data (goals, study records, etc.) will be permanently deleted.'**
+  String get deleteAccountConfirmMessage;
+
+  /// Delete button text
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get btnDelete;
+
+  /// Final delete account confirmation title
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure?'**
+  String get deleteAccountFinalTitle;
+
+  /// Final delete account confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'This action will permanently delete your account and all your data.'**
+  String get deleteAccountFinalMessage;
+
+  /// Stop/Cancel button text
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get btnStop;
+
+  /// Delete account failure message
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete account'**
+  String get deleteAccountFailed;
+
+  /// URL open failure message
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open URL'**
+  String get urlOpenFailed;
+
+  /// About dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'About {appName}'**
+  String aboutDialogTitle(String appName);
+
+  /// About dialog description
+  ///
+  /// In en, this message translates to:
+  /// **'A timer app to help you achieve your goals. Small daily efforts lead to great results.'**
+  String get aboutDialogDescription;
 }
 
 class _AppLocalizationsDelegate

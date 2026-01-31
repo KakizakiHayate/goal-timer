@@ -17,6 +17,7 @@ import '../../../core/utils/url_launcher_utils.dart';
 import '../../../core/utils/user_consts.dart';
 import '../../../core/widgets/pressable_card.dart';
 import '../../../core/widgets/setting_item.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../auth/view/login_screen.dart';
 import '../../welcome/view/welcome_screen.dart';
 import '../view_model/settings_view_model.dart';
@@ -59,6 +60,8 @@ class _SettingsScreenState extends State<SettingsScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Obx(() {
       // 監視対象のobservable変数にアクセス（子メソッド内の変数も追跡される）
       _settingsViewModel.displayName.value;
@@ -67,7 +70,7 @@ class _SettingsScreenState extends State<SettingsScreen>
         backgroundColor: ColorConsts.backgroundPrimary,
         appBar: AppBar(
           title: Text(
-            '設定',
+            l10n?.settingsTitle ?? 'Settings',
             style: TextConsts.h3.copyWith(
               color: Colors.white,
               fontWeight: FontWeight.bold,
@@ -84,37 +87,37 @@ class _SettingsScreenState extends State<SettingsScreen>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // プロフィールセクション
-              _buildProfileSection(),
+              _buildProfileSection(l10n),
 
               const SizedBox(height: SpacingConsts.l),
 
               // アカウント連携セクション
-              _buildAccountSection(),
+              _buildAccountSection(l10n),
 
               const SizedBox(height: SpacingConsts.l),
 
               // アプリ設定
-              _buildAppSection(),
+              _buildAppSection(l10n),
 
               const SizedBox(height: SpacingConsts.l),
 
               // 通知設定
-              _buildNotificationSection(),
+              _buildNotificationSection(l10n),
 
               const SizedBox(height: SpacingConsts.l),
 
               // データとプライバシー
-              _buildDataSection(),
+              _buildDataSection(l10n),
 
               const SizedBox(height: SpacingConsts.l),
 
               // サポート
-              _buildSupportSection(),
+              _buildSupportSection(l10n),
 
               const SizedBox(height: SpacingConsts.l),
 
               // アカウント管理（ログアウト・削除）
-              _buildAccountManagementSection(),
+              _buildAccountManagementSection(l10n),
 
               const SizedBox(height: SpacingConsts.xxl),
             ],
@@ -125,7 +128,7 @@ class _SettingsScreenState extends State<SettingsScreen>
     });
   }
 
-  Widget _buildProfileSection() {
+  Widget _buildProfileSection(AppLocalizations? l10n) {
     return Obx(
       () => PressableCard(
         margin: EdgeInsets.zero,
@@ -167,7 +170,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                   ),
                   const SizedBox(height: SpacingConsts.xs),
                   Text(
-                    'タップして名前を変更',
+                    l10n?.tapToChangeName ?? 'Tap to change name',
                     style: TextConsts.caption.copyWith(
                       color: ColorConsts.textSecondary,
                     ),
@@ -190,13 +193,15 @@ class _SettingsScreenState extends State<SettingsScreen>
 
   /// 名前変更ダイアログを表示
   Future<void> _showChangeNameDialog() async {
+    final l10n = AppLocalizations.of(context);
+
     // オンラインチェック
     final hasNetwork = await _settingsViewModel.checkNetworkConnection();
     if (!hasNetwork) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(UserConsts.offlineError),
+          SnackBar(
+            content: Text(l10n?.offlineError ?? 'Cannot change while offline'),
             backgroundColor: ColorConsts.error,
           ),
         );
@@ -212,52 +217,55 @@ class _SettingsScreenState extends State<SettingsScreen>
 
     final result = await showDialog<String>(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: const Text(UserConsts.changeNameDialogTitle),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: controller,
-                maxLength: UserConsts.maxDisplayNameLength,
-                autofocus: true,
-                decoration: InputDecoration(
-                  hintText: UserConsts.changeNameDialogHint,
-                  counterText:
-                      '${controller.text.length}/${UserConsts.maxDisplayNameLength}',
+      builder: (dialogContext) {
+        final dialogL10n = AppLocalizations.of(dialogContext);
+        return StatefulBuilder(
+          builder: (context, setDialogState) => AlertDialog(
+            title: Text(dialogL10n?.changeNameDialogTitle ?? 'Change Name'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: controller,
+                  maxLength: UserConsts.maxDisplayNameLength,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    hintText: dialogL10n?.changeNameDialogHint ?? 'Enter name',
+                    counterText:
+                        '${controller.text.length}/${UserConsts.maxDisplayNameLength}',
+                  ),
+                  onChanged: (value) {
+                    // counterTextを更新するため、StatefulBuilderのsetStateを使用
+                    setDialogState(() {});
+                  },
                 ),
-                onChanged: (value) {
-                  // counterTextを更新するため、StatefulBuilderのsetStateを使用
-                  setDialogState(() {});
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(),
+                child: Text(dialogL10n?.commonBtnCancel ?? 'Cancel'),
+              ),
+              TextButton(
+                onPressed: () {
+                  final newName = controller.text.trim();
+                  if (newName.isEmpty) {
+                    ScaffoldMessenger.of(dialogContext).showSnackBar(
+                      SnackBar(
+                        content: Text(dialogL10n?.emptyNameError ?? 'Please enter a name'),
+                        backgroundColor: ColorConsts.error,
+                      ),
+                    );
+                    return;
+                  }
+                  Navigator.of(dialogContext).pop(newName);
                 },
+                child: Text(dialogL10n?.commonBtnSave ?? 'Save'),
               ),
             ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text(UserConsts.cancelButtonLabel),
-            ),
-            TextButton(
-              onPressed: () {
-                final newName = controller.text.trim();
-                if (newName.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(UserConsts.emptyNameError),
-                      backgroundColor: ColorConsts.error,
-                    ),
-                  );
-                  return;
-                }
-                Navigator.of(context).pop(newName);
-              },
-              child: const Text(UserConsts.saveButtonLabel),
-            ),
-          ],
-        ),
-      ),
+        );
+      },
     );
 
     if (result == null || result.isEmpty) return;
@@ -267,41 +275,41 @@ class _SettingsScreenState extends State<SettingsScreen>
 
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('名前を変更しました'),
+        SnackBar(
+          content: Text(l10n?.nameChangedSuccess ?? 'Name changed successfully'),
           backgroundColor: ColorConsts.success,
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('名前の変更に失敗しました'),
+        SnackBar(
+          content: Text(l10n?.nameChangeFailed ?? 'Failed to change name'),
           backgroundColor: ColorConsts.error,
         ),
       );
     }
   }
 
-  Widget _buildAccountSection() {
+  Widget _buildAccountSection(AppLocalizations? l10n) {
     // Supabaseの現在のユーザーを取得
     final currentUser = Supabase.instance.client.auth.currentUser;
     final isAnonymous = currentUser?.isAnonymous ?? true;
 
     return _buildSection(
-      title: 'アカウント連携',
+      title: l10n?.sectionAccountLink ?? 'Account Link',
       children: [
         if (isAnonymous)
           SettingItem(
-            title: 'アカウントを連携する',
-            subtitle: 'Google / Apple でデータをバックアップ',
+            title: l10n?.linkAccount ?? 'Link Account',
+            subtitle: l10n?.linkAccountSubtitle ?? 'Backup data with Google / Apple',
             icon: Icons.link,
             iconColor: ColorConsts.primary,
             onTap: _showLoginScreen,
           )
         else
           SettingItem(
-            title: '連携済み',
-            subtitle: currentUser?.email ?? 'アカウント連携済み',
+            title: l10n?.accountLinked ?? 'Linked',
+            subtitle: currentUser?.email ?? (l10n?.accountLinkedDefault ?? 'Account linked'),
             icon: Icons.check_circle,
             iconColor: ColorConsts.success,
             onTap: null,
@@ -310,15 +318,18 @@ class _SettingsScreenState extends State<SettingsScreen>
     );
   }
 
-  Widget _buildAppSection() {
+  Widget _buildAppSection(AppLocalizations? l10n) {
     return _buildSection(
-      title: 'アプリ設定',
+      title: l10n?.sectionAppSettings ?? 'App Settings',
       children: [
         Obx(() {
+          final subtitle = l10n?.defaultTimerDurationSubtitle(
+                _settingsViewModel.formattedDefaultTime,
+              ) ??
+              'Default time for new goals: ${_settingsViewModel.formattedDefaultTime}';
           return SettingItem(
-            title: 'デフォルトタイマー時間',
-            subtitle:
-                '新しい目標のデフォルト時間：${_settingsViewModel.formattedDefaultTime}',
+            title: l10n?.defaultTimerDuration ?? 'Default Timer Duration',
+            subtitle: subtitle,
             icon: Icons.timer_outlined,
             iconColor: ColorConsts.warning,
             onTap: _showTimerSettings,
@@ -328,17 +339,17 @@ class _SettingsScreenState extends State<SettingsScreen>
     );
   }
 
-  Widget _buildNotificationSection() {
+  Widget _buildNotificationSection(AppLocalizations? l10n) {
     return _buildSection(
-      title: '通知設定',
+      title: l10n?.sectionNotifications ?? 'Notifications',
       children: [
         Obx(() {
+          final subtitle = _settingsViewModel.streakReminderEnabled.value
+              ? (l10n?.streakReminderOnSubtitle ?? 'Receive reminders to maintain your study streak')
+              : (l10n?.streakReminderOffSubtitle ?? 'Reminder notifications are OFF');
           return _buildSwitchSettingItem(
-            title: 'ストリークリマインダー',
-            subtitle:
-                _settingsViewModel.streakReminderEnabled.value
-                    ? '連続学習を維持するためのリマインダーを受け取ります'
-                    : 'リマインダー通知はOFFです',
+            title: l10n?.streakReminder ?? 'Streak Reminder',
+            subtitle: subtitle,
             icon: Icons.notifications_active_outlined,
             iconColor: ColorConsts.primary,
             value: _settingsViewModel.streakReminderEnabled.value,
@@ -414,13 +425,13 @@ class _SettingsScreenState extends State<SettingsScreen>
     );
   }
 
-  Widget _buildDataSection() {
+  Widget _buildDataSection(AppLocalizations? l10n) {
     return _buildSection(
-      title: 'データとプライバシー',
+      title: l10n?.sectionDataPrivacy ?? 'Data & Privacy',
       children: [
         SettingItem(
-          title: 'プライバシーポリシー',
-          subtitle: 'データの取り扱いについて',
+          title: l10n?.privacyPolicy ?? 'Privacy Policy',
+          subtitle: l10n?.privacyPolicySubtitle ?? 'About data handling',
           icon: Icons.privacy_tip_outlined,
           iconColor: ColorConsts.textSecondary,
           onTap: _showPrivacyPolicy,
@@ -429,27 +440,27 @@ class _SettingsScreenState extends State<SettingsScreen>
     );
   }
 
-  Widget _buildSupportSection() {
+  Widget _buildSupportSection(AppLocalizations? l10n) {
     return _buildSection(
-      title: 'サポート',
+      title: l10n?.sectionSupport ?? 'Support',
       children: [
         SettingItem(
-          title: '不具合報告',
-          subtitle: 'バグや問題を報告する',
+          title: l10n?.bugReport ?? 'Bug Report',
+          subtitle: l10n?.bugReportSubtitle ?? 'Report bugs and issues',
           icon: Icons.bug_report_outlined,
           iconColor: ColorConsts.error,
           onTap: _showBugReportForm,
         ),
         SettingItem(
-          title: '機能追加のご要望',
-          subtitle: '新機能のアイデアをお聞かせください',
+          title: l10n?.featureRequest ?? 'Feature Request',
+          subtitle: l10n?.featureRequestSubtitle ?? 'Share your ideas for new features',
           icon: Icons.lightbulb_outline,
           iconColor: ColorConsts.warning,
           onTap: _showFeatureRequestForm,
         ),
         SettingItem(
-          title: 'アプリについて',
-          subtitle: 'バージョン ${AppConsts.appVersion}',
+          title: l10n?.aboutApp ?? 'About',
+          subtitle: l10n?.versionLabel(AppConsts.appVersion) ?? 'Version ${AppConsts.appVersion}',
           icon: Icons.info_outline,
           iconColor: ColorConsts.textSecondary,
           onTap: _showAbout,
@@ -459,18 +470,18 @@ class _SettingsScreenState extends State<SettingsScreen>
   }
 
 
-  Widget _buildAccountManagementSection() {
+  Widget _buildAccountManagementSection(AppLocalizations? l10n) {
     final currentUser = Supabase.instance.client.auth.currentUser;
     final isAnonymous = currentUser?.isAnonymous ?? true;
 
     return _buildSection(
-      title: 'アカウント管理',
+      title: l10n?.sectionAccountManagement ?? 'Account Management',
       children: [
         // ログアウトボタン（連携済みユーザーのみ表示）
         if (!isAnonymous)
           SettingItem(
-            title: 'ログアウト',
-            subtitle: 'アカウントからログアウトします',
+            title: l10n?.logout ?? 'Logout',
+            subtitle: l10n?.logoutSubtitle ?? 'Sign out from your account',
             icon: Icons.logout,
             iconColor: ColorConsts.warning,
             onTap: _showLogoutConfirmDialog,
@@ -478,8 +489,8 @@ class _SettingsScreenState extends State<SettingsScreen>
 
         // アカウント削除ボタン（全ユーザーに表示）
         SettingItem(
-          title: 'アカウントを削除',
-          subtitle: 'すべてのデータが削除されます',
+          title: l10n?.deleteAccount ?? 'Delete Account',
+          subtitle: l10n?.deleteAccountSubtitle ?? 'All data will be deleted',
           icon: Icons.delete_forever,
           iconColor: ColorConsts.error,
           onTap: _showDeleteAccountConfirmDialog,
@@ -524,40 +535,45 @@ class _SettingsScreenState extends State<SettingsScreen>
 
   /// ログアウト確認ダイアログを表示
   Future<void> _showLogoutConfirmDialog() async {
+    final l10n = AppLocalizations.of(context);
+
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('ログアウト'),
-        content: const Text('ログアウトしますか？'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text(
-              'キャンセル',
-              style: TextStyle(color: ColorConsts.textSecondary),
+      builder: (dialogContext) {
+        final dialogL10n = AppLocalizations.of(dialogContext);
+        return AlertDialog(
+          title: Text(dialogL10n?.logout ?? 'Logout'),
+          content: Text(dialogL10n?.logoutConfirmMessage ?? 'Are you sure you want to logout?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(
+                dialogL10n?.commonBtnCancel ?? 'Cancel',
+                style: const TextStyle(color: ColorConsts.textSecondary),
+              ),
             ),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: ColorConsts.warning,
+            ElevatedButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: ColorConsts.warning,
+              ),
+              child: Text(
+                dialogL10n?.logout ?? 'Logout',
+                style: const TextStyle(color: Colors.white),
+              ),
             ),
-            child: const Text(
-              'ログアウト',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        ],
-      ),
+          ],
+        );
+      },
     );
 
     if (confirmed == true && mounted) {
-      await _performLogout();
+      await _performLogout(l10n);
     }
   }
 
   /// ログアウトを実行
-  Future<void> _performLogout() async {
+  Future<void> _performLogout(AppLocalizations? l10n) async {
     try {
       final authDatasource = SupabaseAuthDatasource(
         supabase: Supabase.instance.client,
@@ -583,8 +599,8 @@ class _SettingsScreenState extends State<SettingsScreen>
       AppLogger.instance.e('ログアウトに失敗しました', error, stackTrace);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('ログアウトに失敗しました'),
+          SnackBar(
+            content: Text(l10n?.logoutFailed ?? 'Failed to logout'),
             backgroundColor: ColorConsts.error,
           ),
         );
@@ -596,32 +612,35 @@ class _SettingsScreenState extends State<SettingsScreen>
   Future<void> _showDeleteAccountConfirmDialog() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('アカウントを削除'),
-        content: const Text(
-          'この操作は取り消せません。\n\n'
-          'すべてのデータ（目標、学習記録など）が\n完全に削除されます。',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text(
-              'キャンセル',
-              style: TextStyle(color: ColorConsts.textSecondary),
-            ),
+      builder: (dialogContext) {
+        final dialogL10n = AppLocalizations.of(dialogContext);
+        return AlertDialog(
+          title: Text(dialogL10n?.deleteAccountConfirmTitle ?? 'Delete Account'),
+          content: Text(
+            dialogL10n?.deleteAccountConfirmMessage ??
+                'This action cannot be undone.\n\nAll your data (goals, study records, etc.) will be permanently deleted.',
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: ColorConsts.error,
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(
+                dialogL10n?.commonBtnCancel ?? 'Cancel',
+                style: const TextStyle(color: ColorConsts.textSecondary),
+              ),
             ),
-            child: const Text(
-              '削除する',
-              style: TextStyle(color: Colors.white),
+            ElevatedButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: ColorConsts.error,
+              ),
+              child: Text(
+                dialogL10n?.btnDelete ?? 'Delete',
+                style: const TextStyle(color: Colors.white),
+              ),
             ),
-          ),
-        ],
-      ),
+          ],
+        );
+      },
     );
 
     if (confirmed == true && mounted) {
@@ -631,46 +650,51 @@ class _SettingsScreenState extends State<SettingsScreen>
 
   /// アカウント削除確認ダイアログ（2段目・最終確認）
   Future<void> _showFinalDeleteConfirmDialog() async {
+    final l10n = AppLocalizations.of(context);
+
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text(
-          '本当に削除しますか？',
-          style: TextStyle(color: ColorConsts.error),
-        ),
-        content: const Text(
-          'この操作を実行すると、あなたのアカウントと\n'
-          'すべてのデータが完全に削除されます。',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text(
-              'やめる',
-              style: TextStyle(color: ColorConsts.textSecondary),
-            ),
+      builder: (dialogContext) {
+        final dialogL10n = AppLocalizations.of(dialogContext);
+        return AlertDialog(
+          title: Text(
+            dialogL10n?.deleteAccountFinalTitle ?? 'Are you sure?',
+            style: const TextStyle(color: ColorConsts.error),
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: ColorConsts.error,
-            ),
-            child: const Text(
-              '削除',
-              style: TextStyle(color: Colors.white),
-            ),
+          content: Text(
+            dialogL10n?.deleteAccountFinalMessage ??
+                'This action will permanently delete your account and all your data.',
           ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(
+                dialogL10n?.btnStop ?? 'Stop',
+                style: const TextStyle(color: ColorConsts.textSecondary),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: ColorConsts.error,
+              ),
+              child: Text(
+                dialogL10n?.commonBtnDelete ?? 'Delete',
+                style: const TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+        );
+      },
     );
 
     if (confirmed == true && mounted) {
-      await _performDeleteAccount();
+      await _performDeleteAccount(l10n);
     }
   }
 
   /// アカウント削除を実行
-  Future<void> _performDeleteAccount() async {
+  Future<void> _performDeleteAccount(AppLocalizations? l10n) async {
     try {
       // ローディング表示
       showDialog(
@@ -713,8 +737,8 @@ class _SettingsScreenState extends State<SettingsScreen>
       if (mounted) {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('アカウント削除に失敗しました'),
+          SnackBar(
+            content: Text(l10n?.deleteAccountFailed ?? 'Failed to delete account'),
             backgroundColor: ColorConsts.error,
           ),
         );
@@ -733,7 +757,8 @@ class _SettingsScreenState extends State<SettingsScreen>
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) {
+      builder: (sheetContext) {
+        final sheetL10n = AppLocalizations.of(sheetContext);
         return SafeArea(
           child: SizedBox(
             height: 320,
@@ -744,9 +769,9 @@ class _SettingsScreenState extends State<SettingsScreen>
                   child: Row(
                     children: [
                       TextButton(
-                        onPressed: () => Navigator.pop(context),
+                        onPressed: () => Navigator.pop(sheetContext),
                         child: Text(
-                          'キャンセル',
+                          sheetL10n?.commonBtnCancel ?? 'Cancel',
                           style: TextConsts.body.copyWith(
                             color: ColorConsts.textSecondary,
                           ),
@@ -757,7 +782,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                           child: FittedBox(
                             fit: BoxFit.scaleDown,
                             child: Text(
-                              'デフォルトタイマー時間',
+                              sheetL10n?.defaultTimerDuration ?? 'Default Timer Duration',
                               style: TextConsts.h4.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -771,12 +796,12 @@ class _SettingsScreenState extends State<SettingsScreen>
                           await _settingsViewModel.updateDefaultTimerDuration(
                             tempDuration,
                           );
-                          if (context.mounted) {
-                            Navigator.pop(context);
+                          if (sheetContext.mounted) {
+                            Navigator.pop(sheetContext);
                           }
                         },
                         child: Text(
-                          '保存',
+                          sheetL10n?.commonBtnSave ?? 'Save',
                           style: TextConsts.body.copyWith(
                             color: ColorConsts.primary,
                             fontWeight: FontWeight.bold,
@@ -805,14 +830,15 @@ class _SettingsScreenState extends State<SettingsScreen>
   }
 
   Future<void> _openUrl(String url) async {
+    final l10n = AppLocalizations.of(context);
     final uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('URLを開けませんでした'),
+          SnackBar(
+            content: Text(l10n?.urlOpenFailed ?? 'Could not open URL'),
             backgroundColor: ColorConsts.error,
           ),
         );
@@ -844,30 +870,32 @@ class _SettingsScreenState extends State<SettingsScreen>
   void _showAbout() {
     showDialog(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('${AppConsts.appName} について'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  AppConsts.appName,
-                  style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: SpacingConsts.s),
-                const Text('バージョン: ${AppConsts.appVersion}'),
-                const SizedBox(height: SpacingConsts.m),
-                const Text('目標達成をサポートするタイマーアプリです。毎日の小さな積み重ねが、大きな成果につながります。'),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('OK'),
+      builder: (dialogContext) {
+        final dialogL10n = AppLocalizations.of(dialogContext);
+        return AlertDialog(
+          title: Text(dialogL10n?.aboutDialogTitle(AppConsts.appName) ?? 'About ${AppConsts.appName}'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                AppConsts.appName,
+                style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
               ),
+              const SizedBox(height: SpacingConsts.s),
+              Text(dialogL10n?.versionLabel(AppConsts.appVersion) ?? 'Version: ${AppConsts.appVersion}'),
+              const SizedBox(height: SpacingConsts.m),
+              Text(dialogL10n?.aboutDialogDescription ?? 'A timer app to help you achieve your goals. Small daily efforts lead to great results.'),
             ],
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(dialogL10n?.commonBtnOk ?? 'OK'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

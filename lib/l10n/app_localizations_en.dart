@@ -337,4 +337,155 @@ class AppLocalizationsEn extends AppLocalizations {
   String remainingDaysInfo(int days, String time) {
     return '$days days left → Total target: $time';
   }
+
+  @override
+  String get settingsTitle => 'Settings';
+
+  @override
+  String get tapToChangeName => 'Tap to change name';
+
+  @override
+  String get changeNameDialogTitle => 'Change Name';
+
+  @override
+  String get changeNameDialogHint => 'Enter name';
+
+  @override
+  String get emptyNameError => 'Please enter a name';
+
+  @override
+  String get offlineError => 'Cannot change while offline';
+
+  @override
+  String get nameChangedSuccess => 'Name changed successfully';
+
+  @override
+  String get nameChangeFailed => 'Failed to change name';
+
+  @override
+  String get sectionAccountLink => 'Account Link';
+
+  @override
+  String get linkAccount => 'Link Account';
+
+  @override
+  String get linkAccountSubtitle => 'Backup data with Google / Apple';
+
+  @override
+  String get accountLinked => 'Linked';
+
+  @override
+  String get accountLinkedDefault => 'Account linked';
+
+  @override
+  String get sectionAppSettings => 'App Settings';
+
+  @override
+  String get defaultTimerDuration => 'Default Timer Duration';
+
+  @override
+  String defaultTimerDurationSubtitle(String time) {
+    return 'Default time for new goals: $time';
+  }
+
+  @override
+  String get sectionNotifications => 'Notifications';
+
+  @override
+  String get streakReminder => 'Streak Reminder';
+
+  @override
+  String get streakReminderOnSubtitle =>
+      'Receive reminders to maintain your study streak';
+
+  @override
+  String get streakReminderOffSubtitle => 'Reminder notifications are OFF';
+
+  @override
+  String get sectionDataPrivacy => 'Data & Privacy';
+
+  @override
+  String get privacyPolicy => 'Privacy Policy';
+
+  @override
+  String get privacyPolicySubtitle => 'About data handling';
+
+  @override
+  String get sectionSupport => 'Support';
+
+  @override
+  String get bugReport => 'Bug Report';
+
+  @override
+  String get bugReportSubtitle => 'Report bugs and issues';
+
+  @override
+  String get featureRequest => 'Feature Request';
+
+  @override
+  String get featureRequestSubtitle => 'Share your ideas for new features';
+
+  @override
+  String get aboutApp => 'About';
+
+  @override
+  String versionLabel(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get sectionAccountManagement => 'Account Management';
+
+  @override
+  String get logout => 'Logout';
+
+  @override
+  String get logoutSubtitle => 'Sign out from your account';
+
+  @override
+  String get logoutConfirmMessage => 'Are you sure you want to logout?';
+
+  @override
+  String get logoutFailed => 'Failed to logout';
+
+  @override
+  String get deleteAccount => 'Delete Account';
+
+  @override
+  String get deleteAccountSubtitle => 'All data will be deleted';
+
+  @override
+  String get deleteAccountConfirmTitle => 'Delete Account';
+
+  @override
+  String get deleteAccountConfirmMessage =>
+      'This action cannot be undone.\n\nAll your data (goals, study records, etc.) will be permanently deleted.';
+
+  @override
+  String get btnDelete => 'Delete';
+
+  @override
+  String get deleteAccountFinalTitle => 'Are you sure?';
+
+  @override
+  String get deleteAccountFinalMessage =>
+      'This action will permanently delete your account and all your data.';
+
+  @override
+  String get btnStop => 'Stop';
+
+  @override
+  String get deleteAccountFailed => 'Failed to delete account';
+
+  @override
+  String get urlOpenFailed => 'Could not open URL';
+
+  @override
+  String aboutDialogTitle(String appName) {
+    return 'About $appName';
+  }
+
+  @override
+  String get aboutDialogDescription =>
+      'A timer app to help you achieve your goals. Small daily efforts lead to great results.';
 }

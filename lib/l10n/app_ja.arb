@@ -179,5 +179,99 @@
 
   "btnUpdate": "更新",
 
-  "remainingDaysInfo": "残り{days}日 → 総目標時間: {time}"
+  "remainingDaysInfo": "残り{days}日 → 総目標時間: {time}",
+
+  "settingsTitle": "設定",
+
+  "tapToChangeName": "タップして名前を変更",
+
+  "changeNameDialogTitle": "名前を変更",
+
+  "changeNameDialogHint": "名前を入力",
+
+  "emptyNameError": "名前を入力してください",
+
+  "offlineError": "オフラインのため変更できません",
+
+  "nameChangedSuccess": "名前を変更しました",
+
+  "nameChangeFailed": "名前の変更に失敗しました",
+
+  "sectionAccountLink": "アカウント連携",
+
+  "linkAccount": "アカウントを連携する",
+
+  "linkAccountSubtitle": "Google / Apple でデータをバックアップ",
+
+  "accountLinked": "連携済み",
+
+  "accountLinkedDefault": "アカウント連携済み",
+
+  "sectionAppSettings": "アプリ設定",
+
+  "defaultTimerDuration": "デフォルトタイマー時間",
+
+  "defaultTimerDurationSubtitle": "新しい目標のデフォルト時間：{time}",
+
+  "sectionNotifications": "通知設定",
+
+  "streakReminder": "ストリークリマインダー",
+
+  "streakReminderOnSubtitle": "連続学習を維持するためのリマインダーを受け取ります",
+
+  "streakReminderOffSubtitle": "リマインダー通知はOFFです",
+
+  "sectionDataPrivacy": "データとプライバシー",
+
+  "privacyPolicy": "プライバシーポリシー",
+
+  "privacyPolicySubtitle": "データの取り扱いについて",
+
+  "sectionSupport": "サポート",
+
+  "bugReport": "不具合報告",
+
+  "bugReportSubtitle": "バグや問題を報告する",
+
+  "featureRequest": "機能追加のご要望",
+
+  "featureRequestSubtitle": "新機能のアイデアをお聞かせください",
+
+  "aboutApp": "アプリについて",
+
+  "versionLabel": "バージョン {version}",
+
+  "sectionAccountManagement": "アカウント管理",
+
+  "logout": "ログアウト",
+
+  "logoutSubtitle": "アカウントからログアウトします",
+
+  "logoutConfirmMessage": "ログアウトしますか？",
+
+  "logoutFailed": "ログアウトに失敗しました",
+
+  "deleteAccount": "アカウントを削除",
+
+  "deleteAccountSubtitle": "すべてのデータが削除されます",
+
+  "deleteAccountConfirmTitle": "アカウントを削除",
+
+  "deleteAccountConfirmMessage": "この操作は取り消せません。\n\nすべてのデータ（目標、学習記録など）が\n完全に削除されます。",
+
+  "btnDelete": "削除する",
+
+  "deleteAccountFinalTitle": "本当に削除しますか？",
+
+  "deleteAccountFinalMessage": "この操作を実行すると、あなたのアカウントと\nすべてのデータが完全に削除されます。",
+
+  "btnStop": "やめる",
+
+  "deleteAccountFailed": "アカウント削除に失敗しました",
+
+  "urlOpenFailed": "URLを開けませんでした",
+
+  "aboutDialogTitle": "{appName} について",
+
+  "aboutDialogDescription": "目標達成をサポートするタイマーアプリです。毎日の小さな積み重ねが、大きな成果につながります。"
 }

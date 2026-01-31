@@ -534,5 +534,255 @@
         "type": "String"
       }
     }
+  },
+
+  "settingsTitle": "Settings",
+  "@settingsTitle": {
+    "description": "Settings screen title"
+  },
+
+  "tapToChangeName": "Tap to change name",
+  "@tapToChangeName": {
+    "description": "Hint text for profile section"
+  },
+
+  "changeNameDialogTitle": "Change Name",
+  "@changeNameDialogTitle": {
+    "description": "Name change dialog title"
+  },
+
+  "changeNameDialogHint": "Enter name",
+  "@changeNameDialogHint": {
+    "description": "Name change dialog hint"
+  },
+
+  "emptyNameError": "Please enter a name",
+  "@emptyNameError": {
+    "description": "Error message for empty name"
+  },
+
+  "offlineError": "Cannot change while offline",
+  "@offlineError": {
+    "description": "Error message for offline state"
+  },
+
+  "nameChangedSuccess": "Name changed successfully",
+  "@nameChangedSuccess": {
+    "description": "Success message for name change"
+  },
+
+  "nameChangeFailed": "Failed to change name",
+  "@nameChangeFailed": {
+    "description": "Error message for name change failure"
+  },
+
+  "sectionAccountLink": "Account Link",
+  "@sectionAccountLink": {
+    "description": "Account link section title"
+  },
+
+  "linkAccount": "Link Account",
+  "@linkAccount": {
+    "description": "Link account button title"
+  },
+
+  "linkAccountSubtitle": "Backup data with Google / Apple",
+  "@linkAccountSubtitle": {
+    "description": "Link account button subtitle"
+  },
+
+  "accountLinked": "Linked",
+  "@accountLinked": {
+    "description": "Account linked status"
+  },
+
+  "accountLinkedDefault": "Account linked",
+  "@accountLinkedDefault": {
+    "description": "Default account linked subtitle"
+  },
+
+  "sectionAppSettings": "App Settings",
+  "@sectionAppSettings": {
+    "description": "App settings section title"
+  },
+
+  "defaultTimerDuration": "Default Timer Duration",
+  "@defaultTimerDuration": {
+    "description": "Default timer duration setting title"
+  },
+
+  "defaultTimerDurationSubtitle": "Default time for new goals: {time}",
+  "@defaultTimerDurationSubtitle": {
+    "description": "Default timer duration setting subtitle",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+
+  "sectionNotifications": "Notifications",
+  "@sectionNotifications": {
+    "description": "Notifications section title"
+  },
+
+  "streakReminder": "Streak Reminder",
+  "@streakReminder": {
+    "description": "Streak reminder setting title"
+  },
+
+  "streakReminderOnSubtitle": "Receive reminders to maintain your study streak",
+  "@streakReminderOnSubtitle": {
+    "description": "Streak reminder enabled subtitle"
+  },
+
+  "streakReminderOffSubtitle": "Reminder notifications are OFF",
+  "@streakReminderOffSubtitle": {
+    "description": "Streak reminder disabled subtitle"
+  },
+
+  "sectionDataPrivacy": "Data & Privacy",
+  "@sectionDataPrivacy": {
+    "description": "Data and privacy section title"
+  },
+
+  "privacyPolicy": "Privacy Policy",
+  "@privacyPolicy": {
+    "description": "Privacy policy setting title"
+  },
+
+  "privacyPolicySubtitle": "About data handling",
+  "@privacyPolicySubtitle": {
+    "description": "Privacy policy setting subtitle"
+  },
+
+  "sectionSupport": "Support",
+  "@sectionSupport": {
+    "description": "Support section title"
+  },
+
+  "bugReport": "Bug Report",
+  "@bugReport": {
+    "description": "Bug report setting title"
+  },
+
+  "bugReportSubtitle": "Report bugs and issues",
+  "@bugReportSubtitle": {
+    "description": "Bug report setting subtitle"
+  },
+
+  "featureRequest": "Feature Request",
+  "@featureRequest": {
+    "description": "Feature request setting title"
+  },
+
+  "featureRequestSubtitle": "Share your ideas for new features",
+  "@featureRequestSubtitle": {
+    "description": "Feature request setting subtitle"
+  },
+
+  "aboutApp": "About",
+  "@aboutApp": {
+    "description": "About app setting title"
+  },
+
+  "versionLabel": "Version {version}",
+  "@versionLabel": {
+    "description": "Version label",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+
+  "sectionAccountManagement": "Account Management",
+  "@sectionAccountManagement": {
+    "description": "Account management section title"
+  },
+
+  "logout": "Logout",
+  "@logout": {
+    "description": "Logout button title"
+  },
+
+  "logoutSubtitle": "Sign out from your account",
+  "@logoutSubtitle": {
+    "description": "Logout button subtitle"
+  },
+
+  "logoutConfirmMessage": "Are you sure you want to logout?",
+  "@logoutConfirmMessage": {
+    "description": "Logout confirmation message"
+  },
+
+  "logoutFailed": "Failed to logout",
+  "@logoutFailed": {
+    "description": "Logout failure message"
+  },
+
+  "deleteAccount": "Delete Account",
+  "@deleteAccount": {
+    "description": "Delete account button title"
+  },
+
+  "deleteAccountSubtitle": "All data will be deleted",
+  "@deleteAccountSubtitle": {
+    "description": "Delete account button subtitle"
+  },
+
+  "deleteAccountConfirmTitle": "Delete Account",
+  "@deleteAccountConfirmTitle": {
+    "description": "Delete account confirmation dialog title"
+  },
+
+  "deleteAccountConfirmMessage": "This action cannot be undone.\n\nAll your data (goals, study records, etc.) will be permanently deleted.",
+  "@deleteAccountConfirmMessage": {
+    "description": "Delete account confirmation message"
+  },
+
+  "btnDelete": "Delete",
+  "@btnDelete": {
+    "description": "Delete button text"
+  },
+
+  "deleteAccountFinalTitle": "Are you sure?",
+  "@deleteAccountFinalTitle": {
+    "description": "Final delete account confirmation title"
+  },
+
+  "deleteAccountFinalMessage": "This action will permanently delete your account and all your data.",
+  "@deleteAccountFinalMessage": {
+    "description": "Final delete account confirmation message"
+  },
+
+  "btnStop": "Stop",
+  "@btnStop": {
+    "description": "Stop/Cancel button text"
+  },
+
+  "deleteAccountFailed": "Failed to delete account",
+  "@deleteAccountFailed": {
+    "description": "Delete account failure message"
+  },
+
+  "urlOpenFailed": "Could not open URL",
+  "@urlOpenFailed": {
+    "description": "URL open failure message"
+  },
+
+  "aboutDialogTitle": "About {appName}",
+  "@aboutDialogTitle": {
+    "description": "About dialog title",
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
+
+  "aboutDialogDescription": "A timer app to help you achieve your goals. Small daily efforts lead to great results.",
+  "@aboutDialogDescription": {
+    "description": "About dialog description"
   }
 }

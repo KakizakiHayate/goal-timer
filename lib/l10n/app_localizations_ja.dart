@@ -305,4 +305,154 @@ class AppLocalizationsJa extends AppLocalizations {
   String remainingDaysInfo(int days, String time) {
     return '残り$days日 → 総目標時間: $time';
   }
+
+  @override
+  String get settingsTitle => '設定';
+
+  @override
+  String get tapToChangeName => 'タップして名前を変更';
+
+  @override
+  String get changeNameDialogTitle => '名前を変更';
+
+  @override
+  String get changeNameDialogHint => '名前を入力';
+
+  @override
+  String get emptyNameError => '名前を入力してください';
+
+  @override
+  String get offlineError => 'オフラインのため変更できません';
+
+  @override
+  String get nameChangedSuccess => '名前を変更しました';
+
+  @override
+  String get nameChangeFailed => '名前の変更に失敗しました';
+
+  @override
+  String get sectionAccountLink => 'アカウント連携';
+
+  @override
+  String get linkAccount => 'アカウントを連携する';
+
+  @override
+  String get linkAccountSubtitle => 'Google / Apple でデータをバックアップ';
+
+  @override
+  String get accountLinked => '連携済み';
+
+  @override
+  String get accountLinkedDefault => 'アカウント連携済み';
+
+  @override
+  String get sectionAppSettings => 'アプリ設定';
+
+  @override
+  String get defaultTimerDuration => 'デフォルトタイマー時間';
+
+  @override
+  String defaultTimerDurationSubtitle(String time) {
+    return '新しい目標のデフォルト時間：$time';
+  }
+
+  @override
+  String get sectionNotifications => '通知設定';
+
+  @override
+  String get streakReminder => 'ストリークリマインダー';
+
+  @override
+  String get streakReminderOnSubtitle => '連続学習を維持するためのリマインダーを受け取ります';
+
+  @override
+  String get streakReminderOffSubtitle => 'リマインダー通知はOFFです';
+
+  @override
+  String get sectionDataPrivacy => 'データとプライバシー';
+
+  @override
+  String get privacyPolicy => 'プライバシーポリシー';
+
+  @override
+  String get privacyPolicySubtitle => 'データの取り扱いについて';
+
+  @override
+  String get sectionSupport => 'サポート';
+
+  @override
+  String get bugReport => '不具合報告';
+
+  @override
+  String get bugReportSubtitle => 'バグや問題を報告する';
+
+  @override
+  String get featureRequest => '機能追加のご要望';
+
+  @override
+  String get featureRequestSubtitle => '新機能のアイデアをお聞かせください';
+
+  @override
+  String get aboutApp => 'アプリについて';
+
+  @override
+  String versionLabel(String version) {
+    return 'バージョン $version';
+  }
+
+  @override
+  String get sectionAccountManagement => 'アカウント管理';
+
+  @override
+  String get logout => 'ログアウト';
+
+  @override
+  String get logoutSubtitle => 'アカウントからログアウトします';
+
+  @override
+  String get logoutConfirmMessage => 'ログアウトしますか？';
+
+  @override
+  String get logoutFailed => 'ログアウトに失敗しました';
+
+  @override
+  String get deleteAccount => 'アカウントを削除';
+
+  @override
+  String get deleteAccountSubtitle => 'すべてのデータが削除されます';
+
+  @override
+  String get deleteAccountConfirmTitle => 'アカウントを削除';
+
+  @override
+  String get deleteAccountConfirmMessage =>
+      'この操作は取り消せません。\n\nすべてのデータ（目標、学習記録など）が\n完全に削除されます。';
+
+  @override
+  String get btnDelete => '削除する';
+
+  @override
+  String get deleteAccountFinalTitle => '本当に削除しますか？';
+
+  @override
+  String get deleteAccountFinalMessage =>
+      'この操作を実行すると、あなたのアカウントと\nすべてのデータが完全に削除されます。';
+
+  @override
+  String get btnStop => 'やめる';
+
+  @override
+  String get deleteAccountFailed => 'アカウント削除に失敗しました';
+
+  @override
+  String get urlOpenFailed => 'URLを開けませんでした';
+
+  @override
+  String aboutDialogTitle(String appName) {
+    return '$appName について';
+  }
+
+  @override
+  String get aboutDialogDescription =>
+      '目標達成をサポートするタイマーアプリです。毎日の小さな積み重ねが、大きな成果につながります。';
 }
