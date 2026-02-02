@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:goal_timer/core/widgets/streak_card.dart';
 import 'package:goal_timer/core/widgets/mini_heatmap.dart';
-import 'package:goal_timer/core/utils/streak_consts.dart';
 import 'package:goal_timer/core/utils/color_consts.dart';
 
 void main() {
@@ -23,7 +22,8 @@ void main() {
         ),
       );
 
-      expect(find.text(StreakConsts.messageZeroStreak), findsOneWidget);
+      // フォールバック値（英語）が表示される
+      expect(find.text("Let's start today!"), findsOneWidget);
     });
 
     testWidgets('ストリーク1日 → 「1日連続学習中！」表示', (tester) async {
@@ -35,7 +35,8 @@ void main() {
         ),
       );
 
-      expect(find.text(StreakConsts.messageStreakDays(1)), findsOneWidget);
+      // フォールバック値（英語）が表示される
+      expect(find.text('1 day streak!'), findsOneWidget);
     });
 
     testWidgets('ストリーク5日 → 「5日連続学習中！」表示', (tester) async {
@@ -56,7 +57,8 @@ void main() {
         ),
       );
 
-      expect(find.text(StreakConsts.messageStreakDays(5)), findsOneWidget);
+      // フォールバック値（英語）が表示される
+      expect(find.text('5 day streak!'), findsOneWidget);
     });
 
     testWidgets('ストリーク7日 → 「🎉 1週間達成！」表示', (tester) async {
@@ -71,8 +73,9 @@ void main() {
         ),
       );
 
+      // フォールバック値（英語）が表示される
       expect(
-        find.textContaining(StreakConsts.messageWeekMilestone),
+        find.textContaining('1 week achieved!'),
         findsOneWidget,
       );
     });
@@ -89,8 +92,9 @@ void main() {
         ),
       );
 
+      // フォールバック値（英語）が表示される
       expect(
-        find.textContaining(StreakConsts.messageMonthMilestone),
+        find.textContaining('1 month achieved!'),
         findsOneWidget,
       );
     });

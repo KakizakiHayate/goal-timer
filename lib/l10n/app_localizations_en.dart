@@ -488,4 +488,107 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get aboutDialogDescription =>
       'A timer app to help you achieve your goals. Small daily efforts lead to great results.';
+
+  @override
+  String get viewDetails => 'View details';
+
+  @override
+  String get streakMessageZero => 'Let\'s start today!';
+
+  @override
+  String get streakMessageWeek => '1 week achieved!';
+
+  @override
+  String get streakMessageMonth => '1 month achieved!';
+
+  @override
+  String streakMessageDays(int days) {
+    return '$days day streak!';
+  }
+
+  @override
+  String get deletedGoal => 'Deleted Goal';
+
+  @override
+  String get loginTitle => 'Login';
+
+  @override
+  String get accountLinkTitle => 'Link Account';
+
+  @override
+  String get loginDescription => 'Resume with your\nprevious data';
+
+  @override
+  String get linkDescription => 'Link your account to safely\nbackup your data';
+
+  @override
+  String get loginWithGoogle => 'Login with Google';
+
+  @override
+  String get linkWithGoogle => 'Link with Google';
+
+  @override
+  String get loginWithApple => 'Login with Apple';
+
+  @override
+  String get linkWithApple => 'Link with Apple';
+
+  @override
+  String get loginNotice =>
+      'If you don\'t have an account, please use \"Start Now\"';
+
+  @override
+  String get linkNotice => 'Your guest data will be preserved after linking';
+
+  @override
+  String get loginFailedTitle => 'Login Failed';
+
+  @override
+  String get linkFailedTitle => 'Link Failed';
+
+  @override
+  String get accountNotFoundMessage =>
+      'This account is not registered.\nTo register, please use \"Start Now\" and link your account.';
+
+  @override
+  String get accountAlreadyExistsMessage =>
+      'This account is already registered.\nTo link, please login first and delete the account.';
+
+  @override
+  String get emailNotFoundMessage =>
+      'Could not retrieve email address.\nPlease unlink your Apple ID in Settings and try again.';
+
+  @override
+  String get genericErrorMessage =>
+      'An error occurred.\nPlease try again later.';
+
+  @override
+  String get confirmLinkTitle => 'Link your account?';
+
+  @override
+  String confirmLinkMessage(String provider) {
+    return 'Link with $provider account';
+  }
+
+  @override
+  String get btnLink => 'Link';
+
+  @override
+  String get linkSuccessTitle => 'Link Complete';
+
+  @override
+  String get linkSuccessMessage => 'Account linked successfully';
+
+  @override
+  String get feedbackTitle => 'Congratulations!';
+
+  @override
+  String get feedbackMessage =>
+      'Would you spare a minute to help us improve the app? The developers read every response.';
+
+  @override
+  String get btnAnswer => 'Answer';
+
+  @override
+  String get btnNotNow => 'Not Now';
 }

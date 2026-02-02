@@ -116,6 +116,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildBottomNavigationBar() {
+    final l10n = AppLocalizations.of(context);
     return AnimatedBuilder(
       animation: _tabController,
       builder: (context, child) {
@@ -159,17 +160,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               BottomNavigationBarItem(
                 icon: const Icon(Icons.home_outlined),
                 activeIcon: const Icon(Icons.home),
-                label: AppLocalizations.of(context)?.navHome ?? 'Home',
+                label: l10n?.navHome ?? 'Home',
               ),
               BottomNavigationBarItem(
                 icon: const Icon(Icons.timer_outlined),
                 activeIcon: const Icon(Icons.timer),
-                label: AppLocalizations.of(context)?.navTimer ?? 'Timer',
+                label: l10n?.navTimer ?? 'Timer',
               ),
               BottomNavigationBarItem(
                 icon: const Icon(Icons.settings_outlined),
                 activeIcon: const Icon(Icons.settings),
-                label: AppLocalizations.of(context)?.navSettings ?? 'Settings',
+                label: l10n?.navSettings ?? 'Settings',
               ),
             ],
           ),
@@ -228,6 +229,8 @@ class _HomeTabContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return GetBuilder<HomeViewModel>(
       builder: (homeViewModel) {
         final homeState = homeViewModel.state;
@@ -249,7 +252,7 @@ class _HomeTabContent extends StatelessWidget {
                     SpacingConsts.s,
                   ),
                   child: Text(
-                    _getGreeting(context, homeState.displayName),
+                    _getGreeting(l10n, homeState.displayName),
                     style: TextConsts.h3.copyWith(
                       color: ColorConsts.textPrimary,
                       fontWeight: FontWeight.bold,
@@ -283,7 +286,7 @@ class _HomeTabContent extends StatelessWidget {
                   vertical: SpacingConsts.m,
                 ),
                 child: Text(
-                  AppLocalizations.of(context)?.sectionMyGoals ?? 'My Goals',
+                  l10n?.sectionMyGoals ?? 'My Goals',
                   style: TextConsts.h3.copyWith(
                     color: ColorConsts.textPrimary,
                     fontWeight: FontWeight.bold,
@@ -303,32 +306,16 @@ class _HomeTabContent extends StatelessWidget {
     );
   }
 
-  String _getGreeting(BuildContext context, String displayName) {
-    final l10n = AppLocalizations.of(context);
+  String _getGreeting(AppLocalizations? l10n, String displayName) {
     final hour = DateTime.now().hour;
 
-    // Fallback for when l10n is not available
-    if (l10n == null) {
-      return _getFallbackGreeting(hour, displayName);
-    }
-
     if (hour < 12) {
-      return l10n.greetingMorning(displayName);
+      return l10n?.greetingMorning(displayName) ?? 'Good morning, $displayName';
+    } else if (hour < 18) {
+      return l10n?.greetingAfternoon(displayName) ?? 'Hello, $displayName';
+    } else {
+      return l10n?.greetingEvening(displayName) ?? 'Good evening, $displayName';
     }
-    if (hour < 18) {
-      return l10n.greetingAfternoon(displayName);
-    }
-    return l10n.greetingEvening(displayName);
-  }
-
-  String _getFallbackGreeting(int hour, String displayName) {
-    if (hour < 12) {
-      return 'Good morning, $displayName';
-    }
-    if (hour < 18) {
-      return 'Hello, $displayName';
-    }
-    return 'Good evening, $displayName';
   }
 
   Widget _buildGoalList(BuildContext context, HomeViewModel viewModel) {
@@ -360,8 +347,7 @@ class _HomeTabContent extends StatelessWidget {
               ),
               const SizedBox(height: SpacingConsts.s),
               Text(
-                l10n?.emptyGoalsMessage ??
-                    'Tap the + button below\nto add a new goal',
+                l10n?.emptyGoalsMessage ?? 'Tap the + button below\nto add a new goal',
                 style: TextConsts.body.copyWith(
                   color: ColorConsts.textTertiary,
                   height: 1.5,
@@ -425,8 +411,7 @@ class _HomeTabContent extends StatelessWidget {
             ),
           ),
           content: Text(
-            l10n?.deleteGoalMessage ??
-                'This goal and all related study logs will be permanently deleted.',
+            l10n?.deleteGoalMessage ?? 'This goal and all related study logs will be permanently deleted. This action cannot be undone.',
             style: TextConsts.body.copyWith(color: ColorConsts.textSecondary),
           ),
           actions: [
@@ -512,8 +497,7 @@ class _TimerTabContent extends StatelessWidget {
                           ),
                           const SizedBox(height: SpacingConsts.l),
                           Text(
-                            l10n?.timerEmptyMessage ??
-                                'Create a goal\nto use the timer',
+                            l10n?.timerEmptyMessage ?? 'Create a goal\nto use the timer',
                             textAlign: TextAlign.center,
                             style: TextConsts.h3.copyWith(
                               color: ColorConsts.textSecondary,
@@ -529,8 +513,7 @@ class _TimerTabContent extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          l10n?.timerSelectGoal ??
-                              'Select a goal to start the timer',
+                          l10n?.timerSelectGoal ?? 'Select a goal to start the timer',
                           style: TextConsts.h4.copyWith(
                             color: ColorConsts.textPrimary,
                             fontWeight: FontWeight.bold,
@@ -566,24 +549,10 @@ class _TimerTabContent extends StatelessWidget {
     GoalsModel goal,
     HomeViewModel viewModel,
   ) {
-    final l10n = AppLocalizations.of(context);
     final homeState = viewModel.state;
     final studiedMinutes = homeState.getStudiedMinutesForGoal(goal);
     final progress = homeState.getProgressForGoal(goal);
     final progressPercent = (progress * 100).toInt();
-
-    // ローカライズされた時間表示
-    final studiedTime =
-        l10n != null
-            ? TimeUtils.formatMinutesToHoursAndMinutesL10n(studiedMinutes, l10n)
-            : TimeUtils.formatMinutesToHoursAndMinutes(studiedMinutes);
-    final targetTime =
-        l10n != null
-            ? TimeUtils.formatMinutesToHoursAndMinutesL10n(
-              goal.targetMinutes,
-              l10n,
-            )
-            : TimeUtils.formatMinutesToHoursAndMinutes(goal.targetMinutes);
 
     return PressableCard(
       onTap: () => _navigateToTimerAndReload(context, viewModel, goal),
@@ -620,7 +589,7 @@ class _TimerTabContent extends StatelessWidget {
                   ),
                   const SizedBox(height: SpacingConsts.xs),
                   Text(
-                    '$studiedTime / $targetTime',
+                    '${TimeUtils.formatMinutesToHoursAndMinutes(studiedMinutes)} / ${TimeUtils.formatMinutesToHoursAndMinutes(goal.targetMinutes)}',
                     style: TextConsts.body.copyWith(
                       color: ColorConsts.textSecondary,
                     ),

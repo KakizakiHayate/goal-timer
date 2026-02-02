@@ -455,4 +455,105 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get aboutDialogDescription =>
       '目標達成をサポートするタイマーアプリです。毎日の小さな積み重ねが、大きな成果につながります。';
+
+  @override
+  String get viewDetails => '詳細を見る';
+
+  @override
+  String get streakMessageZero => '今日から始めよう！';
+
+  @override
+  String get streakMessageWeek => '1週間達成！';
+
+  @override
+  String get streakMessageMonth => '1ヶ月達成！';
+
+  @override
+  String streakMessageDays(int days) {
+    return '$days日連続学習中！';
+  }
+
+  @override
+  String get deletedGoal => '削除された目標';
+
+  @override
+  String get loginTitle => 'ログイン';
+
+  @override
+  String get accountLinkTitle => 'アカウント連携';
+
+  @override
+  String get loginDescription => '以前のデータを引き継いで\n再開できます';
+
+  @override
+  String get linkDescription => 'アカウントを連携すると、データを\n安全にバックアップできます';
+
+  @override
+  String get loginWithGoogle => 'Google でログイン';
+
+  @override
+  String get linkWithGoogle => 'Google で連携';
+
+  @override
+  String get loginWithApple => 'Apple でログイン';
+
+  @override
+  String get linkWithApple => 'Apple で連携';
+
+  @override
+  String get loginNotice => 'アカウントをお持ちでない場合は「すぐに始める」をご利用ください';
+
+  @override
+  String get linkNotice => '連携後もゲストとしてのデータは保持されます';
+
+  @override
+  String get loginFailedTitle => 'ログインできませんでした';
+
+  @override
+  String get linkFailedTitle => '連携できませんでした';
+
+  @override
+  String get accountNotFoundMessage =>
+      'このアカウントは登録されていません。\n新規登録は「すぐに始める」からアカウント連携を行ってください。';
+
+  @override
+  String get accountAlreadyExistsMessage =>
+      'このアカウントは既に登録されています。\n連携するには、一度ログインしてアカウントを削除してください。';
+
+  @override
+  String get emailNotFoundMessage =>
+      'メールアドレスを取得できませんでした。\n設定からApple IDの連携を解除して再度お試しください。';
+
+  @override
+  String get genericErrorMessage => 'エラーが発生しました。\nしばらくしてから再度お試しください。';
+
+  @override
+  String get confirmLinkTitle => 'アカウントを連携しますか？';
+
+  @override
+  String confirmLinkMessage(String provider) {
+    return '$providerアカウントと連携します';
+  }
+
+  @override
+  String get btnLink => '連携する';
+
+  @override
+  String get linkSuccessTitle => '連携完了';
+
+  @override
+  String get linkSuccessMessage => 'アカウントが正常に連携されました';
+
+  @override
+  String get feedbackTitle => '目標達成おめでとうございます!';
+
+  @override
+  String get feedbackMessage =>
+      'より使いやすいアプリにするために、1分だけお声を聞かせていただけませんか？開発者が全て目を通します。';
+
+  @override
+  String get btnAnswer => '回答する';
+
+  @override
+  String get btnNotNow => '今はしない';
 }

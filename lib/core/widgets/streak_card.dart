@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../utils/color_consts.dart';
 import '../utils/spacing_consts.dart';
 import '../utils/streak_consts.dart';
@@ -44,19 +45,19 @@ class StreakCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildStreakMessage(),
+            _buildStreakMessage(context),
             const SizedBox(height: SpacingConsts.m),
             MiniHeatmap(studyDates: studyDates),
             const SizedBox(height: SpacingConsts.m),
-            _buildDetailLink(),
+            _buildDetailLink(context),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildStreakMessage() {
-    final message = _getStreakMessage();
+  Widget _buildStreakMessage(BuildContext context) {
+    final message = _getStreakMessage(context);
     final icon = _getStreakIcon();
 
     return Row(
@@ -76,15 +77,18 @@ class StreakCard extends StatelessWidget {
     );
   }
 
-  String _getStreakMessage() {
-    if (streakDays == 0) return StreakConsts.messageZeroStreak;
+  String _getStreakMessage(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    if (streakDays == 0) {
+      return l10n?.streakMessageZero ?? "Let's start today!";
+    }
     if (streakDays >= StreakConsts.monthMilestone) {
-      return '🏆 ${StreakConsts.messageMonthMilestone}';
+      return '🏆 ${l10n?.streakMessageMonth ?? '1 month achieved!'}';
     }
     if (streakDays >= StreakConsts.weekMilestone) {
-      return '🎉 ${StreakConsts.messageWeekMilestone}';
+      return '🎉 ${l10n?.streakMessageWeek ?? '1 week achieved!'}';
     }
-    return StreakConsts.messageStreakDays(streakDays);
+    return l10n?.streakMessageDays(streakDays) ?? '$streakDays day streak!';
   }
 
   String _getStreakIcon() {
@@ -94,12 +98,13 @@ class StreakCard extends StatelessWidget {
     return '🔥';
   }
 
-  Widget _buildDetailLink() {
+  Widget _buildDetailLink(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         Text(
-          '詳細を見る',
+          l10n?.viewDetails ?? 'View details',
           style: TextConsts.bodySmall.copyWith(
             fontWeight: FontWeight.w500,
             color: ColorConsts.textSecondary,

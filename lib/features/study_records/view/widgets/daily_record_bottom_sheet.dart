@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+
 import '../../../../core/utils/color_consts.dart';
 import '../../../../core/utils/spacing_consts.dart';
 import '../../../../core/utils/text_consts.dart';
 import '../../../../core/utils/time_utils.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../view_model/study_records_view_model.dart';
 
 /// 日別学習記録のボトムシート
@@ -108,7 +110,7 @@ class DailyRecordBottomSheet extends StatelessWidget {
                 (context, index) => const SizedBox(height: SpacingConsts.s),
             itemBuilder: (context, index) {
               final record = records[index];
-              return _buildRecordItem(record);
+              return _buildRecordItem(context, record);
             },
           ),
         );
@@ -117,7 +119,12 @@ class DailyRecordBottomSheet extends StatelessWidget {
   }
 
   /// 個別の学習記録アイテム
-  Widget _buildRecordItem(DailyRecord record) {
+  Widget _buildRecordItem(BuildContext context, DailyRecord record) {
+    final l10n = AppLocalizations.of(context);
+    final displayTitle = record.isDeleted
+        ? (l10n?.deletedGoal ?? 'Deleted Goal')
+        : record.goalTitle;
+
     return Container(
       padding: const EdgeInsets.all(SpacingConsts.m),
       decoration: BoxDecoration(
@@ -128,7 +135,7 @@ class DailyRecordBottomSheet extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              record.goalTitle,
+              displayTitle,
               style: TextConsts.bodyMedium.copyWith(
                 color:
                     record.isDeleted

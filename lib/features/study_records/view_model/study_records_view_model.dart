@@ -263,7 +263,7 @@ class StudyRecordsViewModel extends GetxController {
         dailyRecords.add(
           DailyRecord(
             goalId: entry.key,
-            goalTitle: goal?.title ?? '削除された目標',
+            goalTitle: goal?.title ?? 'Deleted Goal',
             totalSeconds: entry.value,
             isDeleted: goal?.deletedAt != null || goal == null,
           ),

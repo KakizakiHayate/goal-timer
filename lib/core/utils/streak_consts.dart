@@ -32,17 +32,4 @@ class StreakConsts {
 
   /// 今日の未学習ドットの枠線幅
   static const double todayBorderWidth = 2.0;
-
-  // メッセージ
-  /// ストリーク0日のメッセージ
-  static const String messageZeroStreak = '今日から始めよう！';
-
-  /// 1週間達成のメッセージ
-  static const String messageWeekMilestone = '1週間達成！';
-
-  /// 1ヶ月達成のメッセージ
-  static const String messageMonthMilestone = '1ヶ月達成！';
-
-  /// 連続学習中のメッセージテンプレート
-  static String messageStreakDays(int days) => '$days日連続学習中！';
 }

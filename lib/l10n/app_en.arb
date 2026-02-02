@@ -784,5 +784,170 @@
   "aboutDialogDescription": "A timer app to help you achieve your goals. Small daily efforts lead to great results.",
   "@aboutDialogDescription": {
     "description": "About dialog description"
+  },
+
+  "viewDetails": "View details",
+  "@viewDetails": {
+    "description": "View details link text"
+  },
+
+  "streakMessageZero": "Let's start today!",
+  "@streakMessageZero": {
+    "description": "Message when streak is 0 days"
+  },
+
+  "streakMessageWeek": "1 week achieved!",
+  "@streakMessageWeek": {
+    "description": "Message for 1 week milestone"
+  },
+
+  "streakMessageMonth": "1 month achieved!",
+  "@streakMessageMonth": {
+    "description": "Message for 1 month milestone"
+  },
+
+  "streakMessageDays": "{days} day streak!",
+  "@streakMessageDays": {
+    "description": "Message for ongoing streak",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+
+  "deletedGoal": "Deleted Goal",
+  "@deletedGoal": {
+    "description": "Placeholder name for deleted goals"
+  },
+
+  "loginTitle": "Login",
+  "@loginTitle": {
+    "description": "Login screen title"
+  },
+
+  "accountLinkTitle": "Link Account",
+  "@accountLinkTitle": {
+    "description": "Account link screen title"
+  },
+
+  "loginDescription": "Resume with your\nprevious data",
+  "@loginDescription": {
+    "description": "Login screen description"
+  },
+
+  "linkDescription": "Link your account to safely\nbackup your data",
+  "@linkDescription": {
+    "description": "Account link screen description"
+  },
+
+  "loginWithGoogle": "Login with Google",
+  "@loginWithGoogle": {
+    "description": "Google login button text"
+  },
+
+  "linkWithGoogle": "Link with Google",
+  "@linkWithGoogle": {
+    "description": "Google link button text"
+  },
+
+  "loginWithApple": "Login with Apple",
+  "@loginWithApple": {
+    "description": "Apple login button text"
+  },
+
+  "linkWithApple": "Link with Apple",
+  "@linkWithApple": {
+    "description": "Apple link button text"
+  },
+
+  "loginNotice": "If you don't have an account, please use \"Start Now\"",
+  "@loginNotice": {
+    "description": "Login screen notice for new users"
+  },
+
+  "linkNotice": "Your guest data will be preserved after linking",
+  "@linkNotice": {
+    "description": "Account link notice"
+  },
+
+  "loginFailedTitle": "Login Failed",
+  "@loginFailedTitle": {
+    "description": "Login failed dialog title"
+  },
+
+  "linkFailedTitle": "Link Failed",
+  "@linkFailedTitle": {
+    "description": "Account link failed dialog title"
+  },
+
+  "accountNotFoundMessage": "This account is not registered.\nTo register, please use \"Start Now\" and link your account.",
+  "@accountNotFoundMessage": {
+    "description": "Error message when account is not found"
+  },
+
+  "accountAlreadyExistsMessage": "This account is already registered.\nTo link, please login first and delete the account.",
+  "@accountAlreadyExistsMessage": {
+    "description": "Error message when account already exists"
+  },
+
+  "emailNotFoundMessage": "Could not retrieve email address.\nPlease unlink your Apple ID in Settings and try again.",
+  "@emailNotFoundMessage": {
+    "description": "Error message when email is not found"
+  },
+
+  "genericErrorMessage": "An error occurred.\nPlease try again later.",
+  "@genericErrorMessage": {
+    "description": "Generic error message"
+  },
+
+  "confirmLinkTitle": "Link your account?",
+  "@confirmLinkTitle": {
+    "description": "Confirm account link dialog title"
+  },
+
+  "confirmLinkMessage": "Link with {provider} account",
+  "@confirmLinkMessage": {
+    "description": "Confirm account link message",
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+
+  "btnLink": "Link",
+  "@btnLink": {
+    "description": "Link button text"
+  },
+
+  "linkSuccessTitle": "Link Complete",
+  "@linkSuccessTitle": {
+    "description": "Link success dialog title"
+  },
+
+  "linkSuccessMessage": "Account linked successfully",
+  "@linkSuccessMessage": {
+    "description": "Link success message"
+  },
+
+  "feedbackTitle": "Congratulations!",
+  "@feedbackTitle": {
+    "description": "Feedback dialog title"
+  },
+
+  "feedbackMessage": "Would you spare a minute to help us improve the app? The developers read every response.",
+  "@feedbackMessage": {
+    "description": "Feedback dialog message"
+  },
+
+  "btnAnswer": "Answer",
+  "@btnAnswer": {
+    "description": "Answer button text"
+  },
+
+  "btnNotNow": "Not Now",
+  "@btnNotNow": {
+    "description": "Not now button text"
   }
 }

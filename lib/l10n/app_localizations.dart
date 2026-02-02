@@ -919,6 +919,192 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A timer app to help you achieve your goals. Small daily efforts lead to great results.'**
   String get aboutDialogDescription;
+
+  /// View details link text
+  ///
+  /// In en, this message translates to:
+  /// **'View details'**
+  String get viewDetails;
+
+  /// Message when streak is 0 days
+  ///
+  /// In en, this message translates to:
+  /// **'Let\'s start today!'**
+  String get streakMessageZero;
+
+  /// Message for 1 week milestone
+  ///
+  /// In en, this message translates to:
+  /// **'1 week achieved!'**
+  String get streakMessageWeek;
+
+  /// Message for 1 month milestone
+  ///
+  /// In en, this message translates to:
+  /// **'1 month achieved!'**
+  String get streakMessageMonth;
+
+  /// Message for ongoing streak
+  ///
+  /// In en, this message translates to:
+  /// **'{days} day streak!'**
+  String streakMessageDays(int days);
+
+  /// Placeholder name for deleted goals
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted Goal'**
+  String get deletedGoal;
+
+  /// Login screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Login'**
+  String get loginTitle;
+
+  /// Account link screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Link Account'**
+  String get accountLinkTitle;
+
+  /// Login screen description
+  ///
+  /// In en, this message translates to:
+  /// **'Resume with your\nprevious data'**
+  String get loginDescription;
+
+  /// Account link screen description
+  ///
+  /// In en, this message translates to:
+  /// **'Link your account to safely\nbackup your data'**
+  String get linkDescription;
+
+  /// Google login button text
+  ///
+  /// In en, this message translates to:
+  /// **'Login with Google'**
+  String get loginWithGoogle;
+
+  /// Google link button text
+  ///
+  /// In en, this message translates to:
+  /// **'Link with Google'**
+  String get linkWithGoogle;
+
+  /// Apple login button text
+  ///
+  /// In en, this message translates to:
+  /// **'Login with Apple'**
+  String get loginWithApple;
+
+  /// Apple link button text
+  ///
+  /// In en, this message translates to:
+  /// **'Link with Apple'**
+  String get linkWithApple;
+
+  /// Login screen notice for new users
+  ///
+  /// In en, this message translates to:
+  /// **'If you don\'t have an account, please use \"Start Now\"'**
+  String get loginNotice;
+
+  /// Account link notice
+  ///
+  /// In en, this message translates to:
+  /// **'Your guest data will be preserved after linking'**
+  String get linkNotice;
+
+  /// Login failed dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Login Failed'**
+  String get loginFailedTitle;
+
+  /// Account link failed dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Link Failed'**
+  String get linkFailedTitle;
+
+  /// Error message when account is not found
+  ///
+  /// In en, this message translates to:
+  /// **'This account is not registered.\nTo register, please use \"Start Now\" and link your account.'**
+  String get accountNotFoundMessage;
+
+  /// Error message when account already exists
+  ///
+  /// In en, this message translates to:
+  /// **'This account is already registered.\nTo link, please login first and delete the account.'**
+  String get accountAlreadyExistsMessage;
+
+  /// Error message when email is not found
+  ///
+  /// In en, this message translates to:
+  /// **'Could not retrieve email address.\nPlease unlink your Apple ID in Settings and try again.'**
+  String get emailNotFoundMessage;
+
+  /// Generic error message
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred.\nPlease try again later.'**
+  String get genericErrorMessage;
+
+  /// Confirm account link dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Link your account?'**
+  String get confirmLinkTitle;
+
+  /// Confirm account link message
+  ///
+  /// In en, this message translates to:
+  /// **'Link with {provider} account'**
+  String confirmLinkMessage(String provider);
+
+  /// Link button text
+  ///
+  /// In en, this message translates to:
+  /// **'Link'**
+  String get btnLink;
+
+  /// Link success dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Link Complete'**
+  String get linkSuccessTitle;
+
+  /// Link success message
+  ///
+  /// In en, this message translates to:
+  /// **'Account linked successfully'**
+  String get linkSuccessMessage;
+
+  /// Feedback dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Congratulations!'**
+  String get feedbackTitle;
+
+  /// Feedback dialog message
+  ///
+  /// In en, this message translates to:
+  /// **'Would you spare a minute to help us improve the app? The developers read every response.'**
+  String get feedbackMessage;
+
+  /// Answer button text
+  ///
+  /// In en, this message translates to:
+  /// **'Answer'**
+  String get btnAnswer;
+
+  /// Not now button text
+  ///
+  /// In en, this message translates to:
+  /// **'Not Now'**
+  String get btnNotNow;
 }
 
 class _AppLocalizationsDelegate
