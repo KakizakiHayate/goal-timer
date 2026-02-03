@@ -7,12 +7,12 @@ import '../../../core/services/notification_service.dart';
 import '../../../core/utils/animation_consts.dart';
 import '../../../core/utils/color_consts.dart';
 import '../../../core/utils/spacing_consts.dart';
-import '../../../core/utils/string_consts.dart';
 import '../../../core/utils/text_consts.dart';
 import '../../../core/utils/time_utils.dart';
 import '../../../core/widgets/goal_card.dart';
 import '../../../core/widgets/pressable_card.dart';
 import '../../../core/widgets/streak_card.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../settings/view/settings_screen.dart';
 import '../../study_records/view/study_records_screen.dart';
 import '../../timer/view/timer_screen.dart';
@@ -155,21 +155,21 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               fontWeight: FontWeight.w600,
             ),
             unselectedLabelStyle: TextConsts.caption,
-            items: const [
+            items: [
               BottomNavigationBarItem(
-                icon: Icon(Icons.home_outlined),
-                activeIcon: Icon(Icons.home),
-                label: 'ホーム',
+                icon: const Icon(Icons.home_outlined),
+                activeIcon: const Icon(Icons.home),
+                label: AppLocalizations.of(context)?.navHome ?? 'Home',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.timer_outlined),
-                activeIcon: Icon(Icons.timer),
-                label: 'タイマー',
+                icon: const Icon(Icons.timer_outlined),
+                activeIcon: const Icon(Icons.timer),
+                label: AppLocalizations.of(context)?.navTimer ?? 'Timer',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.settings_outlined),
-                activeIcon: Icon(Icons.settings),
-                label: '設定',
+                icon: const Icon(Icons.settings_outlined),
+                activeIcon: const Icon(Icons.settings),
+                label: AppLocalizations.of(context)?.navSettings ?? 'Settings',
               ),
             ],
           ),
@@ -249,7 +249,7 @@ class _HomeTabContent extends StatelessWidget {
                     SpacingConsts.s,
                   ),
                   child: Text(
-                    '${_getGreeting()}、${homeState.displayName} さん',
+                    _getGreeting(context, homeState.displayName),
                     style: TextConsts.h3.copyWith(
                       color: ColorConsts.textPrimary,
                       fontWeight: FontWeight.bold,
@@ -283,7 +283,7 @@ class _HomeTabContent extends StatelessWidget {
                   vertical: SpacingConsts.m,
                 ),
                 child: Text(
-                  'マイ目標',
+                  AppLocalizations.of(context)?.sectionMyGoals ?? 'My Goals',
                   style: TextConsts.h3.copyWith(
                     color: ColorConsts.textPrimary,
                     fontWeight: FontWeight.bold,
@@ -293,7 +293,7 @@ class _HomeTabContent extends StatelessWidget {
             ),
 
             // 目標リスト
-            _buildGoalList(homeViewModel),
+            _buildGoalList(context, homeViewModel),
 
             // FABがコンテンツに重ならないようにするための余白
             const SliverToBoxAdapter(child: SizedBox(height: 96.0)),
@@ -303,19 +303,36 @@ class _HomeTabContent extends StatelessWidget {
     );
   }
 
-  String _getGreeting() {
+  String _getGreeting(BuildContext context, String displayName) {
+    final l10n = AppLocalizations.of(context);
     final hour = DateTime.now().hour;
 
-    if (hour < 12) {
-      return 'おはよう';
-    } else if (hour < 18) {
-      return 'こんにちは';
-    } else {
-      return 'こんばんは';
+    // Fallback for when l10n is not available
+    if (l10n == null) {
+      return _getFallbackGreeting(hour, displayName);
     }
+
+    if (hour < 12) {
+      return l10n.greetingMorning(displayName);
+    }
+    if (hour < 18) {
+      return l10n.greetingAfternoon(displayName);
+    }
+    return l10n.greetingEvening(displayName);
   }
 
-  Widget _buildGoalList(HomeViewModel viewModel) {
+  String _getFallbackGreeting(int hour, String displayName) {
+    if (hour < 12) {
+      return 'Good morning, $displayName';
+    }
+    if (hour < 18) {
+      return 'Hello, $displayName';
+    }
+    return 'Good evening, $displayName';
+  }
+
+  Widget _buildGoalList(BuildContext context, HomeViewModel viewModel) {
+    final l10n = AppLocalizations.of(context);
     final goals = viewModel.filteredGoals;
 
     if (goals.isEmpty) {
@@ -335,7 +352,7 @@ class _HomeTabContent extends StatelessWidget {
               ),
               const SizedBox(height: SpacingConsts.l),
               Text(
-                '目標がありません',
+                l10n?.emptyGoalsTitle ?? 'No goals yet',
                 style: TextConsts.h3.copyWith(
                   color: ColorConsts.textSecondary,
                   fontWeight: FontWeight.w600,
@@ -343,7 +360,8 @@ class _HomeTabContent extends StatelessWidget {
               ),
               const SizedBox(height: SpacingConsts.s),
               Text(
-                '下の+ボタンから\n新しい目標を追加してください',
+                l10n?.emptyGoalsMessage ??
+                    'Tap the + button below\nto add a new goal',
                 style: TextConsts.body.copyWith(
                   color: ColorConsts.textTertiary,
                   height: 1.5,
@@ -394,26 +412,28 @@ class _HomeTabContent extends StatelessWidget {
     HomeViewModel viewModel,
     GoalsModel goal,
   ) {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return AlertDialog(
           title: Text(
-            StringConsts.deleteGoalTitle,
+            l10n?.deleteGoalTitle ?? 'Delete this goal?',
             style: TextConsts.h4.copyWith(
               color: ColorConsts.textPrimary,
               fontWeight: FontWeight.bold,
             ),
           ),
           content: Text(
-            StringConsts.deleteGoalMessage,
+            l10n?.deleteGoalMessage ??
+                'This goal and all related study logs will be permanently deleted.',
             style: TextConsts.body.copyWith(color: ColorConsts.textSecondary),
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(dialogContext),
               child: Text(
-                StringConsts.cancelButton,
+                l10n?.commonBtnCancel ?? 'Cancel',
                 style: TextConsts.body.copyWith(
                   color: ColorConsts.textSecondary,
                 ),
@@ -421,14 +441,14 @@ class _HomeTabContent extends StatelessWidget {
             ),
             TextButton(
               onPressed: () async {
-                Navigator.pop(context);
+                Navigator.pop(dialogContext);
                 // ViewModelに処理を委譲し、結果に基づいてUIフィードバックを表示
                 final result = await viewModel.onDeleteGoalConfirmed(goal);
                 if (!context.mounted) return;
                 _showDeleteResultSnackBar(context, result);
               },
               child: Text(
-                StringConsts.deleteButton,
+                l10n?.commonBtnDelete ?? 'Delete',
                 style: TextConsts.body.copyWith(
                   color: ColorConsts.error,
                   fontWeight: FontWeight.bold,
@@ -446,11 +466,12 @@ class _HomeTabContent extends StatelessWidget {
     BuildContext context,
     DeleteGoalResult result,
   ) {
+    final l10n = AppLocalizations.of(context);
     final isSuccess = result == DeleteGoalResult.success;
     final message =
         isSuccess
-            ? StringConsts.goalDeletedMessage
-            : StringConsts.goalDeleteFailedMessage;
+            ? (l10n?.goalDeletedMessage ?? 'Goal deleted')
+            : (l10n?.goalDeleteFailedMessage ?? 'Failed to delete goal');
     final color = isSuccess ? ColorConsts.success : ColorConsts.error;
 
     ScaffoldMessenger.of(
@@ -464,13 +485,15 @@ class _TimerTabContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return GetBuilder<HomeViewModel>(
       builder: (homeViewModel) {
         final goals = homeViewModel.state.goals;
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('タイマー'),
+            title: Text(l10n?.timerTabTitle ?? 'Timer'),
             backgroundColor: ColorConsts.primary,
             foregroundColor: Colors.white,
           ),
@@ -489,7 +512,8 @@ class _TimerTabContent extends StatelessWidget {
                           ),
                           const SizedBox(height: SpacingConsts.l),
                           Text(
-                            'タイマーを使用するには\n目標を作成してください',
+                            l10n?.timerEmptyMessage ??
+                                'Create a goal\nto use the timer',
                             textAlign: TextAlign.center,
                             style: TextConsts.h3.copyWith(
                               color: ColorConsts.textSecondary,
@@ -505,7 +529,8 @@ class _TimerTabContent extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'タイマーを開始する目標を選択してください',
+                          l10n?.timerSelectGoal ??
+                              'Select a goal to start the timer',
                           style: TextConsts.h4.copyWith(
                             color: ColorConsts.textPrimary,
                             fontWeight: FontWeight.bold,
@@ -541,10 +566,24 @@ class _TimerTabContent extends StatelessWidget {
     GoalsModel goal,
     HomeViewModel viewModel,
   ) {
+    final l10n = AppLocalizations.of(context);
     final homeState = viewModel.state;
     final studiedMinutes = homeState.getStudiedMinutesForGoal(goal);
     final progress = homeState.getProgressForGoal(goal);
     final progressPercent = (progress * 100).toInt();
+
+    // ローカライズされた時間表示
+    final studiedTime =
+        l10n != null
+            ? TimeUtils.formatMinutesToHoursAndMinutesL10n(studiedMinutes, l10n)
+            : TimeUtils.formatMinutesToHoursAndMinutes(studiedMinutes);
+    final targetTime =
+        l10n != null
+            ? TimeUtils.formatMinutesToHoursAndMinutesL10n(
+              goal.targetMinutes,
+              l10n,
+            )
+            : TimeUtils.formatMinutesToHoursAndMinutes(goal.targetMinutes);
 
     return PressableCard(
       onTap: () => _navigateToTimerAndReload(context, viewModel, goal),
@@ -581,7 +620,7 @@ class _TimerTabContent extends StatelessWidget {
                   ),
                   const SizedBox(height: SpacingConsts.xs),
                   Text(
-                    '${TimeUtils.formatMinutesToHoursAndMinutes(studiedMinutes)} / ${TimeUtils.formatMinutesToHoursAndMinutes(goal.targetMinutes)}',
+                    '$studiedTime / $targetTime',
                     style: TextConsts.body.copyWith(
                       color: ColorConsts.textSecondary,
                     ),

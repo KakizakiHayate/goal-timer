@@ -188,5 +188,100 @@
   "finalWarningNoStreak": "Study today to start your streak!",
   "@finalWarningNoStreak": {
     "description": "Final warning message when user has no streak"
+  },
+
+  "navHome": "Home",
+  "@navHome": {
+    "description": "Bottom navigation home tab label"
+  },
+
+  "navTimer": "Timer",
+  "@navTimer": {
+    "description": "Bottom navigation timer tab label"
+  },
+
+  "navSettings": "Settings",
+  "@navSettings": {
+    "description": "Bottom navigation settings tab label"
+  },
+
+  "greetingMorning": "Good morning, {name}",
+  "@greetingMorning": {
+    "description": "Morning greeting with user name",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+
+  "greetingAfternoon": "Hello, {name}",
+  "@greetingAfternoon": {
+    "description": "Afternoon greeting with user name",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+
+  "greetingEvening": "Good evening, {name}",
+  "@greetingEvening": {
+    "description": "Evening greeting with user name",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+
+  "sectionMyGoals": "My Goals",
+  "@sectionMyGoals": {
+    "description": "Section header for goals list"
+  },
+
+  "emptyGoalsTitle": "No goals yet",
+  "@emptyGoalsTitle": {
+    "description": "Title when there are no goals"
+  },
+
+  "emptyGoalsMessage": "Tap the + button below\nto add a new goal",
+  "@emptyGoalsMessage": {
+    "description": "Message when there are no goals"
+  },
+
+  "timerTabTitle": "Timer",
+  "@timerTabTitle": {
+    "description": "Timer tab app bar title"
+  },
+
+  "timerEmptyMessage": "Create a goal\nto use the timer",
+  "@timerEmptyMessage": {
+    "description": "Message when there are no goals for timer"
+  },
+
+  "timerSelectGoal": "Select a goal to start the timer",
+  "@timerSelectGoal": {
+    "description": "Instruction to select a goal for timer"
+  },
+
+  "deleteGoalTitle": "Delete this goal?",
+  "@deleteGoalTitle": {
+    "description": "Delete goal confirmation dialog title"
+  },
+
+  "deleteGoalMessage": "This goal and all related study logs will be permanently deleted. This action cannot be undone.",
+  "@deleteGoalMessage": {
+    "description": "Delete goal confirmation dialog message"
+  },
+
+  "goalDeletedMessage": "Goal deleted",
+  "@goalDeletedMessage": {
+    "description": "Success message when goal is deleted"
+  },
+
+  "goalDeleteFailedMessage": "Failed to delete goal",
+  "@goalDeleteFailedMessage": {
+    "description": "Error message when goal deletion fails"
   }
 }

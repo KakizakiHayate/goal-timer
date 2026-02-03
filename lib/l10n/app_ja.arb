@@ -55,5 +55,37 @@
 
   "warningNoStreak": "今日も学習しませんか？まだ間に合います！",
 
-  "finalWarningNoStreak": "今日中に学習して、連続学習を始めましょう！"
+  "finalWarningNoStreak": "今日中に学習して、連続学習を始めましょう！",
+
+  "navHome": "ホーム",
+
+  "navTimer": "タイマー",
+
+  "navSettings": "設定",
+
+  "greetingMorning": "おはよう、{name} さん",
+
+  "greetingAfternoon": "こんにちは、{name} さん",
+
+  "greetingEvening": "こんばんは、{name} さん",
+
+  "sectionMyGoals": "マイ目標",
+
+  "emptyGoalsTitle": "目標がありません",
+
+  "emptyGoalsMessage": "下の+ボタンから\n新しい目標を追加してください",
+
+  "timerTabTitle": "タイマー",
+
+  "timerEmptyMessage": "タイマーを使用するには\n目標を作成してください",
+
+  "timerSelectGoal": "タイマーを開始する目標を選択してください",
+
+  "deleteGoalTitle": "目標を削除しますか？",
+
+  "deleteGoalMessage": "この目標と、紐づいた学習ログがすべて削除されます。この操作は元に戻せません。",
+
+  "goalDeletedMessage": "目標を削除しました",
+
+  "goalDeleteFailedMessage": "目標の削除に失敗しました"
 }

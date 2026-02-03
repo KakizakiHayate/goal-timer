@@ -265,6 +265,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Study today to start your streak!'**
   String get finalWarningNoStreak;
+
+  /// Bottom navigation home tab label
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get navHome;
+
+  /// Bottom navigation timer tab label
+  ///
+  /// In en, this message translates to:
+  /// **'Timer'**
+  String get navTimer;
+
+  /// Bottom navigation settings tab label
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get navSettings;
+
+  /// Morning greeting with user name
+  ///
+  /// In en, this message translates to:
+  /// **'Good morning, {name}'**
+  String greetingMorning(String name);
+
+  /// Afternoon greeting with user name
+  ///
+  /// In en, this message translates to:
+  /// **'Hello, {name}'**
+  String greetingAfternoon(String name);
+
+  /// Evening greeting with user name
+  ///
+  /// In en, this message translates to:
+  /// **'Good evening, {name}'**
+  String greetingEvening(String name);
+
+  /// Section header for goals list
+  ///
+  /// In en, this message translates to:
+  /// **'My Goals'**
+  String get sectionMyGoals;
+
+  /// Title when there are no goals
+  ///
+  /// In en, this message translates to:
+  /// **'No goals yet'**
+  String get emptyGoalsTitle;
+
+  /// Message when there are no goals
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the + button below\nto add a new goal'**
+  String get emptyGoalsMessage;
+
+  /// Timer tab app bar title
+  ///
+  /// In en, this message translates to:
+  /// **'Timer'**
+  String get timerTabTitle;
+
+  /// Message when there are no goals for timer
+  ///
+  /// In en, this message translates to:
+  /// **'Create a goal\nto use the timer'**
+  String get timerEmptyMessage;
+
+  /// Instruction to select a goal for timer
+  ///
+  /// In en, this message translates to:
+  /// **'Select a goal to start the timer'**
+  String get timerSelectGoal;
+
+  /// Delete goal confirmation dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this goal?'**
+  String get deleteGoalTitle;
+
+  /// Delete goal confirmation dialog message
+  ///
+  /// In en, this message translates to:
+  /// **'This goal and all related study logs will be permanently deleted. This action cannot be undone.'**
+  String get deleteGoalMessage;
+
+  /// Success message when goal is deleted
+  ///
+  /// In en, this message translates to:
+  /// **'Goal deleted'**
+  String get goalDeletedMessage;
+
+  /// Error message when goal deletion fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete goal'**
+  String get goalDeleteFailedMessage;
 }
 
 class _AppLocalizationsDelegate
