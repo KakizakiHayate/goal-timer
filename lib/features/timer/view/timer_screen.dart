@@ -99,7 +99,16 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
     TimerViewModel timerViewModel,
   ) {
     final l10n = AppLocalizations.of(context);
-    final timeText = TimeUtils.formatSecondsToHoursAndMinutes(timerViewModel.elapsedSeconds);
+    final timeText =
+        l10n != null
+            ? TimeUtils.formatSecondsToHoursAndMinutesL10n(
+              timerViewModel.elapsedSeconds,
+              l10n,
+            )
+            : TimeUtils.formatSecondsToHoursAndMinutes(
+              timerViewModel.elapsedSeconds,
+            );
+
     timerViewModel.clearCompletionConfirmFlag();
     showDialog(
       context: context,
@@ -114,7 +123,8 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
               style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
             ),
             content: Text(
-              l10n?.dialogTimerCompleteMessage(timeText) ?? 'Would you like to record $timeText as study time?',
+              l10n?.dialogTimerCompleteMessage(timeText) ??
+                  'Would you like to record $timeText as study time?',
               style: TextConsts.body.copyWith(color: ColorConsts.textSecondary),
             ),
             actions: [
@@ -230,7 +240,8 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
           style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
         ),
         content: Text(
-          l10n?.dialogBackConfirmMessage ?? 'Unrecorded study time will be lost.',
+          l10n?.dialogBackConfirmMessage ??
+              'Unrecorded study time will be lost.',
           style: TextConsts.body.copyWith(color: ColorConsts.textSecondary),
         ),
         actions: [
@@ -266,8 +277,6 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-
     return Obx(() {
       final timerViewModel = Get.find<TimerViewModel>();
       final timerState = timerViewModel.state;
@@ -309,7 +318,8 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                       ),
                       Expanded(
                         child: Text(
-                          l10n?.timerScreenTitle ?? 'Timer',
+                          AppLocalizations.of(context)?.timerScreenTitle ??
+                              'Timer',
                           style: TextConsts.h3.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -410,7 +420,8 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
               style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
             ),
             content: Text(
-              l10n?.dialogModeSwitchMessage ?? 'Please save or reset the timer before switching modes.',
+              l10n?.dialogModeSwitchMessage ??
+                  'Please save or reset the timer before switching modes.',
               style: TextConsts.body.copyWith(color: ColorConsts.textSecondary),
             ),
             actions: [
@@ -554,7 +565,7 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                 ),
                 const SizedBox(height: SpacingConsts.s),
                 Text(
-                  _getTimerStatusText(context, timerState),
+                  _getTimerStatusText(timerState),
                   style: TextConsts.body.copyWith(
                     color: Colors.white.withValues(alpha: 0.8),
                     fontWeight: FontWeight.w600,
@@ -569,7 +580,7 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
     );
   }
 
-  String _getTimerStatusText(BuildContext context, TimerState timerState) {
+  String _getTimerStatusText(TimerState timerState) {
     final l10n = AppLocalizations.of(context);
     if (timerState.isRunning) {
       return l10n?.statusFocusing ?? 'Focusing...';
@@ -688,7 +699,16 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
     TimerViewModel timerViewModel,
   ) {
     final l10n = AppLocalizations.of(context);
-    final timeText = TimeUtils.formatSecondsToHoursAndMinutes(timerViewModel.elapsedSeconds);
+    final timeText =
+        l10n != null
+            ? TimeUtils.formatSecondsToHoursAndMinutesL10n(
+              timerViewModel.elapsedSeconds,
+              l10n,
+            )
+            : TimeUtils.formatSecondsToHoursAndMinutes(
+              timerViewModel.elapsedSeconds,
+            );
+
     showDialog(
       context: context,
       builder:
@@ -701,7 +721,8 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
               style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
             ),
             content: Text(
-              l10n?.dialogTimerCompleteMessage(timeText) ?? 'Would you like to record $timeText as study time?',
+              l10n?.dialogTimerCompleteMessage(timeText) ??
+                  'Would you like to record $timeText as study time?',
               style: TextConsts.body.copyWith(color: ColorConsts.textSecondary),
             ),
             actions: [
