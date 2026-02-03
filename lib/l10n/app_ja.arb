@@ -17,5 +17,43 @@
 
   "timeFormatMinutes": "{minutes}分",
 
-  "daysSuffix": "{count}日"
+  "daysSuffix": "{count}日",
+
+  "progress": "進捗",
+
+  "btnStartTimer": "タイマー開始",
+
+  "btnEdit": "編集",
+
+  "deadlineInfo": "{month}月{day}日まで（あと{days}日）",
+
+  "timerCompleteTitle": "タイマー完了",
+
+  "timerCompleteMessage": "「{goal}」の学習時間が終了しました",
+
+  "timerChannelName": "タイマー完了",
+
+  "timerChannelDescription": "タイマーが完了した時の通知",
+
+  "streakReminderChannelName": "ストリークリマインダー",
+
+  "streakReminderChannelDescription": "連続学習日数を維持するためのリマインダー通知",
+
+  "reminderTitle": "今日も学習しましょう！",
+
+  "warningTitle": "ストリークが途切れそう！",
+
+  "finalWarningTitle": "最後のチャンス！",
+
+  "reminderMessage": "現在{days}日連続で学習中です。今日も続けましょう！",
+
+  "warningMessage": "{days}日間の連続学習が途切れてしまいます！あと少しで1日終了です。",
+
+  "finalWarningMessage": "{days}日連続の記録を守りましょう！今日中に1分以上学習してください。",
+
+  "reminderNoStreak": "今日から学習を始めましょう！",
+
+  "warningNoStreak": "今日も学習しませんか？まだ間に合います！",
+
+  "finalWarningNoStreak": "今日中に学習して、連続学習を始めましょう！"
 }

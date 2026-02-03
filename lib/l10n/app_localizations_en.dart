@@ -46,4 +46,91 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get progress => 'Progress';
+
+  @override
+  String get btnStartTimer => 'Start Timer';
+
+  @override
+  String get btnEdit => 'Edit';
+
+  @override
+  String deadlineInfo(int month, int day, int days) {
+    return 'Until $month/$day ($days days left)';
+  }
+
+  @override
+  String get timerCompleteTitle => 'Timer Complete';
+
+  @override
+  String timerCompleteMessage(String goal) {
+    return 'Study time for \"$goal\" has ended';
+  }
+
+  @override
+  String get timerChannelName => 'Timer Complete';
+
+  @override
+  String get timerChannelDescription => 'Notifications when timer completes';
+
+  @override
+  String get streakReminderChannelName => 'Streak Reminder';
+
+  @override
+  String get streakReminderChannelDescription =>
+      'Reminders to maintain your study streak';
+
+  @override
+  String get reminderTitle => 'Let\'s study today!';
+
+  @override
+  String get warningTitle => 'Your streak is at risk!';
+
+  @override
+  String get finalWarningTitle => 'Last chance!';
+
+  @override
+  String reminderMessage(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days',
+      one: '1 day',
+    );
+    return 'You\'ve studied $_temp0 in a row. Keep it up!';
+  }
+
+  @override
+  String warningMessage(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days-day',
+      one: '1-day',
+    );
+    return 'Your $_temp0 streak will break! The day is almost over.';
+  }
+
+  @override
+  String finalWarningMessage(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days-day',
+      one: '1-day',
+    );
+    return 'Protect your $_temp0 streak! Study for at least 1 minute today.';
+  }
+
+  @override
+  String get reminderNoStreak => 'Start studying today!';
+
+  @override
+  String get warningNoStreak =>
+      'How about studying today? There\'s still time!';
+
+  @override
+  String get finalWarningNoStreak => 'Study today to start your streak!';
 }

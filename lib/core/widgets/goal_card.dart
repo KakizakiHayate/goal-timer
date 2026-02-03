@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../utils/animation_consts.dart';
 import '../utils/color_consts.dart';
 import '../utils/spacing_consts.dart';
@@ -69,18 +70,18 @@ class GoalCard extends StatelessWidget {
           const SizedBox(height: SpacingConsts.m),
 
           // プログレス表示
-          _buildProgress(),
+          _buildProgress(context),
 
           // 期限表示
           if (deadline != null) ...[
             const SizedBox(height: SpacingConsts.s),
-            _buildDeadlineInfo(),
+            _buildDeadlineInfo(context),
           ],
 
           const SizedBox(height: SpacingConsts.m),
 
           // アクションボタン
-          _buildActionButtons(),
+          _buildActionButtons(context),
         ],
       ),
     );
@@ -152,7 +153,9 @@ class GoalCard extends StatelessWidget {
     );
   }
 
-  Widget _buildProgress() {
+  Widget _buildProgress(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) return const SizedBox.shrink();
     final percentage = (progress * 100).toInt();
 
     return Column(
@@ -162,7 +165,7 @@ class GoalCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              '進捗',
+              l10n.progress,
               style: TextConsts.caption.copyWith(
                 color: ColorConsts.textSecondary,
                 fontWeight: FontWeight.w600,
@@ -233,9 +236,10 @@ class GoalCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDeadlineInfo() {
+  Widget _buildDeadlineInfo(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final localDeadline = deadline;
-    if (localDeadline == null) return const SizedBox.shrink();
+    if (l10n == null || localDeadline == null) return const SizedBox.shrink();
 
     final remainingDays = TimeUtils.calculateRemainingDays(localDeadline);
     final month = localDeadline.month;
@@ -250,7 +254,7 @@ class GoalCard extends StatelessWidget {
         ),
         const SizedBox(width: SpacingConsts.xs),
         Text(
-          '$month月$day日まで（あと$remainingDays日）',
+          l10n.deadlineInfo(month, day, remainingDays),
           style: TextConsts.caption.copyWith(
             color: ColorConsts.textSecondary,
           ),
@@ -259,7 +263,9 @@ class GoalCard extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButtons() {
+  Widget _buildActionButtons(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) return const SizedBox.shrink();
     return Row(
       children: [
         Expanded(
@@ -267,7 +273,7 @@ class GoalCard extends StatelessWidget {
           child: _ActionButton(
             key: timerButtonKey, // タイマーボタン用のKeyを設定
             icon: Icons.timer_outlined,
-            label: 'タイマー開始',
+            label: l10n.btnStartTimer,
             backgroundColor: ColorConsts.primary,
             textColor: Colors.white,
             onTap: onTimerTap,
@@ -276,7 +282,7 @@ class GoalCard extends StatelessWidget {
         const SizedBox(width: SpacingConsts.s),
         _ActionButton(
           icon: Icons.edit_outlined,
-          label: '編集',
+          label: l10n.btnEdit,
           backgroundColor: ColorConsts.backgroundSecondary,
           textColor: ColorConsts.textSecondary,
           onTap: onEditTap,

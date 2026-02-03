@@ -5,6 +5,7 @@ import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
 import '../utils/app_logger.dart';
+import '../utils/locale_helper.dart';
 import '../utils/streak_reminder_consts.dart';
 
 /// 通知タップ時のペイロード
@@ -26,6 +27,26 @@ class NotificationService {
 
   /// 通知タップ時のコールバック（外部から設定可能）
   void Function(String? payload)? onNotificationTap;
+
+  // ========== 国際化対応テキスト ==========
+
+  /// タイマー完了通知タイトル
+  String get _timerCompleteTitle =>
+      LocaleHelper.isJapanese ? 'タイマー完了' : 'Timer Complete';
+
+  /// タイマー完了通知メッセージ
+  String _timerCompleteMessage(String goalTitle) => LocaleHelper.isJapanese
+      ? '「$goalTitle」の学習時間が終了しました'
+      : 'Study time for "$goalTitle" has ended';
+
+  /// タイマー通知チャンネル名
+  String get _timerChannelName =>
+      LocaleHelper.isJapanese ? 'タイマー完了' : 'Timer Complete';
+
+  /// タイマー通知チャンネル説明
+  String get _timerChannelDescription => LocaleHelper.isJapanese
+      ? 'タイマーが完了した時の通知'
+      : 'Notifications when timer completes';
 
   final FlutterLocalNotificationsPlugin _notifications =
       FlutterLocalNotificationsPlugin();
@@ -97,10 +118,10 @@ class NotificationService {
       return;
     }
 
-    const androidDetails = AndroidNotificationDetails(
+    final androidDetails = AndroidNotificationDetails(
       'timer_completion',
-      'タイマー完了',
-      channelDescription: 'タイマーが完了した時の通知',
+      _timerChannelName,
+      channelDescription: _timerChannelDescription,
       importance: Importance.high,
       priority: Priority.high,
     );
@@ -111,7 +132,7 @@ class NotificationService {
       presentSound: true,
     );
 
-    const details = NotificationDetails(
+    final details = NotificationDetails(
       android: androidDetails,
       iOS: iosDetails,
     );
@@ -122,8 +143,8 @@ class NotificationService {
 
     await _notifications.zonedSchedule(
       _timerCompletionNotificationId,
-      'タイマー完了',
-      '「$goalTitle」の学習時間が終了しました',
+      _timerCompleteTitle,
+      _timerCompleteMessage(goalTitle),
       scheduledTime,
       details,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
@@ -142,10 +163,10 @@ class NotificationService {
       return;
     }
 
-    const androidDetails = AndroidNotificationDetails(
+    final androidDetails = AndroidNotificationDetails(
       'timer_completion',
-      'タイマー完了',
-      channelDescription: 'タイマーが完了した時の通知',
+      _timerChannelName,
+      channelDescription: _timerChannelDescription,
       importance: Importance.high,
       priority: Priority.high,
     );
@@ -156,15 +177,15 @@ class NotificationService {
       presentSound: true,
     );
 
-    const details = NotificationDetails(
+    final details = NotificationDetails(
       android: androidDetails,
       iOS: iosDetails,
     );
 
     await _notifications.show(
       _timerCompletionNotificationId,
-      'タイマー完了',
-      '「$goalTitle」の学習時間が終了しました',
+      _timerCompleteTitle,
+      _timerCompleteMessage(goalTitle),
       details,
     );
 
@@ -398,7 +419,7 @@ class NotificationService {
     required String title,
     required String body,
   }) async {
-    const androidDetails = AndroidNotificationDetails(
+    final androidDetails = AndroidNotificationDetails(
       StreakReminderConsts.channelId,
       StreakReminderConsts.channelName,
       channelDescription: StreakReminderConsts.channelDescription,
@@ -412,7 +433,7 @@ class NotificationService {
       presentSound: true,
     );
 
-    const details = NotificationDetails(
+    final details = NotificationDetails(
       android: androidDetails,
       iOS: iosDetails,
     );

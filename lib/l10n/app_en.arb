@@ -62,5 +62,131 @@
         "type": "int"
       }
     }
+  },
+
+  "progress": "Progress",
+  "@progress": {
+    "description": "Progress label in goal card"
+  },
+
+  "btnStartTimer": "Start Timer",
+  "@btnStartTimer": {
+    "description": "Start timer button text"
+  },
+
+  "btnEdit": "Edit",
+  "@btnEdit": {
+    "description": "Edit button text"
+  },
+
+  "deadlineInfo": "Until {month}/{day} ({days} days left)",
+  "@deadlineInfo": {
+    "description": "Deadline info text in goal card",
+    "placeholders": {
+      "month": {
+        "type": "int"
+      },
+      "day": {
+        "type": "int"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+
+  "timerCompleteTitle": "Timer Complete",
+  "@timerCompleteTitle": {
+    "description": "Timer complete notification title"
+  },
+
+  "timerCompleteMessage": "Study time for \"{goal}\" has ended",
+  "@timerCompleteMessage": {
+    "description": "Timer complete notification message",
+    "placeholders": {
+      "goal": {
+        "type": "String"
+      }
+    }
+  },
+
+  "timerChannelName": "Timer Complete",
+  "@timerChannelName": {
+    "description": "Timer notification channel name"
+  },
+
+  "timerChannelDescription": "Notifications when timer completes",
+  "@timerChannelDescription": {
+    "description": "Timer notification channel description"
+  },
+
+  "streakReminderChannelName": "Streak Reminder",
+  "@streakReminderChannelName": {
+    "description": "Streak reminder notification channel name"
+  },
+
+  "streakReminderChannelDescription": "Reminders to maintain your study streak",
+  "@streakReminderChannelDescription": {
+    "description": "Streak reminder notification channel description"
+  },
+
+  "reminderTitle": "Let's study today!",
+  "@reminderTitle": {
+    "description": "Streak reminder notification title"
+  },
+
+  "warningTitle": "Your streak is at risk!",
+  "@warningTitle": {
+    "description": "Streak warning notification title"
+  },
+
+  "finalWarningTitle": "Last chance!",
+  "@finalWarningTitle": {
+    "description": "Streak final warning notification title"
+  },
+
+  "reminderMessage": "You've studied {days, plural, one{1 day} other{{days} days}} in a row. Keep it up!",
+  "@reminderMessage": {
+    "description": "Streak reminder notification message",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+
+  "warningMessage": "Your {days, plural, one{1-day} other{{days}-day}} streak will break! The day is almost over.",
+  "@warningMessage": {
+    "description": "Streak warning notification message",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+
+  "finalWarningMessage": "Protect your {days, plural, one{1-day} other{{days}-day}} streak! Study for at least 1 minute today.",
+  "@finalWarningMessage": {
+    "description": "Streak final warning notification message",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+
+  "reminderNoStreak": "Start studying today!",
+  "@reminderNoStreak": {
+    "description": "Reminder message when user has no streak"
+  },
+
+  "warningNoStreak": "How about studying today? There's still time!",
+  "@warningNoStreak": {
+    "description": "Warning message when user has no streak"
+  },
+
+  "finalWarningNoStreak": "Study today to start your streak!",
+  "@finalWarningNoStreak": {
+    "description": "Final warning message when user has no streak"
   }
 }

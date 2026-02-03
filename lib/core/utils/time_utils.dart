@@ -1,3 +1,5 @@
+import '../../l10n/app_localizations.dart';
+
 /// DateTime拡張メソッド
 extension DateTimeComparison on DateTime {
   /// 同じ日かどうかを判定
@@ -47,18 +49,42 @@ class TimeUtils {
 
   /// 分数を「X時間Y分」形式にフォーマット
   /// 例: 90分 → "1時間30分", 30分 → "0時間30分"
+  /// @deprecated Use [formatMinutesToHoursAndMinutesL10n] instead
   static String formatMinutesToHoursAndMinutes(int totalMinutes) {
     final hours = totalMinutes ~/ minutesPerHour;
     final minutes = totalMinutes % minutesPerHour;
     return '$hours時間$minutes分';
   }
 
+  /// 分数を「X時間Y分」形式にフォーマット（国際化対応）
+  /// 例: 90分 → "1時間30分" (ja) / "1h 30m" (en)
+  static String formatMinutesToHoursAndMinutesL10n(
+    int totalMinutes,
+    AppLocalizations l10n,
+  ) {
+    final hours = totalMinutes ~/ minutesPerHour;
+    final minutes = totalMinutes % minutesPerHour;
+    return l10n.timeFormatHoursMinutes(hours, minutes);
+  }
+
   /// 秒数を「X時間Y分」形式にフォーマット
   /// 例: 3660秒 → "1時間1分", 120秒 → "0時間2分"
+  /// @deprecated Use [formatSecondsToHoursAndMinutesL10n] instead
   static String formatSecondsToHoursAndMinutes(int totalSeconds) {
     final hours = totalSeconds ~/ secondsPerHour;
     final minutes = (totalSeconds % secondsPerHour) ~/ secondsPerMinute;
     return '$hours時間$minutes分';
+  }
+
+  /// 秒数を「X時間Y分」形式にフォーマット（国際化対応）
+  /// 例: 3660秒 → "1時間1分" (ja) / "1h 1m" (en)
+  static String formatSecondsToHoursAndMinutesL10n(
+    int totalSeconds,
+    AppLocalizations l10n,
+  ) {
+    final hours = totalSeconds ~/ secondsPerHour;
+    final minutes = (totalSeconds % secondsPerHour) ~/ secondsPerMinute;
+    return l10n.timeFormatHoursMinutes(hours, minutes);
   }
 
   /// 残り時間を計算（目標時間 - 消費時間）- 後方互換性のため残す

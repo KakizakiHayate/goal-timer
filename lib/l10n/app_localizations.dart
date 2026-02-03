@@ -151,6 +151,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, one{1 day} other{{count} days}}'**
   String daysSuffix(int count);
+
+  /// Progress label in goal card
+  ///
+  /// In en, this message translates to:
+  /// **'Progress'**
+  String get progress;
+
+  /// Start timer button text
+  ///
+  /// In en, this message translates to:
+  /// **'Start Timer'**
+  String get btnStartTimer;
+
+  /// Edit button text
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get btnEdit;
+
+  /// Deadline info text in goal card
+  ///
+  /// In en, this message translates to:
+  /// **'Until {month}/{day} ({days} days left)'**
+  String deadlineInfo(int month, int day, int days);
+
+  /// Timer complete notification title
+  ///
+  /// In en, this message translates to:
+  /// **'Timer Complete'**
+  String get timerCompleteTitle;
+
+  /// Timer complete notification message
+  ///
+  /// In en, this message translates to:
+  /// **'Study time for \"{goal}\" has ended'**
+  String timerCompleteMessage(String goal);
+
+  /// Timer notification channel name
+  ///
+  /// In en, this message translates to:
+  /// **'Timer Complete'**
+  String get timerChannelName;
+
+  /// Timer notification channel description
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications when timer completes'**
+  String get timerChannelDescription;
+
+  /// Streak reminder notification channel name
+  ///
+  /// In en, this message translates to:
+  /// **'Streak Reminder'**
+  String get streakReminderChannelName;
+
+  /// Streak reminder notification channel description
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders to maintain your study streak'**
+  String get streakReminderChannelDescription;
+
+  /// Streak reminder notification title
+  ///
+  /// In en, this message translates to:
+  /// **'Let\'s study today!'**
+  String get reminderTitle;
+
+  /// Streak warning notification title
+  ///
+  /// In en, this message translates to:
+  /// **'Your streak is at risk!'**
+  String get warningTitle;
+
+  /// Streak final warning notification title
+  ///
+  /// In en, this message translates to:
+  /// **'Last chance!'**
+  String get finalWarningTitle;
+
+  /// Streak reminder notification message
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve studied {days, plural, one{1 day} other{{days} days}} in a row. Keep it up!'**
+  String reminderMessage(int days);
+
+  /// Streak warning notification message
+  ///
+  /// In en, this message translates to:
+  /// **'Your {days, plural, one{1-day} other{{days}-day}} streak will break! The day is almost over.'**
+  String warningMessage(int days);
+
+  /// Streak final warning notification message
+  ///
+  /// In en, this message translates to:
+  /// **'Protect your {days, plural, one{1-day} other{{days}-day}} streak! Study for at least 1 minute today.'**
+  String finalWarningMessage(int days);
+
+  /// Reminder message when user has no streak
+  ///
+  /// In en, this message translates to:
+  /// **'Start studying today!'**
+  String get reminderNoStreak;
+
+  /// Warning message when user has no streak
+  ///
+  /// In en, this message translates to:
+  /// **'How about studying today? There\'s still time!'**
+  String get warningNoStreak;
+
+  /// Final warning message when user has no streak
+  ///
+  /// In en, this message translates to:
+  /// **'Study today to start your streak!'**
+  String get finalWarningNoStreak;
 }
 
 class _AppLocalizationsDelegate
