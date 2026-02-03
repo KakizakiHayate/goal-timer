@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -85,26 +84,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'Goal Timer',
+      onGenerateTitle: (context) =>
+          AppLocalizations.of(context)?.appName ?? 'Goal Timer',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: ColorConsts.primary),
         useMaterial3: true,
       ),
       // 国際化設定
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      localeResolutionCallback: (locale, supportedLocales) {
-        // 日本語の場合は日本語、それ以外は英語にフォールバック
-        if (locale?.languageCode == 'ja') {
-          return const Locale('ja');
-        }
-        return const Locale('en');
-      },
       home: const SplashScreen(),
       debugShowCheckedModeBanner: false,
     );
