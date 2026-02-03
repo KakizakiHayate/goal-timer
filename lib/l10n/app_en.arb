@@ -949,5 +949,95 @@
   "btnNotNow": "Not Now",
   "@btnNotNow": {
     "description": "Not now button text"
+  },
+
+  "welcomeCatchCopy1": "Turn goal achievement",
+  "@welcomeCatchCopy1": {
+    "description": "Welcome screen catch copy line 1"
+  },
+
+  "welcomeCatchCopy2": "into a habit",
+  "@welcomeCatchCopy2": {
+    "description": "Welcome screen catch copy line 2"
+  },
+
+  "btnStartNow": "Start Now",
+  "@btnStartNow": {
+    "description": "Start now button text"
+  },
+
+  "btnLogin": "Login",
+  "@btnLogin": {
+    "description": "Login button text"
+  },
+
+  "welcomeLoginDescription": "Login to resume with your\nprevious data",
+  "@welcomeLoginDescription": {
+    "description": "Welcome screen login description"
+  },
+
+  "splashCheckingNetwork": "Checking network...",
+  "@splashCheckingNetwork": {
+    "description": "Splash screen checking network status"
+  },
+
+  "splashAuthenticating": "Authenticating...",
+  "@splashAuthenticating": {
+    "description": "Splash screen authenticating status"
+  },
+
+  "splashPreparingData": "Preparing data...",
+  "@splashPreparingData": {
+    "description": "Splash screen preparing data status"
+  },
+
+  "splashComplete": "Complete",
+  "@splashComplete": {
+    "description": "Splash screen complete status"
+  },
+
+  "splashOffline": "Offline",
+  "@splashOffline": {
+    "description": "Splash screen offline status"
+  },
+
+  "splashErrorOccurred": "An error occurred",
+  "@splashErrorOccurred": {
+    "description": "Splash screen error status"
+  },
+
+  "networkErrorTitle": "Network Error",
+  "@networkErrorTitle": {
+    "description": "Network error dialog title"
+  },
+
+  "networkErrorMessage": "Please connect to the network.\nThis app requires an internet connection.",
+  "@networkErrorMessage": {
+    "description": "Network error dialog message"
+  },
+
+  "btnRetry": "Retry",
+  "@btnRetry": {
+    "description": "Retry button text"
+  },
+
+  "errorTitle": "Error",
+  "@errorTitle": {
+    "description": "Generic error dialog title"
+  },
+
+  "initializationFailedMessage": "Initialization failed. Please contact support.",
+  "@initializationFailedMessage": {
+    "description": "Initialization failed error message"
+  },
+
+  "authCredentialNotFound": "Could not retrieve credentials",
+  "@authCredentialNotFound": {
+    "description": "Error when auth credentials not found"
+  },
+
+  "authLoginFailed": "Login failed",
+  "@authLoginFailed": {
+    "description": "Generic login failed message"
   }
 }

@@ -335,5 +335,41 @@
 
   "btnAnswer": "回答する",
 
-  "btnNotNow": "今はしない"
+  "btnNotNow": "今はしない",
+
+  "welcomeCatchCopy1": "目標達成を、",
+
+  "welcomeCatchCopy2": "習慣に変える",
+
+  "btnStartNow": "すぐに始める",
+
+  "btnLogin": "ログイン",
+
+  "welcomeLoginDescription": "ログインすると、データを\n引き継いで再開できます",
+
+  "splashCheckingNetwork": "ネットワークを確認しています...",
+
+  "splashAuthenticating": "認証しています...",
+
+  "splashPreparingData": "データを準備しています...",
+
+  "splashComplete": "完了",
+
+  "splashOffline": "オフライン",
+
+  "splashErrorOccurred": "エラーが発生しました",
+
+  "networkErrorTitle": "ネットワークエラー",
+
+  "networkErrorMessage": "ネットワークに接続してください。\nこのアプリはオンラインで動作します。",
+
+  "btnRetry": "再試行",
+
+  "errorTitle": "エラー",
+
+  "initializationFailedMessage": "初期化に失敗しました。運営にお問い合わせください。",
+
+  "authCredentialNotFound": "認証情報を取得できませんでした",
+
+  "authLoginFailed": "ログインに失敗しました"
 }

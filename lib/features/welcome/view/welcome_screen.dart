@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../../core/utils/color_consts.dart';
 import '../../../core/utils/spacing_consts.dart';
 import '../../../core/utils/text_consts.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../auth/view/login_screen.dart';
 import '../view_model/welcome_view_model.dart';
 
@@ -50,17 +51,17 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   const SizedBox(height: SpacingConsts.xl),
 
                   // キャッチコピー
-                  _buildCatchCopy(),
+                  _buildCatchCopy(context),
 
                   const Spacer(flex: 2),
 
                   // ボタン群
-                  _buildButtons(viewModel),
+                  _buildButtons(context, viewModel),
 
                   const SizedBox(height: SpacingConsts.l),
 
                   // 説明テキスト
-                  _buildDescription(),
+                  _buildDescription(context),
 
                   const SizedBox(height: SpacingConsts.xxl),
                 ],
@@ -96,17 +97,18 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     );
   }
 
-  Widget _buildCatchCopy() {
+  Widget _buildCatchCopy(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       children: [
         Text(
-          '目標達成を、',
+          l10n?.welcomeCatchCopy1 ?? 'Turn goal achievement',
           style: TextConsts.h2.copyWith(
             color: ColorConsts.textPrimary,
           ),
         ),
         Text(
-          '習慣に変える',
+          l10n?.welcomeCatchCopy2 ?? 'into a habit',
           style: TextConsts.h2.copyWith(
             color: ColorConsts.primary,
             fontWeight: FontWeight.bold,
@@ -116,7 +118,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     );
   }
 
-  Widget _buildButtons(WelcomeViewModel viewModel) {
+  Widget _buildButtons(BuildContext context, WelcomeViewModel viewModel) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       children: [
         // すぐに始めるボタン（Primary）
@@ -143,7 +146,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     ),
                   )
                 : Text(
-                    'すぐに始める',
+                    l10n?.btnStartNow ?? 'Start Now',
                     style: TextConsts.buttonLarge.copyWith(
                       color: Colors.white,
                     ),
@@ -170,7 +173,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               ),
             ),
             child: Text(
-              'ログイン',
+              l10n?.btnLogin ?? 'Login',
               style: TextConsts.buttonLarge.copyWith(
                 color: ColorConsts.primary,
               ),
@@ -181,9 +184,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     );
   }
 
-  Widget _buildDescription() {
+  Widget _buildDescription(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Text(
-      'ログインすると、データを\n引き継いで再開できます',
+      l10n?.welcomeLoginDescription ?? 'Login to resume with your\nprevious data',
       style: TextConsts.bodySmall.copyWith(
         color: ColorConsts.textSecondary,
         height: 1.5,

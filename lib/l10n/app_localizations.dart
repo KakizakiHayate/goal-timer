@@ -1105,6 +1105,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not Now'**
   String get btnNotNow;
+
+  /// Welcome screen catch copy line 1
+  ///
+  /// In en, this message translates to:
+  /// **'Turn goal achievement'**
+  String get welcomeCatchCopy1;
+
+  /// Welcome screen catch copy line 2
+  ///
+  /// In en, this message translates to:
+  /// **'into a habit'**
+  String get welcomeCatchCopy2;
+
+  /// Start now button text
+  ///
+  /// In en, this message translates to:
+  /// **'Start Now'**
+  String get btnStartNow;
+
+  /// Login button text
+  ///
+  /// In en, this message translates to:
+  /// **'Login'**
+  String get btnLogin;
+
+  /// Welcome screen login description
+  ///
+  /// In en, this message translates to:
+  /// **'Login to resume with your\nprevious data'**
+  String get welcomeLoginDescription;
+
+  /// Splash screen checking network status
+  ///
+  /// In en, this message translates to:
+  /// **'Checking network...'**
+  String get splashCheckingNetwork;
+
+  /// Splash screen authenticating status
+  ///
+  /// In en, this message translates to:
+  /// **'Authenticating...'**
+  String get splashAuthenticating;
+
+  /// Splash screen preparing data status
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing data...'**
+  String get splashPreparingData;
+
+  /// Splash screen complete status
+  ///
+  /// In en, this message translates to:
+  /// **'Complete'**
+  String get splashComplete;
+
+  /// Splash screen offline status
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get splashOffline;
+
+  /// Splash screen error status
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred'**
+  String get splashErrorOccurred;
+
+  /// Network error dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Network Error'**
+  String get networkErrorTitle;
+
+  /// Network error dialog message
+  ///
+  /// In en, this message translates to:
+  /// **'Please connect to the network.\nThis app requires an internet connection.'**
+  String get networkErrorMessage;
+
+  /// Retry button text
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get btnRetry;
+
+  /// Generic error dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get errorTitle;
+
+  /// Initialization failed error message
+  ///
+  /// In en, this message translates to:
+  /// **'Initialization failed. Please contact support.'**
+  String get initializationFailedMessage;
+
+  /// Error when auth credentials not found
+  ///
+  /// In en, this message translates to:
+  /// **'Could not retrieve credentials'**
+  String get authCredentialNotFound;
+
+  /// Generic login failed message
+  ///
+  /// In en, this message translates to:
+  /// **'Login failed'**
+  String get authLoginFailed;
 }
 
 class _AppLocalizationsDelegate

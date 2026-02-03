@@ -556,4 +556,58 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get btnNotNow => '今はしない';
+
+  @override
+  String get welcomeCatchCopy1 => '目標達成を、';
+
+  @override
+  String get welcomeCatchCopy2 => '習慣に変える';
+
+  @override
+  String get btnStartNow => 'すぐに始める';
+
+  @override
+  String get btnLogin => 'ログイン';
+
+  @override
+  String get welcomeLoginDescription => 'ログインすると、データを\n引き継いで再開できます';
+
+  @override
+  String get splashCheckingNetwork => 'ネットワークを確認しています...';
+
+  @override
+  String get splashAuthenticating => '認証しています...';
+
+  @override
+  String get splashPreparingData => 'データを準備しています...';
+
+  @override
+  String get splashComplete => '完了';
+
+  @override
+  String get splashOffline => 'オフライン';
+
+  @override
+  String get splashErrorOccurred => 'エラーが発生しました';
+
+  @override
+  String get networkErrorTitle => 'ネットワークエラー';
+
+  @override
+  String get networkErrorMessage => 'ネットワークに接続してください。\nこのアプリはオンラインで動作します。';
+
+  @override
+  String get btnRetry => '再試行';
+
+  @override
+  String get errorTitle => 'エラー';
+
+  @override
+  String get initializationFailedMessage => '初期化に失敗しました。運営にお問い合わせください。';
+
+  @override
+  String get authCredentialNotFound => '認証情報を取得できませんでした';
+
+  @override
+  String get authLoginFailed => 'ログインに失敗しました';
 }

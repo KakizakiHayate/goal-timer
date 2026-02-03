@@ -5,10 +5,10 @@ import 'package:intl/intl.dart';
 import '../../../../core/models/goals/goals_model.dart';
 import '../../../../core/utils/color_consts.dart';
 import '../../../../core/utils/spacing_consts.dart';
-import '../../../../core/utils/string_consts.dart';
 import '../../../../core/utils/text_consts.dart';
 import '../../../../core/utils/time_utils.dart';
 import '../../../../core/utils/ui_consts.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../view_model/home_view_model.dart';
 
 class AddGoalModal extends StatefulWidget {
@@ -90,11 +90,14 @@ class _AddGoalModalState extends State<AddGoalModal> {
       return;
     }
 
+    final l10n = AppLocalizations.of(context);
     final selectedDeadline = _selectedDeadline;
     if (selectedDeadline == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(StringConsts.selectDeadlineMessage),
+        SnackBar(
+          content: Text(
+            l10n?.selectDeadlineValidation ?? 'Please select a deadline',
+          ),
           backgroundColor: ColorConsts.error,
         ),
       );
@@ -137,8 +140,8 @@ class _AddGoalModalState extends State<AddGoalModal> {
           SnackBar(
             content: Text(
               _isEdit
-                  ? StringConsts.goalUpdatedMessage
-                  : StringConsts.goalAddedMessage,
+                  ? (l10n?.goalUpdatedMessage ?? 'Goal updated')
+                  : (l10n?.goalAddedMessage ?? 'Goal added'),
             ),
             backgroundColor: ColorConsts.success,
           ),
@@ -150,8 +153,8 @@ class _AddGoalModalState extends State<AddGoalModal> {
           SnackBar(
             content: Text(
               _isEdit
-                  ? StringConsts.goalUpdateFailedMessage
-                  : StringConsts.goalAddFailedMessage,
+                  ? (l10n?.goalUpdateFailedMessage ?? 'Failed to update goal')
+                  : (l10n?.goalAddFailedMessage ?? 'Failed to add goal'),
             ),
             backgroundColor: ColorConsts.error,
           ),
@@ -188,7 +191,7 @@ class _AddGoalModalState extends State<AddGoalModal> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildHeader(),
+              _buildHeader(context),
             Flexible(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(SpacingConsts.l),
@@ -197,17 +200,17 @@ class _AddGoalModalState extends State<AddGoalModal> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildTitleField(),
+                      _buildTitleField(context),
                       const SizedBox(height: SpacingConsts.l),
-                      _buildDescriptionField(),
+                      _buildDescriptionField(context),
                       const SizedBox(height: SpacingConsts.l),
-                      _buildTargetMinutesField(),
+                      _buildTargetMinutesField(context),
                       const SizedBox(height: SpacingConsts.l),
-                      _buildDeadlineField(),
+                      _buildDeadlineField(context),
                       const SizedBox(height: SpacingConsts.l),
-                      _buildAvoidMessageField(),
+                      _buildAvoidMessageField(context),
                       const SizedBox(height: SpacingConsts.xl),
-                      _buildSaveButton(),
+                      _buildSaveButton(context),
                     ],
                   ),
                 ),
@@ -220,7 +223,8 @@ class _AddGoalModalState extends State<AddGoalModal> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.all(SpacingConsts.l),
       decoration: const BoxDecoration(
@@ -241,7 +245,9 @@ class _AddGoalModalState extends State<AddGoalModal> {
         children: [
           Expanded(
             child: Text(
-              _isEdit ? StringConsts.editGoalTitle : StringConsts.addGoalTitle,
+              _isEdit
+                  ? (l10n?.editGoalTitle ?? 'Edit Goal')
+                  : (l10n?.addGoalTitle ?? 'Add Goal'),
               style: TextConsts.h3.copyWith(
                 color: ColorConsts.textPrimary,
                 fontWeight: FontWeight.bold,
@@ -258,12 +264,13 @@ class _AddGoalModalState extends State<AddGoalModal> {
     );
   }
 
-  Widget _buildTitleField() {
+  Widget _buildTitleField(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          StringConsts.goalNameLabel,
+          l10n?.goalNameLabel ?? 'Goal Name *',
           style: TextConsts.body.copyWith(
             color: ColorConsts.textPrimary,
             fontWeight: FontWeight.w600,
@@ -273,7 +280,7 @@ class _AddGoalModalState extends State<AddGoalModal> {
         TextFormField(
           controller: _titleController,
           decoration: InputDecoration(
-            hintText: StringConsts.goalNamePlaceholder,
+            hintText: l10n?.goalNamePlaceholder ?? 'e.g. Get TOEIC 800',
             filled: true,
             fillColor: ColorConsts.cardBackground,
             border: OutlineInputBorder(
@@ -285,7 +292,7 @@ class _AddGoalModalState extends State<AddGoalModal> {
           maxLength: 50,
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
-              return StringConsts.goalNameRequired;
+              return l10n?.goalNameRequired ?? 'Please enter a goal name';
             }
             return null;
           },
@@ -294,12 +301,13 @@ class _AddGoalModalState extends State<AddGoalModal> {
     );
   }
 
-  Widget _buildDescriptionField() {
+  Widget _buildDescriptionField(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          StringConsts.descriptionLabel,
+          l10n?.descriptionLabel ?? 'Description',
           style: TextConsts.body.copyWith(
             color: ColorConsts.textPrimary,
             fontWeight: FontWeight.w600,
@@ -309,7 +317,8 @@ class _AddGoalModalState extends State<AddGoalModal> {
         TextFormField(
           controller: _descriptionController,
           decoration: InputDecoration(
-            hintText: StringConsts.descriptionPlaceholder,
+            hintText: l10n?.descriptionPlaceholder ??
+                'e.g. I want to improve my English for working abroad',
             filled: true,
             fillColor: ColorConsts.cardBackground,
             border: OutlineInputBorder(
@@ -325,12 +334,13 @@ class _AddGoalModalState extends State<AddGoalModal> {
     );
   }
 
-  Widget _buildTargetMinutesField() {
+  Widget _buildTargetMinutesField(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          StringConsts.targetMinutesLabel,
+          l10n?.targetMinutesLabel ?? 'Daily Study Time *',
           style: TextConsts.body.copyWith(
             color: ColorConsts.textPrimary,
             fontWeight: FontWeight.w600,
@@ -341,7 +351,7 @@ class _AddGoalModalState extends State<AddGoalModal> {
           onTap: () async {
             await showDialog(
               context: context,
-              builder: (BuildContext context) {
+              builder: (BuildContext dialogContext) {
                 return _TimePickerDialog(
                   initialMinutes: _targetMinutes,
                   onTimeSelected: (minutes) {
@@ -389,14 +399,15 @@ class _AddGoalModalState extends State<AddGoalModal> {
     );
   }
 
-  Widget _buildDeadlineField() {
+  Widget _buildDeadlineField(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final selectedDeadline = _selectedDeadline;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          StringConsts.deadlineLabel,
+          l10n?.deadlineLabel ?? 'Deadline *',
           style: TextConsts.body.copyWith(
             color: ColorConsts.textPrimary,
             fontWeight: FontWeight.w600,
@@ -422,8 +433,9 @@ class _AddGoalModalState extends State<AddGoalModal> {
                 Expanded(
                   child: Text(
                     selectedDeadline != null
-                        ? DateFormat('yyyy年M月d日').format(selectedDeadline)
-                        : StringConsts.selectDeadlinePlaceholder,
+                        ? DateFormat('yyyy/M/d').format(selectedDeadline)
+                        : (l10n?.selectDeadlinePlaceholder ??
+                            'Select a deadline'),
                     style: TextConsts.body.copyWith(
                       color:
                           selectedDeadline != null
@@ -444,33 +456,38 @@ class _AddGoalModalState extends State<AddGoalModal> {
         // 総目標時間の表示（期限が選択されている場合のみ）
         if (selectedDeadline != null) ...[
           const SizedBox(height: SpacingConsts.s),
-          _buildTotalTargetTimeText(selectedDeadline),
+          _buildTotalTargetTimeText(context, selectedDeadline),
         ],
       ],
     );
   }
 
-  Widget _buildTotalTargetTimeText(DateTime deadline) {
+  Widget _buildTotalTargetTimeText(BuildContext context, DateTime deadline) {
+    final l10n = AppLocalizations.of(context);
     final remainingDays = TimeUtils.calculateRemainingDays(deadline);
     final totalTargetMinutes = TimeUtils.calculateTotalTargetMinutes(
       targetMinutes: _targetMinutes,
       remainingDays: remainingDays,
     );
+    final formattedTime =
+        TimeUtils.formatMinutesToHoursAndMinutes(totalTargetMinutes);
 
     return Text(
-      '残り$remainingDays日 → 総目標時間: ${TimeUtils.formatMinutesToHoursAndMinutes(totalTargetMinutes)}',
+      l10n?.remainingDaysInfo(remainingDays, formattedTime) ??
+          '$remainingDays days left → Total target: $formattedTime',
       style: TextConsts.bodySmall.copyWith(
         color: ColorConsts.textSecondary,
       ),
     );
   }
 
-  Widget _buildAvoidMessageField() {
+  Widget _buildAvoidMessageField(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          StringConsts.avoidMessageLabel,
+          l10n?.avoidMessageLabel ?? 'What happens if you don\'t achieve it? *',
           style: TextConsts.body.copyWith(
             color: ColorConsts.textPrimary,
             fontWeight: FontWeight.w600,
@@ -478,14 +495,16 @@ class _AddGoalModalState extends State<AddGoalModal> {
         ),
         const SizedBox(height: SpacingConsts.xs),
         Text(
-          StringConsts.avoidMessageHint,
+          l10n?.avoidMessageHint ??
+              'Clarifying negative outcomes helps maintain motivation',
           style: TextConsts.caption.copyWith(color: ColorConsts.textTertiary),
         ),
         const SizedBox(height: SpacingConsts.s),
         TextFormField(
           controller: _avoidMessageController,
           decoration: InputDecoration(
-            hintText: StringConsts.avoidMessagePlaceholder,
+            hintText: l10n?.avoidMessagePlaceholder ??
+                'e.g. Miss career advancement opportunities',
             filled: true,
             fillColor: ColorConsts.cardBackground,
             border: OutlineInputBorder(
@@ -498,7 +517,8 @@ class _AddGoalModalState extends State<AddGoalModal> {
           maxLength: 200,
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
-              return StringConsts.avoidMessageRequired;
+              return l10n?.avoidMessageRequired ??
+                  'Please enter what happens if you don\'t achieve it';
             }
             return null;
           },
@@ -507,7 +527,8 @@ class _AddGoalModalState extends State<AddGoalModal> {
     );
   }
 
-  Widget _buildSaveButton() {
+  Widget _buildSaveButton(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
@@ -532,7 +553,9 @@ class _AddGoalModalState extends State<AddGoalModal> {
                   ),
                 )
                 : Text(
-                  _isEdit ? StringConsts.updateButton : StringConsts.saveButton,
+                  _isEdit
+                      ? (l10n?.btnUpdate ?? 'Update')
+                      : (l10n?.commonBtnSave ?? 'Save'),
                   style: TextConsts.h4.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -583,6 +606,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Container(
@@ -591,7 +615,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              '目標時間を設定',
+              l10n?.setTargetTimeTitle ?? 'Set Target Time',
               style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: SpacingConsts.l),
@@ -635,7 +659,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
                     ),
                   ),
                   Text(
-                    '時間',
+                    l10n?.hoursUnit ?? 'hours',
                     style: TextConsts.body.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
@@ -676,7 +700,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
                     ),
                   ),
                   Text(
-                    '分',
+                    l10n?.minutesUnit ?? 'minutes',
                     style: TextConsts.body.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
@@ -691,7 +715,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
                   child: TextButton(
                     onPressed: () => Navigator.of(context).pop(),
                     child: Text(
-                      'キャンセル',
+                      l10n?.commonBtnCancel ?? 'Cancel',
                       style: TextConsts.body.copyWith(
                         color: ColorConsts.textSecondary,
                       ),
@@ -720,9 +744,9 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text(
-                      '決定',
-                      style: TextStyle(fontWeight: FontWeight.w600),
+                    child: Text(
+                      l10n?.btnConfirm ?? 'Confirm',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                   ),
                 ),

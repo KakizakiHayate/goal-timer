@@ -591,4 +591,61 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get btnNotNow => 'Not Now';
+
+  @override
+  String get welcomeCatchCopy1 => 'Turn goal achievement';
+
+  @override
+  String get welcomeCatchCopy2 => 'into a habit';
+
+  @override
+  String get btnStartNow => 'Start Now';
+
+  @override
+  String get btnLogin => 'Login';
+
+  @override
+  String get welcomeLoginDescription =>
+      'Login to resume with your\nprevious data';
+
+  @override
+  String get splashCheckingNetwork => 'Checking network...';
+
+  @override
+  String get splashAuthenticating => 'Authenticating...';
+
+  @override
+  String get splashPreparingData => 'Preparing data...';
+
+  @override
+  String get splashComplete => 'Complete';
+
+  @override
+  String get splashOffline => 'Offline';
+
+  @override
+  String get splashErrorOccurred => 'An error occurred';
+
+  @override
+  String get networkErrorTitle => 'Network Error';
+
+  @override
+  String get networkErrorMessage =>
+      'Please connect to the network.\nThis app requires an internet connection.';
+
+  @override
+  String get btnRetry => 'Retry';
+
+  @override
+  String get errorTitle => 'Error';
+
+  @override
+  String get initializationFailedMessage =>
+      'Initialization failed. Please contact support.';
+
+  @override
+  String get authCredentialNotFound => 'Could not retrieve credentials';
+
+  @override
+  String get authLoginFailed => 'Login failed';
 }
