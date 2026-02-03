@@ -433,7 +433,8 @@ class _AddGoalModalState extends State<AddGoalModal> {
                 Expanded(
                   child: Text(
                     selectedDeadline != null
-                        ? DateFormat('yyyy/M/d').format(selectedDeadline)
+                        ? DateFormat.yMMMd(l10n?.localeName)
+                            .format(selectedDeadline)
                         : (l10n?.selectDeadlinePlaceholder ??
                             'Select a deadline'),
                     style: TextConsts.body.copyWith(

@@ -54,11 +54,11 @@ class _StudyRecordsScreenState extends State<StudyRecordsScreen> {
             child: Column(
               children: [
                 const SizedBox(height: SpacingConsts.m),
-                _buildMonthNavigation(viewModel, state),
+                _buildMonthNavigation(l10n, viewModel, state),
                 const SizedBox(height: SpacingConsts.m),
                 _buildCalendarCard(viewModel, state),
                 const SizedBox(height: SpacingConsts.l),
-                _buildStreakInfo(context, state),
+                _buildStreakInfo(l10n, state),
                 const SizedBox(height: SpacingConsts.l),
               ],
             ),
@@ -70,6 +70,7 @@ class _StudyRecordsScreenState extends State<StudyRecordsScreen> {
 
   /// 月ナビゲーション
   Widget _buildMonthNavigation(
+    AppLocalizations? l10n,
     StudyRecordsViewModel viewModel,
     StudyRecordsState state,
   ) {
@@ -92,7 +93,7 @@ class _StudyRecordsScreenState extends State<StudyRecordsScreen> {
             ),
           ),
           Text(
-            _formatMonth(context, state.currentMonth),
+            _formatMonth(l10n, state.currentMonth),
             style: TextConsts.h3.copyWith(fontWeight: FontWeight.w600),
           ),
           IconButton(
@@ -138,9 +139,7 @@ class _StudyRecordsScreenState extends State<StudyRecordsScreen> {
   }
 
   /// ストリーク情報
-  Widget _buildStreakInfo(BuildContext context, StudyRecordsState state) {
-    final l10n = AppLocalizations.of(context);
-
+  Widget _buildStreakInfo(AppLocalizations? l10n, StudyRecordsState state) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: SpacingConsts.l),
       padding: const EdgeInsets.all(SpacingConsts.m),
@@ -206,8 +205,7 @@ class _StudyRecordsScreenState extends State<StudyRecordsScreen> {
   }
 
   /// 月をフォーマット
-  String _formatMonth(BuildContext context, DateTime date) {
-    final l10n = AppLocalizations.of(context);
+  String _formatMonth(AppLocalizations? l10n, DateTime date) {
     return l10n?.monthFormat(date.year, date.month) ?? '${date.year}/${date.month}';
   }
 
