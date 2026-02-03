@@ -373,5 +373,166 @@
   "btnComplete": "Complete",
   "@btnComplete": {
     "description": "Complete button text"
+  },
+
+  "studyRecordsTitle": "Study Records",
+  "@studyRecordsTitle": {
+    "description": "Study records screen title"
+  },
+
+  "monthFormat": "{year}/{month}",
+  "@monthFormat": {
+    "description": "Month format for calendar navigation",
+    "placeholders": {
+      "year": {
+        "type": "int"
+      },
+      "month": {
+        "type": "int"
+      }
+    }
+  },
+
+  "currentStreakLabel": "Current Streak",
+  "@currentStreakLabel": {
+    "description": "Current streak label"
+  },
+
+  "longestStreakLabel": "Longest Streak",
+  "@longestStreakLabel": {
+    "description": "Longest streak label"
+  },
+
+  "addGoalTitle": "Add Goal",
+  "@addGoalTitle": {
+    "description": "Add goal modal title"
+  },
+
+  "editGoalTitle": "Edit Goal",
+  "@editGoalTitle": {
+    "description": "Edit goal modal title"
+  },
+
+  "goalAddedMessage": "Goal added",
+  "@goalAddedMessage": {
+    "description": "Success message when goal is added"
+  },
+
+  "goalUpdatedMessage": "Goal updated",
+  "@goalUpdatedMessage": {
+    "description": "Success message when goal is updated"
+  },
+
+  "goalAddFailedMessage": "Failed to add goal",
+  "@goalAddFailedMessage": {
+    "description": "Error message when goal addition fails"
+  },
+
+  "goalUpdateFailedMessage": "Failed to update goal",
+  "@goalUpdateFailedMessage": {
+    "description": "Error message when goal update fails"
+  },
+
+  "selectDeadlineValidation": "Please select a deadline",
+  "@selectDeadlineValidation": {
+    "description": "Validation message for deadline selection"
+  },
+
+  "goalNameLabel": "Goal Name *",
+  "@goalNameLabel": {
+    "description": "Goal name field label"
+  },
+
+  "descriptionLabel": "Description",
+  "@descriptionLabel": {
+    "description": "Description field label"
+  },
+
+  "targetMinutesLabel": "Daily Study Time *",
+  "@targetMinutesLabel": {
+    "description": "Target minutes field label"
+  },
+
+  "deadlineLabel": "Deadline *",
+  "@deadlineLabel": {
+    "description": "Deadline field label"
+  },
+
+  "avoidMessageLabel": "What happens if you don't achieve it? *",
+  "@avoidMessageLabel": {
+    "description": "Avoid message field label"
+  },
+
+  "avoidMessageHint": "Clarifying negative outcomes helps maintain motivation",
+  "@avoidMessageHint": {
+    "description": "Hint text for avoid message field"
+  },
+
+  "goalNameRequired": "Please enter a goal name",
+  "@goalNameRequired": {
+    "description": "Validation message for required goal name"
+  },
+
+  "avoidMessageRequired": "Please enter what happens if you don't achieve it",
+  "@avoidMessageRequired": {
+    "description": "Validation message for required avoid message"
+  },
+
+  "goalNamePlaceholder": "e.g. Get TOEIC 800",
+  "@goalNamePlaceholder": {
+    "description": "Placeholder for goal name field"
+  },
+
+  "descriptionPlaceholder": "e.g. I want to improve my English for working abroad",
+  "@descriptionPlaceholder": {
+    "description": "Placeholder for description field"
+  },
+
+  "avoidMessagePlaceholder": "e.g. Miss career advancement opportunities",
+  "@avoidMessagePlaceholder": {
+    "description": "Placeholder for avoid message field"
+  },
+
+  "selectDeadlinePlaceholder": "Select a deadline",
+  "@selectDeadlinePlaceholder": {
+    "description": "Placeholder for deadline selection"
+  },
+
+  "setTargetTimeTitle": "Set Target Time",
+  "@setTargetTimeTitle": {
+    "description": "Time picker dialog title"
+  },
+
+  "hoursUnit": "hours",
+  "@hoursUnit": {
+    "description": "Hours unit label"
+  },
+
+  "minutesUnit": "minutes",
+  "@minutesUnit": {
+    "description": "Minutes unit label"
+  },
+
+  "btnConfirm": "Confirm",
+  "@btnConfirm": {
+    "description": "Confirm button text"
+  },
+
+  "btnUpdate": "Update",
+  "@btnUpdate": {
+    "description": "Update button text"
+  },
+
+  "remainingDaysInfo": "{days} days left → Total target: {time}",
+  "@remainingDaysInfo": {
+    "description": "Remaining days and total target time info",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
   }
 }

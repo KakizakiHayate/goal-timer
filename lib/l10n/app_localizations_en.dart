@@ -242,4 +242,99 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get btnComplete => 'Complete';
+
+  @override
+  String get studyRecordsTitle => 'Study Records';
+
+  @override
+  String monthFormat(int year, int month) {
+    return '$year/$month';
+  }
+
+  @override
+  String get currentStreakLabel => 'Current Streak';
+
+  @override
+  String get longestStreakLabel => 'Longest Streak';
+
+  @override
+  String get addGoalTitle => 'Add Goal';
+
+  @override
+  String get editGoalTitle => 'Edit Goal';
+
+  @override
+  String get goalAddedMessage => 'Goal added';
+
+  @override
+  String get goalUpdatedMessage => 'Goal updated';
+
+  @override
+  String get goalAddFailedMessage => 'Failed to add goal';
+
+  @override
+  String get goalUpdateFailedMessage => 'Failed to update goal';
+
+  @override
+  String get selectDeadlineValidation => 'Please select a deadline';
+
+  @override
+  String get goalNameLabel => 'Goal Name *';
+
+  @override
+  String get descriptionLabel => 'Description';
+
+  @override
+  String get targetMinutesLabel => 'Daily Study Time *';
+
+  @override
+  String get deadlineLabel => 'Deadline *';
+
+  @override
+  String get avoidMessageLabel => 'What happens if you don\'t achieve it? *';
+
+  @override
+  String get avoidMessageHint =>
+      'Clarifying negative outcomes helps maintain motivation';
+
+  @override
+  String get goalNameRequired => 'Please enter a goal name';
+
+  @override
+  String get avoidMessageRequired =>
+      'Please enter what happens if you don\'t achieve it';
+
+  @override
+  String get goalNamePlaceholder => 'e.g. Get TOEIC 800';
+
+  @override
+  String get descriptionPlaceholder =>
+      'e.g. I want to improve my English for working abroad';
+
+  @override
+  String get avoidMessagePlaceholder =>
+      'e.g. Miss career advancement opportunities';
+
+  @override
+  String get selectDeadlinePlaceholder => 'Select a deadline';
+
+  @override
+  String get setTargetTimeTitle => 'Set Target Time';
+
+  @override
+  String get hoursUnit => 'hours';
+
+  @override
+  String get minutesUnit => 'minutes';
+
+  @override
+  String get btnConfirm => 'Confirm';
+
+  @override
+  String get btnUpdate => 'Update';
+
+  @override
+  String remainingDaysInfo(int days, String time) {
+    return '$days days left → Total target: $time';
+  }
 }

@@ -214,4 +214,95 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get btnComplete => '完了';
+
+  @override
+  String get studyRecordsTitle => '学習記録';
+
+  @override
+  String monthFormat(int year, int month) {
+    return '$year年$month月';
+  }
+
+  @override
+  String get currentStreakLabel => '現在のストリーク';
+
+  @override
+  String get longestStreakLabel => '最長ストリーク';
+
+  @override
+  String get addGoalTitle => '目標を追加';
+
+  @override
+  String get editGoalTitle => '目標を編集';
+
+  @override
+  String get goalAddedMessage => '目標を追加しました';
+
+  @override
+  String get goalUpdatedMessage => '目標を更新しました';
+
+  @override
+  String get goalAddFailedMessage => '目標の追加に失敗しました';
+
+  @override
+  String get goalUpdateFailedMessage => '目標の更新に失敗しました';
+
+  @override
+  String get selectDeadlineValidation => '期限を選択してください';
+
+  @override
+  String get goalNameLabel => '目標名 *';
+
+  @override
+  String get descriptionLabel => '説明';
+
+  @override
+  String get targetMinutesLabel => '1日の勉強時間 *';
+
+  @override
+  String get deadlineLabel => '期限 *';
+
+  @override
+  String get avoidMessageLabel => '達成しないとどうなりますか？ *';
+
+  @override
+  String get avoidMessageHint => 'ネガティブな結果を明確にすることで、モチベーションを維持しやすくなります';
+
+  @override
+  String get goalNameRequired => '目標名を入力してください';
+
+  @override
+  String get avoidMessageRequired => '達成しない場合の結果を入力してください';
+
+  @override
+  String get goalNamePlaceholder => '例: TOEIC 800点取得';
+
+  @override
+  String get descriptionPlaceholder => '例: 海外転職のために英語力を向上させたい';
+
+  @override
+  String get avoidMessagePlaceholder => '例: キャリアアップの機会を逃してしまう';
+
+  @override
+  String get selectDeadlinePlaceholder => '期限を選択してください';
+
+  @override
+  String get setTargetTimeTitle => '目標時間を設定';
+
+  @override
+  String get hoursUnit => '時間';
+
+  @override
+  String get minutesUnit => '分';
+
+  @override
+  String get btnConfirm => '決定';
+
+  @override
+  String get btnUpdate => '更新';
+
+  @override
+  String remainingDaysInfo(int days, String time) {
+    return '残り$days日 → 総目標時間: $time';
+  }
 }

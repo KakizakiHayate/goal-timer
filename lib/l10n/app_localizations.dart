@@ -463,6 +463,180 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Complete'**
   String get btnComplete;
+
+  /// Study records screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Study Records'**
+  String get studyRecordsTitle;
+
+  /// Month format for calendar navigation
+  ///
+  /// In en, this message translates to:
+  /// **'{year}/{month}'**
+  String monthFormat(int year, int month);
+
+  /// Current streak label
+  ///
+  /// In en, this message translates to:
+  /// **'Current Streak'**
+  String get currentStreakLabel;
+
+  /// Longest streak label
+  ///
+  /// In en, this message translates to:
+  /// **'Longest Streak'**
+  String get longestStreakLabel;
+
+  /// Add goal modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Add Goal'**
+  String get addGoalTitle;
+
+  /// Edit goal modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Goal'**
+  String get editGoalTitle;
+
+  /// Success message when goal is added
+  ///
+  /// In en, this message translates to:
+  /// **'Goal added'**
+  String get goalAddedMessage;
+
+  /// Success message when goal is updated
+  ///
+  /// In en, this message translates to:
+  /// **'Goal updated'**
+  String get goalUpdatedMessage;
+
+  /// Error message when goal addition fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to add goal'**
+  String get goalAddFailedMessage;
+
+  /// Error message when goal update fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update goal'**
+  String get goalUpdateFailedMessage;
+
+  /// Validation message for deadline selection
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a deadline'**
+  String get selectDeadlineValidation;
+
+  /// Goal name field label
+  ///
+  /// In en, this message translates to:
+  /// **'Goal Name *'**
+  String get goalNameLabel;
+
+  /// Description field label
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get descriptionLabel;
+
+  /// Target minutes field label
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Study Time *'**
+  String get targetMinutesLabel;
+
+  /// Deadline field label
+  ///
+  /// In en, this message translates to:
+  /// **'Deadline *'**
+  String get deadlineLabel;
+
+  /// Avoid message field label
+  ///
+  /// In en, this message translates to:
+  /// **'What happens if you don\'t achieve it? *'**
+  String get avoidMessageLabel;
+
+  /// Hint text for avoid message field
+  ///
+  /// In en, this message translates to:
+  /// **'Clarifying negative outcomes helps maintain motivation'**
+  String get avoidMessageHint;
+
+  /// Validation message for required goal name
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a goal name'**
+  String get goalNameRequired;
+
+  /// Validation message for required avoid message
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter what happens if you don\'t achieve it'**
+  String get avoidMessageRequired;
+
+  /// Placeholder for goal name field
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Get TOEIC 800'**
+  String get goalNamePlaceholder;
+
+  /// Placeholder for description field
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. I want to improve my English for working abroad'**
+  String get descriptionPlaceholder;
+
+  /// Placeholder for avoid message field
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Miss career advancement opportunities'**
+  String get avoidMessagePlaceholder;
+
+  /// Placeholder for deadline selection
+  ///
+  /// In en, this message translates to:
+  /// **'Select a deadline'**
+  String get selectDeadlinePlaceholder;
+
+  /// Time picker dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Set Target Time'**
+  String get setTargetTimeTitle;
+
+  /// Hours unit label
+  ///
+  /// In en, this message translates to:
+  /// **'hours'**
+  String get hoursUnit;
+
+  /// Minutes unit label
+  ///
+  /// In en, this message translates to:
+  /// **'minutes'**
+  String get minutesUnit;
+
+  /// Confirm button text
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get btnConfirm;
+
+  /// Update button text
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get btnUpdate;
+
+  /// Remaining days and total target time info
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days left → Total target: {time}'**
+  String remainingDaysInfo(int days, String time);
 }
 
 class _AppLocalizationsDelegate

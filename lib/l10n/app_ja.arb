@@ -121,5 +121,63 @@
 
   "dialogModeSwitchMessage": "タイマーを保存またはリセットしてからモードを切り替えてください",
 
-  "btnComplete": "完了"
+  "btnComplete": "完了",
+
+  "studyRecordsTitle": "学習記録",
+
+  "monthFormat": "{year}年{month}月",
+
+  "currentStreakLabel": "現在のストリーク",
+
+  "longestStreakLabel": "最長ストリーク",
+
+  "addGoalTitle": "目標を追加",
+
+  "editGoalTitle": "目標を編集",
+
+  "goalAddedMessage": "目標を追加しました",
+
+  "goalUpdatedMessage": "目標を更新しました",
+
+  "goalAddFailedMessage": "目標の追加に失敗しました",
+
+  "goalUpdateFailedMessage": "目標の更新に失敗しました",
+
+  "selectDeadlineValidation": "期限を選択してください",
+
+  "goalNameLabel": "目標名 *",
+
+  "descriptionLabel": "説明",
+
+  "targetMinutesLabel": "1日の勉強時間 *",
+
+  "deadlineLabel": "期限 *",
+
+  "avoidMessageLabel": "達成しないとどうなりますか？ *",
+
+  "avoidMessageHint": "ネガティブな結果を明確にすることで、モチベーションを維持しやすくなります",
+
+  "goalNameRequired": "目標名を入力してください",
+
+  "avoidMessageRequired": "達成しない場合の結果を入力してください",
+
+  "goalNamePlaceholder": "例: TOEIC 800点取得",
+
+  "descriptionPlaceholder": "例: 海外転職のために英語力を向上させたい",
+
+  "avoidMessagePlaceholder": "例: キャリアアップの機会を逃してしまう",
+
+  "selectDeadlinePlaceholder": "期限を選択してください",
+
+  "setTargetTimeTitle": "目標時間を設定",
+
+  "hoursUnit": "時間",
+
+  "minutesUnit": "分",
+
+  "btnConfirm": "決定",
+
+  "btnUpdate": "更新",
+
+  "remainingDaysInfo": "残り{days}日 → 総目標時間: {time}"
 }
