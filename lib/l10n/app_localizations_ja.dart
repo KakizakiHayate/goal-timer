@@ -161,4 +161,57 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get goalDeleteFailedMessage => '目標の削除に失敗しました';
+
+  @override
+  String get timerScreenTitle => 'タイマー';
+
+  @override
+  String get modeCountdown => 'カウントダウン';
+
+  @override
+  String get modeCountup => 'カウントアップ';
+
+  @override
+  String get statusFocusing => '集中中...';
+
+  @override
+  String get statusPaused => '一時停止中';
+
+  @override
+  String get statusReady => 'スタートを押してください';
+
+  @override
+  String get dialogTimerCompleteTitle => 'タイマー完了';
+
+  @override
+  String dialogTimerCompleteMessage(String time) {
+    return '$timeを学習完了として記録しますか？';
+  }
+
+  @override
+  String get btnRecord => '記録する';
+
+  @override
+  String get btnDontRecord => '記録しない';
+
+  @override
+  String get dialogStudyCompleteTitle => '学習完了';
+
+  @override
+  String get dialogBackConfirmTitle => '学習を中断しますか？';
+
+  @override
+  String get dialogBackConfirmMessage => '記録されていない学習時間は失われます。';
+
+  @override
+  String get btnQuit => '中断する';
+
+  @override
+  String get dialogModeSwitchTitle => 'モード切り替え';
+
+  @override
+  String get dialogModeSwitchMessage => 'タイマーを保存またはリセットしてからモードを切り替えてください';
+
+  @override
+  String get btnComplete => '完了';
 }

@@ -283,5 +283,95 @@
   "goalDeleteFailedMessage": "Failed to delete goal",
   "@goalDeleteFailedMessage": {
     "description": "Error message when goal deletion fails"
+  },
+
+  "timerScreenTitle": "Timer",
+  "@timerScreenTitle": {
+    "description": "Timer screen app bar title"
+  },
+
+  "modeCountdown": "Countdown",
+  "@modeCountdown": {
+    "description": "Countdown timer mode"
+  },
+
+  "modeCountup": "Count Up",
+  "@modeCountup": {
+    "description": "Count up timer mode"
+  },
+
+  "statusFocusing": "Focusing...",
+  "@statusFocusing": {
+    "description": "Timer status when running"
+  },
+
+  "statusPaused": "Paused",
+  "@statusPaused": {
+    "description": "Timer status when paused"
+  },
+
+  "statusReady": "Press Start",
+  "@statusReady": {
+    "description": "Timer status when ready to start"
+  },
+
+  "dialogTimerCompleteTitle": "Timer Complete",
+  "@dialogTimerCompleteTitle": {
+    "description": "Timer complete dialog title"
+  },
+
+  "dialogTimerCompleteMessage": "Would you like to record {time} as study time?",
+  "@dialogTimerCompleteMessage": {
+    "description": "Timer complete dialog message",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+
+  "btnRecord": "Record",
+  "@btnRecord": {
+    "description": "Record button text"
+  },
+
+  "btnDontRecord": "Don't Record",
+  "@btnDontRecord": {
+    "description": "Don't record button text"
+  },
+
+  "dialogStudyCompleteTitle": "Study Complete",
+  "@dialogStudyCompleteTitle": {
+    "description": "Study complete dialog title"
+  },
+
+  "dialogBackConfirmTitle": "Stop studying?",
+  "@dialogBackConfirmTitle": {
+    "description": "Back confirmation dialog title"
+  },
+
+  "dialogBackConfirmMessage": "Unrecorded study time will be lost.",
+  "@dialogBackConfirmMessage": {
+    "description": "Back confirmation dialog message"
+  },
+
+  "btnQuit": "Quit",
+  "@btnQuit": {
+    "description": "Quit button text"
+  },
+
+  "dialogModeSwitchTitle": "Switch Mode",
+  "@dialogModeSwitchTitle": {
+    "description": "Mode switch dialog title"
+  },
+
+  "dialogModeSwitchMessage": "Please save or reset the timer before switching modes.",
+  "@dialogModeSwitchMessage": {
+    "description": "Mode switch blocked dialog message"
+  },
+
+  "btnComplete": "Complete",
+  "@btnComplete": {
+    "description": "Complete button text"
   }
 }

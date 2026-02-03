@@ -11,6 +11,7 @@ import '../../../core/utils/time_utils.dart';
 import '../../../core/utils/url_launcher_utils.dart';
 import '../../../core/widgets/circular_progress_indicator.dart' as custom;
 import '../../../core/widgets/feedback_dialog.dart';
+import '../../../l10n/app_localizations.dart';
 import '../view_model/timer_view_model.dart';
 
 /// タイマー画面
@@ -97,21 +98,33 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
     BuildContext context,
     TimerViewModel timerViewModel,
   ) {
+    final l10n = AppLocalizations.of(context);
+    final timeText =
+        l10n != null
+            ? TimeUtils.formatSecondsToHoursAndMinutesL10n(
+              timerViewModel.elapsedSeconds,
+              l10n,
+            )
+            : TimeUtils.formatSecondsToHoursAndMinutes(
+              timerViewModel.elapsedSeconds,
+            );
+
     timerViewModel.clearCompletionConfirmFlag();
     showDialog(
       context: context,
       barrierDismissible: false,
       builder:
-          (context) => AlertDialog(
+          (dialogContext) => AlertDialog(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
             title: Text(
-              'タイマー完了',
+              l10n?.dialogTimerCompleteTitle ?? 'Timer Complete',
               style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
             ),
             content: Text(
-              '${TimeUtils.formatSecondsToHoursAndMinutes(timerViewModel.elapsedSeconds)}を学習完了として記録しますか？',
+              l10n?.dialogTimerCompleteMessage(timeText) ??
+                  'Would you like to record $timeText as study time?',
               style: TextConsts.body.copyWith(color: ColorConsts.textSecondary),
             ),
             actions: [
@@ -119,10 +132,10 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                 onPressed: () {
                   _isCompletionDialogShowing = false;
                   timerViewModel.resetTimer();
-                  Navigator.pop(context);
+                  Navigator.pop(dialogContext);
                 },
                 child: Text(
-                  '記録しない',
+                  l10n?.btnDontRecord ?? "Don't Record",
                   style: TextConsts.body.copyWith(
                     color: ColorConsts.textSecondary,
                   ),
@@ -130,7 +143,7 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
               ),
               ElevatedButton(
                 onPressed: () async {
-                  final navigator = Navigator.of(context);
+                  final navigator = Navigator.of(dialogContext);
                   try {
                     await timerViewModel.onTappedTimerFinishButton();
                     _isCompletionDialogShowing = false;
@@ -157,7 +170,7 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                   ),
                 ),
                 child: Text(
-                  '記録する',
+                  l10n?.btnRecord ?? 'Record',
                   style: TextConsts.body.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
@@ -215,32 +228,34 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
   /// 戻る確認ダイアログを表示
   /// 戻る場合はtrue、キャンセルの場合はfalseを返す
   Future<bool?> _showBackConfirmDialog() {
+    final l10n = AppLocalizations.of(context);
     return showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
         title: Text(
-          '学習を中断しますか？',
+          l10n?.dialogBackConfirmTitle ?? 'Stop studying?',
           style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
         ),
         content: Text(
-          '記録されていない学習時間は失われます。',
+          l10n?.dialogBackConfirmMessage ??
+              'Unrecorded study time will be lost.',
           style: TextConsts.body.copyWith(color: ColorConsts.textSecondary),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () => Navigator.pop(dialogContext, false),
             child: Text(
-              'キャンセル',
+              l10n?.commonBtnCancel ?? 'Cancel',
               style: TextConsts.body.copyWith(
                 color: ColorConsts.textSecondary,
               ),
             ),
           ),
           ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => Navigator.pop(dialogContext, true),
             style: ElevatedButton.styleFrom(
               backgroundColor: ColorConsts.error,
               shape: RoundedRectangleBorder(
@@ -248,7 +263,7 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
               ),
             ),
             child: Text(
-              '中断する',
+              l10n?.btnQuit ?? 'Quit',
               style: TextConsts.body.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
@@ -303,7 +318,8 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                       ),
                       Expanded(
                         child: Text(
-                          'タイマー',
+                          AppLocalizations.of(context)?.timerScreenTitle ??
+                              'Timer',
                           style: TextConsts.h3.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -354,6 +370,7 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
     TimerState timerState,
     TimerViewModel timerViewModel,
   ) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
@@ -365,7 +382,7 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
         children: [
           // カウントダウン
           _buildModeButton(
-            'カウントダウン',
+            l10n?.modeCountdown ?? 'Countdown',
             timerState.mode == TimerMode.countdown,
             () => _onModeTapped(timerViewModel, TimerMode.countdown),
             Icons.timer_outlined,
@@ -373,7 +390,7 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
 
           // カウントアップ
           _buildModeButton(
-            'カウントアップ',
+            l10n?.modeCountup ?? 'Count Up',
             timerState.mode == TimerMode.countup,
             () => _onModeTapped(timerViewModel, TimerMode.countup),
             Icons.all_inclusive,
@@ -390,24 +407,26 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
   }
 
   void _showModeSwitchBlockedDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder:
-          (context) => AlertDialog(
+          (dialogContext) => AlertDialog(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
             title: Text(
-              'モード切り替え',
+              l10n?.dialogModeSwitchTitle ?? 'Switch Mode',
               style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
             ),
             content: Text(
-              'タイマーを保存またはリセットしてからモードを切り替えてください',
+              l10n?.dialogModeSwitchMessage ??
+                  'Please save or reset the timer before switching modes.',
               style: TextConsts.body.copyWith(color: ColorConsts.textSecondary),
             ),
             actions: [
               ElevatedButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () => Navigator.pop(dialogContext),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: ColorConsts.primary,
                   shape: RoundedRectangleBorder(
@@ -415,7 +434,7 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                   ),
                 ),
                 child: Text(
-                  'OK',
+                  l10n?.commonBtnOk ?? 'OK',
                   style: TextConsts.body.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
@@ -562,12 +581,13 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
   }
 
   String _getTimerStatusText(TimerState timerState) {
+    final l10n = AppLocalizations.of(context);
     if (timerState.isRunning) {
-      return '集中中...';
+      return l10n?.statusFocusing ?? 'Focusing...';
     } else if (timerState.isPaused) {
-      return '一時停止中';
+      return l10n?.statusPaused ?? 'Paused';
     } else {
-      return 'スタートを押してください';
+      return l10n?.statusReady ?? 'Press Start';
     }
   }
 
@@ -678,26 +698,38 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
     TimerState timerState,
     TimerViewModel timerViewModel,
   ) {
+    final l10n = AppLocalizations.of(context);
+    final timeText =
+        l10n != null
+            ? TimeUtils.formatSecondsToHoursAndMinutesL10n(
+              timerViewModel.elapsedSeconds,
+              l10n,
+            )
+            : TimeUtils.formatSecondsToHoursAndMinutes(
+              timerViewModel.elapsedSeconds,
+            );
+
     showDialog(
       context: context,
       builder:
-          (context) => AlertDialog(
+          (dialogContext) => AlertDialog(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
             title: Text(
-              '学習完了',
+              l10n?.dialogStudyCompleteTitle ?? 'Study Complete',
               style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
             ),
             content: Text(
-              '${TimeUtils.formatSecondsToHoursAndMinutes(timerViewModel.elapsedSeconds)}を学習完了として記録しますか？',
+              l10n?.dialogTimerCompleteMessage(timeText) ??
+                  'Would you like to record $timeText as study time?',
               style: TextConsts.body.copyWith(color: ColorConsts.textSecondary),
             ),
             actions: [
               TextButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () => Navigator.pop(dialogContext),
                 child: Text(
-                  'キャンセル',
+                  l10n?.commonBtnCancel ?? 'Cancel',
                   style: TextConsts.body.copyWith(
                     color: ColorConsts.textSecondary,
                   ),
@@ -705,9 +737,9 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
               ),
               ElevatedButton(
                 onPressed: () async {
-                  final navigator = Navigator.of(context);
+                  final navigator = Navigator.of(dialogContext);
                   await timerViewModel.onTappedTimerFinishButton();
-                  if (context.mounted) {
+                  if (dialogContext.mounted) {
                     // ダイアログを閉じる
                     navigator.pop();
 
@@ -729,7 +761,7 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                   ),
                 ),
                 child: Text(
-                  '完了',
+                  l10n?.btnComplete ?? 'Complete',
                   style: TextConsts.body.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,

@@ -87,5 +87,39 @@
 
   "goalDeletedMessage": "目標を削除しました",
 
-  "goalDeleteFailedMessage": "目標の削除に失敗しました"
+  "goalDeleteFailedMessage": "目標の削除に失敗しました",
+
+  "timerScreenTitle": "タイマー",
+
+  "modeCountdown": "カウントダウン",
+
+  "modeCountup": "カウントアップ",
+
+  "statusFocusing": "集中中...",
+
+  "statusPaused": "一時停止中",
+
+  "statusReady": "スタートを押してください",
+
+  "dialogTimerCompleteTitle": "タイマー完了",
+
+  "dialogTimerCompleteMessage": "{time}を学習完了として記録しますか？",
+
+  "btnRecord": "記録する",
+
+  "btnDontRecord": "記録しない",
+
+  "dialogStudyCompleteTitle": "学習完了",
+
+  "dialogBackConfirmTitle": "学習を中断しますか？",
+
+  "dialogBackConfirmMessage": "記録されていない学習時間は失われます。",
+
+  "btnQuit": "中断する",
+
+  "dialogModeSwitchTitle": "モード切り替え",
+
+  "dialogModeSwitchMessage": "タイマーを保存またはリセットしてからモードを切り替えてください",
+
+  "btnComplete": "完了"
 }
