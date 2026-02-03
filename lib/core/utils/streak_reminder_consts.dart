@@ -1,7 +1,10 @@
+import '../../l10n/app_localizations.dart';
 import 'locale_helper.dart';
 
 /// ストリークリマインダー通知の定数
 class StreakReminderConsts {
+  static AppLocalizations get _l10n =>
+      lookupAppLocalizations(LocaleHelper.systemLocale);
   // 通知時刻（時）
   static const int reminderHour = 20;
   static const int warningHour = 21;
@@ -19,25 +22,19 @@ class StreakReminderConsts {
   static const String channelId = 'streak_reminder';
 
   /// 通知チャンネル名（ロケール対応）
-  static String get channelName =>
-      LocaleHelper.isJapanese ? 'ストリークリマインダー' : 'Streak Reminder';
+  static String get channelName => _l10n.streakReminderChannelName;
 
   /// 通知チャンネル説明（ロケール対応）
-  static String get channelDescription => LocaleHelper.isJapanese
-      ? '連続学習日数を維持するためのリマインダー通知'
-      : 'Reminders to maintain your study streak';
+  static String get channelDescription => _l10n.streakReminderChannelDescription;
 
   /// リマインダータイトル（ロケール対応）
-  static String get reminderTitle =>
-      LocaleHelper.isJapanese ? '今日も学習しましょう！' : "Let's study today!";
+  static String get reminderTitle => _l10n.reminderTitle;
 
   /// 警告タイトル（ロケール対応）
-  static String get warningTitle =>
-      LocaleHelper.isJapanese ? 'ストリークが途切れそう！' : 'Your streak is at risk!';
+  static String get warningTitle => _l10n.warningTitle;
 
   /// 最終警告タイトル（ロケール対応）
-  static String get finalWarningTitle =>
-      LocaleHelper.isJapanese ? '最後のチャンス！' : 'Last chance!';
+  static String get finalWarningTitle => _l10n.finalWarningTitle;
 
   // デフォルト設定
   static const bool defaultReminderEnabled = true;
@@ -52,36 +49,24 @@ class StreakReminderConsts {
   /// ストリーク日数に応じたリマインダーメッセージを取得する
   static String getReminderMessage(int streakDays) {
     if (streakDays <= 0) {
-      return LocaleHelper.isJapanese
-          ? '今日から学習を始めましょう！'
-          : 'Start studying today!';
+      return _l10n.reminderNoStreak;
     }
-    return LocaleHelper.isJapanese
-        ? '現在$streakDays日連続で学習中です。今日も続けましょう！'
-        : "You've studied $streakDays ${streakDays == 1 ? 'day' : 'days'} in a row. Keep it up!";
+    return _l10n.reminderMessage(streakDays);
   }
 
   /// ストリーク日数に応じた警告メッセージを取得する
   static String getWarningMessage(int streakDays) {
     if (streakDays <= 0) {
-      return LocaleHelper.isJapanese
-          ? '今日も学習しませんか？まだ間に合います！'
-          : "How about studying today? There's still time!";
+      return _l10n.warningNoStreak;
     }
-    return LocaleHelper.isJapanese
-        ? '$streakDays日間の連続学習が途切れてしまいます！あと少しで1日終了です。'
-        : 'Your $streakDays-${streakDays == 1 ? 'day' : 'day'} streak will break! The day is almost over.';
+    return _l10n.warningMessage(streakDays);
   }
 
   /// ストリーク日数に応じた最終警告メッセージを取得する
   static String getFinalWarningMessage(int streakDays) {
     if (streakDays <= 0) {
-      return LocaleHelper.isJapanese
-          ? '今日中に学習して、連続学習を始めましょう！'
-          : 'Study today to start your streak!';
+      return _l10n.finalWarningNoStreak;
     }
-    return LocaleHelper.isJapanese
-        ? '$streakDays日連続の記録を守りましょう！今日中に1分以上学習してください。'
-        : 'Protect your $streakDays-${streakDays == 1 ? 'day' : 'day'} streak! Study for at least 1 minute today.';
+    return _l10n.finalWarningMessage(streakDays);
   }
 }

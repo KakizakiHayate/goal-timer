@@ -179,5 +179,197 @@
 
   "btnUpdate": "更新",
 
-  "remainingDaysInfo": "残り{days}日 → 総目標時間: {time}"
+  "remainingDaysInfo": "残り{days}日 → 総目標時間: {time}",
+
+  "settingsTitle": "設定",
+
+  "tapToChangeName": "タップして名前を変更",
+
+  "changeNameDialogTitle": "名前を変更",
+
+  "changeNameDialogHint": "名前を入力",
+
+  "emptyNameError": "名前を入力してください",
+
+  "offlineError": "オフラインのため変更できません",
+
+  "nameChangedSuccess": "名前を変更しました",
+
+  "nameChangeFailed": "名前の変更に失敗しました",
+
+  "sectionAccountLink": "アカウント連携",
+
+  "linkAccount": "アカウントを連携する",
+
+  "linkAccountSubtitle": "Google / Apple でデータをバックアップ",
+
+  "accountLinked": "連携済み",
+
+  "accountLinkedDefault": "アカウント連携済み",
+
+  "sectionAppSettings": "アプリ設定",
+
+  "defaultTimerDuration": "デフォルトタイマー時間",
+
+  "defaultTimerDurationSubtitle": "新しい目標のデフォルト時間：{time}",
+
+  "sectionNotifications": "通知設定",
+
+  "streakReminder": "ストリークリマインダー",
+
+  "streakReminderOnSubtitle": "連続学習を維持するためのリマインダーを受け取ります",
+
+  "streakReminderOffSubtitle": "リマインダー通知はOFFです",
+
+  "sectionDataPrivacy": "データとプライバシー",
+
+  "privacyPolicy": "プライバシーポリシー",
+
+  "privacyPolicySubtitle": "データの取り扱いについて",
+
+  "sectionSupport": "サポート",
+
+  "bugReport": "不具合報告",
+
+  "bugReportSubtitle": "バグや問題を報告する",
+
+  "featureRequest": "機能追加のご要望",
+
+  "featureRequestSubtitle": "新機能のアイデアをお聞かせください",
+
+  "aboutApp": "アプリについて",
+
+  "versionLabel": "バージョン {version}",
+
+  "sectionAccountManagement": "アカウント管理",
+
+  "logout": "ログアウト",
+
+  "logoutSubtitle": "アカウントからログアウトします",
+
+  "logoutConfirmMessage": "ログアウトしますか？",
+
+  "logoutFailed": "ログアウトに失敗しました",
+
+  "deleteAccount": "アカウントを削除",
+
+  "deleteAccountSubtitle": "すべてのデータが削除されます",
+
+  "deleteAccountConfirmTitle": "アカウントを削除",
+
+  "deleteAccountConfirmMessage": "この操作は取り消せません。\n\nすべてのデータ（目標、学習記録など）が\n完全に削除されます。",
+
+  "btnDelete": "削除する",
+
+  "deleteAccountFinalTitle": "本当に削除しますか？",
+
+  "deleteAccountFinalMessage": "この操作を実行すると、あなたのアカウントと\nすべてのデータが完全に削除されます。",
+
+  "btnStop": "やめる",
+
+  "deleteAccountFailed": "アカウント削除に失敗しました",
+
+  "urlOpenFailed": "URLを開けませんでした",
+
+  "aboutDialogTitle": "{appName} について",
+
+  "aboutDialogDescription": "目標達成をサポートするタイマーアプリです。毎日の小さな積み重ねが、大きな成果につながります。",
+
+  "viewDetails": "詳細を見る",
+
+  "streakMessageZero": "今日から始めよう！",
+
+  "streakMessageWeek": "1週間達成！",
+
+  "streakMessageMonth": "1ヶ月達成！",
+
+  "streakMessageDays": "{days}日連続学習中！",
+
+  "deletedGoal": "削除された目標",
+
+  "loginTitle": "ログイン",
+
+  "accountLinkTitle": "アカウント連携",
+
+  "loginDescription": "以前のデータを引き継いで\n再開できます",
+
+  "linkDescription": "アカウントを連携すると、データを\n安全にバックアップできます",
+
+  "loginWithGoogle": "Google でログイン",
+
+  "linkWithGoogle": "Google で連携",
+
+  "loginWithApple": "Apple でログイン",
+
+  "linkWithApple": "Apple で連携",
+
+  "loginNotice": "アカウントをお持ちでない場合は「すぐに始める」をご利用ください",
+
+  "linkNotice": "連携後もゲストとしてのデータは保持されます",
+
+  "loginFailedTitle": "ログインできませんでした",
+
+  "linkFailedTitle": "連携できませんでした",
+
+  "accountNotFoundMessage": "このアカウントは登録されていません。\n新規登録は「すぐに始める」からアカウント連携を行ってください。",
+
+  "accountAlreadyExistsMessage": "このアカウントは既に登録されています。\n連携するには、一度ログインしてアカウントを削除してください。",
+
+  "emailNotFoundMessage": "メールアドレスを取得できませんでした。\n設定からApple IDの連携を解除して再度お試しください。",
+
+  "genericErrorMessage": "エラーが発生しました。\nしばらくしてから再度お試しください。",
+
+  "confirmLinkTitle": "アカウントを連携しますか？",
+
+  "confirmLinkMessage": "{provider}アカウントと連携します",
+
+  "btnLink": "連携する",
+
+  "linkSuccessTitle": "連携完了",
+
+  "linkSuccessMessage": "アカウントが正常に連携されました",
+
+  "feedbackTitle": "目標達成おめでとうございます!",
+
+  "feedbackMessage": "より使いやすいアプリにするために、1分だけお声を聞かせていただけませんか？開発者が全て目を通します。",
+
+  "btnAnswer": "回答する",
+
+  "btnNotNow": "今はしない",
+
+  "welcomeCatchCopy1": "目標達成を、",
+
+  "welcomeCatchCopy2": "習慣に変える",
+
+  "btnStartNow": "すぐに始める",
+
+  "btnLogin": "ログイン",
+
+  "welcomeLoginDescription": "ログインすると、データを\n引き継いで再開できます",
+
+  "splashCheckingNetwork": "ネットワークを確認しています...",
+
+  "splashAuthenticating": "認証しています...",
+
+  "splashPreparingData": "データを準備しています...",
+
+  "splashComplete": "完了",
+
+  "splashOffline": "オフライン",
+
+  "splashErrorOccurred": "エラーが発生しました",
+
+  "networkErrorTitle": "ネットワークエラー",
+
+  "networkErrorMessage": "ネットワークに接続してください。\nこのアプリはオンラインで動作します。",
+
+  "btnRetry": "再試行",
+
+  "errorTitle": "エラー",
+
+  "initializationFailedMessage": "初期化に失敗しました。運営にお問い合わせください。",
+
+  "authCredentialNotFound": "認証情報を取得できませんでした",
+
+  "authLoginFailed": "ログインに失敗しました"
 }

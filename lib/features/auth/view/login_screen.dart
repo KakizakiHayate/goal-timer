@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import '../../../core/utils/color_consts.dart';
 import '../../../core/utils/spacing_consts.dart';
 import '../../../core/utils/text_consts.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../home/view/home_screen.dart';
 import '../../settings/view_model/settings_view_model.dart';
 import '../view_model/auth_view_model.dart';
@@ -47,25 +48,38 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   /// モードに応じたタイトル
-  String get _title => widget.mode == LoginMode.login ? 'ログイン' : 'アカウント連携';
+  String _getTitle(AppLocalizations? l10n) {
+    if (widget.mode == LoginMode.login) {
+      return l10n?.loginTitle ?? 'Login';
+    }
+    return l10n?.accountLinkTitle ?? 'Link Account';
+  }
 
   /// モードに応じた説明文
-  String get _description => widget.mode == LoginMode.login
-      ? '以前のデータを引き継いで\n再開できます'
-      : 'アカウントを連携すると、データを\n安全にバックアップできます';
+  String _getDescription(AppLocalizations? l10n) {
+    if (widget.mode == LoginMode.login) {
+      return l10n?.loginDescription ?? 'Resume with your\nprevious data';
+    }
+    return l10n?.linkDescription ?? 'Link your account to safely\nbackup your data';
+  }
 
   /// モードに応じた注意書き
-  String get _notice => widget.mode == LoginMode.login
-      ? 'アカウントをお持ちでない場合は「すぐに始める」をご利用ください'
-      : '連携後もゲストとしてのデータは保持されます';
+  String _getNotice(AppLocalizations? l10n) {
+    if (widget.mode == LoginMode.login) {
+      return l10n?.loginNotice ?? 'If you don\'t have an account, please use "Start Now"';
+    }
+    return l10n?.linkNotice ?? 'Your guest data will be preserved after linking';
+  }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Scaffold(
       backgroundColor: ColorConsts.backgroundPrimary,
       appBar: AppBar(
         title: Text(
-          _title,
+          _getTitle(l10n),
           style: TextConsts.h3.copyWith(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -90,7 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   // 説明テキスト
                   Text(
-                    _description,
+                    _getDescription(l10n),
                     style: TextConsts.body.copyWith(
                       color: ColorConsts.textSecondary,
                       height: 1.5,
@@ -106,7 +120,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         ? null
                         : () => _onGooglePressed(viewModel),
                     icon: _buildGoogleIcon(),
-                    label: 'Google で${widget.mode == LoginMode.login ? 'ログイン' : '連携'}',
+                    label: widget.mode == LoginMode.login
+                        ? (l10n?.loginWithGoogle ?? 'Login with Google')
+                        : (l10n?.linkWithGoogle ?? 'Link with Google'),
                     backgroundColor: Colors.white,
                     textColor: ColorConsts.textPrimary,
                   ),
@@ -120,7 +136,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           ? null
                           : () => _onApplePressed(viewModel),
                       icon: const Icon(Icons.apple, color: Colors.white, size: 24),
-                      label: 'Apple で${widget.mode == LoginMode.login ? 'ログイン' : '連携'}',
+                      label: widget.mode == LoginMode.login
+                          ? (l10n?.loginWithApple ?? 'Login with Apple')
+                          : (l10n?.linkWithApple ?? 'Link with Apple'),
                       backgroundColor: Colors.black,
                       textColor: Colors.white,
                     ),
@@ -154,7 +172,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   // 注意書き
                   Text(
-                    _notice,
+                    _getNotice(l10n),
                     style: TextConsts.caption.copyWith(
                       color: ColorConsts.textSecondary,
                     ),
@@ -308,49 +326,51 @@ class _LoginScreenState extends State<LoginScreen> {
 
   /// エラー種別に応じたダイアログを表示
   void _showErrorDialog(AuthErrorType errorType) {
+    final l10n = AppLocalizations.of(context);
     String title;
     String message;
 
     switch (errorType) {
       case AuthErrorType.accountNotFound:
-        title = 'ログインできませんでした';
-        message =
-            'このアカウントは登録されていません。\n新規登録は「すぐに始める」からアカウント連携を行ってください。';
+        title = l10n?.loginFailedTitle ?? 'Login Failed';
+        message = l10n?.accountNotFoundMessage ??
+            'This account is not registered.\nTo register, please use "Start Now" and link your account.';
       case AuthErrorType.accountAlreadyExists:
-        title = '連携できませんでした';
-        message =
-            'このアカウントは既に登録されています。\n連携するには、一度ログインしてアカウントを削除してください。';
+        title = l10n?.linkFailedTitle ?? 'Link Failed';
+        message = l10n?.accountAlreadyExistsMessage ??
+            'This account is already registered.\nTo link, please login first and delete the account.';
       case AuthErrorType.emailNotFound:
         title = widget.mode == LoginMode.login
-            ? 'ログインできませんでした'
-            : '連携できませんでした';
-        message =
-            'メールアドレスを取得できませんでした。\n設定からApple IDの連携を解除して再度お試しください。';
+            ? (l10n?.loginFailedTitle ?? 'Login Failed')
+            : (l10n?.linkFailedTitle ?? 'Link Failed');
+        message = l10n?.emailNotFoundMessage ??
+            'Could not retrieve email address.\nPlease unlink your Apple ID in Settings and try again.';
       case AuthErrorType.other:
       case AuthErrorType.none:
         title = widget.mode == LoginMode.login
-            ? 'ログインできませんでした'
-            : '連携できませんでした';
-        message = 'エラーが発生しました。\nしばらくしてから再度お試しください。';
+            ? (l10n?.loginFailedTitle ?? 'Login Failed')
+            : (l10n?.linkFailedTitle ?? 'Link Failed');
+        message = l10n?.genericErrorMessage ??
+            'An error occurred.\nPlease try again later.';
     }
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: Text(title),
         content: Text(message),
         actions: [
           ElevatedButton(
             onPressed: () {
-              Navigator.of(context).pop();
+              Navigator.of(dialogContext).pop();
               Get.find<AuthViewModel>().clearError();
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: ColorConsts.primary,
             ),
-            child: const Text(
-              'OK',
-              style: TextStyle(color: Colors.white),
+            child: Text(
+              l10n?.commonBtnOk ?? 'OK',
+              style: const TextStyle(color: Colors.white),
             ),
           ),
         ],
@@ -366,27 +386,28 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<bool> _showConfirmDialog(String provider) async {
+    final l10n = AppLocalizations.of(context);
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('アカウントを連携しますか？'),
-        content: Text('$providerアカウントと連携します'),
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n?.confirmLinkTitle ?? 'Link your account?'),
+        content: Text(l10n?.confirmLinkMessage(provider) ?? 'Link with $provider account'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text(
-              'キャンセル',
-              style: TextStyle(color: ColorConsts.textSecondary),
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(
+              l10n?.commonBtnCancel ?? 'Cancel',
+              style: const TextStyle(color: ColorConsts.textSecondary),
             ),
           ),
           ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
             style: ElevatedButton.styleFrom(
               backgroundColor: ColorConsts.primary,
             ),
-            child: const Text(
-              '連携する',
-              style: TextStyle(color: Colors.white),
+            child: Text(
+              l10n?.btnLink ?? 'Link',
+              style: const TextStyle(color: Colors.white),
             ),
           ),
         ],
@@ -397,23 +418,24 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _showSuccessDialog() {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('連携完了'),
-        content: const Text('アカウントが正常に連携されました'),
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n?.linkSuccessTitle ?? 'Link Complete'),
+        content: Text(l10n?.linkSuccessMessage ?? 'Account linked successfully'),
         actions: [
           ElevatedButton(
             onPressed: () {
-              Navigator.of(context).pop(); // ダイアログを閉じる
+              Navigator.of(dialogContext).pop(); // ダイアログを閉じる
               Navigator.of(context).pop(); // ログイン画面を閉じる
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: ColorConsts.primary,
             ),
-            child: const Text(
-              'OK',
-              style: TextStyle(color: Colors.white),
+            child: Text(
+              l10n?.commonBtnOk ?? 'OK',
+              style: const TextStyle(color: Colors.white),
             ),
           ),
         ],

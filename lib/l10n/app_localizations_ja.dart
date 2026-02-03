@@ -305,4 +305,309 @@ class AppLocalizationsJa extends AppLocalizations {
   String remainingDaysInfo(int days, String time) {
     return '残り$days日 → 総目標時間: $time';
   }
+
+  @override
+  String get settingsTitle => '設定';
+
+  @override
+  String get tapToChangeName => 'タップして名前を変更';
+
+  @override
+  String get changeNameDialogTitle => '名前を変更';
+
+  @override
+  String get changeNameDialogHint => '名前を入力';
+
+  @override
+  String get emptyNameError => '名前を入力してください';
+
+  @override
+  String get offlineError => 'オフラインのため変更できません';
+
+  @override
+  String get nameChangedSuccess => '名前を変更しました';
+
+  @override
+  String get nameChangeFailed => '名前の変更に失敗しました';
+
+  @override
+  String get sectionAccountLink => 'アカウント連携';
+
+  @override
+  String get linkAccount => 'アカウントを連携する';
+
+  @override
+  String get linkAccountSubtitle => 'Google / Apple でデータをバックアップ';
+
+  @override
+  String get accountLinked => '連携済み';
+
+  @override
+  String get accountLinkedDefault => 'アカウント連携済み';
+
+  @override
+  String get sectionAppSettings => 'アプリ設定';
+
+  @override
+  String get defaultTimerDuration => 'デフォルトタイマー時間';
+
+  @override
+  String defaultTimerDurationSubtitle(String time) {
+    return '新しい目標のデフォルト時間：$time';
+  }
+
+  @override
+  String get sectionNotifications => '通知設定';
+
+  @override
+  String get streakReminder => 'ストリークリマインダー';
+
+  @override
+  String get streakReminderOnSubtitle => '連続学習を維持するためのリマインダーを受け取ります';
+
+  @override
+  String get streakReminderOffSubtitle => 'リマインダー通知はOFFです';
+
+  @override
+  String get sectionDataPrivacy => 'データとプライバシー';
+
+  @override
+  String get privacyPolicy => 'プライバシーポリシー';
+
+  @override
+  String get privacyPolicySubtitle => 'データの取り扱いについて';
+
+  @override
+  String get sectionSupport => 'サポート';
+
+  @override
+  String get bugReport => '不具合報告';
+
+  @override
+  String get bugReportSubtitle => 'バグや問題を報告する';
+
+  @override
+  String get featureRequest => '機能追加のご要望';
+
+  @override
+  String get featureRequestSubtitle => '新機能のアイデアをお聞かせください';
+
+  @override
+  String get aboutApp => 'アプリについて';
+
+  @override
+  String versionLabel(String version) {
+    return 'バージョン $version';
+  }
+
+  @override
+  String get sectionAccountManagement => 'アカウント管理';
+
+  @override
+  String get logout => 'ログアウト';
+
+  @override
+  String get logoutSubtitle => 'アカウントからログアウトします';
+
+  @override
+  String get logoutConfirmMessage => 'ログアウトしますか？';
+
+  @override
+  String get logoutFailed => 'ログアウトに失敗しました';
+
+  @override
+  String get deleteAccount => 'アカウントを削除';
+
+  @override
+  String get deleteAccountSubtitle => 'すべてのデータが削除されます';
+
+  @override
+  String get deleteAccountConfirmTitle => 'アカウントを削除';
+
+  @override
+  String get deleteAccountConfirmMessage =>
+      'この操作は取り消せません。\n\nすべてのデータ（目標、学習記録など）が\n完全に削除されます。';
+
+  @override
+  String get btnDelete => '削除する';
+
+  @override
+  String get deleteAccountFinalTitle => '本当に削除しますか？';
+
+  @override
+  String get deleteAccountFinalMessage =>
+      'この操作を実行すると、あなたのアカウントと\nすべてのデータが完全に削除されます。';
+
+  @override
+  String get btnStop => 'やめる';
+
+  @override
+  String get deleteAccountFailed => 'アカウント削除に失敗しました';
+
+  @override
+  String get urlOpenFailed => 'URLを開けませんでした';
+
+  @override
+  String aboutDialogTitle(String appName) {
+    return '$appName について';
+  }
+
+  @override
+  String get aboutDialogDescription =>
+      '目標達成をサポートするタイマーアプリです。毎日の小さな積み重ねが、大きな成果につながります。';
+
+  @override
+  String get viewDetails => '詳細を見る';
+
+  @override
+  String get streakMessageZero => '今日から始めよう！';
+
+  @override
+  String get streakMessageWeek => '1週間達成！';
+
+  @override
+  String get streakMessageMonth => '1ヶ月達成！';
+
+  @override
+  String streakMessageDays(int days) {
+    return '$days日連続学習中！';
+  }
+
+  @override
+  String get deletedGoal => '削除された目標';
+
+  @override
+  String get loginTitle => 'ログイン';
+
+  @override
+  String get accountLinkTitle => 'アカウント連携';
+
+  @override
+  String get loginDescription => '以前のデータを引き継いで\n再開できます';
+
+  @override
+  String get linkDescription => 'アカウントを連携すると、データを\n安全にバックアップできます';
+
+  @override
+  String get loginWithGoogle => 'Google でログイン';
+
+  @override
+  String get linkWithGoogle => 'Google で連携';
+
+  @override
+  String get loginWithApple => 'Apple でログイン';
+
+  @override
+  String get linkWithApple => 'Apple で連携';
+
+  @override
+  String get loginNotice => 'アカウントをお持ちでない場合は「すぐに始める」をご利用ください';
+
+  @override
+  String get linkNotice => '連携後もゲストとしてのデータは保持されます';
+
+  @override
+  String get loginFailedTitle => 'ログインできませんでした';
+
+  @override
+  String get linkFailedTitle => '連携できませんでした';
+
+  @override
+  String get accountNotFoundMessage =>
+      'このアカウントは登録されていません。\n新規登録は「すぐに始める」からアカウント連携を行ってください。';
+
+  @override
+  String get accountAlreadyExistsMessage =>
+      'このアカウントは既に登録されています。\n連携するには、一度ログインしてアカウントを削除してください。';
+
+  @override
+  String get emailNotFoundMessage =>
+      'メールアドレスを取得できませんでした。\n設定からApple IDの連携を解除して再度お試しください。';
+
+  @override
+  String get genericErrorMessage => 'エラーが発生しました。\nしばらくしてから再度お試しください。';
+
+  @override
+  String get confirmLinkTitle => 'アカウントを連携しますか？';
+
+  @override
+  String confirmLinkMessage(String provider) {
+    return '$providerアカウントと連携します';
+  }
+
+  @override
+  String get btnLink => '連携する';
+
+  @override
+  String get linkSuccessTitle => '連携完了';
+
+  @override
+  String get linkSuccessMessage => 'アカウントが正常に連携されました';
+
+  @override
+  String get feedbackTitle => '目標達成おめでとうございます!';
+
+  @override
+  String get feedbackMessage =>
+      'より使いやすいアプリにするために、1分だけお声を聞かせていただけませんか？開発者が全て目を通します。';
+
+  @override
+  String get btnAnswer => '回答する';
+
+  @override
+  String get btnNotNow => '今はしない';
+
+  @override
+  String get welcomeCatchCopy1 => '目標達成を、';
+
+  @override
+  String get welcomeCatchCopy2 => '習慣に変える';
+
+  @override
+  String get btnStartNow => 'すぐに始める';
+
+  @override
+  String get btnLogin => 'ログイン';
+
+  @override
+  String get welcomeLoginDescription => 'ログインすると、データを\n引き継いで再開できます';
+
+  @override
+  String get splashCheckingNetwork => 'ネットワークを確認しています...';
+
+  @override
+  String get splashAuthenticating => '認証しています...';
+
+  @override
+  String get splashPreparingData => 'データを準備しています...';
+
+  @override
+  String get splashComplete => '完了';
+
+  @override
+  String get splashOffline => 'オフライン';
+
+  @override
+  String get splashErrorOccurred => 'エラーが発生しました';
+
+  @override
+  String get networkErrorTitle => 'ネットワークエラー';
+
+  @override
+  String get networkErrorMessage => 'ネットワークに接続してください。\nこのアプリはオンラインで動作します。';
+
+  @override
+  String get btnRetry => '再試行';
+
+  @override
+  String get errorTitle => 'エラー';
+
+  @override
+  String get initializationFailedMessage => '初期化に失敗しました。運営にお問い合わせください。';
+
+  @override
+  String get authCredentialNotFound => '認証情報を取得できませんでした';
+
+  @override
+  String get authLoginFailed => 'ログインに失敗しました';
 }

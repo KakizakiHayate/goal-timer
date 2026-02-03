@@ -637,6 +637,582 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{days} days left → Total target: {time}'**
   String remainingDaysInfo(int days, String time);
+
+  /// Settings screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settingsTitle;
+
+  /// Hint text for profile section
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to change name'**
+  String get tapToChangeName;
+
+  /// Name change dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Change Name'**
+  String get changeNameDialogTitle;
+
+  /// Name change dialog hint
+  ///
+  /// In en, this message translates to:
+  /// **'Enter name'**
+  String get changeNameDialogHint;
+
+  /// Error message for empty name
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a name'**
+  String get emptyNameError;
+
+  /// Error message for offline state
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot change while offline'**
+  String get offlineError;
+
+  /// Success message for name change
+  ///
+  /// In en, this message translates to:
+  /// **'Name changed successfully'**
+  String get nameChangedSuccess;
+
+  /// Error message for name change failure
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to change name'**
+  String get nameChangeFailed;
+
+  /// Account link section title
+  ///
+  /// In en, this message translates to:
+  /// **'Account Link'**
+  String get sectionAccountLink;
+
+  /// Link account button title
+  ///
+  /// In en, this message translates to:
+  /// **'Link Account'**
+  String get linkAccount;
+
+  /// Link account button subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Backup data with Google / Apple'**
+  String get linkAccountSubtitle;
+
+  /// Account linked status
+  ///
+  /// In en, this message translates to:
+  /// **'Linked'**
+  String get accountLinked;
+
+  /// Default account linked subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Account linked'**
+  String get accountLinkedDefault;
+
+  /// App settings section title
+  ///
+  /// In en, this message translates to:
+  /// **'App Settings'**
+  String get sectionAppSettings;
+
+  /// Default timer duration setting title
+  ///
+  /// In en, this message translates to:
+  /// **'Default Timer Duration'**
+  String get defaultTimerDuration;
+
+  /// Default timer duration setting subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Default time for new goals: {time}'**
+  String defaultTimerDurationSubtitle(String time);
+
+  /// Notifications section title
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get sectionNotifications;
+
+  /// Streak reminder setting title
+  ///
+  /// In en, this message translates to:
+  /// **'Streak Reminder'**
+  String get streakReminder;
+
+  /// Streak reminder enabled subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Receive reminders to maintain your study streak'**
+  String get streakReminderOnSubtitle;
+
+  /// Streak reminder disabled subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder notifications are OFF'**
+  String get streakReminderOffSubtitle;
+
+  /// Data and privacy section title
+  ///
+  /// In en, this message translates to:
+  /// **'Data & Privacy'**
+  String get sectionDataPrivacy;
+
+  /// Privacy policy setting title
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get privacyPolicy;
+
+  /// Privacy policy setting subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'About data handling'**
+  String get privacyPolicySubtitle;
+
+  /// Support section title
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get sectionSupport;
+
+  /// Bug report setting title
+  ///
+  /// In en, this message translates to:
+  /// **'Bug Report'**
+  String get bugReport;
+
+  /// Bug report setting subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Report bugs and issues'**
+  String get bugReportSubtitle;
+
+  /// Feature request setting title
+  ///
+  /// In en, this message translates to:
+  /// **'Feature Request'**
+  String get featureRequest;
+
+  /// Feature request setting subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Share your ideas for new features'**
+  String get featureRequestSubtitle;
+
+  /// About app setting title
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get aboutApp;
+
+  /// Version label
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version}'**
+  String versionLabel(String version);
+
+  /// Account management section title
+  ///
+  /// In en, this message translates to:
+  /// **'Account Management'**
+  String get sectionAccountManagement;
+
+  /// Logout button title
+  ///
+  /// In en, this message translates to:
+  /// **'Logout'**
+  String get logout;
+
+  /// Logout button subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out from your account'**
+  String get logoutSubtitle;
+
+  /// Logout confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to logout?'**
+  String get logoutConfirmMessage;
+
+  /// Logout failure message
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to logout'**
+  String get logoutFailed;
+
+  /// Delete account button title
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account'**
+  String get deleteAccount;
+
+  /// Delete account button subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'All data will be deleted'**
+  String get deleteAccountSubtitle;
+
+  /// Delete account confirmation dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account'**
+  String get deleteAccountConfirmTitle;
+
+  /// Delete account confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'This action cannot be undone.\n\nAll your data (goals, study records, etc.) will be permanently deleted.'**
+  String get deleteAccountConfirmMessage;
+
+  /// Delete button text
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get btnDelete;
+
+  /// Final delete account confirmation title
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure?'**
+  String get deleteAccountFinalTitle;
+
+  /// Final delete account confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'This action will permanently delete your account and all your data.'**
+  String get deleteAccountFinalMessage;
+
+  /// Stop/Cancel button text
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get btnStop;
+
+  /// Delete account failure message
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete account'**
+  String get deleteAccountFailed;
+
+  /// URL open failure message
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open URL'**
+  String get urlOpenFailed;
+
+  /// About dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'About {appName}'**
+  String aboutDialogTitle(String appName);
+
+  /// About dialog description
+  ///
+  /// In en, this message translates to:
+  /// **'A timer app to help you achieve your goals. Small daily efforts lead to great results.'**
+  String get aboutDialogDescription;
+
+  /// View details link text
+  ///
+  /// In en, this message translates to:
+  /// **'View details'**
+  String get viewDetails;
+
+  /// Message when streak is 0 days
+  ///
+  /// In en, this message translates to:
+  /// **'Let\'s start today!'**
+  String get streakMessageZero;
+
+  /// Message for 1 week milestone
+  ///
+  /// In en, this message translates to:
+  /// **'1 week achieved!'**
+  String get streakMessageWeek;
+
+  /// Message for 1 month milestone
+  ///
+  /// In en, this message translates to:
+  /// **'1 month achieved!'**
+  String get streakMessageMonth;
+
+  /// Message for ongoing streak
+  ///
+  /// In en, this message translates to:
+  /// **'{days} day streak!'**
+  String streakMessageDays(int days);
+
+  /// Placeholder name for deleted goals
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted Goal'**
+  String get deletedGoal;
+
+  /// Login screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Login'**
+  String get loginTitle;
+
+  /// Account link screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Link Account'**
+  String get accountLinkTitle;
+
+  /// Login screen description
+  ///
+  /// In en, this message translates to:
+  /// **'Resume with your\nprevious data'**
+  String get loginDescription;
+
+  /// Account link screen description
+  ///
+  /// In en, this message translates to:
+  /// **'Link your account to safely\nbackup your data'**
+  String get linkDescription;
+
+  /// Google login button text
+  ///
+  /// In en, this message translates to:
+  /// **'Login with Google'**
+  String get loginWithGoogle;
+
+  /// Google link button text
+  ///
+  /// In en, this message translates to:
+  /// **'Link with Google'**
+  String get linkWithGoogle;
+
+  /// Apple login button text
+  ///
+  /// In en, this message translates to:
+  /// **'Login with Apple'**
+  String get loginWithApple;
+
+  /// Apple link button text
+  ///
+  /// In en, this message translates to:
+  /// **'Link with Apple'**
+  String get linkWithApple;
+
+  /// Login screen notice for new users
+  ///
+  /// In en, this message translates to:
+  /// **'If you don\'t have an account, please use \"Start Now\"'**
+  String get loginNotice;
+
+  /// Account link notice
+  ///
+  /// In en, this message translates to:
+  /// **'Your guest data will be preserved after linking'**
+  String get linkNotice;
+
+  /// Login failed dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Login Failed'**
+  String get loginFailedTitle;
+
+  /// Account link failed dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Link Failed'**
+  String get linkFailedTitle;
+
+  /// Error message when account is not found
+  ///
+  /// In en, this message translates to:
+  /// **'This account is not registered.\nTo register, please use \"Start Now\" and link your account.'**
+  String get accountNotFoundMessage;
+
+  /// Error message when account already exists
+  ///
+  /// In en, this message translates to:
+  /// **'This account is already registered.\nTo link, please login first and delete the account.'**
+  String get accountAlreadyExistsMessage;
+
+  /// Error message when email is not found
+  ///
+  /// In en, this message translates to:
+  /// **'Could not retrieve email address.\nPlease unlink your Apple ID in Settings and try again.'**
+  String get emailNotFoundMessage;
+
+  /// Generic error message
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred.\nPlease try again later.'**
+  String get genericErrorMessage;
+
+  /// Confirm account link dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Link your account?'**
+  String get confirmLinkTitle;
+
+  /// Confirm account link message
+  ///
+  /// In en, this message translates to:
+  /// **'Link with {provider} account'**
+  String confirmLinkMessage(String provider);
+
+  /// Link button text
+  ///
+  /// In en, this message translates to:
+  /// **'Link'**
+  String get btnLink;
+
+  /// Link success dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Link Complete'**
+  String get linkSuccessTitle;
+
+  /// Link success message
+  ///
+  /// In en, this message translates to:
+  /// **'Account linked successfully'**
+  String get linkSuccessMessage;
+
+  /// Feedback dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Congratulations!'**
+  String get feedbackTitle;
+
+  /// Feedback dialog message
+  ///
+  /// In en, this message translates to:
+  /// **'Would you spare a minute to help us improve the app? The developers read every response.'**
+  String get feedbackMessage;
+
+  /// Answer button text
+  ///
+  /// In en, this message translates to:
+  /// **'Answer'**
+  String get btnAnswer;
+
+  /// Not now button text
+  ///
+  /// In en, this message translates to:
+  /// **'Not Now'**
+  String get btnNotNow;
+
+  /// Welcome screen catch copy line 1
+  ///
+  /// In en, this message translates to:
+  /// **'Turn goal achievement'**
+  String get welcomeCatchCopy1;
+
+  /// Welcome screen catch copy line 2
+  ///
+  /// In en, this message translates to:
+  /// **'into a habit'**
+  String get welcomeCatchCopy2;
+
+  /// Start now button text
+  ///
+  /// In en, this message translates to:
+  /// **'Start Now'**
+  String get btnStartNow;
+
+  /// Login button text
+  ///
+  /// In en, this message translates to:
+  /// **'Login'**
+  String get btnLogin;
+
+  /// Welcome screen login description
+  ///
+  /// In en, this message translates to:
+  /// **'Login to resume with your\nprevious data'**
+  String get welcomeLoginDescription;
+
+  /// Splash screen checking network status
+  ///
+  /// In en, this message translates to:
+  /// **'Checking network...'**
+  String get splashCheckingNetwork;
+
+  /// Splash screen authenticating status
+  ///
+  /// In en, this message translates to:
+  /// **'Authenticating...'**
+  String get splashAuthenticating;
+
+  /// Splash screen preparing data status
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing data...'**
+  String get splashPreparingData;
+
+  /// Splash screen complete status
+  ///
+  /// In en, this message translates to:
+  /// **'Complete'**
+  String get splashComplete;
+
+  /// Splash screen offline status
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get splashOffline;
+
+  /// Splash screen error status
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred'**
+  String get splashErrorOccurred;
+
+  /// Network error dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Network Error'**
+  String get networkErrorTitle;
+
+  /// Network error dialog message
+  ///
+  /// In en, this message translates to:
+  /// **'Please connect to the network.\nThis app requires an internet connection.'**
+  String get networkErrorMessage;
+
+  /// Retry button text
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get btnRetry;
+
+  /// Generic error dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get errorTitle;
+
+  /// Initialization failed error message
+  ///
+  /// In en, this message translates to:
+  /// **'Initialization failed. Please contact support.'**
+  String get initializationFailedMessage;
+
+  /// Error when auth credentials not found
+  ///
+  /// In en, this message translates to:
+  /// **'Could not retrieve credentials'**
+  String get authCredentialNotFound;
+
+  /// Generic login failed message
+  ///
+  /// In en, this message translates to:
+  /// **'Login failed'**
+  String get authLoginFailed;
 }
 
 class _AppLocalizationsDelegate

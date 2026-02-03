@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../utils/color_consts.dart';
 import '../utils/spacing_consts.dart';
 import '../utils/text_consts.dart';
@@ -21,6 +22,8 @@ class FeedbackDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
@@ -39,7 +42,7 @@ class FeedbackDialog extends StatelessWidget {
           children: [
             // タイトル
             Text(
-              '目標達成おめでとうございます!',
+              l10n?.feedbackTitle ?? 'Congratulations!',
               style: TextConsts.h4.copyWith(
                 fontWeight: FontWeight.w600,
                 color: ColorConsts.textPrimary,
@@ -50,7 +53,7 @@ class FeedbackDialog extends StatelessWidget {
 
             // 本文
             Text(
-              'より使いやすいアプリにするために、1分だけお声を聞かせていただけませんか？開発者が全て目を通します。',
+              l10n?.feedbackMessage ?? 'Would you spare a minute to help us improve the app? The developers read every response.',
               style: TextConsts.body.copyWith(
                 color: ColorConsts.textSecondary,
                 height: 1.4,
@@ -81,7 +84,7 @@ class FeedbackDialog extends StatelessWidget {
                       elevation: 0,
                     ),
                     child: Text(
-                      '回答する',
+                      l10n?.btnAnswer ?? 'Answer',
                       style: TextConsts.body.copyWith(
                         fontWeight: FontWeight.w600,
                         color: Colors.white,
@@ -107,7 +110,7 @@ class FeedbackDialog extends StatelessWidget {
                       ),
                     ),
                     child: Text(
-                      '今はしない',
+                      l10n?.btnNotNow ?? 'Not Now',
                       style: TextConsts.body.copyWith(
                         color: ColorConsts.textSecondary,
                       ),

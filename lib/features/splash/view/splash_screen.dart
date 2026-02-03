@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../../core/utils/color_consts.dart';
 import '../../../core/utils/spacing_consts.dart';
 import '../../../core/utils/text_consts.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../home/view/home_screen.dart';
 import '../../welcome/view/welcome_screen.dart';
 import '../view_model/splash_view_model.dart';
@@ -106,12 +107,17 @@ class _SplashScreenState extends State<SplashScreen> {
           const SizedBox(height: SpacingConsts.xl),
 
           // アプリ名
-          Text(
-            '目標達成タイマー',
-            style: TextConsts.h2.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
+          Builder(
+            builder: (context) {
+              final l10n = AppLocalizations.of(context);
+              return Text(
+                l10n?.appName ?? 'Goal Timer',
+                style: TextConsts.h2.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              );
+            },
           ),
 
           const SizedBox(height: SpacingConsts.xxl),
@@ -127,11 +133,15 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             ),
             const SizedBox(height: SpacingConsts.l),
-            Text(
-              _getStatusMessage(viewModel.status),
-              style: TextConsts.body.copyWith(
-                color: Colors.white.withValues(alpha: 0.8),
-              ),
+            Builder(
+              builder: (context) {
+                return Text(
+                  _getStatusMessage(context, viewModel.status),
+                  style: TextConsts.body.copyWith(
+                    color: Colors.white.withValues(alpha: 0.8),
+                  ),
+                );
+              },
             ),
           ],
         ],
@@ -139,22 +149,23 @@ class _SplashScreenState extends State<SplashScreen> {
     );
   }
 
-  String _getStatusMessage(SplashStatus status) {
+  String _getStatusMessage(BuildContext context, SplashStatus status) {
+    final l10n = AppLocalizations.of(context);
     switch (status) {
       case SplashStatus.initial:
       case SplashStatus.checkingNetwork:
-        return 'ネットワークを確認しています...';
+        return l10n?.splashCheckingNetwork ?? 'Checking network...';
       case SplashStatus.authenticating:
-        return '認証しています...';
+        return l10n?.splashAuthenticating ?? 'Authenticating...';
       case SplashStatus.migrating:
-        return 'データを準備しています...';
+        return l10n?.splashPreparingData ?? 'Preparing data...';
       case SplashStatus.completedToHome:
       case SplashStatus.completedToWelcome:
-        return '完了';
+        return l10n?.splashComplete ?? 'Complete';
       case SplashStatus.offline:
-        return 'オフライン';
+        return l10n?.splashOffline ?? 'Offline';
       case SplashStatus.error:
-        return 'エラーが発生しました';
+        return l10n?.splashErrorOccurred ?? 'An error occurred';
     }
   }
 
@@ -171,19 +182,23 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void _showOfflineDialog() {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('ネットワークエラー'),
-        content: const Text('ネットワークに接続してください。\nこのアプリはオンラインで動作します。'),
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n?.networkErrorTitle ?? 'Network Error'),
+        content: Text(
+          l10n?.networkErrorMessage ??
+              'Please connect to the network.\nThis app requires an internet connection.',
+        ),
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.of(context).pop();
+              Navigator.of(dialogContext).pop();
               _viewModel.retryFromOffline();
             },
-            child: const Text('再試行'),
+            child: Text(l10n?.btnRetry ?? 'Retry'),
           ),
         ],
       ),
@@ -191,19 +206,23 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void _showErrorDialog(String message) {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('エラー'),
-        content: Text(message),
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n?.errorTitle ?? 'Error'),
+        content: Text(
+          l10n?.initializationFailedMessage ??
+              'Initialization failed. Please contact support.',
+        ),
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.of(context).pop();
+              Navigator.of(dialogContext).pop();
               _viewModel.retryFromOffline();
             },
-            child: const Text('再試行'),
+            child: Text(l10n?.btnRetry ?? 'Retry'),
           ),
         ],
       ),

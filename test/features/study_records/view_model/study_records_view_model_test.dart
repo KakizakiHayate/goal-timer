@@ -273,7 +273,7 @@ void main() {
         final result = await viewModel.fetchDailyRecords(testDate);
 
         expect(result.length, 1);
-        expect(result.first.goalTitle, '削除された目標');
+        expect(result.first.goalTitle, 'Deleted Goal');
         expect(result.first.isDeleted, true);
       });
 

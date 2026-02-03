@@ -90,12 +90,14 @@ class _AddGoalModalState extends State<AddGoalModal> {
       return;
     }
 
-    final selectedDeadline = _selectedDeadline;
     final l10n = AppLocalizations.of(context);
+    final selectedDeadline = _selectedDeadline;
     if (selectedDeadline == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(l10n?.selectDeadlineValidation ?? 'Please select a deadline'),
+          content: Text(
+            l10n?.selectDeadlineValidation ?? 'Please select a deadline',
+          ),
           backgroundColor: ColorConsts.error,
         ),
       );
@@ -105,12 +107,6 @@ class _AddGoalModalState extends State<AddGoalModal> {
     // async gapの前にcontext関連の参照をキャプチャ
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
-    final successMessage = _isEdit
-        ? (l10n?.goalUpdatedMessage ?? 'Goal updated')
-        : (l10n?.goalAddedMessage ?? 'Goal added');
-    final errorMessage = _isEdit
-        ? (l10n?.goalUpdateFailedMessage ?? 'Failed to update goal')
-        : (l10n?.goalAddFailedMessage ?? 'Failed to add goal');
 
     setState(() {
       _isLoading = true;
@@ -142,7 +138,11 @@ class _AddGoalModalState extends State<AddGoalModal> {
         navigator.pop();
         scaffoldMessenger.showSnackBar(
           SnackBar(
-            content: Text(successMessage),
+            content: Text(
+              _isEdit
+                  ? (l10n?.goalUpdatedMessage ?? 'Goal updated')
+                  : (l10n?.goalAddedMessage ?? 'Goal added'),
+            ),
             backgroundColor: ColorConsts.success,
           ),
         );
@@ -151,7 +151,11 @@ class _AddGoalModalState extends State<AddGoalModal> {
       if (mounted) {
         scaffoldMessenger.showSnackBar(
           SnackBar(
-            content: Text(errorMessage),
+            content: Text(
+              _isEdit
+                  ? (l10n?.goalUpdateFailedMessage ?? 'Failed to update goal')
+                  : (l10n?.goalAddFailedMessage ?? 'Failed to add goal'),
+            ),
             backgroundColor: ColorConsts.error,
           ),
         );
@@ -187,7 +191,7 @@ class _AddGoalModalState extends State<AddGoalModal> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildHeader(),
+              _buildHeader(context),
             Flexible(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(SpacingConsts.l),
@@ -196,17 +200,17 @@ class _AddGoalModalState extends State<AddGoalModal> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildTitleField(),
+                      _buildTitleField(context),
                       const SizedBox(height: SpacingConsts.l),
-                      _buildDescriptionField(),
+                      _buildDescriptionField(context),
                       const SizedBox(height: SpacingConsts.l),
-                      _buildTargetMinutesField(),
+                      _buildTargetMinutesField(context),
                       const SizedBox(height: SpacingConsts.l),
-                      _buildDeadlineField(),
+                      _buildDeadlineField(context),
                       const SizedBox(height: SpacingConsts.l),
-                      _buildAvoidMessageField(),
+                      _buildAvoidMessageField(context),
                       const SizedBox(height: SpacingConsts.xl),
-                      _buildSaveButton(),
+                      _buildSaveButton(context),
                     ],
                   ),
                 ),
@@ -219,12 +223,8 @@ class _AddGoalModalState extends State<AddGoalModal> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final title = _isEdit
-        ? (l10n?.editGoalTitle ?? 'Edit Goal')
-        : (l10n?.addGoalTitle ?? 'Add Goal');
-
     return Container(
       padding: const EdgeInsets.all(SpacingConsts.l),
       decoration: const BoxDecoration(
@@ -245,7 +245,9 @@ class _AddGoalModalState extends State<AddGoalModal> {
         children: [
           Expanded(
             child: Text(
-              title,
+              _isEdit
+                  ? (l10n?.editGoalTitle ?? 'Edit Goal')
+                  : (l10n?.addGoalTitle ?? 'Add Goal'),
               style: TextConsts.h3.copyWith(
                 color: ColorConsts.textPrimary,
                 fontWeight: FontWeight.bold,
@@ -262,9 +264,8 @@ class _AddGoalModalState extends State<AddGoalModal> {
     );
   }
 
-  Widget _buildTitleField() {
+  Widget _buildTitleField(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -300,9 +301,8 @@ class _AddGoalModalState extends State<AddGoalModal> {
     );
   }
 
-  Widget _buildDescriptionField() {
+  Widget _buildDescriptionField(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -317,7 +317,8 @@ class _AddGoalModalState extends State<AddGoalModal> {
         TextFormField(
           controller: _descriptionController,
           decoration: InputDecoration(
-            hintText: l10n?.descriptionPlaceholder ?? 'e.g. I want to improve my English for working abroad',
+            hintText: l10n?.descriptionPlaceholder ??
+                'e.g. I want to improve my English for working abroad',
             filled: true,
             fillColor: ColorConsts.cardBackground,
             border: OutlineInputBorder(
@@ -333,9 +334,8 @@ class _AddGoalModalState extends State<AddGoalModal> {
     );
   }
 
-  Widget _buildTargetMinutesField() {
+  Widget _buildTargetMinutesField(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -399,9 +399,9 @@ class _AddGoalModalState extends State<AddGoalModal> {
     );
   }
 
-  Widget _buildDeadlineField() {
-    final selectedDeadline = _selectedDeadline;
+  Widget _buildDeadlineField(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final selectedDeadline = _selectedDeadline;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -433,8 +433,10 @@ class _AddGoalModalState extends State<AddGoalModal> {
                 Expanded(
                   child: Text(
                     selectedDeadline != null
-                        ? DateFormat('yyyy年M月d日').format(selectedDeadline)
-                        : (l10n?.selectDeadlinePlaceholder ?? 'Select a deadline'),
+                        ? DateFormat.yMMMd(l10n?.localeName)
+                            .format(selectedDeadline)
+                        : (l10n?.selectDeadlinePlaceholder ??
+                            'Select a deadline'),
                     style: TextConsts.body.copyWith(
                       color:
                           selectedDeadline != null
@@ -455,37 +457,38 @@ class _AddGoalModalState extends State<AddGoalModal> {
         // 総目標時間の表示（期限が選択されている場合のみ）
         if (selectedDeadline != null) ...[
           const SizedBox(height: SpacingConsts.s),
-          _buildTotalTargetTimeText(selectedDeadline),
+          _buildTotalTargetTimeText(context, selectedDeadline),
         ],
       ],
     );
   }
 
-  Widget _buildTotalTargetTimeText(DateTime deadline) {
+  Widget _buildTotalTargetTimeText(BuildContext context, DateTime deadline) {
+    final l10n = AppLocalizations.of(context);
     final remainingDays = TimeUtils.calculateRemainingDays(deadline);
     final totalTargetMinutes = TimeUtils.calculateTotalTargetMinutes(
       targetMinutes: _targetMinutes,
       remainingDays: remainingDays,
     );
-    final l10n = AppLocalizations.of(context);
-    final formattedTime = TimeUtils.formatMinutesToHoursAndMinutes(totalTargetMinutes);
+    final formattedTime =
+        TimeUtils.formatMinutesToHoursAndMinutes(totalTargetMinutes);
 
     return Text(
-      l10n?.remainingDaysInfo(remainingDays, formattedTime) ?? '$remainingDays days left → Total target: $formattedTime',
+      l10n?.remainingDaysInfo(remainingDays, formattedTime) ??
+          '$remainingDays days left → Total target: $formattedTime',
       style: TextConsts.bodySmall.copyWith(
         color: ColorConsts.textSecondary,
       ),
     );
   }
 
-  Widget _buildAvoidMessageField() {
+  Widget _buildAvoidMessageField(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          l10n?.avoidMessageLabel ?? "What happens if you don't achieve it? *",
+          l10n?.avoidMessageLabel ?? 'What happens if you don\'t achieve it? *',
           style: TextConsts.body.copyWith(
             color: ColorConsts.textPrimary,
             fontWeight: FontWeight.w600,
@@ -493,14 +496,16 @@ class _AddGoalModalState extends State<AddGoalModal> {
         ),
         const SizedBox(height: SpacingConsts.xs),
         Text(
-          l10n?.avoidMessageHint ?? 'Clarifying negative outcomes helps maintain motivation',
+          l10n?.avoidMessageHint ??
+              'Clarifying negative outcomes helps maintain motivation',
           style: TextConsts.caption.copyWith(color: ColorConsts.textTertiary),
         ),
         const SizedBox(height: SpacingConsts.s),
         TextFormField(
           controller: _avoidMessageController,
           decoration: InputDecoration(
-            hintText: l10n?.avoidMessagePlaceholder ?? 'e.g. Miss career advancement opportunities',
+            hintText: l10n?.avoidMessagePlaceholder ??
+                'e.g. Miss career advancement opportunities',
             filled: true,
             fillColor: ColorConsts.cardBackground,
             border: OutlineInputBorder(
@@ -513,7 +518,8 @@ class _AddGoalModalState extends State<AddGoalModal> {
           maxLength: 200,
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
-              return l10n?.avoidMessageRequired ?? "Please enter what happens if you don't achieve it";
+              return l10n?.avoidMessageRequired ??
+                  'Please enter what happens if you don\'t achieve it';
             }
             return null;
           },
@@ -522,12 +528,8 @@ class _AddGoalModalState extends State<AddGoalModal> {
     );
   }
 
-  Widget _buildSaveButton() {
+  Widget _buildSaveButton(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final buttonText = _isEdit
-        ? (l10n?.btnUpdate ?? 'Update')
-        : (l10n?.commonBtnSave ?? 'Save');
-
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
@@ -552,7 +554,9 @@ class _AddGoalModalState extends State<AddGoalModal> {
                   ),
                 )
                 : Text(
-                  buttonText,
+                  _isEdit
+                      ? (l10n?.btnUpdate ?? 'Update')
+                      : (l10n?.commonBtnSave ?? 'Save'),
                   style: TextConsts.h4.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -604,7 +608,6 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Container(

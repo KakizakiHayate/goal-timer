@@ -337,4 +337,315 @@ class AppLocalizationsEn extends AppLocalizations {
   String remainingDaysInfo(int days, String time) {
     return '$days days left → Total target: $time';
   }
+
+  @override
+  String get settingsTitle => 'Settings';
+
+  @override
+  String get tapToChangeName => 'Tap to change name';
+
+  @override
+  String get changeNameDialogTitle => 'Change Name';
+
+  @override
+  String get changeNameDialogHint => 'Enter name';
+
+  @override
+  String get emptyNameError => 'Please enter a name';
+
+  @override
+  String get offlineError => 'Cannot change while offline';
+
+  @override
+  String get nameChangedSuccess => 'Name changed successfully';
+
+  @override
+  String get nameChangeFailed => 'Failed to change name';
+
+  @override
+  String get sectionAccountLink => 'Account Link';
+
+  @override
+  String get linkAccount => 'Link Account';
+
+  @override
+  String get linkAccountSubtitle => 'Backup data with Google / Apple';
+
+  @override
+  String get accountLinked => 'Linked';
+
+  @override
+  String get accountLinkedDefault => 'Account linked';
+
+  @override
+  String get sectionAppSettings => 'App Settings';
+
+  @override
+  String get defaultTimerDuration => 'Default Timer Duration';
+
+  @override
+  String defaultTimerDurationSubtitle(String time) {
+    return 'Default time for new goals: $time';
+  }
+
+  @override
+  String get sectionNotifications => 'Notifications';
+
+  @override
+  String get streakReminder => 'Streak Reminder';
+
+  @override
+  String get streakReminderOnSubtitle =>
+      'Receive reminders to maintain your study streak';
+
+  @override
+  String get streakReminderOffSubtitle => 'Reminder notifications are OFF';
+
+  @override
+  String get sectionDataPrivacy => 'Data & Privacy';
+
+  @override
+  String get privacyPolicy => 'Privacy Policy';
+
+  @override
+  String get privacyPolicySubtitle => 'About data handling';
+
+  @override
+  String get sectionSupport => 'Support';
+
+  @override
+  String get bugReport => 'Bug Report';
+
+  @override
+  String get bugReportSubtitle => 'Report bugs and issues';
+
+  @override
+  String get featureRequest => 'Feature Request';
+
+  @override
+  String get featureRequestSubtitle => 'Share your ideas for new features';
+
+  @override
+  String get aboutApp => 'About';
+
+  @override
+  String versionLabel(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get sectionAccountManagement => 'Account Management';
+
+  @override
+  String get logout => 'Logout';
+
+  @override
+  String get logoutSubtitle => 'Sign out from your account';
+
+  @override
+  String get logoutConfirmMessage => 'Are you sure you want to logout?';
+
+  @override
+  String get logoutFailed => 'Failed to logout';
+
+  @override
+  String get deleteAccount => 'Delete Account';
+
+  @override
+  String get deleteAccountSubtitle => 'All data will be deleted';
+
+  @override
+  String get deleteAccountConfirmTitle => 'Delete Account';
+
+  @override
+  String get deleteAccountConfirmMessage =>
+      'This action cannot be undone.\n\nAll your data (goals, study records, etc.) will be permanently deleted.';
+
+  @override
+  String get btnDelete => 'Delete';
+
+  @override
+  String get deleteAccountFinalTitle => 'Are you sure?';
+
+  @override
+  String get deleteAccountFinalMessage =>
+      'This action will permanently delete your account and all your data.';
+
+  @override
+  String get btnStop => 'Stop';
+
+  @override
+  String get deleteAccountFailed => 'Failed to delete account';
+
+  @override
+  String get urlOpenFailed => 'Could not open URL';
+
+  @override
+  String aboutDialogTitle(String appName) {
+    return 'About $appName';
+  }
+
+  @override
+  String get aboutDialogDescription =>
+      'A timer app to help you achieve your goals. Small daily efforts lead to great results.';
+
+  @override
+  String get viewDetails => 'View details';
+
+  @override
+  String get streakMessageZero => 'Let\'s start today!';
+
+  @override
+  String get streakMessageWeek => '1 week achieved!';
+
+  @override
+  String get streakMessageMonth => '1 month achieved!';
+
+  @override
+  String streakMessageDays(int days) {
+    return '$days day streak!';
+  }
+
+  @override
+  String get deletedGoal => 'Deleted Goal';
+
+  @override
+  String get loginTitle => 'Login';
+
+  @override
+  String get accountLinkTitle => 'Link Account';
+
+  @override
+  String get loginDescription => 'Resume with your\nprevious data';
+
+  @override
+  String get linkDescription => 'Link your account to safely\nbackup your data';
+
+  @override
+  String get loginWithGoogle => 'Login with Google';
+
+  @override
+  String get linkWithGoogle => 'Link with Google';
+
+  @override
+  String get loginWithApple => 'Login with Apple';
+
+  @override
+  String get linkWithApple => 'Link with Apple';
+
+  @override
+  String get loginNotice =>
+      'If you don\'t have an account, please use \"Start Now\"';
+
+  @override
+  String get linkNotice => 'Your guest data will be preserved after linking';
+
+  @override
+  String get loginFailedTitle => 'Login Failed';
+
+  @override
+  String get linkFailedTitle => 'Link Failed';
+
+  @override
+  String get accountNotFoundMessage =>
+      'This account is not registered.\nTo register, please use \"Start Now\" and link your account.';
+
+  @override
+  String get accountAlreadyExistsMessage =>
+      'This account is already registered.\nTo link, please login first and delete the account.';
+
+  @override
+  String get emailNotFoundMessage =>
+      'Could not retrieve email address.\nPlease unlink your Apple ID in Settings and try again.';
+
+  @override
+  String get genericErrorMessage =>
+      'An error occurred.\nPlease try again later.';
+
+  @override
+  String get confirmLinkTitle => 'Link your account?';
+
+  @override
+  String confirmLinkMessage(String provider) {
+    return 'Link with $provider account';
+  }
+
+  @override
+  String get btnLink => 'Link';
+
+  @override
+  String get linkSuccessTitle => 'Link Complete';
+
+  @override
+  String get linkSuccessMessage => 'Account linked successfully';
+
+  @override
+  String get feedbackTitle => 'Congratulations!';
+
+  @override
+  String get feedbackMessage =>
+      'Would you spare a minute to help us improve the app? The developers read every response.';
+
+  @override
+  String get btnAnswer => 'Answer';
+
+  @override
+  String get btnNotNow => 'Not Now';
+
+  @override
+  String get welcomeCatchCopy1 => 'Turn goal achievement';
+
+  @override
+  String get welcomeCatchCopy2 => 'into a habit';
+
+  @override
+  String get btnStartNow => 'Start Now';
+
+  @override
+  String get btnLogin => 'Login';
+
+  @override
+  String get welcomeLoginDescription =>
+      'Login to resume with your\nprevious data';
+
+  @override
+  String get splashCheckingNetwork => 'Checking network...';
+
+  @override
+  String get splashAuthenticating => 'Authenticating...';
+
+  @override
+  String get splashPreparingData => 'Preparing data...';
+
+  @override
+  String get splashComplete => 'Complete';
+
+  @override
+  String get splashOffline => 'Offline';
+
+  @override
+  String get splashErrorOccurred => 'An error occurred';
+
+  @override
+  String get networkErrorTitle => 'Network Error';
+
+  @override
+  String get networkErrorMessage =>
+      'Please connect to the network.\nThis app requires an internet connection.';
+
+  @override
+  String get btnRetry => 'Retry';
+
+  @override
+  String get errorTitle => 'Error';
+
+  @override
+  String get initializationFailedMessage =>
+      'Initialization failed. Please contact support.';
+
+  @override
+  String get authCredentialNotFound => 'Could not retrieve credentials';
+
+  @override
+  String get authLoginFailed => 'Login failed';
 }

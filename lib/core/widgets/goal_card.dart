@@ -44,6 +44,9 @@ class GoalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) return const SizedBox.shrink();
+
     return PressableCard(
       key: tutorialKey, // チュートリアル用のKeyを追加
       onTap: onTap,
@@ -70,18 +73,18 @@ class GoalCard extends StatelessWidget {
           const SizedBox(height: SpacingConsts.m),
 
           // プログレス表示
-          _buildProgress(context),
+          _buildProgress(l10n),
 
           // 期限表示
           if (deadline != null) ...[
             const SizedBox(height: SpacingConsts.s),
-            _buildDeadlineInfo(context),
+            _buildDeadlineInfo(l10n),
           ],
 
           const SizedBox(height: SpacingConsts.m),
 
           // アクションボタン
-          _buildActionButtons(context),
+          _buildActionButtons(l10n),
         ],
       ),
     );
@@ -153,9 +156,7 @@ class GoalCard extends StatelessWidget {
     );
   }
 
-  Widget _buildProgress(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    if (l10n == null) return const SizedBox.shrink();
+  Widget _buildProgress(AppLocalizations l10n) {
     final percentage = (progress * 100).toInt();
 
     return Column(
@@ -236,10 +237,9 @@ class GoalCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDeadlineInfo(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
+  Widget _buildDeadlineInfo(AppLocalizations l10n) {
     final localDeadline = deadline;
-    if (l10n == null || localDeadline == null) return const SizedBox.shrink();
+    if (localDeadline == null) return const SizedBox.shrink();
 
     final remainingDays = TimeUtils.calculateRemainingDays(localDeadline);
     final month = localDeadline.month;
@@ -263,9 +263,7 @@ class GoalCard extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButtons(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    if (l10n == null) return const SizedBox.shrink();
+  Widget _buildActionButtons(AppLocalizations l10n) {
     return Row(
       children: [
         Expanded(

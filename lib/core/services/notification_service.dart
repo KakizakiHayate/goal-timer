@@ -4,6 +4,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
+import '../../l10n/app_localizations.dart';
 import '../utils/app_logger.dart';
 import '../utils/locale_helper.dart';
 import '../utils/streak_reminder_consts.dart';
@@ -30,23 +31,21 @@ class NotificationService {
 
   // ========== 国際化対応テキスト ==========
 
+  AppLocalizations get _l10n =>
+      lookupAppLocalizations(LocaleHelper.systemLocale);
+
   /// タイマー完了通知タイトル
-  String get _timerCompleteTitle =>
-      LocaleHelper.isJapanese ? 'タイマー完了' : 'Timer Complete';
+  String get _timerCompleteTitle => _l10n.timerCompleteTitle;
 
   /// タイマー完了通知メッセージ
-  String _timerCompleteMessage(String goalTitle) => LocaleHelper.isJapanese
-      ? '「$goalTitle」の学習時間が終了しました'
-      : 'Study time for "$goalTitle" has ended';
+  String _timerCompleteMessage(String goalTitle) =>
+      _l10n.timerCompleteMessage(goalTitle);
 
   /// タイマー通知チャンネル名
-  String get _timerChannelName =>
-      LocaleHelper.isJapanese ? 'タイマー完了' : 'Timer Complete';
+  String get _timerChannelName => _l10n.timerChannelName;
 
   /// タイマー通知チャンネル説明
-  String get _timerChannelDescription => LocaleHelper.isJapanese
-      ? 'タイマーが完了した時の通知'
-      : 'Notifications when timer completes';
+  String get _timerChannelDescription => _l10n.timerChannelDescription;
 
   final FlutterLocalNotificationsPlugin _notifications =
       FlutterLocalNotificationsPlugin();
