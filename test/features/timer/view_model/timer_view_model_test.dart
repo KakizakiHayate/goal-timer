@@ -37,6 +37,9 @@ class FakeSettingsViewModel extends GetxController
   final RxBool isUpdatingDisplayName = false.obs;
 
   @override
+  final RxString appVersion = '1.0.0'.obs;
+
+  @override
   Future<void> init() async {}
 
   @override

@@ -458,13 +458,16 @@ class _SettingsScreenState extends State<SettingsScreen>
           iconColor: ColorConsts.warning,
           onTap: _showFeatureRequestForm,
         ),
-        SettingItem(
-          title: l10n?.aboutApp ?? 'About',
-          subtitle: l10n?.versionLabel(AppConsts.appVersion) ?? 'Version ${AppConsts.appVersion}',
-          icon: Icons.info_outline,
-          iconColor: ColorConsts.textSecondary,
-          onTap: _showAbout,
-        ),
+        Obx(() {
+          final version = _settingsViewModel.appVersion.value;
+          return SettingItem(
+            title: l10n?.aboutApp ?? 'About',
+            subtitle: l10n?.versionLabel(version) ?? 'Version $version',
+            icon: Icons.info_outline,
+            iconColor: ColorConsts.textSecondary,
+            onTap: _showAbout,
+          );
+        }),
       ],
     );
   }
@@ -868,6 +871,7 @@ class _SettingsScreenState extends State<SettingsScreen>
   }
 
   void _showAbout() {
+    final version = _settingsViewModel.appVersion.value;
     showDialog(
       context: context,
       builder: (dialogContext) {
@@ -883,7 +887,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                 style: TextConsts.h3.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: SpacingConsts.s),
-              Text(dialogL10n?.versionLabel(AppConsts.appVersion) ?? 'Version: ${AppConsts.appVersion}'),
+              Text(dialogL10n?.versionLabel(version) ?? 'Version: $version'),
               const SizedBox(height: SpacingConsts.m),
               Text(dialogL10n?.aboutDialogDescription ?? 'A timer app to help you achieve your goals. Small daily efforts lead to great results.'),
             ],

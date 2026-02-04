@@ -19,9 +19,6 @@ class AppConsts {
   /// アプリ名
   static const String appName = '目標達成タイマー';
 
-  /// アプリバージョン
-  static const String appVersion = '1.0.0';
-
   // === フィードバック設定 ===
   /// フィードバックポップアップの表示間隔（学習完了回数）
   static const int feedbackPopupInterval = 3;
