@@ -648,4 +648,62 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authLoginFailed => 'Login failed';
+
+  @override
+  String get navAnalytics => 'Analytics';
+
+  @override
+  String get analyticsTotalTime => 'Total Time';
+
+  @override
+  String get analyticsDailyAverage => 'Daily Avg';
+
+  @override
+  String get analyticsStudyDays => 'Study Days';
+
+  @override
+  String analyticsDaysSuffix(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get analyticsWeek => 'Week';
+
+  @override
+  String get analyticsMonth => 'Month';
+
+  @override
+  String analyticsMonthYear(String month, int year) {
+    return '$month $year';
+  }
+
+  @override
+  String get analyticsTotal => 'Total';
+
+  @override
+  String get analyticsNoData => 'No study records yet';
+
+  @override
+  String get analyticsStartStudying => 'Start studying with Timer';
+
+  @override
+  String analyticsSecondsFormat(int seconds) {
+    return '${seconds}s';
+  }
+
+  @override
+  String analyticsMinutesFormat(int minutes) {
+    return '${minutes}m';
+  }
+
+  @override
+  String analyticsHoursFormat(int hours) {
+    return '${hours}h';
+  }
 }
