@@ -36,6 +36,7 @@ dependencies:
   jwt_decoder: ^2.0.1
   local_auth: ^3.0.0
   logger: ^2.6.2
+  package_info_plus: ^9.0.0
   path: '1.9.1'
   path_provider: ^2.1.5
   purchases_flutter: ^9.0.0

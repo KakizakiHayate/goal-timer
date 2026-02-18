@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/data/local/local_settings_datasource.dart';
@@ -26,6 +27,7 @@ class SettingsViewModel extends GetxController {
       StreakReminderConsts.defaultReminderEnabled.obs;
   final RxString displayName = UserConsts.defaultGuestName.obs;
   final RxBool isUpdatingDisplayName = false.obs;
+  final RxString appVersion = ''.obs;
 
   /// Repositoryに渡す用のユーザーID（nullの場合は空文字）
   ///
@@ -61,6 +63,10 @@ class SettingsViewModel extends GetxController {
 
     final name = await _usersRepository.getDisplayName(userId);
     displayName.value = name;
+
+    // pubspec.yamlからバージョンを取得
+    final packageInfo = await PackageInfo.fromPlatform();
+    appVersion.value = packageInfo.version;
   }
 
   /// デフォルトタイマー時間を更新
