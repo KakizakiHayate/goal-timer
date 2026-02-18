@@ -13,6 +13,7 @@ import '../../../core/widgets/goal_card.dart';
 import '../../../core/widgets/pressable_card.dart';
 import '../../../core/widgets/streak_card.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../analytics/view/analytics_screen.dart';
 import '../../settings/view/settings_screen.dart';
 import '../../study_records/view/study_records_screen.dart';
 import '../../timer/view/timer_screen.dart';
@@ -53,7 +54,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
     Get.put(HomeViewModel());
 
     _fabAnimationController = AnimationController(
@@ -102,6 +103,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final pages = [
       const _HomeTabContent(),
       const _TimerTabContent(),
+      const AnalyticsScreen(),
       const SettingsScreen(),
     ];
 
@@ -110,7 +112,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       body: pages[_tabController.index],
       bottomNavigationBar: _buildBottomNavigationBar(),
       floatingActionButton:
-          _tabController.index != 2 ? _buildFloatingActionButton() : null,
+          _tabController.index <= 1 ? _buildFloatingActionButton() : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
@@ -165,6 +167,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 icon: const Icon(Icons.timer_outlined),
                 activeIcon: const Icon(Icons.timer),
                 label: AppLocalizations.of(context)?.navTimer ?? 'Timer',
+              ),
+              BottomNavigationBarItem(
+                icon: const Icon(Icons.bar_chart_outlined),
+                activeIcon: const Icon(Icons.bar_chart),
+                label: AppLocalizations.of(context)?.navAnalytics ?? 'Analytics',
               ),
               BottomNavigationBarItem(
                 icon: const Icon(Icons.settings_outlined),
