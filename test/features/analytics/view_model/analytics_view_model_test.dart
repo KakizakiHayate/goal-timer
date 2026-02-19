@@ -495,5 +495,86 @@ void main() {
       expect(state.endDate.weekday, DateTime.sunday);
       expect(state.endDate, DateTime(2026, 2, 22));
     });
+
+    // UT-16: 今日を含む期間で週↔月を繰り返してもカスケードシフトしない
+    test('UT-16: 今日を含む期間で週↔月切り替えがカスケードシフトしない', () async {
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+
+      // 今日を含む週を読み込む
+      await viewModel.loadData(
+        periodType: AnalyticsPeriodType.week,
+        referenceDate: today,
+      );
+
+      final weekStart = viewModel.state.startDate;
+      final weekEnd = viewModel.state.endDate;
+
+      // 週→月に切り替え
+      await viewModel.switchPeriodType(AnalyticsPeriodType.month);
+      expect(viewModel.state.periodType, AnalyticsPeriodType.month);
+      // 月の範囲に今日が含まれていること
+      expect(
+        !today.isBefore(viewModel.state.startDate) &&
+            !today.isAfter(viewModel.state.endDate),
+        true,
+      );
+
+      // 月→週に切り替え
+      await viewModel.switchPeriodType(AnalyticsPeriodType.week);
+      expect(viewModel.state.periodType, AnalyticsPeriodType.week);
+      // 元の週と同じ期間に戻ること（カスケードシフトしない）
+      expect(viewModel.state.startDate, weekStart);
+      expect(viewModel.state.endDate, weekEnd);
+    });
+
+    // UT-17: 同じ期間タイプへの切り替えは何もしない
+    test('UT-17: 同じ期間タイプへの切り替えは何もしない', () async {
+      await viewModel.loadData(
+        periodType: AnalyticsPeriodType.week,
+        referenceDate: monday,
+      );
+
+      final callCountBefore = verify(
+        () => mockStudyLogsRepository.fetchLogsInRange(
+          startDate: any(named: 'startDate'),
+          endDate: any(named: 'endDate'),
+          userId: any(named: 'userId'),
+        ),
+      ).callCount;
+
+      // 同じタイプで切り替え → 何もしない
+      await viewModel.switchPeriodType(AnalyticsPeriodType.week);
+
+      // 追加のfetchが呼ばれていないこと
+      verifyNever(
+        () => mockStudyLogsRepository.fetchLogsInRange(
+          startDate: any(named: 'startDate'),
+          endDate: any(named: 'endDate'),
+          userId: any(named: 'userId'),
+        ),
+      );
+    });
+
+    // UT-18: 過去の週から月へ切り替えると元の週を含む月になる
+    test('UT-18: 過去の週から月へ切り替えると元の週を含む月になる', () async {
+      // 2026-01-05（月曜日）～01-11（日曜日）を読み込む
+      final pastMonday = DateTime(2026, 1, 5);
+
+      await viewModel.loadData(
+        periodType: AnalyticsPeriodType.week,
+        referenceDate: pastMonday,
+      );
+
+      expect(viewModel.state.startDate, DateTime(2026, 1, 5));
+      expect(viewModel.state.endDate, DateTime(2026, 1, 11));
+
+      // 週→月に切り替え
+      await viewModel.switchPeriodType(AnalyticsPeriodType.month);
+
+      // endDate(1/11)を含む月=1月になること
+      expect(viewModel.state.startDate, DateTime(2026, 1, 1));
+      expect(viewModel.state.endDate, DateTime(2026, 1, 31));
+    });
   });
 }

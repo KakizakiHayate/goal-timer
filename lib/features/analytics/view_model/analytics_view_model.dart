@@ -113,13 +113,44 @@ class AnalyticsViewModel extends GetxController {
   }
 
   /// 期間タイプを切り替える（週↔月）
+  ///
+  /// 基準日の選択ロジック:
+  /// - 今日が現在の表示期間内 → 今日を基準日に使用
+  /// - 現在の表示期間が過去 → 期間の最終日を基準日に使用
+  /// - 現在の表示期間が未来 → 期間の開始日を基準日に使用
+  ///
+  /// これにより、週↔月の切り替えで期間がずれる問題を防ぐ。
   Future<void> switchPeriodType(AnalyticsPeriodType newType) async {
     if (_state.periodType == newType) return;
 
     await loadData(
       periodType: newType,
-      referenceDate: _state.startDate,
+      referenceDate: _getReferenceDateForPeriodSwitch(),
     );
+  }
+
+  /// 期間切り替え時の基準日を計算
+  ///
+  /// 今日が表示期間内ならtodayを使い、期間外なら端の日付を使うことで、
+  /// ユーザーの表示コンテキストを維持する。
+  DateTime _getReferenceDateForPeriodSwitch() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    final isWithinPeriod =
+        !today.isBefore(_state.startDate) && !today.isAfter(_state.endDate);
+
+    if (isWithinPeriod) {
+      return today;
+    }
+
+    // 過去の期間を表示中 → endDateを使って期間の末尾を基準にする
+    if (today.isAfter(_state.endDate)) {
+      return _state.endDate;
+    }
+
+    // 未来の期間を表示中 → startDateを使って期間の先頭を基準にする
+    return _state.startDate;
   }
 
   /// 期間の開始日・終了日を計算
