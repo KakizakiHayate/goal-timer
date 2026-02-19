@@ -52,17 +52,26 @@ class AnalyticsViewModel extends GetxController {
 
       final results = await Future.wait([
         _goalsRepository.fetchActiveGoals(_userId),
-        _studyLogsRepository.fetchAllLogs(_userId),
+        _studyLogsRepository.fetchLogsInRange(
+          startDate: dateRange.start,
+          endDate: dateRange.end,
+          userId: _userId,
+        ),
       ]);
 
       final activeGoals = results[0] as List<GoalsModel>;
-      final allLogs = results[1] as List<StudyDailyLogsModel>;
+      final logs = results[1] as List<StudyDailyLogsModel>;
+
+      // createdAt順にソート（View側での毎回のソートを回避）
+      final sortedGoals = List.of(activeGoals)
+        ..sort((a, b) => (a.createdAt ?? DateTime.now())
+            .compareTo(b.createdAt ?? DateTime.now()));
 
       final dailyData = _buildDailyData(
         startDate: dateRange.start,
         endDate: dateRange.end,
-        logs: allLogs,
-        activeGoalIds: activeGoals.map((g) => g.id).toSet(),
+        logs: logs,
+        activeGoalIds: sortedGoals.map((g) => g.id).toSet(),
       );
 
       _state = AnalyticsState(
@@ -70,7 +79,7 @@ class AnalyticsViewModel extends GetxController {
         startDate: dateRange.start,
         endDate: dateRange.end,
         dailyData: dailyData,
-        activeGoals: activeGoals,
+        activeGoals: sortedGoals,
       );
       update();
     } catch (error, stackTrace) {
@@ -176,6 +185,7 @@ class AnalyticsViewModel extends GetxController {
   ///
   /// 期間内の全日分のデータを生成し、学習ログを集計する。
   /// アクティブな目標のログのみを含める。
+  /// ログを先に日付でグループ化し、日ごとのループを効率化する。
   List<DailyStudyData> _buildDailyData({
     required DateTime startDate,
     required DateTime endDate,
@@ -184,11 +194,22 @@ class AnalyticsViewModel extends GetxController {
   }) {
     final dayCount = endDate.difference(startDate).inDays + 1;
 
+    // ログを日付ごとにグループ化（O(n)で一度だけ走査）
+    final logsByDate = <DateTime, List<StudyDailyLogsModel>>{};
+    for (final log in logs) {
+      final dateOnly = DateTime(
+        log.studyDate.year,
+        log.studyDate.month,
+        log.studyDate.day,
+      );
+      (logsByDate[dateOnly] ??= []).add(log);
+    }
+
     return List.generate(dayCount, (i) {
       final date = startDate.add(Duration(days: i));
+      final dailyLogs = logsByDate[date] ?? [];
       final goalSeconds = _aggregateGoalSeconds(
-        date: date,
-        logs: logs,
+        logs: dailyLogs,
         activeGoalIds: activeGoalIds,
       );
       return DailyStudyData(date: date, goalSeconds: goalSeconds);
@@ -197,23 +218,16 @@ class AnalyticsViewModel extends GetxController {
 
   /// 特定日のアクティブ目標ごとの学習秒数を集計
   Map<String, int> _aggregateGoalSeconds({
-    required DateTime date,
     required List<StudyDailyLogsModel> logs,
     required Set<String> activeGoalIds,
   }) {
     final goalSeconds = <String, int>{};
     for (final log in logs) {
-      if (!_isSameDay(log.studyDate, date)) continue;
       if (!activeGoalIds.contains(log.goalId)) continue;
       goalSeconds[log.goalId] =
           (goalSeconds[log.goalId] ?? 0) + log.totalSeconds;
     }
     return goalSeconds;
-  }
-
-  /// 2つの日付が同じ日か判定
-  bool _isSameDay(DateTime a, DateTime b) {
-    return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 }
 

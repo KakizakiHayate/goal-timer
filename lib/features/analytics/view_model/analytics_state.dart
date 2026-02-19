@@ -64,16 +64,21 @@ class AnalyticsState {
   final DateTime endDate;
   final List<DailyStudyData> dailyData;
   final List<GoalsModel> activeGoals;
+
+  /// goalId → GoalsModel のマップ（O(1)検索用）
+  final Map<String, GoalsModel> activeGoalsMap;
   final bool isLoading;
 
-  const AnalyticsState({
+  AnalyticsState({
     this.periodType = AnalyticsPeriodType.week,
     required this.startDate,
     required this.endDate,
     this.dailyData = const [],
     this.activeGoals = const [],
+    Map<String, GoalsModel>? activeGoalsMap,
     this.isLoading = false,
-  });
+  }) : activeGoalsMap = activeGoalsMap ??
+            {for (final g in activeGoals) g.id: g};
 
   AnalyticsState copyWith({
     AnalyticsPeriodType? periodType,
@@ -81,14 +86,18 @@ class AnalyticsState {
     DateTime? endDate,
     List<DailyStudyData>? dailyData,
     List<GoalsModel>? activeGoals,
+    Map<String, GoalsModel>? activeGoalsMap,
     bool? isLoading,
   }) {
+    final newGoals = activeGoals ?? this.activeGoals;
     return AnalyticsState(
       periodType: periodType ?? this.periodType,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
       dailyData: dailyData ?? this.dailyData,
-      activeGoals: activeGoals ?? this.activeGoals,
+      activeGoals: newGoals,
+      activeGoalsMap: activeGoalsMap ??
+          (activeGoals != null ? null : this.activeGoalsMap),
       isLoading: isLoading ?? this.isLoading,
     );
   }

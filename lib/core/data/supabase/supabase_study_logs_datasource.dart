@@ -50,6 +50,36 @@ class SupabaseStudyLogsDatasource {
     }
   }
 
+  /// 指定期間内の学習ログを取得
+  Future<List<StudyDailyLogsModel>> fetchLogsInRange({
+    required String userId,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    try {
+      final startDateStr =
+          '${startDate.year}-${startDate.month.toString().padLeft(2, '0')}-${startDate.day.toString().padLeft(2, '0')}';
+      final endDateStr =
+          '${endDate.year}-${endDate.month.toString().padLeft(2, '0')}-${endDate.day.toString().padLeft(2, '0')}';
+
+      final response = await _supabase
+          .from(_tableName)
+          .select()
+          .eq('user_id', userId)
+          .gte('study_date', startDateStr)
+          .lte('study_date', '$endDateStr 23:59:59')
+          .order('study_date', ascending: false);
+
+      return (response as List)
+          .map((json) =>
+              StudyDailyLogsModel.fromJson(json as Map<String, dynamic>))
+          .toList();
+    } catch (error, stackTrace) {
+      AppLogger.instance.e('期間内学習ログ取得に失敗しました', error, stackTrace);
+      rethrow;
+    }
+  }
+
   /// 学習ログを作成または更新
   /// null値はDBのDEFAULT値を使用するため除外する
   Future<StudyDailyLogsModel> upsertLog(StudyDailyLogsModel log) async {

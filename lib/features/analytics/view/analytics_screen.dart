@@ -406,11 +406,9 @@ class _StackedBarChart extends StatelessWidget {
 
           final lines = <String>[dateStr];
 
-          // 目標ごとの内訳
+          // 目標ごとの内訳（MapでO(1)検索）
           for (final entry in dayData.goalSeconds.entries) {
-            final goal = state.activeGoals
-                .where((g) => g.id == entry.key)
-                .firstOrNull;
+            final goal = state.activeGoalsMap[entry.key];
             final goalName = goal?.title ?? '';
             final minutes = entry.value ~/ TimeUtils.secondsPerMinute;
             lines.add('$goalName: ${minutes}m');
@@ -515,13 +513,9 @@ class _StackedBarChart extends StatelessWidget {
       final rodStackItems = <BarChartRodStackItem>[];
       double cumulative = 0;
 
-      // 目標をcreatedAt順にソートして積み上げ
-      final sortedGoals = List.of(state.activeGoals)
-        ..sort((a, b) => (a.createdAt ?? DateTime.now())
-            .compareTo(b.createdAt ?? DateTime.now()));
-
-      for (var i = 0; i < sortedGoals.length; i++) {
-        final goal = sortedGoals[i];
+      // activeGoalsはViewModel側でcreatedAt順にソート済み
+      for (var i = 0; i < state.activeGoals.length; i++) {
+        final goal = state.activeGoals[i];
         final seconds = dayData.goalSeconds[goal.id] ?? 0;
         if (seconds <= 0) continue;
 
@@ -565,14 +559,11 @@ class _Legend extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final sortedGoals = List.of(state.activeGoals)
-      ..sort((a, b) => (a.createdAt ?? DateTime.now())
-          .compareTo(b.createdAt ?? DateTime.now()));
-
+    // activeGoalsはViewModel側でcreatedAt順にソート済み
     return Wrap(
       spacing: SpacingConsts.md,
       runSpacing: SpacingConsts.sm,
-      children: sortedGoals.asMap().entries.map((entry) {
+      children: state.activeGoals.asMap().entries.map((entry) {
         final index = entry.key;
         final goal = entry.value;
         final color = AnalyticsColors.getColor(index);

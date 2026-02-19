@@ -92,7 +92,11 @@ void main() {
     ).thenAnswer((_) async => [activeGoal1, activeGoal2]);
 
     when(
-      () => mockStudyLogsRepository.fetchAllLogs(any()),
+      () => mockStudyLogsRepository.fetchLogsInRange(
+        startDate: any(named: 'startDate'),
+        endDate: any(named: 'endDate'),
+        userId: any(named: 'userId'),
+      ),
     ).thenAnswer((_) async => []);
 
     viewModel = AnalyticsViewModel(
@@ -120,7 +124,11 @@ void main() {
       ];
 
       when(
-        () => mockStudyLogsRepository.fetchAllLogs(any()),
+        () => mockStudyLogsRepository.fetchLogsInRange(
+        startDate: any(named: 'startDate'),
+        endDate: any(named: 'endDate'),
+        userId: any(named: 'userId'),
+      ),
       ).thenAnswer((_) async => logs);
 
       await viewModel.loadData(
@@ -156,7 +164,11 @@ void main() {
       ];
 
       when(
-        () => mockStudyLogsRepository.fetchAllLogs(any()),
+        () => mockStudyLogsRepository.fetchLogsInRange(
+        startDate: any(named: 'startDate'),
+        endDate: any(named: 'endDate'),
+        userId: any(named: 'userId'),
+      ),
       ).thenAnswer((_) async => logs);
 
       await viewModel.loadData(
@@ -173,7 +185,11 @@ void main() {
     // UT-03: 学習ログがない期間を選択した場合、空のデータが返る
     test('UT-03: 学習ログがない場合、空のデータが返る', () async {
       when(
-        () => mockStudyLogsRepository.fetchAllLogs(any()),
+        () => mockStudyLogsRepository.fetchLogsInRange(
+        startDate: any(named: 'startDate'),
+        endDate: any(named: 'endDate'),
+        userId: any(named: 'userId'),
+      ),
       ).thenAnswer((_) async => []);
 
       await viewModel.loadData(
@@ -234,8 +250,14 @@ void main() {
       await viewModel.switchPeriodType(AnalyticsPeriodType.month);
 
       expect(viewModel.state.periodType, AnalyticsPeriodType.month);
-      // fetchAllLogsが2回呼ばれる（初回 + 切り替え時）
-      verify(() => mockStudyLogsRepository.fetchAllLogs(any())).called(2);
+      // fetchLogsInRangeが2回呼ばれる（初回 + 切り替え時）
+      verify(
+        () => mockStudyLogsRepository.fetchLogsInRange(
+          startDate: any(named: 'startDate'),
+          endDate: any(named: 'endDate'),
+          userId: any(named: 'userId'),
+        ),
+      ).called(2);
     });
 
     // UT-07: サマリー（合計時間）が正しく計算される
@@ -251,7 +273,11 @@ void main() {
       ];
 
       when(
-        () => mockStudyLogsRepository.fetchAllLogs(any()),
+        () => mockStudyLogsRepository.fetchLogsInRange(
+        startDate: any(named: 'startDate'),
+        endDate: any(named: 'endDate'),
+        userId: any(named: 'userId'),
+      ),
       ).thenAnswer((_) async => logs);
 
       await viewModel.loadData(
@@ -269,7 +295,11 @@ void main() {
       ];
 
       when(
-        () => mockStudyLogsRepository.fetchAllLogs(any()),
+        () => mockStudyLogsRepository.fetchLogsInRange(
+        startDate: any(named: 'startDate'),
+        endDate: any(named: 'endDate'),
+        userId: any(named: 'userId'),
+      ),
       ).thenAnswer((_) async => logs);
 
       await viewModel.loadData(
@@ -298,7 +328,11 @@ void main() {
       ];
 
       when(
-        () => mockStudyLogsRepository.fetchAllLogs(any()),
+        () => mockStudyLogsRepository.fetchLogsInRange(
+        startDate: any(named: 'startDate'),
+        endDate: any(named: 'endDate'),
+        userId: any(named: 'userId'),
+      ),
       ).thenAnswer((_) async => logs);
 
       await viewModel.loadData(
@@ -325,7 +359,11 @@ void main() {
       ];
 
       when(
-        () => mockStudyLogsRepository.fetchAllLogs(any()),
+        () => mockStudyLogsRepository.fetchLogsInRange(
+        startDate: any(named: 'startDate'),
+        endDate: any(named: 'endDate'),
+        userId: any(named: 'userId'),
+      ),
       ).thenAnswer((_) async => logs);
 
       await viewModel.loadData(
@@ -357,7 +395,11 @@ void main() {
       ];
 
       when(
-        () => mockStudyLogsRepository.fetchAllLogs(any()),
+        () => mockStudyLogsRepository.fetchLogsInRange(
+        startDate: any(named: 'startDate'),
+        endDate: any(named: 'endDate'),
+        userId: any(named: 'userId'),
+      ),
       ).thenAnswer((_) async => logs);
 
       await viewModel.loadData(
@@ -400,7 +442,11 @@ void main() {
       ];
 
       when(
-        () => mockStudyLogsRepository.fetchAllLogs(any()),
+        () => mockStudyLogsRepository.fetchLogsInRange(
+        startDate: any(named: 'startDate'),
+        endDate: any(named: 'endDate'),
+        userId: any(named: 'userId'),
+      ),
       ).thenAnswer((_) async => logsUnder1h);
 
       await viewModel.loadData(
@@ -416,7 +462,11 @@ void main() {
       ];
 
       when(
-        () => mockStudyLogsRepository.fetchAllLogs(any()),
+        () => mockStudyLogsRepository.fetchLogsInRange(
+        startDate: any(named: 'startDate'),
+        endDate: any(named: 'endDate'),
+        userId: any(named: 'userId'),
+      ),
       ).thenAnswer((_) async => logsOver1h);
 
       await viewModel.loadData(
