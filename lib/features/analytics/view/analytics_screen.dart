@@ -13,7 +13,9 @@ import '../view_model/analytics_view_model.dart';
 
 /// 分析画面
 class AnalyticsScreen extends StatefulWidget {
-  const AnalyticsScreen({super.key});
+  final VoidCallback? onNavigateToTimer;
+
+  const AnalyticsScreen({super.key, this.onNavigateToTimer});
 
   @override
   State<AnalyticsScreen> createState() => _AnalyticsScreenState();
@@ -71,14 +73,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 const SizedBox(height: SpacingConsts.lg),
                 if (state.isEmpty)
                   _EmptyState(
-                    onStartStudying: () {
-                      // タイマータブ（index 1）に切り替え
-                      final homeState = context.findAncestorStateOfType<State>();
-                      if (homeState != null) {
-                        // BottomNavigationBarのonTapを呼ぶ代わりに、
-                        // Navigatorでpopしてタイマータブに移動
-                      }
-                    },
+                    onStartStudying: widget.onNavigateToTimer,
                   )
                 else ...[
                   _StackedBarChart(state: state),
@@ -595,9 +590,9 @@ class _Legend extends StatelessWidget {
 
 /// 空状態表示
 class _EmptyState extends StatelessWidget {
-  final VoidCallback onStartStudying;
+  final VoidCallback? onStartStudying;
 
-  const _EmptyState({required this.onStartStudying});
+  const _EmptyState({this.onStartStudying});
 
   @override
   Widget build(BuildContext context) {
@@ -622,27 +617,29 @@ class _EmptyState extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: SpacingConsts.md),
-            ElevatedButton(
-              onPressed: onStartStudying,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: ColorConsts.primary,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: SpacingConsts.lg,
-                  vertical: SpacingConsts.sm,
+            if (onStartStudying != null) ...[
+              const SizedBox(height: SpacingConsts.md),
+              ElevatedButton(
+                onPressed: onStartStudying,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: ColorConsts.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: SpacingConsts.lg,
+                    vertical: SpacingConsts.sm,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(SpacingConsts.radiusMd),
+                  ),
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(SpacingConsts.radiusMd),
+                child: Text(
+                  l10n?.analyticsStartStudying ??
+                      'Start studying with Timer',
+                  style: TextConsts.buttonMedium,
                 ),
               ),
-              child: Text(
-                l10n?.analyticsStartStudying ??
-                    'Start studying with Timer',
-                style: TextConsts.buttonMedium,
-              ),
-            ),
+            ],
           ],
         ),
       ),

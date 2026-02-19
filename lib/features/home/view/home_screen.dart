@@ -100,10 +100,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    const timerTabIndex = 1;
     final pages = [
       const _HomeTabContent(),
       const _TimerTabContent(),
-      const AnalyticsScreen(),
+      AnalyticsScreen(
+        onNavigateToTimer: () {
+          _tabController.animateTo(timerTabIndex);
+          setState(() {});
+        },
+      ),
       const SettingsScreen(),
     ];
 
