@@ -73,6 +73,32 @@ class StudyLogsRepository {
     }
   }
 
+  /// 指定期間内の学習ログを取得
+  ///
+  /// [startDate] 開始日
+  /// [endDate] 終了日
+  /// [userId] ユーザーID（Supabase使用時に必要）
+  Future<List<StudyDailyLogsModel>> fetchLogsInRange({
+    required DateTime startDate,
+    required DateTime endDate,
+    required String userId,
+  }) async {
+    if (await _migrationService.isMigrated()) {
+      AppLogger.instance.i('Supabaseから期間内学習ログを取得します');
+      return _supabaseDs.fetchLogsInRange(
+        userId: userId,
+        startDate: startDate,
+        endDate: endDate,
+      );
+    } else {
+      AppLogger.instance.i('ローカルDBから期間内学習ログを取得します');
+      return _localDs.fetchLogsInRange(
+        startDate: startDate,
+        endDate: endDate,
+      );
+    }
+  }
+
   /// 特定の目標の学習ログを取得
   ///
   /// [goalId] 目標ID

@@ -610,4 +610,56 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get authLoginFailed => 'ログインに失敗しました';
+
+  @override
+  String get navAnalytics => '分析';
+
+  @override
+  String get analyticsTotalTime => '合計時間';
+
+  @override
+  String get analyticsDailyAverage => '1日平均';
+
+  @override
+  String get analyticsStudyDays => '学習日数';
+
+  @override
+  String analyticsDaysSuffix(int count) {
+    return '$count日';
+  }
+
+  @override
+  String get analyticsWeek => '週';
+
+  @override
+  String get analyticsMonth => '月';
+
+  @override
+  String analyticsMonthYear(String month, int year) {
+    return '$year年$month';
+  }
+
+  @override
+  String get analyticsTotal => '合計';
+
+  @override
+  String get analyticsNoData => 'まだ学習記録がありません';
+
+  @override
+  String get analyticsStartStudying => 'タイマーで学習を始める';
+
+  @override
+  String analyticsSecondsFormat(int seconds) {
+    return '$seconds秒';
+  }
+
+  @override
+  String analyticsMinutesFormat(int minutes) {
+    return '$minutes分';
+  }
+
+  @override
+  String analyticsHoursFormat(int hours) {
+    return '${hours}h';
+  }
 }

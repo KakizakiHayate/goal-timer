@@ -1039,5 +1039,103 @@
   "authLoginFailed": "Login failed",
   "@authLoginFailed": {
     "description": "Generic login failed message"
+  },
+
+  "navAnalytics": "Analytics",
+  "@navAnalytics": {
+    "description": "Bottom navigation analytics tab label"
+  },
+
+  "analyticsTotalTime": "Total Time",
+  "@analyticsTotalTime": {
+    "description": "Analytics summary total time label"
+  },
+
+  "analyticsDailyAverage": "Daily Avg",
+  "@analyticsDailyAverage": {
+    "description": "Analytics summary daily average label"
+  },
+
+  "analyticsStudyDays": "Study Days",
+  "@analyticsStudyDays": {
+    "description": "Analytics summary study days label"
+  },
+
+  "analyticsDaysSuffix": "{count, plural, one{1 day} other{{count} days}}",
+  "@analyticsDaysSuffix": {
+    "description": "Analytics days suffix with plural support",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "analyticsWeek": "Week",
+  "@analyticsWeek": {
+    "description": "Analytics period selector week label"
+  },
+
+  "analyticsMonth": "Month",
+  "@analyticsMonth": {
+    "description": "Analytics period selector month label"
+  },
+
+  "analyticsMonthYear": "{month} {year}",
+  "@analyticsMonthYear": {
+    "description": "Analytics month year format",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+
+  "analyticsTotal": "Total",
+  "@analyticsTotal": {
+    "description": "Analytics tooltip total label"
+  },
+
+  "analyticsNoData": "No study records yet",
+  "@analyticsNoData": {
+    "description": "Analytics empty state message"
+  },
+
+  "analyticsStartStudying": "Start studying with Timer",
+  "@analyticsStartStudying": {
+    "description": "Analytics empty state CTA button"
+  },
+
+  "analyticsSecondsFormat": "{seconds}s",
+  "@analyticsSecondsFormat": {
+    "description": "Analytics seconds format",
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+
+  "analyticsMinutesFormat": "{minutes}m",
+  "@analyticsMinutesFormat": {
+    "description": "Analytics minutes format",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+
+  "analyticsHoursFormat": "{hours}h",
+  "@analyticsHoursFormat": {
+    "description": "Analytics hours format for Y axis",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
   }
 }

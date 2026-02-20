@@ -1213,6 +1213,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Login failed'**
   String get authLoginFailed;
+
+  /// Bottom navigation analytics tab label
+  ///
+  /// In en, this message translates to:
+  /// **'Analytics'**
+  String get navAnalytics;
+
+  /// Analytics summary total time label
+  ///
+  /// In en, this message translates to:
+  /// **'Total Time'**
+  String get analyticsTotalTime;
+
+  /// Analytics summary daily average label
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Avg'**
+  String get analyticsDailyAverage;
+
+  /// Analytics summary study days label
+  ///
+  /// In en, this message translates to:
+  /// **'Study Days'**
+  String get analyticsStudyDays;
+
+  /// Analytics days suffix with plural support
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 day} other{{count} days}}'**
+  String analyticsDaysSuffix(int count);
+
+  /// Analytics period selector week label
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get analyticsWeek;
+
+  /// Analytics period selector month label
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get analyticsMonth;
+
+  /// Analytics month year format
+  ///
+  /// In en, this message translates to:
+  /// **'{month} {year}'**
+  String analyticsMonthYear(String month, int year);
+
+  /// Analytics tooltip total label
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get analyticsTotal;
+
+  /// Analytics empty state message
+  ///
+  /// In en, this message translates to:
+  /// **'No study records yet'**
+  String get analyticsNoData;
+
+  /// Analytics empty state CTA button
+  ///
+  /// In en, this message translates to:
+  /// **'Start studying with Timer'**
+  String get analyticsStartStudying;
+
+  /// Analytics seconds format
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds}s'**
+  String analyticsSecondsFormat(int seconds);
+
+  /// Analytics minutes format
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes}m'**
+  String analyticsMinutesFormat(int minutes);
+
+  /// Analytics hours format for Y axis
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h'**
+  String analyticsHoursFormat(int hours);
 }
 
 class _AppLocalizationsDelegate

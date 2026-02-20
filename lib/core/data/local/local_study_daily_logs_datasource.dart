@@ -116,6 +116,26 @@ class LocalStudyDailyLogsDatasource {
     );
   }
 
+  /// 指定期間内の学習ログを取得
+  Future<List<StudyDailyLogsModel>> fetchLogsInRange({
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    final db = await _database.database;
+
+    final startDateStr = _formatDateOnly(startDate);
+    final endDateStr = _formatDateOnly(endDate);
+
+    final List<Map<String, dynamic>> maps = await db.query(
+      DatabaseConsts.tableStudyDailyLogs,
+      where:
+          'DATE(${DatabaseConsts.columnStudyDate}) >= DATE(?) AND DATE(${DatabaseConsts.columnStudyDate}) <= DATE(?)',
+      whereArgs: [startDateStr, endDateStr],
+    );
+
+    return maps.map((map) => _mapToModel(map)).toList();
+  }
+
   /// 指定期間内の学習日リストを取得（合計1分以上の日のみ）
   /// 全ての目標を合算してカウント
   Future<List<DateTime>> fetchStudyDatesInRange({

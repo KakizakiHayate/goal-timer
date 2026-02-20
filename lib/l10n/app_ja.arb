@@ -371,5 +371,33 @@
 
   "authCredentialNotFound": "認証情報を取得できませんでした",
 
-  "authLoginFailed": "ログインに失敗しました"
+  "authLoginFailed": "ログインに失敗しました",
+
+  "navAnalytics": "分析",
+
+  "analyticsTotalTime": "合計時間",
+
+  "analyticsDailyAverage": "1日平均",
+
+  "analyticsStudyDays": "学習日数",
+
+  "analyticsDaysSuffix": "{count}日",
+
+  "analyticsWeek": "週",
+
+  "analyticsMonth": "月",
+
+  "analyticsMonthYear": "{year}年{month}",
+
+  "analyticsTotal": "合計",
+
+  "analyticsNoData": "まだ学習記録がありません",
+
+  "analyticsStartStudying": "タイマーで学習を始める",
+
+  "analyticsSecondsFormat": "{seconds}秒",
+
+  "analyticsMinutesFormat": "{minutes}分",
+
+  "analyticsHoursFormat": "{hours}h"
 }
