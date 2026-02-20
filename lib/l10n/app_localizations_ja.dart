@@ -636,7 +636,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String analyticsMonthYear(String month, int year) {
-    return '$year年$month月';
+    return '$year年$month';
   }
 
   @override
