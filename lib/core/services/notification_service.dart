@@ -8,6 +8,7 @@ import '../../l10n/app_localizations.dart';
 import '../utils/app_logger.dart';
 import '../utils/locale_helper.dart';
 import '../utils/streak_reminder_consts.dart';
+import '../utils/time_utils.dart';
 
 /// 通知タップ時のペイロード
 class NotificationPayload {
@@ -23,8 +24,20 @@ class NotificationService {
   factory NotificationService() => _instance;
   NotificationService._internal();
 
-  /// タイマー完了通知のID
+  /// タイマー完了通知のID（後方互換性のため残す）
   static const int _timerCompletionNotificationId = 1;
+
+  /// 繰り返し通知のベースID
+  static const int _repeatingNotificationBaseId = 100;
+
+  /// 繰り返し通知の間隔（秒）
+  static const int _repeatingNotificationIntervalSeconds = 10;
+
+  /// 繰り返し通知の最大数
+  static const int _repeatingNotificationMaxCount = 40;
+
+  /// スケジュール済みの繰り返し通知IDリスト
+  List<int> _scheduledRepeatingNotificationIds = [];
 
   /// 通知タップ時のコールバック（外部から設定可能）
   void Function(String? payload)? onNotificationTap;
@@ -34,12 +47,12 @@ class NotificationService {
   AppLocalizations get _l10n =>
       lookupAppLocalizations(LocaleHelper.systemLocale);
 
-  /// タイマー完了通知タイトル
-  String get _timerCompleteTitle => _l10n.timerCompleteTitle;
+  /// 繰り返し通知タイトル
+  String get _repeatingNotificationTitle => _l10n.repeatingNotificationTitle;
 
-  /// タイマー完了通知メッセージ
-  String _timerCompleteMessage(String goalTitle) =>
-      _l10n.timerCompleteMessage(goalTitle);
+  /// 繰り返し通知メッセージ
+  String _repeatingNotificationMessage(String goalTitle, String duration) =>
+      _l10n.repeatingNotificationMessage(goalTitle, duration);
 
   /// タイマー通知チャンネル名
   String get _timerChannelName => _l10n.timerChannelName;
@@ -106,17 +119,28 @@ class NotificationService {
     return result ?? false;
   }
 
-  /// タイマー完了通知をスケジュールする
-  /// [seconds] 秒後に通知を表示する
-  Future<void> scheduleTimerCompletionNotification({
-    required int seconds,
+  /// 繰り返し完了通知をスケジュールする
+  /// [delayBeforeCompletionSeconds] 完了までの残り秒数
+  /// [goalTitle] 目標タイトル（通知本文に表示）
+  /// [studyDurationSeconds] 学習時間（秒）（通知本文に表示）
+  Future<void> scheduleRepeatingCompletionNotifications({
+    required int delayBeforeCompletionSeconds,
     required String goalTitle,
+    required int studyDurationSeconds,
   }) async {
     if (!_isInitialized) {
       AppLogger.instance.w('NotificationService: 未初期化のため通知をスケジュールできません');
       return;
     }
 
+    final now = tz.TZDateTime.now(tz.local);
+    final duration = TimeUtils.formatSecondsToHoursAndMinutesL10n(
+      studyDurationSeconds,
+      _l10n,
+    );
+    final title = _repeatingNotificationTitle;
+    final body = _repeatingNotificationMessage(goalTitle, duration);
+
     final androidDetails = AndroidNotificationDetails(
       'timer_completion',
       _timerChannelName,
@@ -136,64 +160,58 @@ class NotificationService {
       iOS: iosDetails,
     );
 
-    final scheduledTime = tz.TZDateTime.now(
-      tz.local,
-    ).add(Duration(seconds: seconds));
+    final ids = <int>[];
 
-    await _notifications.zonedSchedule(
-      _timerCompletionNotificationId,
-      _timerCompleteTitle,
-      _timerCompleteMessage(goalTitle),
-      scheduledTime,
-      details,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      matchDateTimeComponents: null,
-    );
+    for (var i = 0; i < _repeatingNotificationMaxCount; i++) {
+      final notificationId = _repeatingNotificationBaseId + i;
+      final delaySeconds = delayBeforeCompletionSeconds +
+          _repeatingNotificationIntervalSeconds * (i + 1);
+      final scheduledTime = now.add(Duration(seconds: delaySeconds));
 
-    AppLogger.instance.i('NotificationService: 通知をスケジュールしました（$seconds秒後）');
-  }
+      await _notifications.zonedSchedule(
+        notificationId,
+        title,
+        body,
+        scheduledTime,
+        details,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        matchDateTimeComponents: null,
+      );
 
-  /// 即時通知を表示する（バックグラウンドで完了した場合）
-  Future<void> showTimerCompletionNotification({
-    required String goalTitle,
-  }) async {
-    if (!_isInitialized) {
-      AppLogger.instance.w('NotificationService: 未初期化のため通知を表示できません');
-      return;
+      ids.add(notificationId);
     }
 
-    final androidDetails = AndroidNotificationDetails(
-      'timer_completion',
-      _timerChannelName,
-      channelDescription: _timerChannelDescription,
-      importance: Importance.high,
-      priority: Priority.high,
-    );
+    _scheduledRepeatingNotificationIds = ids;
 
-    const iosDetails = DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
+    AppLogger.instance.i(
+      'NotificationService: 繰り返し通知を${ids.length}個スケジュールしました'
+      '（完了予定: $delayBeforeCompletionSeconds秒後, '
+      '最初の通知: ${delayBeforeCompletionSeconds + _repeatingNotificationIntervalSeconds}秒後, '
+      '最後の通知: ${delayBeforeCompletionSeconds + _repeatingNotificationIntervalSeconds * _repeatingNotificationMaxCount}秒後）',
     );
-
-    final details = NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
-
-    await _notifications.show(
-      _timerCompletionNotificationId,
-      _timerCompleteTitle,
-      _timerCompleteMessage(goalTitle),
-      details,
-    );
-
-    AppLogger.instance.i('NotificationService: 即時通知を表示しました');
   }
 
-  /// スケジュールされた通知をキャンセルする
+  /// 繰り返し完了通知をキャンセルする
+  Future<void> cancelRepeatingCompletionNotifications() async {
+    for (final id in _scheduledRepeatingNotificationIds) {
+      await _notifications.cancel(id);
+    }
+
+    final cancelledCount = _scheduledRepeatingNotificationIds.length;
+    _scheduledRepeatingNotificationIds = [];
+
+    if (cancelledCount > 0) {
+      AppLogger.instance.i(
+        'NotificationService: 繰り返し通知を$cancelledCount個キャンセルしました',
+      );
+    }
+  }
+
+  /// スケジュールされたタイマー完了通知をキャンセルする
+  /// 既存の呼び出し元（pauseTimer, resetTimer, onClose）との後方互換性を維持
   Future<void> cancelScheduledNotification() async {
     await _notifications.cancel(_timerCompletionNotificationId);
+    await cancelRepeatingCompletionNotifications();
     AppLogger.instance.i('NotificationService: スケジュールされた通知をキャンセルしました');
   }
 

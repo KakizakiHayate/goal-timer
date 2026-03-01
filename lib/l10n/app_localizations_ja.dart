@@ -662,4 +662,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String analyticsHoursFormat(int hours) {
     return '${hours}h';
   }
+
+  @override
+  String get repeatingNotificationTitle => '学習時間終了';
+
+  @override
+  String repeatingNotificationMessage(String goal, String duration) {
+    return '「$goal」の学習時間（$duration）を達成しました！お疲れ様です！';
+  }
 }
