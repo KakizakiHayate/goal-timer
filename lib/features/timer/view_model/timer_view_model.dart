@@ -258,8 +258,8 @@ class TimerViewModel extends GetxController {
       needsCompletionConfirm: false,
     );
 
-    // カウントダウン/ポモドーロモードの場合、完了時の通知をスケジュール
-    if (state.mode == TimerMode.countdown || state.mode == TimerMode.pomodoro) {
+    // カウントダウンモードの場合、繰り返し完了通知をスケジュール
+    if (state.mode == TimerMode.countdown) {
       _scheduleCompletionNotification();
     }
 
@@ -381,12 +381,13 @@ class TimerViewModel extends GetxController {
     }
   }
 
-  /// 完了通知をスケジュールする
+  /// 完了通知をスケジュールする（繰り返し通知）
   Future<void> _scheduleCompletionNotification() async {
     if (state.currentSeconds > TimeUtils.minValidSeconds) {
-      await _notificationService.scheduleTimerCompletionNotification(
-        seconds: state.currentSeconds,
+      await _notificationService.scheduleRepeatingCompletionNotifications(
+        delayBeforeCompletionSeconds: state.currentSeconds,
         goalTitle: goal.title,
+        studyDurationSeconds: state.totalSeconds,
       );
     }
   }
@@ -415,6 +416,8 @@ class TimerViewModel extends GetxController {
         // バックグラウンド中に完了した場合
         _elapsedSeconds = state.totalSeconds;
         _timer?.cancel();
+        // 残りの繰り返し通知をキャンセル（ユーザーがアプリに戻ったため不要）
+        _notificationService.cancelRepeatingCompletionNotifications();
         _state.value = state.copyWith(
           status: TimerStatus.completed,
           currentSeconds: TimerConstants.countdownCompleteThreshold,
