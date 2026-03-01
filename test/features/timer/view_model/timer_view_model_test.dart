@@ -117,15 +117,15 @@ void main() {
       () => mockNotificationService.requestPermission(),
     ).thenAnswer((_) async => true);
     when(
-      () => mockNotificationService.scheduleTimerCompletionNotification(
-        seconds: any(named: 'seconds'),
+      () => mockNotificationService.scheduleRepeatingCompletionNotifications(
+        delayBeforeCompletionSeconds:
+            any(named: 'delayBeforeCompletionSeconds'),
         goalTitle: any(named: 'goalTitle'),
+        studyDurationSeconds: any(named: 'studyDurationSeconds'),
       ),
     ).thenAnswer((_) async {});
     when(
-      () => mockNotificationService.showTimerCompletionNotification(
-        goalTitle: any(named: 'goalTitle'),
-      ),
+      () => mockNotificationService.cancelRepeatingCompletionNotifications(),
     ).thenAnswer((_) async {});
 
     // MockAuthServiceのスタブ設定
@@ -584,6 +584,215 @@ void main() {
 
         // Assert
         expect(state.needsBackConfirmation, isFalse);
+      });
+    });
+  });
+
+  group('TimerViewModel 繰り返し通知テスト', () {
+    group('スケジュール（T-3.x）', () {
+      test('T-3.1: カウントダウンでstartTimer→scheduleRepeatingCompletionNotificationsが呼ばれること',
+          () {
+        // Arrange
+        final viewModel = createTestViewModel();
+
+        // Act
+        viewModel.startTimer();
+
+        // Assert
+        verify(
+          () => mockNotificationService
+              .scheduleRepeatingCompletionNotifications(
+            delayBeforeCompletionSeconds:
+                any(named: 'delayBeforeCompletionSeconds'),
+            goalTitle: 'Test Goal',
+            studyDurationSeconds: any(named: 'studyDurationSeconds'),
+          ),
+        ).called(1);
+
+        viewModel.onClose();
+      });
+
+      test('T-3.2: カウントアップでstartTimer→繰り返し通知がスケジュールされないこと', () {
+        // Arrange
+        final viewModel = createTestViewModel();
+        viewModel.setMode(TimerMode.countup);
+
+        // Act
+        viewModel.startTimer();
+
+        // Assert
+        verifyNever(
+          () => mockNotificationService
+              .scheduleRepeatingCompletionNotifications(
+            delayBeforeCompletionSeconds:
+                any(named: 'delayBeforeCompletionSeconds'),
+            goalTitle: any(named: 'goalTitle'),
+            studyDurationSeconds: any(named: 'studyDurationSeconds'),
+          ),
+        );
+
+        viewModel.onClose();
+      });
+
+      test('T-3.3: ポモドーロでstartTimer→繰り返し通知がスケジュールされないこと', () {
+        // Arrange
+        final viewModel = createTestViewModel();
+        viewModel.setMode(TimerMode.pomodoro);
+
+        // Act
+        viewModel.startTimer();
+
+        // Assert
+        verifyNever(
+          () => mockNotificationService
+              .scheduleRepeatingCompletionNotifications(
+            delayBeforeCompletionSeconds:
+                any(named: 'delayBeforeCompletionSeconds'),
+            goalTitle: any(named: 'goalTitle'),
+            studyDurationSeconds: any(named: 'studyDurationSeconds'),
+          ),
+        );
+
+        viewModel.onClose();
+      });
+    });
+
+    group('キャンセル（T-4.x）', () {
+      test('T-4.1: pauseTimer→cancelScheduledNotificationが呼ばれること', () {
+        // Arrange
+        final viewModel = createTestViewModel();
+        viewModel.startTimer();
+
+        // Act
+        viewModel.pauseTimer();
+
+        // Assert
+        verify(
+          () => mockNotificationService.cancelScheduledNotification(),
+        ).called(1);
+
+        viewModel.onClose();
+      });
+
+      test('T-4.2: resetTimer→cancelScheduledNotificationが呼ばれること', () {
+        // Arrange
+        final viewModel = createTestViewModel();
+        viewModel.startTimer();
+
+        // Act
+        viewModel.resetTimer();
+
+        // Assert
+        verify(
+          () => mockNotificationService.cancelScheduledNotification(),
+        ).called(1);
+
+        viewModel.onClose();
+      });
+
+      test(
+          'T-4.3: バックグラウンド中にタイマー完了→復帰時にcancelRepeatingCompletionNotificationsが呼ばれること',
+          () {
+        // Arrange: totalSeconds=0でタイマーを即完了させる
+        fakeSettingsViewModel.defaultTimerSeconds.value = 0;
+        final viewModel = createTestViewModel();
+
+        // Act: 開始→バックグラウンド→復帰（elapsed≈0, 0-0=0≤0で完了判定）
+        viewModel.startTimer();
+        viewModel.onAppPaused();
+        viewModel.onAppResumed();
+
+        // Assert
+        verify(
+          () =>
+              mockNotificationService.cancelRepeatingCompletionNotifications(),
+        ).called(1);
+
+        viewModel.onClose();
+      });
+
+      test(
+          'T-4.4: バックグラウンド中にタイマー未完了→復帰時にcancelRepeatingCompletionNotificationsが呼ばれないこと',
+          () {
+        // Arrange: デフォルト25分 → 即復帰では未完了
+        final viewModel = createTestViewModel();
+
+        // Act
+        viewModel.startTimer();
+        viewModel.onAppPaused();
+        viewModel.onAppResumed();
+
+        // Assert: 直接のcancelRepeatingCompletionNotificationsは呼ばれない
+        verifyNever(
+          () =>
+              mockNotificationService.cancelRepeatingCompletionNotifications(),
+        );
+
+        viewModel.onClose();
+      });
+    });
+
+    group('一時停止→再開（T-5.x）', () {
+      test('T-5.1: 一時停止→再開時にscheduleRepeatingCompletionNotificationsが再度呼ばれること',
+          () {
+        // Arrange
+        final viewModel = createTestViewModel();
+
+        // Act: 開始（1回目）→一時停止→再開（2回目）
+        viewModel.startTimer();
+        viewModel.pauseTimer();
+        viewModel.startTimer();
+
+        // Assert: 開始と再開で計2回スケジュールされる
+        verify(
+          () => mockNotificationService
+              .scheduleRepeatingCompletionNotifications(
+            delayBeforeCompletionSeconds:
+                any(named: 'delayBeforeCompletionSeconds'),
+            goalTitle: any(named: 'goalTitle'),
+            studyDurationSeconds: any(named: 'studyDurationSeconds'),
+          ),
+        ).called(2);
+
+        viewModel.onClose();
+      });
+    });
+
+    group('エッジケース（T-6.x）', () {
+      test('T-6.1: currentSecondsが0の場合は通知がスケジュールされないこと', () {
+        // Arrange: totalSeconds=0 → currentSeconds=0
+        fakeSettingsViewModel.defaultTimerSeconds.value = 0;
+        final viewModel = createTestViewModel();
+
+        // Act
+        viewModel.startTimer();
+
+        // Assert: currentSeconds <= 0のため通知はスケジュールされない
+        verifyNever(
+          () => mockNotificationService
+              .scheduleRepeatingCompletionNotifications(
+            delayBeforeCompletionSeconds:
+                any(named: 'delayBeforeCompletionSeconds'),
+            goalTitle: any(named: 'goalTitle'),
+            studyDurationSeconds: any(named: 'studyDurationSeconds'),
+          ),
+        );
+
+        viewModel.onClose();
+      });
+
+      test('T-6.2: onClose時にcancelScheduledNotificationが呼ばれること', () {
+        // Arrange
+        final viewModel = createTestViewModel();
+        viewModel.startTimer();
+
+        // Act
+        viewModel.onClose();
+
+        // Assert: onCloseで通知がキャンセルされる
+        verify(
+          () => mockNotificationService.cancelScheduledNotification(),
+        ).called(1);
       });
     });
   });
