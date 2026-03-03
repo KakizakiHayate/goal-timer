@@ -145,6 +145,7 @@ void main() {
     when(
       () => mockAudioService.playTimerCompletionSound(),
     ).thenAnswer((_) async {});
+    when(() => mockAudioService.dispose()).thenAnswer((_) async {});
   });
 
   /// テスト用のTimerViewModelを作成するヘルパー関数
@@ -714,6 +715,7 @@ void main() {
       when(
         () => mockAudioService.playTimerCompletionSound(),
       ).thenAnswer((_) async {});
+      when(() => mockAudioService.dispose()).thenAnswer((_) async {});
 
       // _timerStartTimeはstartTimer()で設定済み、onAppPaused()ではnullにしない
       // ただしonAppPaused()でタイマーをキャンセルする

@@ -209,6 +209,7 @@ class TimerViewModel extends GetxController {
   @override
   void onClose() {
     _timer?.cancel();
+    _audioService.dispose();
     // タイマー完了通知のみキャンセル（ストリークリマインダーは維持）
     _notificationService.cancelScheduledNotification();
     super.onClose();

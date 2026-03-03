@@ -21,4 +21,9 @@ class AudioService {
       AppLogger.instance.e('チャイム音の再生に失敗しました', error, stackTrace);
     }
   }
+
+  /// AudioPlayerのリソースを解放する
+  Future<void> dispose() async {
+    await _audioPlayer.dispose();
+  }
 }
