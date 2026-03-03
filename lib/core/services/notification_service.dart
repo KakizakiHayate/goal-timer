@@ -161,6 +161,7 @@ class NotificationService {
     );
 
     final ids = <int>[];
+    final futures = <Future<void>>[];
 
     for (var i = 0; i < _repeatingNotificationMaxCount; i++) {
       final notificationId = _repeatingNotificationBaseId + i;
@@ -168,19 +169,22 @@ class NotificationService {
           _repeatingNotificationIntervalSeconds * (i + 1);
       final scheduledTime = now.add(Duration(seconds: delaySeconds));
 
-      await _notifications.zonedSchedule(
-        notificationId,
-        title,
-        body,
-        scheduledTime,
-        details,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        matchDateTimeComponents: null,
+      futures.add(
+        _notifications.zonedSchedule(
+          notificationId,
+          title,
+          body,
+          scheduledTime,
+          details,
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+          matchDateTimeComponents: null,
+        ),
       );
 
       ids.add(notificationId);
     }
 
+    await Future.wait(futures);
     _scheduledRepeatingNotificationIds = ids;
 
     AppLogger.instance.i(
@@ -193,16 +197,16 @@ class NotificationService {
 
   /// 繰り返し完了通知をキャンセルする
   Future<void> cancelRepeatingCompletionNotifications() async {
-    for (final id in _scheduledRepeatingNotificationIds) {
-      await _notifications.cancel(id);
-    }
-
-    final cancelledCount = _scheduledRepeatingNotificationIds.length;
+    // 競合状態を避けるため、IDリストをローカル変数にコピーし、
+    // すぐにインスタンス変数をクリアする
+    final idsToCancel = _scheduledRepeatingNotificationIds;
     _scheduledRepeatingNotificationIds = [];
 
-    if (cancelledCount > 0) {
+    if (idsToCancel.isNotEmpty) {
+      await Future.wait(idsToCancel.map((id) => _notifications.cancel(id)));
+
       AppLogger.instance.i(
-        'NotificationService: 繰り返し通知を$cancelledCount個キャンセルしました',
+        'NotificationService: 繰り返し通知を${idsToCancel.length}個キャンセルしました',
       );
     }
   }
