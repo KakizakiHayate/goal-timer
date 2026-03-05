@@ -8,6 +8,7 @@ import '../../../core/data/repositories/study_logs_repository.dart';
 import '../../../core/data/repositories/users_repository.dart';
 import '../../../core/models/goals/goals_model.dart';
 import '../../../core/models/study_daily_logs/study_daily_logs_model.dart';
+import '../../../core/services/audio_service.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/services/rating_service.dart';
@@ -136,6 +137,9 @@ class TimerViewModel extends GetxController {
   // PRコメント対応: インスタンス変数として一度だけ取得
   final SettingsViewModel _settingsViewModel;
 
+  // 音声サービス
+  final AudioService _audioService;
+
   // 通知サービス
   final NotificationService _notificationService;
 
@@ -179,7 +183,9 @@ class TimerViewModel extends GetxController {
     SettingsViewModel? settingsViewModel,
     NotificationService? notificationService,
     LocalSettingsDataSource? settingsDataSource,
+    AudioService? audioService,
   }) : _settingsViewModel = settingsViewModel ?? Get.find<SettingsViewModel>(),
+       _audioService = audioService ?? AudioService(),
        _notificationService = notificationService ?? NotificationService(),
        _studyLogsRepository = studyLogsRepository ?? StudyLogsRepository(),
        _usersRepository = usersRepository ?? UsersRepository(),
@@ -203,6 +209,7 @@ class TimerViewModel extends GetxController {
   @override
   void onClose() {
     _timer?.cancel();
+    _audioService.dispose();
     // タイマー完了通知のみキャンセル（ストリークリマインダーは維持）
     _notificationService.cancelScheduledNotification();
     super.onClose();
@@ -324,6 +331,12 @@ class TimerViewModel extends GetxController {
       currentSeconds: TimerConstants.countdownCompleteThreshold,
       needsCompletionConfirm: true,
     );
+
+    // カウントダウンモードの場合のみチャイム音を再生
+    if (state.mode == TimerMode.countdown) {
+      unawaited(_audioService.playTimerCompletionSound());
+    }
+
     AppLogger.instance.i('タイマーが完了しました: $_elapsedSeconds秒');
     // フィードバックポップアップの判定はonTappedTimerFinishButtonで行う
     // （学習記録保存時にカウント）
@@ -415,14 +428,9 @@ class TimerViewModel extends GetxController {
       if (newCurrentSeconds <= TimeUtils.minValidSeconds) {
         // バックグラウンド中に完了した場合
         _elapsedSeconds = state.totalSeconds;
-        _timer?.cancel();
         // 残りの繰り返し通知をキャンセル（ユーザーがアプリに戻ったため不要）
         _notificationService.cancelRepeatingCompletionNotifications();
-        _state.value = state.copyWith(
-          status: TimerStatus.completed,
-          currentSeconds: TimerConstants.countdownCompleteThreshold,
-          needsCompletionConfirm: true,
-        );
+        completeTimer();
         AppLogger.instance.i('バックグラウンド中にタイマーが完了しました');
       } else {
         // まだ完了していない場合: 経過時間を更新してタイマーを再開
