@@ -706,4 +706,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String analyticsHoursFormat(int hours) {
     return '${hours}h';
   }
+
+  @override
+  String get repeatingNotificationTitle => 'Study Time Complete';
+
+  @override
+  String repeatingNotificationMessage(String goal, String duration) {
+    return 'You completed $duration of studying \"$goal\"! Great job!';
+  }
 }

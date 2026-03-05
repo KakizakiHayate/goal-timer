@@ -1297,6 +1297,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{hours}h'**
   String analyticsHoursFormat(int hours);
+
+  /// Repeating notification title after countdown timer completion
+  ///
+  /// In en, this message translates to:
+  /// **'Study Time Complete'**
+  String get repeatingNotificationTitle;
+
+  /// Repeating notification message after countdown timer completion
+  ///
+  /// In en, this message translates to:
+  /// **'You completed {duration} of studying \"{goal}\"! Great job!'**
+  String repeatingNotificationMessage(String goal, String duration);
 }
 
 class _AppLocalizationsDelegate

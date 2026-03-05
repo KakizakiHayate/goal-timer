@@ -1137,5 +1137,23 @@
         "type": "int"
       }
     }
+  },
+
+  "repeatingNotificationTitle": "Study Time Complete",
+  "@repeatingNotificationTitle": {
+    "description": "Repeating notification title after countdown timer completion"
+  },
+
+  "repeatingNotificationMessage": "You completed {duration} of studying \"{goal}\"! Great job!",
+  "@repeatingNotificationMessage": {
+    "description": "Repeating notification message after countdown timer completion",
+    "placeholders": {
+      "goal": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
   }
 }

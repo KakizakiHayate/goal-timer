@@ -399,5 +399,9 @@
 
   "analyticsMinutesFormat": "{minutes}分",
 
-  "analyticsHoursFormat": "{hours}h"
+  "analyticsHoursFormat": "{hours}h",
+
+  "repeatingNotificationTitle": "学習時間終了",
+
+  "repeatingNotificationMessage": "「{goal}」の学習時間（{duration}）を達成しました！お疲れ様です！"
 }
