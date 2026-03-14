@@ -130,10 +130,11 @@ class TimeUtils {
 class TimerConstants {
   static const int tutorialDurationSeconds = 5;
   static const int countdownCompleteThreshold = 0;
-  static const int pomodoroWorkMinutes = 25;
-  static const int pomodoroBreakMinutes = 5;
   static const int countupMaxHours = 1;
-  static const int initialPomodoroRound = 1;
+  // ※以下はポモドーロ実装時に追加予定
+  // static const int pomodoroWorkMinutes = 25;
+  // static const int pomodoroBreakMinutes = 5;
+  // static const int initialPomodoroRound = 1;
 }
 ```
 
@@ -187,7 +188,7 @@ class AppConsts {
 | `minXxx` / `maxXxx` | 最小値/最大値 | `minTimerSeconds`, `maxTimerHours` |
 | `defaultXxx` | デフォルト値 | `defaultTimerSeconds`, `defaultTimerMinutes` |
 | `xxxCount` | 件数 | `maxGoalCount` |
-| `initialXxx` | 初期値 | `initialPomodoroRound` |
+| `initialXxx` | 初期値 | `initialCount` |
 
 ### 5.2 プライベート定数
 
