@@ -14,6 +14,7 @@ import '../../../core/widgets/pressable_card.dart';
 import '../../../core/widgets/streak_card.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../analytics/view/analytics_screen.dart';
+import '../../manual_entry/view/manual_entry_modal.dart';
 import '../../settings/view/settings_screen.dart';
 import '../../study_records/view/study_records_screen.dart';
 import '../../timer/view/timer_screen.dart';
@@ -118,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       body: pages[_tabController.index],
       bottomNavigationBar: _buildBottomNavigationBar(),
       floatingActionButton:
-          _tabController.index <= 1 ? _buildFloatingActionButton() : null,
+          _tabController.index == 0 ? _buildFloatingActionButton() : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
@@ -493,8 +494,15 @@ class _HomeTabContent extends StatelessWidget {
   }
 }
 
-class _TimerTabContent extends StatelessWidget {
+class _TimerTabContent extends StatefulWidget {
   const _TimerTabContent();
+
+  @override
+  State<_TimerTabContent> createState() => _TimerTabContentState();
+}
+
+class _TimerTabContentState extends State<_TimerTabContent> {
+  bool _isFabVisible = true;
 
   @override
   Widget build(BuildContext context) {
@@ -551,27 +559,120 @@ class _TimerTabContent extends StatelessWidget {
                         ),
                         const SizedBox(height: SpacingConsts.l),
                         Expanded(
-                          child: ListView.separated(
-                            itemCount: goals.length,
-                            separatorBuilder:
-                                (context, index) =>
-                                    const SizedBox(height: SpacingConsts.m),
-                            itemBuilder: (context, index) {
-                              final goal = goals[index];
-                              return _buildGoalTimerCard(
-                                context,
-                                goal,
-                                homeViewModel,
-                              );
+                          child: NotificationListener<ScrollNotification>(
+                            onNotification: (notification) {
+                              if (notification is ScrollStartNotification) {
+                                if (_isFabVisible) {
+                                  setState(() => _isFabVisible = false);
+                                }
+                              } else if (notification is ScrollEndNotification) {
+                                if (!_isFabVisible) {
+                                  setState(() => _isFabVisible = true);
+                                }
+                              }
+                              return false;
                             },
+                            child: ListView.separated(
+                              itemCount: goals.length,
+                              separatorBuilder:
+                                  (context, index) =>
+                                      const SizedBox(height: SpacingConsts.m),
+                              itemBuilder: (context, index) {
+                                final goal = goals[index];
+                                return _buildGoalTimerCard(
+                                  context,
+                                  goal,
+                                  homeViewModel,
+                                );
+                              },
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
+          floatingActionButton: goals.isNotEmpty
+              ? _buildManualEntryFab(context, goals, homeViewModel)
+              : null,
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerFloat,
         );
       },
     );
+  }
+
+  /// 手動入力用フローティングボタン
+  Widget _buildManualEntryFab(
+    BuildContext context,
+    List<GoalsModel> goals,
+    HomeViewModel homeViewModel,
+  ) {
+    final l10n = AppLocalizations.of(context);
+
+    return AnimatedOpacity(
+      opacity: _isFabVisible ? 1.0 : 0.0,
+      duration: AnimationConsts.fast,
+      child: IgnorePointer(
+        ignoring: !_isFabVisible,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(28),
+            gradient: const LinearGradient(
+              colors: [ColorConsts.primary, ColorConsts.primaryLight],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: ColorConsts.primary.withValues(alpha: 0.4),
+                offset: const Offset(0, 8),
+                blurRadius: 24,
+                spreadRadius: 0,
+              ),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(28),
+              onTap: () => _showManualEntry(context, goals, homeViewModel),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: SpacingConsts.l,
+                  vertical: SpacingConsts.m,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.edit, color: Colors.white, size: 20),
+                    const SizedBox(width: SpacingConsts.s),
+                    Text(
+                      l10n?.manualEntryButton ?? '手動で記録する',
+                      style: TextConsts.bodyMedium.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 手動入力モーダルを表示
+  Future<void> _showManualEntry(
+    BuildContext context,
+    List<GoalsModel> goals,
+    HomeViewModel homeViewModel,
+  ) async {
+    final result = await showManualEntryModal(context, goals: goals);
+    if (result == true) {
+      homeViewModel.reloadGoals();
+    }
   }
 
   Widget _buildGoalTimerCard(
