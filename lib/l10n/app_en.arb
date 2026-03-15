@@ -1155,5 +1155,65 @@
         "type": "String"
       }
     }
+  },
+
+  "manualEntryButton": "Record Manually",
+  "@manualEntryButton": {
+    "description": "Manual entry floating button text"
+  },
+
+  "manualEntryTitle": "Manual Record",
+  "@manualEntryTitle": {
+    "description": "Manual entry modal title"
+  },
+
+  "manualEntrySelectGoal": "Select Goal",
+  "@manualEntrySelectGoal": {
+    "description": "Manual entry goal selection label"
+  },
+
+  "manualEntryStudyTime": "Study Time",
+  "@manualEntryStudyTime": {
+    "description": "Manual entry study time label"
+  },
+
+  "manualEntryStudyDate": "Study Date",
+  "@manualEntryStudyDate": {
+    "description": "Manual entry study date label"
+  },
+
+  "manualEntryNoGoalSelected": "Please select a goal",
+  "@manualEntryNoGoalSelected": {
+    "description": "Validation message when no goal is selected"
+  },
+
+  "manualEntryNoTimeSelected": "Please set a study time",
+  "@manualEntryNoTimeSelected": {
+    "description": "Validation message when no time is set"
+  },
+
+  "manualEntrySaveSuccess": "Study record saved!",
+  "@manualEntrySaveSuccess": {
+    "description": "Success message after manual entry save"
+  },
+
+  "manualEntrySaveFailed": "Failed to save",
+  "@manualEntrySaveFailed": {
+    "description": "Error message when manual entry save fails"
+  },
+
+  "manualEntryCongratsTitle": "Great job!",
+  "@manualEntryCongratsTitle": {
+    "description": "Congratulations title after manual entry save"
+  },
+
+  "manualEntryCongratsMessage": "Recorded {time} of study",
+  "@manualEntryCongratsMessage": {
+    "description": "Congratulations message after manual entry save",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
   }
 }

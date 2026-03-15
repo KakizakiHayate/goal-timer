@@ -714,4 +714,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String repeatingNotificationMessage(String goal, String duration) {
     return 'You completed $duration of studying \"$goal\"! Great job!';
   }
+
+  @override
+  String get manualEntryButton => 'Record Manually';
+
+  @override
+  String get manualEntryTitle => 'Manual Record';
+
+  @override
+  String get manualEntrySelectGoal => 'Select Goal';
+
+  @override
+  String get manualEntryStudyTime => 'Study Time';
+
+  @override
+  String get manualEntryStudyDate => 'Study Date';
+
+  @override
+  String get manualEntryNoGoalSelected => 'Please select a goal';
+
+  @override
+  String get manualEntryNoTimeSelected => 'Please set a study time';
+
+  @override
+  String get manualEntrySaveSuccess => 'Study record saved!';
+
+  @override
+  String get manualEntrySaveFailed => 'Failed to save';
+
+  @override
+  String get manualEntryCongratsTitle => 'Great job!';
+
+  @override
+  String manualEntryCongratsMessage(String time) {
+    return 'Recorded $time of study';
+  }
 }
