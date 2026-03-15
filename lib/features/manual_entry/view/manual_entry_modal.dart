@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../../../core/models/goals/goals_model.dart';
+import '../../../core/utils/calendar_utils.dart';
 import '../../../core/utils/color_consts.dart';
 import '../../../core/utils/spacing_consts.dart';
 import '../../../core/utils/text_consts.dart';
@@ -298,7 +299,10 @@ class _ManualEntryModalState extends State<ManualEntryModal> {
           icon: const Icon(Icons.chevron_left, color: ColorConsts.textSecondary),
         ),
         Text(
-          '${_displayMonth.year}年${_displayMonth.month}月',
+          CalendarUtils.formatYearMonth(
+            _displayMonth,
+            Localizations.localeOf(context).toString(),
+          ),
           style: TextConsts.bodyMedium.copyWith(fontWeight: FontWeight.w600),
         ),
         IconButton(
@@ -323,9 +327,10 @@ class _ManualEntryModalState extends State<ManualEntryModal> {
     );
   }
 
-  /// 曜日ヘッダー
+  /// 曜日ヘッダー（ロケール対応）
   Widget _buildWeekdayHeader() {
-    const weekdays = ['月', '火', '水', '木', '金', '土', '日'];
+    final locale = Localizations.localeOf(context).toString();
+    final weekdays = CalendarUtils.getOrderedWeekdays(locale);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -350,7 +355,11 @@ class _ManualEntryModalState extends State<ManualEntryModal> {
 
   /// カレンダーグリッド
   Widget _buildCalendarGrid(ManualEntryViewModel viewModel) {
-    final days = _generateCalendarDays();
+    final locale = Localizations.localeOf(context).toString();
+    final days = CalendarUtils.generateCalendarDays(
+      month: _displayMonth,
+      locale: locale,
+    );
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
@@ -441,23 +450,6 @@ class _ManualEntryModalState extends State<ManualEntryModal> {
     if (isFuture) return ColorConsts.textTertiary;
     if (isToday) return ColorConsts.primary;
     return ColorConsts.textPrimary;
-  }
-
-  List<DateTime?> _generateCalendarDays() {
-    final firstDayOfMonth =
-        DateTime(_displayMonth.year, _displayMonth.month, 1);
-    final lastDayOfMonth =
-        DateTime(_displayMonth.year, _displayMonth.month + 1, 0);
-    final leadingEmptyDays = firstDayOfMonth.weekday - 1;
-
-    final List<DateTime?> days = [];
-    for (var i = 0; i < leadingEmptyDays; i++) {
-      days.add(null);
-    }
-    for (var day = 1; day <= lastDayOfMonth.day; day++) {
-      days.add(DateTime(_displayMonth.year, _displayMonth.month, day));
-    }
-    return days;
   }
 
   /// 保存ボタン
