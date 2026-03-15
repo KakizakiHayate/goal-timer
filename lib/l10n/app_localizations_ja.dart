@@ -670,4 +670,39 @@ class AppLocalizationsJa extends AppLocalizations {
   String repeatingNotificationMessage(String goal, String duration) {
     return '「$goal」の学習時間（$duration）を達成しました！お疲れ様です！';
   }
+
+  @override
+  String get manualEntryButton => '手動で記録する';
+
+  @override
+  String get manualEntryTitle => '手動で記録';
+
+  @override
+  String get manualEntrySelectGoal => '目標を選択';
+
+  @override
+  String get manualEntryStudyTime => '学習時間';
+
+  @override
+  String get manualEntryStudyDate => '学習日';
+
+  @override
+  String get manualEntryNoGoalSelected => '目標を選択してください';
+
+  @override
+  String get manualEntryNoTimeSelected => '学習時間を設定してください';
+
+  @override
+  String get manualEntrySaveSuccess => '学習記録を保存しました！';
+
+  @override
+  String get manualEntrySaveFailed => '保存に失敗しました';
+
+  @override
+  String get manualEntryCongratsTitle => 'お疲れ様でした！';
+
+  @override
+  String manualEntryCongratsMessage(String time) {
+    return '$timeの学習を記録しました';
+  }
 }

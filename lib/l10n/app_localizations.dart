@@ -1309,6 +1309,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You completed {duration} of studying \"{goal}\"! Great job!'**
   String repeatingNotificationMessage(String goal, String duration);
+
+  /// Manual entry floating button text
+  ///
+  /// In en, this message translates to:
+  /// **'Record Manually'**
+  String get manualEntryButton;
+
+  /// Manual entry modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Manual Record'**
+  String get manualEntryTitle;
+
+  /// Manual entry goal selection label
+  ///
+  /// In en, this message translates to:
+  /// **'Select Goal'**
+  String get manualEntrySelectGoal;
+
+  /// Manual entry study time label
+  ///
+  /// In en, this message translates to:
+  /// **'Study Time'**
+  String get manualEntryStudyTime;
+
+  /// Manual entry study date label
+  ///
+  /// In en, this message translates to:
+  /// **'Study Date'**
+  String get manualEntryStudyDate;
+
+  /// Validation message when no goal is selected
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a goal'**
+  String get manualEntryNoGoalSelected;
+
+  /// Validation message when no time is set
+  ///
+  /// In en, this message translates to:
+  /// **'Please set a study time'**
+  String get manualEntryNoTimeSelected;
+
+  /// Success message after manual entry save
+  ///
+  /// In en, this message translates to:
+  /// **'Study record saved!'**
+  String get manualEntrySaveSuccess;
+
+  /// Error message when manual entry save fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save'**
+  String get manualEntrySaveFailed;
+
+  /// Congratulations title after manual entry save
+  ///
+  /// In en, this message translates to:
+  /// **'Great job!'**
+  String get manualEntryCongratsTitle;
+
+  /// Congratulations message after manual entry save
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded {time} of study'**
+  String manualEntryCongratsMessage(String time);
 }
 
 class _AppLocalizationsDelegate
