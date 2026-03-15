@@ -560,18 +560,7 @@ class _TimerTabContentState extends State<_TimerTabContent> {
                         const SizedBox(height: SpacingConsts.l),
                         Expanded(
                           child: NotificationListener<ScrollNotification>(
-                            onNotification: (notification) {
-                              if (notification is ScrollStartNotification) {
-                                if (_isFabVisible) {
-                                  setState(() => _isFabVisible = false);
-                                }
-                              } else if (notification is ScrollEndNotification) {
-                                if (!_isFabVisible) {
-                                  setState(() => _isFabVisible = true);
-                                }
-                              }
-                              return false;
-                            },
+                            onNotification: _handleScrollNotification,
                             child: ListView.separated(
                               itemCount: goals.length,
                               separatorBuilder:
@@ -599,6 +588,16 @@ class _TimerTabContentState extends State<_TimerTabContent> {
         );
       },
     );
+  }
+
+  /// スクロール通知を処理してFABの表示/非表示を切り替える
+  bool _handleScrollNotification(ScrollNotification notification) {
+    if (notification is ScrollStartNotification && _isFabVisible) {
+      setState(() => _isFabVisible = false);
+    } else if (notification is ScrollEndNotification && !_isFabVisible) {
+      setState(() => _isFabVisible = true);
+    }
+    return false;
   }
 
   /// 手動入力用フローティングボタン

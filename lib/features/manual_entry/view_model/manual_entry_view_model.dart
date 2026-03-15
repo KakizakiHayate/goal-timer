@@ -97,9 +97,12 @@ class ManualEntryViewModel extends GetxController {
     update();
 
     try {
+      final goal = _selectedGoal;
+      if (goal == null) return false;
+
       final log = StudyDailyLogsModel(
         id: const Uuid().v4(),
-        goalId: _selectedGoal!.id,
+        goalId: goal.id,
         studyDate: selectedDate,
         totalSeconds: _selectedDuration.inSeconds,
         userId: _userId,
@@ -109,7 +112,7 @@ class ManualEntryViewModel extends GetxController {
 
       AppLogger.instance.i(
         '手動学習記録を保存しました: ${log.id}, '
-        '目標: ${_selectedGoal!.title}, '
+        '目標: ${goal.title}, '
         '学習日: ${log.studyDate}, '
         '${_selectedDuration.inSeconds}秒',
       );
