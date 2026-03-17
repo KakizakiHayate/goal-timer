@@ -403,5 +403,27 @@
 
   "repeatingNotificationTitle": "学習時間終了",
 
-  "repeatingNotificationMessage": "「{goal}」の学習時間（{duration}）を達成しました！お疲れ様です！"
+  "repeatingNotificationMessage": "「{goal}」の学習時間（{duration}）を達成しました！お疲れ様です！",
+
+  "manualEntryButton": "手動で記録する",
+
+  "manualEntryTitle": "手動で記録",
+
+  "manualEntrySelectGoal": "目標を選択",
+
+  "manualEntryStudyTime": "学習時間",
+
+  "manualEntryStudyDate": "学習日",
+
+  "manualEntryNoGoalSelected": "目標を選択してください",
+
+  "manualEntryNoTimeSelected": "学習時間を設定してください",
+
+  "manualEntrySaveSuccess": "学習記録を保存しました！",
+
+  "manualEntrySaveFailed": "保存に失敗しました",
+
+  "manualEntryCongratsTitle": "お疲れ様でした！",
+
+  "manualEntryCongratsMessage": "{time}の学習を記録しました"
 }

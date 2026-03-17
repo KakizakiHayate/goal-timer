@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import '../../../../core/utils/calendar_utils.dart';
 import '../../../../core/utils/color_consts.dart';
 import '../../../../core/utils/spacing_consts.dart';
 import '../../../../core/utils/text_consts.dart';
 
-/// 月間カレンダーウィジェット（月曜始まり）
+/// 月間カレンダーウィジェット（ロケール対応）
 class MonthlyCalendar extends StatelessWidget {
   final DateTime currentMonth;
   final List<DateTime> studyDates;
@@ -25,11 +26,17 @@ class MonthlyCalendar extends StatelessWidget {
     // パフォーマンス改善: studyDatesをSetに変換してO(1)検索
     final studyDateSet = _createStudyDateSet();
 
+    final locale = Localizations.localeOf(context).toString();
+
     return Column(
       children: [
-        _buildWeekdayHeader(),
+        _buildWeekdayHeader(locale),
         const SizedBox(height: SpacingConsts.s),
-        _buildCalendarGrid(today: today, studyDateSet: studyDateSet),
+        _buildCalendarGrid(
+          today: today,
+          studyDateSet: studyDateSet,
+          locale: locale,
+        ),
       ],
     );
   }
@@ -39,9 +46,9 @@ class MonthlyCalendar extends StatelessWidget {
     return studyDates.map((d) => DateTime(d.year, d.month, d.day)).toSet();
   }
 
-  /// 曜日ヘッダー（月曜始まり）
-  Widget _buildWeekdayHeader() {
-    const weekdays = ['月', '火', '水', '木', '金', '土', '日'];
+  /// 曜日ヘッダー（ロケール対応）
+  Widget _buildWeekdayHeader(String locale) {
+    final weekdays = CalendarUtils.getOrderedWeekdays(locale);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -67,8 +74,12 @@ class MonthlyCalendar extends StatelessWidget {
   Widget _buildCalendarGrid({
     required DateTime today,
     required Set<DateTime> studyDateSet,
+    required String locale,
   }) {
-    final days = _generateCalendarDays();
+    final days = CalendarUtils.generateCalendarDays(
+      month: currentMonth,
+      locale: locale,
+    );
 
     return GridView.builder(
       shrinkWrap: true,
@@ -191,37 +202,6 @@ class MonthlyCalendar extends StatelessWidget {
     }
 
     return ColorConsts.textPrimary;
-  }
-
-  /// カレンダーの日付リストを生成（月曜始まり）
-  List<DateTime?> _generateCalendarDays() {
-    final firstDayOfMonth = DateTime(currentMonth.year, currentMonth.month, 1);
-    final lastDayOfMonth = DateTime(
-      currentMonth.year,
-      currentMonth.month + 1,
-      0,
-    );
-
-    // 月曜始まりのため、1=月曜, 7=日曜に変換
-    // DateTime.weekdayは1=月曜, 7=日曜なので調整不要
-    final startWeekday = firstDayOfMonth.weekday;
-
-    // 月曜始まりなので、月曜=1から始まる
-    final leadingEmptyDays = startWeekday - 1;
-
-    final List<DateTime?> days = [];
-
-    // 前月の空白
-    for (var i = 0; i < leadingEmptyDays; i++) {
-      days.add(null);
-    }
-
-    // 当月の日付
-    for (var day = 1; day <= lastDayOfMonth.day; day++) {
-      days.add(DateTime(currentMonth.year, currentMonth.month, day));
-    }
-
-    return days;
   }
 
   /// 今日かどうか
