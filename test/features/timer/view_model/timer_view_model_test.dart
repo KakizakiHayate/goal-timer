@@ -812,6 +812,109 @@ void main() {
         ).called(1);
       });
     });
+
+    group('例外ハンドリング（T-7.x）', () {
+      test(
+          'T-7.1: _scheduleCompletionNotificationで例外が発生してもタイマーが正常に動作すること',
+          () {
+        // Arrange: 通知スケジュールが例外をスロー
+        when(
+          () => mockNotificationService
+              .scheduleRepeatingCompletionNotifications(
+            delayBeforeCompletionSeconds:
+                any(named: 'delayBeforeCompletionSeconds'),
+            goalTitle: any(named: 'goalTitle'),
+            studyDurationSeconds: any(named: 'studyDurationSeconds'),
+          ),
+        ).thenThrow(Exception('通知スケジュールエラー'));
+
+        final viewModel = createTestViewModel();
+
+        // Act: startTimerが例外をスローせず正常に完了すること
+        viewModel.startTimer();
+
+        // Assert: タイマーはrunning状態
+        expect(viewModel.state.status, equals(TimerStatus.running));
+
+        viewModel.onClose();
+      });
+
+      test(
+          'T-7.2: onAppResumedでcancelRepeatingCompletionNotificationsが例外をスローしても復帰処理が完了すること',
+          () {
+        // Arrange
+        when(
+          () =>
+              mockNotificationService.cancelRepeatingCompletionNotifications(),
+        ).thenThrow(Exception('キャンセルエラー'));
+
+        fakeSettingsViewModel.defaultTimerSeconds.value = 0;
+        final viewModel = createTestViewModel();
+
+        // Act: 開始→バックグラウンド→復帰（完了判定）
+        viewModel.startTimer();
+        viewModel.onAppPaused();
+        viewModel.onAppResumed();
+
+        // Assert: タイマーが完了状態になっていること（例外で中断されない）
+        expect(viewModel.state.status, equals(TimerStatus.completed));
+
+        viewModel.onClose();
+      });
+
+      test(
+          'T-7.3: onCloseでaudioService.dispose()が例外をスローしてもcancelScheduledNotificationが呼ばれること',
+          () {
+        // Arrange
+        when(() => mockAudioService.dispose()).thenThrow(
+          Exception('dispose エラー'),
+        );
+
+        final viewModel = createTestViewModel();
+        viewModel.startTimer();
+
+        // Act
+        viewModel.onClose();
+
+        // Assert: dispose例外後もcancelScheduledNotificationが呼ばれること
+        verify(
+          () => mockNotificationService.cancelScheduledNotification(),
+        ).called(1);
+      });
+
+      test(
+          'T-7.4: onCloseでcancelScheduledNotificationが例外をスローしてもonCloseが正常に完了すること',
+          () {
+        // Arrange
+        when(
+          () => mockNotificationService.cancelScheduledNotification(),
+        ).thenThrow(Exception('キャンセルエラー'));
+
+        final viewModel = createTestViewModel();
+        viewModel.startTimer();
+
+        // Act & Assert: 例外がスローされないこと
+        expect(() => viewModel.onClose(), returnsNormally);
+      });
+
+      test(
+          'T-7.5: onCloseでaudioServiceとnotificationServiceの両方が例外をスローしてもonCloseが正常に完了すること',
+          () {
+        // Arrange
+        when(() => mockAudioService.dispose()).thenThrow(
+          Exception('dispose エラー'),
+        );
+        when(
+          () => mockNotificationService.cancelScheduledNotification(),
+        ).thenThrow(Exception('キャンセルエラー'));
+
+        final viewModel = createTestViewModel();
+        viewModel.startTimer();
+
+        // Act & Assert: 例外がスローされないこと
+        expect(() => viewModel.onClose(), returnsNormally);
+      });
+    });
   });
 
   group('タイマー完了時の音声再生テスト', () {

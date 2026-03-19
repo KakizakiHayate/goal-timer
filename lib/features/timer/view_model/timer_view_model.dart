@@ -209,9 +209,17 @@ class TimerViewModel extends GetxController {
   @override
   void onClose() {
     _timer?.cancel();
-    _audioService.dispose();
+    try {
+      _audioService.dispose();
+    } catch (error, stackTrace) {
+      AppLogger.instance.e('AudioServiceのdisposeに失敗しました', error, stackTrace);
+    }
     // タイマー完了通知のみキャンセル（ストリークリマインダーは維持）
-    _notificationService.cancelScheduledNotification();
+    try {
+      _notificationService.cancelScheduledNotification();
+    } catch (error, stackTrace) {
+      AppLogger.instance.e('通知のキャンセルに失敗しました', error, stackTrace);
+    }
     super.onClose();
   }
 
@@ -397,11 +405,19 @@ class TimerViewModel extends GetxController {
   /// 完了通知をスケジュールする（繰り返し通知）
   Future<void> _scheduleCompletionNotification() async {
     if (state.currentSeconds > TimeUtils.minValidSeconds) {
-      await _notificationService.scheduleRepeatingCompletionNotifications(
-        delayBeforeCompletionSeconds: state.currentSeconds,
-        goalTitle: goal.title,
-        studyDurationSeconds: state.totalSeconds,
-      );
+      try {
+        await _notificationService.scheduleRepeatingCompletionNotifications(
+          delayBeforeCompletionSeconds: state.currentSeconds,
+          goalTitle: goal.title,
+          studyDurationSeconds: state.totalSeconds,
+        );
+      } catch (error, stackTrace) {
+        AppLogger.instance.e(
+          '完了通知のスケジュールに失敗しました',
+          error,
+          stackTrace,
+        );
+      }
     }
   }
 
@@ -429,7 +445,15 @@ class TimerViewModel extends GetxController {
         // バックグラウンド中に完了した場合
         _elapsedSeconds = state.totalSeconds;
         // 残りの繰り返し通知をキャンセル（ユーザーがアプリに戻ったため不要）
-        _notificationService.cancelRepeatingCompletionNotifications();
+        try {
+          _notificationService.cancelRepeatingCompletionNotifications();
+        } catch (error, stackTrace) {
+          AppLogger.instance.e(
+            '繰り返し通知のキャンセルに失敗しました',
+            error,
+            stackTrace,
+          );
+        }
         completeTimer();
         AppLogger.instance.i('バックグラウンド中にタイマーが完了しました');
       } else {
