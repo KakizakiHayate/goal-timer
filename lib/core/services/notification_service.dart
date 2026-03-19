@@ -184,7 +184,15 @@ class NotificationService {
       ids.add(notificationId);
     }
 
-    await Future.wait(futures);
+    try {
+      await Future.wait(futures);
+    } catch (error, stackTrace) {
+      AppLogger.instance.e(
+        'NotificationService: 繰り返し通知のスケジュールに失敗しました',
+        error,
+        stackTrace,
+      );
+    }
     _scheduledRepeatingNotificationIds = ids;
 
     AppLogger.instance.i(
@@ -203,7 +211,15 @@ class NotificationService {
     _scheduledRepeatingNotificationIds = [];
 
     if (idsToCancel.isNotEmpty) {
-      await Future.wait(idsToCancel.map((id) => _notifications.cancel(id)));
+      try {
+        await Future.wait(idsToCancel.map((id) => _notifications.cancel(id)));
+      } catch (error, stackTrace) {
+        AppLogger.instance.e(
+          'NotificationService: 繰り返し通知のキャンセルに失敗しました',
+          error,
+          stackTrace,
+        );
+      }
 
       AppLogger.instance.i(
         'NotificationService: 繰り返し通知を${idsToCancel.length}個キャンセルしました',
