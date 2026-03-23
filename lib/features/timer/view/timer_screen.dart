@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -149,12 +151,18 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                     _isCompletionDialogShowing = false;
                     navigator.pop();
 
+                    // pop()直後はcontextが不安定なため、次フレームまで待機
+                    await _waitForNextFrame();
+
                     // フィードバックポップアップの表示チェック
-                    if (timerViewModel.state.shouldShowFeedbackPopup) {
+                    if (mounted &&
+                        timerViewModel.state.shouldShowFeedbackPopup) {
                       await _showFeedbackPopupIfNeeded(timerViewModel);
                     }
 
-                    navigator.pop(true);
+                    if (mounted) {
+                      navigator.pop(true);
+                    }
                   } catch (e, s) {
                     AppLogger.instance.e('学習記録の保存に失敗しました', e, s);
                     _isCompletionDialogShowing = false;
@@ -180,6 +188,17 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
             ],
           ),
     );
+  }
+
+  /// 次フレームまで待機する
+  ///
+  /// pop()直後のcontextが不安定な状態を回避するために使用
+  Future<void> _waitForNextFrame() {
+    final completer = Completer<void>();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      completer.complete();
+    });
+    return completer.future;
   }
 
   /// フィードバックポップアップを表示し、結果に応じて処理を行う
@@ -743,8 +762,12 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                     // ダイアログを閉じる
                     navigator.pop();
 
+                    // pop()直後はcontextが不安定なため、次フレームまで待機
+                    await _waitForNextFrame();
+
                     // フィードバックポップアップの表示チェック（カウントダウンモードのみ）
-                    if (timerViewModel.state.shouldShowFeedbackPopup) {
+                    if (mounted &&
+                        timerViewModel.state.shouldShowFeedbackPopup) {
                       await _showFeedbackPopupIfNeeded(timerViewModel);
                     }
 
