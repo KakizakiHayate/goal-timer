@@ -1,6 +1,5 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
 
 import '../../../core/models/goals/goals_model.dart';
@@ -160,8 +159,9 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                       await _showFeedbackPopupIfNeeded(timerViewModel);
                     }
 
-                    if (mounted) {
-                      navigator.pop(true);
+                    // ダイアログは既に閉じているため、画面のcontextからNavigatorを取得
+                    if (context.mounted) {
+                      Navigator.of(context).pop(true);
                     }
                   } catch (e, s) {
                     AppLogger.instance.e('学習記録の保存に失敗しました', e, s);
@@ -194,11 +194,7 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
   ///
   /// pop()直後のcontextが不安定な状態を回避するために使用
   Future<void> _waitForNextFrame() {
-    final completer = Completer<void>();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      completer.complete();
-    });
-    return completer.future;
+    return SchedulerBinding.instance.endOfFrame;
   }
 
   /// フィードバックポップアップを表示し、結果に応じて処理を行う
@@ -779,9 +775,9 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                       await _showFeedbackPopupIfNeeded(timerViewModel);
                     }
 
-                    // タイマー画面を閉じて、学習完了を通知（trueを返す）
-                    if (mounted) {
-                      navigator.pop(true);
+                    // ダイアログは既に閉じているため、画面のcontextからNavigatorを取得
+                    if (context.mounted) {
+                      Navigator.of(context).pop(true);
                     }
                   }
                 },
