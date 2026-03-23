@@ -1059,4 +1059,49 @@ void main() {
       viewModel.onClose();
     });
   });
+
+  group('フィードバックポップアップ状態管理テスト', () {
+    test('初期状態ではshouldShowFeedbackPopupがfalseであること', () {
+      // Arrange
+      final state = TimerState();
+
+      // Assert
+      expect(state.shouldShowFeedbackPopup, isFalse);
+    });
+
+    test('clearFeedbackPopupFlagでshouldShowFeedbackPopupがfalseになること', () {
+      // Arrange
+      final viewModel = createTestViewModel();
+
+      // Act
+      viewModel.clearFeedbackPopupFlag();
+
+      // Assert
+      expect(viewModel.state.shouldShowFeedbackPopup, isFalse);
+
+      viewModel.onClose();
+    });
+
+    test('copyWithでshouldShowFeedbackPopupをtrueに設定できること', () {
+      // Arrange
+      final state = TimerState();
+
+      // Act
+      final updatedState = state.copyWith(shouldShowFeedbackPopup: true);
+
+      // Assert
+      expect(updatedState.shouldShowFeedbackPopup, isTrue);
+    });
+
+    test('copyWithでshouldShowFeedbackPopupを省略すると前の値が保持されること', () {
+      // Arrange
+      final state = TimerState().copyWith(shouldShowFeedbackPopup: true);
+
+      // Act
+      final updatedState = state.copyWith(status: TimerStatus.running);
+
+      // Assert
+      expect(updatedState.shouldShowFeedbackPopup, isTrue);
+    });
+  });
 }

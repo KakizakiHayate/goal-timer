@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
 
 import '../../../core/models/goals/goals_model.dart';
@@ -149,12 +150,19 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                     _isCompletionDialogShowing = false;
                     navigator.pop();
 
+                    // pop()直後はcontextが不安定なため、次フレームまで待機
+                    await _waitForNextFrame();
+
                     // フィードバックポップアップの表示チェック
-                    if (timerViewModel.state.shouldShowFeedbackPopup) {
+                    if (mounted &&
+                        timerViewModel.state.shouldShowFeedbackPopup) {
                       await _showFeedbackPopupIfNeeded(timerViewModel);
                     }
 
-                    navigator.pop(true);
+                    // ダイアログは既に閉じているため、画面のcontextからNavigatorを取得
+                    if (context.mounted) {
+                      Navigator.of(context).pop(true);
+                    }
                   } catch (e, s) {
                     AppLogger.instance.e('学習記録の保存に失敗しました', e, s);
                     _isCompletionDialogShowing = false;
@@ -180,6 +188,13 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
             ],
           ),
     );
+  }
+
+  /// 次フレームまで待機する
+  ///
+  /// pop()直後のcontextが不安定な状態を回避するために使用
+  Future<void> _waitForNextFrame() {
+    return SchedulerBinding.instance.endOfFrame;
   }
 
   /// フィードバックポップアップを表示し、結果に応じて処理を行う
@@ -381,19 +396,23 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
         mainAxisSize: MainAxisSize.min,
         children: [
           // カウントダウン
-          _buildModeButton(
-            l10n?.modeCountdown ?? 'Countdown',
-            timerState.mode == TimerMode.countdown,
-            () => _onModeTapped(timerViewModel, TimerMode.countdown),
-            Icons.timer_outlined,
+          Flexible(
+            child: _buildModeButton(
+              l10n?.modeCountdown ?? 'Countdown',
+              timerState.mode == TimerMode.countdown,
+              () => _onModeTapped(timerViewModel, TimerMode.countdown),
+              Icons.timer_outlined,
+            ),
           ),
 
           // カウントアップ
-          _buildModeButton(
-            l10n?.modeCountup ?? 'Count Up',
-            timerState.mode == TimerMode.countup,
-            () => _onModeTapped(timerViewModel, TimerMode.countup),
-            Icons.all_inclusive,
+          Flexible(
+            child: _buildModeButton(
+              l10n?.modeCountup ?? 'Count Up',
+              timerState.mode == TimerMode.countup,
+              () => _onModeTapped(timerViewModel, TimerMode.countup),
+              Icons.all_inclusive,
+            ),
           ),
         ],
       ),
@@ -483,11 +502,15 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
               size: 20,
             ),
             const SizedBox(width: SpacingConsts.xs),
-            Text(
-              text,
-              style: TextConsts.body.copyWith(
-                color: isActive ? ColorConsts.textPrimary : Colors.white,
-                fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
+            Flexible(
+              child: Text(
+                text,
+                style: TextConsts.body.copyWith(
+                  color: isActive ? ColorConsts.textPrimary : Colors.white,
+                  fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
               ),
             ),
           ],
@@ -743,14 +766,18 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                     // ダイアログを閉じる
                     navigator.pop();
 
+                    // pop()直後はcontextが不安定なため、次フレームまで待機
+                    await _waitForNextFrame();
+
                     // フィードバックポップアップの表示チェック（カウントダウンモードのみ）
-                    if (timerViewModel.state.shouldShowFeedbackPopup) {
+                    if (mounted &&
+                        timerViewModel.state.shouldShowFeedbackPopup) {
                       await _showFeedbackPopupIfNeeded(timerViewModel);
                     }
 
-                    // タイマー画面を閉じて、学習完了を通知（trueを返す）
-                    if (mounted) {
-                      navigator.pop(true);
+                    // ダイアログは既に閉じているため、画面のcontextからNavigatorを取得
+                    if (context.mounted) {
+                      Navigator.of(context).pop(true);
                     }
                   }
                 },
