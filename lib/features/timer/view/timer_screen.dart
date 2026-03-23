@@ -400,19 +400,23 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
         mainAxisSize: MainAxisSize.min,
         children: [
           // カウントダウン
-          _buildModeButton(
-            l10n?.modeCountdown ?? 'Countdown',
-            timerState.mode == TimerMode.countdown,
-            () => _onModeTapped(timerViewModel, TimerMode.countdown),
-            Icons.timer_outlined,
+          Flexible(
+            child: _buildModeButton(
+              l10n?.modeCountdown ?? 'Countdown',
+              timerState.mode == TimerMode.countdown,
+              () => _onModeTapped(timerViewModel, TimerMode.countdown),
+              Icons.timer_outlined,
+            ),
           ),
 
           // カウントアップ
-          _buildModeButton(
-            l10n?.modeCountup ?? 'Count Up',
-            timerState.mode == TimerMode.countup,
-            () => _onModeTapped(timerViewModel, TimerMode.countup),
-            Icons.all_inclusive,
+          Flexible(
+            child: _buildModeButton(
+              l10n?.modeCountup ?? 'Count Up',
+              timerState.mode == TimerMode.countup,
+              () => _onModeTapped(timerViewModel, TimerMode.countup),
+              Icons.all_inclusive,
+            ),
           ),
         ],
       ),
@@ -502,11 +506,15 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
               size: 20,
             ),
             const SizedBox(width: SpacingConsts.xs),
-            Text(
-              text,
-              style: TextConsts.body.copyWith(
-                color: isActive ? ColorConsts.textPrimary : Colors.white,
-                fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
+            Flexible(
+              child: Text(
+                text,
+                style: TextConsts.body.copyWith(
+                  color: isActive ? ColorConsts.textPrimary : Colors.white,
+                  fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
               ),
             ),
           ],
