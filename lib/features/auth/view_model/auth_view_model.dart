@@ -1,10 +1,14 @@
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../core/data/local/app_database.dart';
 import '../../../core/data/local/local_users_datasource.dart';
 import '../../../core/data/supabase/supabase_auth_datasource.dart';
+import '../../../core/data/supabase/supabase_user_devices_datasource.dart';
 import '../../../core/data/supabase/supabase_users_datasource.dart';
+import '../../../core/models/user_devices/user_devices_model.dart';
+import '../../../core/services/fcm_service.dart';
 import '../../../core/utils/app_logger.dart';
 
 /// 認証の状態
@@ -52,11 +56,15 @@ class AuthViewModel extends GetxController {
   late final SupabaseAuthDatasource _authDatasource;
   late final LocalUsersDatasource _usersDatasource;
   late final SupabaseUsersDatasource _supabaseUsersDatasource;
+  late final SupabaseUserDevicesDatasource _userDevicesDatasource;
+  late final FcmService _fcmService;
 
   AuthViewModel({
     SupabaseAuthDatasource? authDatasource,
     LocalUsersDatasource? usersDatasource,
     SupabaseUsersDatasource? supabaseUsersDatasource,
+    SupabaseUserDevicesDatasource? userDevicesDatasource,
+    FcmService? fcmService,
   }) {
     _authDatasource = authDatasource ??
         SupabaseAuthDatasource(supabase: Supabase.instance.client);
@@ -64,6 +72,14 @@ class AuthViewModel extends GetxController {
         usersDatasource ?? LocalUsersDatasource(database: AppDatabase());
     _supabaseUsersDatasource = supabaseUsersDatasource ??
         SupabaseUsersDatasource(supabase: Supabase.instance.client);
+    _userDevicesDatasource = userDevicesDatasource ??
+        SupabaseUserDevicesDatasource(supabase: Supabase.instance.client);
+    _fcmService = fcmService ?? FcmService();
+
+    // トークン更新時に現在のユーザーで再登録
+    _fcmService.setOnTokenRefresh((newToken) async {
+      await _registerCurrentDevice(token: newToken);
+    });
   }
 
   /// 現在の状態
@@ -178,6 +194,9 @@ class AuthViewModel extends GetxController {
       // displayNameをローカルDBとSupabaseに保存
       await _saveDisplayName(result.displayName, saveToSupabase: true);
 
+      // FCMトークンをuser_devicesに登録
+      await _registerCurrentDevice();
+
       _status.value = AuthStatus.success;
       AppLogger.instance.i('Googleアカウント連携成功');
       update();
@@ -281,6 +300,9 @@ class AuthViewModel extends GetxController {
 
       // displayNameをローカルDBとSupabaseに保存
       await _saveDisplayName(result.displayName, saveToSupabase: true);
+
+      // FCMトークンをuser_devicesに登録
+      await _registerCurrentDevice();
 
       _status.value = AuthStatus.success;
       AppLogger.instance.i('Appleアカウント連携成功');
@@ -387,6 +409,9 @@ class AuthViewModel extends GetxController {
       }
       await _saveDisplayName(customDisplayName ?? result.displayName);
 
+      // FCMトークンをuser_devicesに登録
+      await _registerCurrentDevice();
+
       _status.value = AuthStatus.success;
       AppLogger.instance.i('Googleログイン成功');
       update();
@@ -486,6 +511,9 @@ class AuthViewModel extends GetxController {
       }
       await _saveDisplayName(customDisplayName ?? result.displayName);
 
+      // FCMトークンをuser_devicesに登録
+      await _registerCurrentDevice();
+
       _status.value = AuthStatus.success;
       AppLogger.instance.i('Appleログイン成功');
       update();
@@ -533,6 +561,9 @@ class AuthViewModel extends GetxController {
       _status.value = AuthStatus.loading;
       update();
 
+      // FCMトークンを user_devices から削除（signOut前に実行）
+      await _unregisterCurrentDevice();
+
       await _authDatasource.signOut();
 
       // ローカルDBのユーザーデータをリセット
@@ -548,6 +579,69 @@ class AuthViewModel extends GetxController {
       _errorType.value = AuthErrorType.other;
       _errorMessage.value = 'サインアウトに失敗しました';
       update();
+    }
+  }
+
+  /// 現在の端末をuser_devicesテーブルに登録
+  ///
+  /// FCMトークンを取得し、ログイン中のユーザーIDと紐づけてSupabaseに保存する。
+  /// トークンが取得できない（iOSシミュレータなど）場合は何もしない。
+  /// 登録に失敗してもログイン処理全体を失敗させない。
+  ///
+  /// [token]を渡した場合はそれを使用し、省略時はFcmServiceから取得する。
+  Future<void> _registerCurrentDevice({String? token}) async {
+    try {
+      final userId = _authDatasource.currentUser?.id;
+      if (userId == null) {
+        AppLogger.instance.w('未ログインのためデバイス登録をスキップ');
+        return;
+      }
+
+      final fcmToken = token ?? await _fcmService.getToken();
+      if (fcmToken == null || fcmToken.isEmpty) {
+        AppLogger.instance.w('FCMトークンが取得できないためデバイス登録をスキップ');
+        return;
+      }
+
+      final deviceName = await _fcmService.getDeviceName();
+
+      await _userDevicesDatasource.upsertDevice(
+        UserDevicesModel(
+          id: const Uuid().v4(),
+          userId: userId,
+          fcmToken: fcmToken,
+          platform: _fcmService.currentPlatform,
+          deviceName: deviceName,
+        ),
+      );
+    } catch (error, stackTrace) {
+      AppLogger.instance.e('デバイス登録に失敗しました', error, stackTrace);
+    }
+  }
+
+  /// 現在の端末をuser_devicesテーブルから削除
+  ///
+  /// ログアウト時に呼ぶ。失敗してもログアウト処理は継続する。
+  Future<void> _unregisterCurrentDevice() async {
+    try {
+      final userId = _authDatasource.currentUser?.id;
+      if (userId == null) {
+        AppLogger.instance.w('未ログインのためデバイス削除をスキップ');
+        return;
+      }
+
+      final fcmToken = await _fcmService.getToken();
+      if (fcmToken == null || fcmToken.isEmpty) {
+        AppLogger.instance.w('FCMトークンが取得できないためデバイス削除をスキップ');
+        return;
+      }
+
+      await _userDevicesDatasource.deleteDeviceByToken(
+        userId: userId,
+        fcmToken: fcmToken,
+      );
+    } catch (error, stackTrace) {
+      AppLogger.instance.e('デバイス削除に失敗しました', error, stackTrace);
     }
   }
 

@@ -7,6 +7,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/data/local/app_database.dart';
 import '../../../core/data/local/local_users_datasource.dart';
 import '../../../core/data/supabase/supabase_auth_datasource.dart';
+import '../../../core/data/supabase/supabase_user_devices_datasource.dart';
+import '../../../core/services/fcm_service.dart';
 import '../../../core/utils/animation_consts.dart';
 import '../../../core/utils/app_consts.dart';
 import '../../../core/utils/app_logger.dart';
@@ -581,6 +583,10 @@ class _SettingsScreenState extends State<SettingsScreen>
       final authDatasource = SupabaseAuthDatasource(
         supabase: Supabase.instance.client,
       );
+
+      // FCMトークンをuser_devicesから削除（signOut前に実行）
+      await _unregisterCurrentDeviceFromFcm();
+
       await authDatasource.signOut();
 
       // ローカルDBのdisplayNameをリセット
@@ -608,6 +614,35 @@ class _SettingsScreenState extends State<SettingsScreen>
           ),
         );
       }
+    }
+  }
+
+  /// 現在の端末をuser_devicesテーブルから削除
+  ///
+  /// ログアウト処理から呼ぶ。失敗してもログアウトは継続する。
+  Future<void> _unregisterCurrentDeviceFromFcm() async {
+    try {
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+      if (userId == null) {
+        AppLogger.instance.w('未ログインのためデバイス削除をスキップ');
+        return;
+      }
+
+      final fcmToken = await FcmService().getToken();
+      if (fcmToken == null || fcmToken.isEmpty) {
+        AppLogger.instance.w('FCMトークンが取得できないためデバイス削除をスキップ');
+        return;
+      }
+
+      final datasource = SupabaseUserDevicesDatasource(
+        supabase: Supabase.instance.client,
+      );
+      await datasource.deleteDeviceByToken(
+        userId: userId,
+        fcmToken: fcmToken,
+      );
+    } catch (error, stackTrace) {
+      AppLogger.instance.e('デバイス削除に失敗しました', error, stackTrace);
     }
   }
 

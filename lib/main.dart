@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/data/local/app_database.dart';
+import 'core/services/fcm_service.dart';
 import 'core/services/firebase_service.dart';
 import 'core/services/notification_service.dart';
 import 'core/utils/app_logger.dart';
@@ -52,6 +53,13 @@ void main() async {
     AppLogger.instance.i('通知サービス初期化が完了しました');
   } catch (error, stackTrace) {
     AppLogger.instance.e('通知サービス初期化に失敗しました', error, stackTrace);
+  }
+
+  // FCMサービスを初期化（プッシュ通知の許可リクエスト・トークン更新監視）
+  try {
+    await FcmService().init();
+  } catch (error, stackTrace) {
+    AppLogger.instance.e('FcmService初期化に失敗しました', error, stackTrace);
   }
 
   runApp(const MyApp());

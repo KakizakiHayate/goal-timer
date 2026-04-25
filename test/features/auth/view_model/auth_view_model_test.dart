@@ -6,7 +6,10 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:goal_timer/core/data/local/local_users_datasource.dart';
 import 'package:goal_timer/core/data/supabase/auth_result.dart';
 import 'package:goal_timer/core/data/supabase/supabase_auth_datasource.dart';
+import 'package:goal_timer/core/data/supabase/supabase_user_devices_datasource.dart';
 import 'package:goal_timer/core/data/supabase/supabase_users_datasource.dart';
+import 'package:goal_timer/core/models/user_devices/user_devices_model.dart';
+import 'package:goal_timer/core/services/fcm_service.dart';
 import 'package:goal_timer/features/auth/view_model/auth_view_model.dart';
 
 // モッククラス
@@ -18,19 +21,34 @@ class MockLocalUsersDatasource extends Mock implements LocalUsersDatasource {}
 class MockSupabaseUsersDatasource extends Mock
     implements SupabaseUsersDatasource {}
 
+class MockSupabaseUserDevicesDatasource extends Mock
+    implements SupabaseUserDevicesDatasource {}
+
+class MockFcmService extends Mock implements FcmService {}
+
 class MockUser extends Mock implements User {}
+
+class FakeUserDevicesModel extends Fake implements UserDevicesModel {}
 
 void main() {
   late MockSupabaseAuthDatasource mockAuthDatasource;
   late MockLocalUsersDatasource mockUsersDatasource;
   late MockSupabaseUsersDatasource mockSupabaseUsersDatasource;
+  late MockSupabaseUserDevicesDatasource mockUserDevicesDatasource;
+  late MockFcmService mockFcmService;
   late MockUser mockUser;
   late AuthViewModel viewModel;
+
+  setUpAll(() {
+    registerFallbackValue(FakeUserDevicesModel());
+  });
 
   setUp(() {
     mockAuthDatasource = MockSupabaseAuthDatasource();
     mockUsersDatasource = MockLocalUsersDatasource();
     mockSupabaseUsersDatasource = MockSupabaseUsersDatasource();
+    mockUserDevicesDatasource = MockSupabaseUserDevicesDatasource();
+    mockFcmService = MockFcmService();
     mockUser = MockUser();
     Get.testMode = true;
 
@@ -67,10 +85,30 @@ void main() {
       () => mockAuthDatasource.clearGoogleSession(),
     ).thenAnswer((_) async {});
 
+    // FCM関連のデフォルトスタブ
+    when(() => mockFcmService.setOnTokenRefresh(any())).thenReturn(null);
+    when(() => mockFcmService.getToken()).thenAnswer((_) async => null);
+    when(() => mockFcmService.getDeviceName()).thenAnswer((_) async => null);
+    when(() => mockFcmService.currentPlatform).thenReturn('ios');
+    when(
+      () => mockUserDevicesDatasource.upsertDevice(any()),
+    ).thenAnswer(
+      (invocation) async => invocation.positionalArguments.first
+          as UserDevicesModel,
+    );
+    when(
+      () => mockUserDevicesDatasource.deleteDeviceByToken(
+        userId: any(named: 'userId'),
+        fcmToken: any(named: 'fcmToken'),
+      ),
+    ).thenAnswer((_) async {});
+
     viewModel = AuthViewModel(
       authDatasource: mockAuthDatasource,
       usersDatasource: mockUsersDatasource,
       supabaseUsersDatasource: mockSupabaseUsersDatasource,
+      userDevicesDatasource: mockUserDevicesDatasource,
+      fcmService: mockFcmService,
     );
   });
 
@@ -115,6 +153,8 @@ void main() {
           authDatasource: mockAuthDatasource,
           usersDatasource: mockUsersDatasource,
           supabaseUsersDatasource: mockSupabaseUsersDatasource,
+          userDevicesDatasource: mockUserDevicesDatasource,
+          fcmService: mockFcmService,
         );
 
         expect(linkedViewModel.isAnonymous, isFalse);
@@ -135,6 +175,8 @@ void main() {
           authDatasource: mockAuthDatasource,
           usersDatasource: mockUsersDatasource,
           supabaseUsersDatasource: mockSupabaseUsersDatasource,
+          userDevicesDatasource: mockUserDevicesDatasource,
+          fcmService: mockFcmService,
         );
 
         expect(linkedViewModel.showLinkButton, isFalse);
@@ -522,6 +564,109 @@ void main() {
         expect(result, isFalse);
         expect(viewModel.status, AuthStatus.error);
         expect(viewModel.errorType, AuthErrorType.other);
+      });
+    });
+
+    group('FCMトークン管理', () {
+      test('Googleログイン成功時にuser_devicesへupsertされる', () async {
+        when(() => mockAuthDatasource.authenticateGoogle()).thenAnswer(
+          (_) async => AuthResult.success(
+            email: 'test@example.com',
+            displayName: 'Test User',
+            idToken: 'test-id-token',
+          ),
+        );
+        when(() => mockAuthDatasource.completeSignInWithGoogle(any()))
+            .thenAnswer((_) async {});
+        when(() => mockAuthDatasource.currentUser).thenReturn(mockUser);
+        when(() => mockSupabaseUsersDatasource.checkAccountExists(
+              email: any(named: 'email'),
+              provider: any(named: 'provider'),
+            )).thenAnswer((_) async => true);
+        when(() => mockFcmService.getToken())
+            .thenAnswer((_) async => 'fcm-token-abc');
+
+        final result = await viewModel.loginWithGoogle();
+
+        expect(result, isTrue);
+        verify(() => mockFcmService.getToken()).called(1);
+        verify(() => mockUserDevicesDatasource.upsertDevice(any())).called(1);
+      });
+
+      test('FCMトークンがnullの場合はupsertを呼ばない', () async {
+        when(() => mockAuthDatasource.authenticateGoogle()).thenAnswer(
+          (_) async => AuthResult.success(
+            email: 'test@example.com',
+            displayName: 'Test User',
+            idToken: 'test-id-token',
+          ),
+        );
+        when(() => mockAuthDatasource.completeSignInWithGoogle(any()))
+            .thenAnswer((_) async {});
+        when(() => mockAuthDatasource.currentUser).thenReturn(mockUser);
+        when(() => mockSupabaseUsersDatasource.checkAccountExists(
+              email: any(named: 'email'),
+              provider: any(named: 'provider'),
+            )).thenAnswer((_) async => true);
+        when(() => mockFcmService.getToken()).thenAnswer((_) async => null);
+
+        final result = await viewModel.loginWithGoogle();
+
+        expect(result, isTrue);
+        verifyNever(() => mockUserDevicesDatasource.upsertDevice(any()));
+      });
+
+      test('signOut時にuser_devicesからdeleteが呼ばれる', () async {
+        when(() => mockAuthDatasource.signOut()).thenAnswer((_) async {});
+        when(() => mockAuthDatasource.currentUser).thenReturn(mockUser);
+        when(() => mockFcmService.getToken())
+            .thenAnswer((_) async => 'fcm-token-abc');
+
+        await viewModel.signOut();
+
+        verify(() => mockUserDevicesDatasource.deleteDeviceByToken(
+              userId: 'test-user-id',
+              fcmToken: 'fcm-token-abc',
+            )).called(1);
+        verify(() => mockAuthDatasource.signOut()).called(1);
+      });
+
+      test('未ログイン状態でsignOutしてもデバイス削除はスキップされる', () async {
+        when(() => mockAuthDatasource.signOut()).thenAnswer((_) async {});
+        when(() => mockAuthDatasource.currentUser).thenReturn(null);
+
+        await viewModel.signOut();
+
+        verifyNever(() => mockUserDevicesDatasource.deleteDeviceByToken(
+              userId: any(named: 'userId'),
+              fcmToken: any(named: 'fcmToken'),
+            ));
+      });
+
+      test('upsertDevice失敗してもログインは成功扱いになる', () async {
+        when(() => mockAuthDatasource.authenticateGoogle()).thenAnswer(
+          (_) async => AuthResult.success(
+            email: 'test@example.com',
+            displayName: 'Test User',
+            idToken: 'test-id-token',
+          ),
+        );
+        when(() => mockAuthDatasource.completeSignInWithGoogle(any()))
+            .thenAnswer((_) async {});
+        when(() => mockAuthDatasource.currentUser).thenReturn(mockUser);
+        when(() => mockSupabaseUsersDatasource.checkAccountExists(
+              email: any(named: 'email'),
+              provider: any(named: 'provider'),
+            )).thenAnswer((_) async => true);
+        when(() => mockFcmService.getToken())
+            .thenAnswer((_) async => 'fcm-token-abc');
+        when(() => mockUserDevicesDatasource.upsertDevice(any()))
+            .thenThrow(Exception('upsertエラー'));
+
+        final result = await viewModel.loginWithGoogle();
+
+        expect(result, isTrue);
+        expect(viewModel.status, AuthStatus.success);
       });
     });
   });
