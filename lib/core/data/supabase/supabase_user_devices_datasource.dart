@@ -19,19 +19,21 @@ class SupabaseUserDevicesDatasource {
   /// デバイスを作成または更新
   ///
   /// (user_id, fcm_token)のUNIQUE制約により、同一トークンが既に存在する場合は
-  /// updated_at と last_active_at が更新される。
+  /// レコードが更新される。
+  ///
+  /// 時刻系カラム（created_at / updated_at / last_active_at）はクライアント時刻が
+  /// 信頼できないため一切送信せず、サーバー側のDEFAULT NOW()およびトリガー
+  /// （update_user_devices_timestamps_trigger）で自動設定する。
   Future<UserDevicesModel> upsertDevice(UserDevicesModel device) async {
     try {
-      final now = DateTime.now();
-      final deviceToUpsert = device.copyWith(
-        updatedAt: now,
-        lastActiveAt: now,
-      );
+      // 時刻系・nullフィールドはサーバー側に任せるため除外する
+      final payload = device.toJson()
+        ..removeWhere((key, value) => value == null);
 
       final response = await _supabase
           .from(_tableName)
           .upsert(
-            deviceToUpsert.toJson(),
+            payload,
             onConflict: 'user_id,fcm_token',
           )
           .select()
