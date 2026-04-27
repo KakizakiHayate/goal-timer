@@ -4,7 +4,11 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:uuid/uuid.dart';
+
 import 'core/data/local/app_database.dart';
+import 'core/data/supabase/supabase_user_devices_datasource.dart';
+import 'core/models/user_devices/user_devices_model.dart';
 import 'core/services/fcm_service.dart';
 import 'core/services/firebase_service.dart';
 import 'core/services/notification_service.dart';
@@ -62,7 +66,50 @@ void main() async {
     AppLogger.instance.e('FcmService初期化に失敗しました', error, stackTrace);
   }
 
+  // 起動時に既ログインの場合はFCMトークンをuser_devicesに登録
+  // 既存ユーザーがアプリ更新後の初回起動でも user_devices にレコードが
+  // 作成されるよう、ログイン状態を確認して登録する。
+  await _registerCurrentDeviceIfLoggedIn();
+
   runApp(const MyApp());
+}
+
+/// 起動時に既ログインなら現在のFCMトークンを user_devices に登録する
+///
+/// 失敗してもアプリ起動は継続する。
+Future<void> _registerCurrentDeviceIfLoggedIn() async {
+  try {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) {
+      AppLogger.instance.i('起動時: 未ログインのためデバイス登録をスキップ');
+      return;
+    }
+
+    final fcmService = FcmService();
+    final fcmToken = await fcmService.getToken();
+    if (fcmToken == null || fcmToken.isEmpty) {
+      AppLogger.instance.w('起動時: FCMトークンが取得できないためデバイス登録をスキップ');
+      return;
+    }
+
+    final deviceName = await fcmService.getDeviceName();
+
+    final datasource = SupabaseUserDevicesDatasource(
+      supabase: Supabase.instance.client,
+    );
+    await datasource.upsertDevice(
+      UserDevicesModel(
+        id: const Uuid().v4(),
+        userId: userId,
+        fcmToken: fcmToken,
+        platform: fcmService.currentPlatform,
+        deviceName: deviceName,
+      ),
+    );
+    AppLogger.instance.i('起動時: デバイス登録が完了しました');
+  } catch (error, stackTrace) {
+    AppLogger.instance.e('起動時のデバイス登録に失敗しました', error, stackTrace);
+  }
 }
 
 /// Supabaseを初期化
