@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:in_app_review/in_app_review.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../utils/app_logger.dart';
+import 'analytics_service.dart';
 
 /// 評価サービス
 /// アプリの評価を促すモーダルを管理するサービス
@@ -39,9 +42,17 @@ class RatingService {
         return;
       }
 
+      // 累計タイマー完了回数（バケット化）をユーザープロパティに反映する
+      unawaited(AnalyticsService.instance.setTotalTimerComplete(newCount));
+
       // 5回ごとに表示
       if (shouldShowRatingDialog(newCount, hasRated)) {
-        await _requestReview();
+        unawaited(
+          AnalyticsService.instance.logReviewPromptEligible(
+            completionCount: newCount,
+          ),
+        );
+        await _requestReview(newCount);
       }
     } catch (error, stackTrace) {
       AppLogger.instance.e('RatingService: 学習完了処理に失敗しました', error, stackTrace);
@@ -55,10 +66,15 @@ class RatingService {
   }
 
   /// 評価モーダルを表示する
-  Future<void> _requestReview() async {
+  Future<void> _requestReview(int completionCount) async {
     try {
       if (await _inAppReview.isAvailable()) {
         AppLogger.instance.i('RatingService: 評価モーダルを表示します');
+        unawaited(
+          AnalyticsService.instance.logReviewPromptShown(
+            completionCount: completionCount,
+          ),
+        );
         await _inAppReview.requestReview();
       } else {
         AppLogger.instance.w('RatingService: 評価モーダルは利用できません');

@@ -9,9 +9,11 @@ import 'package:uuid/uuid.dart';
 import 'core/data/local/app_database.dart';
 import 'core/data/supabase/supabase_user_devices_datasource.dart';
 import 'core/models/user_devices/user_devices_model.dart';
+import 'core/services/analytics_service.dart';
 import 'core/services/fcm_service.dart';
 import 'core/services/firebase_service.dart';
 import 'core/services/notification_service.dart';
+import 'core/utils/analytics_screen_names.dart';
 import 'core/utils/app_logger.dart';
 import 'core/utils/color_consts.dart';
 import 'features/settings/view_model/settings_view_model.dart';
@@ -145,6 +147,12 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: ColorConsts.primary),
         useMaterial3: true,
       ),
+      routingCallback: (routing) {
+        final screenName = AnalyticsScreenNames.fromRoute(routing?.current);
+        if (screenName != null) {
+          AnalyticsService.instance.logScreenView(screenName);
+        }
+      },
       // 国際化設定
       localizationsDelegates: const [
         AppLocalizations.delegate,

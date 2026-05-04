@@ -8,6 +8,7 @@ import '../../../core/data/repositories/study_logs_repository.dart';
 import '../../../core/data/repositories/users_repository.dart';
 import '../../../core/models/goals/goals_model.dart';
 import '../../../core/models/study_daily_logs/study_daily_logs_model.dart';
+import '../../../core/services/analytics_service.dart';
 import '../../../core/services/audio_service.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/services/notification_service.dart';
@@ -260,6 +261,9 @@ class TimerViewModel extends GetxController {
   void startTimer() {
     if (state.status == TimerStatus.running) return;
 
+    // 一時停止からの再開かどうかを開始処理前に判定する
+    final isResume = state.status == TimerStatus.paused;
+
     // バックグラウンド対応: 開始時刻を記録
     _timerStartTime = DateTime.now();
 
@@ -267,6 +271,17 @@ class TimerViewModel extends GetxController {
     // 深夜0時またぎ対応: 開始日を基準にログを保存するため
     final now = DateTime.now();
     _studySessionStartDay ??= DateTime(now.year, now.month, now.day);
+
+    if (isResume) {
+      unawaited(AnalyticsService.instance.logTimerResume(goalId: goal.id));
+    } else {
+      unawaited(
+        AnalyticsService.instance.logTimerStart(
+          goalId: goal.id,
+          targetMinutes: goal.targetMinutes,
+        ),
+      );
+    }
 
     _state.value = state.copyWith(
       status: TimerStatus.running,
@@ -312,11 +327,20 @@ class TimerViewModel extends GetxController {
     _state.value = state.copyWith(status: TimerStatus.paused);
     // 通知をキャンセル
     _notificationService.cancelScheduledNotification();
+    unawaited(
+      AnalyticsService.instance.logTimerPause(
+        goalId: goal.id,
+        elapsedSeconds: _elapsedSeconds,
+      ),
+    );
     AppLogger.instance.i('タイマーを一時停止しました');
   }
 
   void resetTimer() {
     _timer?.cancel();
+    final cancelledElapsedSeconds = _elapsedSeconds;
+    final wasInProgress =
+        cancelledElapsedSeconds > TimerConstants.initialElapsedSeconds;
     _elapsedSeconds = TimerConstants.initialElapsedSeconds;
     _pausedElapsedSeconds = TimerConstants.initialElapsedSeconds;
     _timerStartTime = null;
@@ -328,6 +352,15 @@ class TimerViewModel extends GetxController {
     );
     // タイマー完了通知のみキャンセル（ストリークリマインダーは維持）
     _notificationService.cancelScheduledNotification();
+    if (wasInProgress) {
+      unawaited(
+        AnalyticsService.instance.logTimerCancel(
+          goalId: goal.id,
+          elapsedSeconds: cancelledElapsedSeconds,
+          targetMinutes: goal.targetMinutes,
+        ),
+      );
+    }
     AppLogger.instance.i('タイマーをリセットしました');
   }
 
@@ -344,6 +377,13 @@ class TimerViewModel extends GetxController {
     if (state.mode == TimerMode.countdown) {
       unawaited(_audioService.playTimerCompletionSound());
     }
+
+    unawaited(
+      AnalyticsService.instance.logTimerComplete(
+        goalId: goal.id,
+        targetMinutes: goal.targetMinutes,
+      ),
+    );
 
     AppLogger.instance.i('タイマーが完了しました: $_elapsedSeconds秒');
     // フィードバックポップアップの判定はonTappedTimerFinishButtonで行う

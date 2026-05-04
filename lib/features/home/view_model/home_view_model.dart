@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 
@@ -5,6 +7,7 @@ import '../../../core/data/repositories/goals_repository.dart';
 import '../../../core/data/repositories/study_logs_repository.dart';
 import '../../../core/data/repositories/users_repository.dart';
 import '../../../core/models/goals/goals_model.dart';
+import '../../../core/services/analytics_service.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/streak_consts.dart';
@@ -208,6 +211,13 @@ class HomeViewModel extends GetxController {
       _state = state.copyWith(goals: [...state.goals, goal]);
       update();
 
+      unawaited(
+        AnalyticsService.instance.logGoalCreate(targetMinutes: targetMinutes),
+      );
+      unawaited(
+        AnalyticsService.instance.setTotalGoalCount(state.goals.length),
+      );
+
       // デバッグ: 保存後に全目標を表示（デバッグビルドのみ）
       assert(() {
         debugPrintAllGoals();
@@ -258,6 +268,10 @@ class HomeViewModel extends GetxController {
               .toList();
       _state = state.copyWith(goals: updatedGoals);
       update();
+
+      unawaited(
+        AnalyticsService.instance.logGoalEdit(goalId: updatedGoal.id),
+      );
     } catch (error, stackTrace) {
       AppLogger.instance.e('目標の更新に失敗しました', error, stackTrace);
       rethrow;
@@ -288,6 +302,11 @@ class HomeViewModel extends GetxController {
       final updatedGoals = state.goals.where((g) => g.id != goal.id).toList();
       _state = state.copyWith(goals: updatedGoals);
       update();
+
+      unawaited(AnalyticsService.instance.logGoalDelete(goalId: goal.id));
+      unawaited(
+        AnalyticsService.instance.setTotalGoalCount(updatedGoals.length),
+      );
 
       // デバッグ: 削除後に全目標を表示（デバッグビルドのみ）
       assert(() {
